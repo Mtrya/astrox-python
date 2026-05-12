@@ -71,6 +71,12 @@ def _require_non_empty_string(value: Any, *, path: Path, field_path: str) -> str
     return value
 
 
+def _require_null_or_non_empty_string(value: Any, *, path: Path, field_path: str) -> str | None:
+    if value is None:
+        return None
+    return _require_non_empty_string(value, path=path, field_path=field_path)
+
+
 def _require_int(value: Any, *, path: Path, field_path: str) -> int:
     if type(value) is not int:
         raise _validation_error(path, field_path, "must be an integer")
@@ -104,7 +110,7 @@ def validate_fixture(fixture: dict[str, Any], *, path: Path) -> None:
     operation_id = _required_value(fixture, "openapi_operation_id", path=path)
     if operation_id is not None and (not isinstance(operation_id, str) or not operation_id):
         raise _validation_error(path, "openapi_operation_id", "must be null or a non-empty string")
-    _require_non_empty_string(
+    _require_null_or_non_empty_string(
         _required_value(fixture, "openapi_request_schema", path=path),
         path=path,
         field_path="openapi_request_schema",

@@ -483,6 +483,7 @@ def test_validate_fixture_allows_missing_request_for_no_body_branch(tmp_path: Pa
     data = valid_fixture_data()
     data["endpoint"] = "/WeatherForecast"
     data["method"] = "GET"
+    data["openapi_request_schema"] = None
     del data["branches"]["nominal"]["request"]
 
     validate_fixture(data, path=fixture_path)
