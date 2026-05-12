@@ -319,6 +319,7 @@ def verify_branch(
             "branch": branch_id,
             "status": None,
             "ok": False,
+            "failure_kind": "request_failed",
             "error": f"request failed: {exc}",
         }
 
@@ -332,6 +333,9 @@ def verify_branch(
 
     if expected_status is not None and response.status_code != expected_status:
         result["ok"] = False
+        result["failure_kind"] = "status_mismatch"
+        result["expected_status"] = expected_status
+        result["actual_status"] = response.status_code
         result["error"] = f"expected status {expected_status}, got {response.status_code}"
         return result
 
@@ -340,6 +344,9 @@ def verify_branch(
         actual_content_type = response.headers.get("content-type", "")
         if not content_type_matches(actual_content_type, expected_content_type):
             result["ok"] = False
+            result["failure_kind"] = "content_type_mismatch"
+            result["expected_content_type"] = expected_content_type
+            result["actual_content_type"] = actual_content_type
             result["error"] = f"expected content type {expected_content_type}, got {actual_content_type!r}"
             return result
 
@@ -350,6 +357,7 @@ def verify_branch(
         body = response.json()
     except ValueError as exc:
         result["ok"] = False
+        result["failure_kind"] = "non_json_response"
         result["error"] = f"response was not JSON: {exc}"
         return result
 
@@ -357,6 +365,7 @@ def verify_branch(
         assert_shape(body, expected_response)
     except ShapeMismatch as exc:
         result["ok"] = False
+        result["failure_kind"] = "shape_mismatch"
         result["error"] = str(exc)
         result["actual_shape"] = fingerprint_shape(body)
     return result
@@ -386,6 +395,25 @@ def verify_fixture(path: Path, *, session: requests.Session, base_url: str, time
     return results
 
 
+def build_report(*, base_url: str, fixture_count: int, results: list[dict[str, Any]]) -> dict[str, Any]:
+    failed_results = [result for result in results if not result["ok"]]
+    failure_kinds: dict[str, int] = {}
+    for result in failed_results:
+        failure_kind = result.get("failure_kind", "unknown_failure")
+        failure_kinds[failure_kind] = failure_kinds.get(failure_kind, 0) + 1
+
+    return {
+        "base_url": base_url,
+        "fixture_count": fixture_count,
+        "branch_count": len(results),
+        "ok_count": len(results) - len(failed_results),
+        "failed_count": len(failed_results),
+        "failure_kinds": failure_kinds,
+        "failed_results": failed_results,
+        "results": results,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fixture-dir", type=Path, default=DEFAULT_FIXTURE_DIR)
@@ -399,13 +427,7 @@ def main() -> int:
         for path in paths:
             results.extend(verify_fixture(path, session=session, base_url=args.base_url, timeout=args.timeout))
 
-    report = {
-        "base_url": args.base_url,
-        "fixture_count": len(paths),
-        "branch_count": len(results),
-        "failed_count": sum(1 for result in results if not result["ok"]),
-        "results": results,
-    }
+    report = build_report(base_url=args.base_url, fixture_count=len(paths), results=results)
     print("OPENAPI_FIXTURE_RESULT_JSON=" + json.dumps(report, sort_keys=True))
     return 1 if report["failed_count"] else 0
 

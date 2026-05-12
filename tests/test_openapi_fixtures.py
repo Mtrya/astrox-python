@@ -9,6 +9,7 @@ import yaml
 from scripts.openapi_fixtures.discover import discover, load_spec
 from scripts.openapi_fixtures.shapes import ShapeMismatch, assert_shape, fingerprint_shape
 from scripts.openapi_fixtures.verify import (
+    build_report,
     content_type_matches,
     iter_fixture_paths,
     load_fixture,
@@ -17,6 +18,34 @@ from scripts.openapi_fixtures.verify import (
     verify_branch,
     verify_fixture,
 )
+
+
+class StubResponse:
+    def __init__(
+        self,
+        *,
+        status_code: int = 200,
+        headers: dict[str, str] | None = None,
+        body: Any = None,
+        json_error: ValueError | None = None,
+    ) -> None:
+        self.status_code = status_code
+        self.headers = headers if headers is not None else {"content-type": "application/json"}
+        self.body = body if body is not None else {}
+        self.json_error = json_error
+
+    def json(self) -> Any:
+        if self.json_error is not None:
+            raise self.json_error
+        return self.body
+
+
+class StubSession:
+    def __init__(self, response: StubResponse) -> None:
+        self.response = response
+
+    def request(self, *args: Any, **kwargs: Any) -> StubResponse:
+        return self.response
 
 
 def valid_fixture_data() -> dict[str, Any]:
@@ -207,7 +236,98 @@ def test_verify_branch_reports_request_exception() -> None:
 
     assert result["ok"] is False
     assert result["status"] is None
+    assert result["failure_kind"] == "request_failed"
     assert "slow upstream" in result["error"]
+
+
+def test_verify_branch_classifies_status_mismatch() -> None:
+    result = verify_branch(
+        session=StubSession(StubResponse(status_code=500)),  # type: ignore[arg-type]
+        base_url="http://example.test",
+        timeout=1.0,
+        endpoint="/Example",
+        method="GET",
+        branch_id="nominal",
+        branch={"expect": {"status": 200}},
+    )
+
+    assert result["ok"] is False
+    assert result["failure_kind"] == "status_mismatch"
+    assert result["expected_status"] == 200
+    assert result["actual_status"] == 500
+
+
+def test_verify_branch_classifies_content_type_mismatch() -> None:
+    result = verify_branch(
+        session=StubSession(StubResponse(headers={"content-type": "text/plain"})),  # type: ignore[arg-type]
+        base_url="http://example.test",
+        timeout=1.0,
+        endpoint="/Example",
+        method="GET",
+        branch_id="nominal",
+        branch={"expect": {"status": 200, "content_type": "application/json"}},
+    )
+
+    assert result["ok"] is False
+    assert result["failure_kind"] == "content_type_mismatch"
+    assert result["expected_content_type"] == "application/json"
+    assert result["actual_content_type"] == "text/plain"
+
+
+def test_verify_branch_classifies_non_json_response() -> None:
+    result = verify_branch(
+        session=StubSession(StubResponse(json_error=ValueError("no json"))),  # type: ignore[arg-type]
+        base_url="http://example.test",
+        timeout=1.0,
+        endpoint="/Example",
+        method="GET",
+        branch_id="nominal",
+        branch={"expect": {"status": 200, "response": {"kind": "json_object"}}},
+    )
+
+    assert result["ok"] is False
+    assert result["failure_kind"] == "non_json_response"
+    assert "no json" in result["error"]
+
+
+def test_verify_branch_classifies_shape_mismatch() -> None:
+    result = verify_branch(
+        session=StubSession(StubResponse(body={"Answer": []})),  # type: ignore[arg-type]
+        base_url="http://example.test",
+        timeout=1.0,
+        endpoint="/Example",
+        method="GET",
+        branch_id="nominal",
+        branch={"expect": {"status": 200, "response": {"kind": "json_array"}}},
+    )
+
+    assert result["ok"] is False
+    assert result["failure_kind"] == "shape_mismatch"
+    assert result["actual_shape"] == {
+        "kind": "json_object",
+        "fields": {"Answer": {"kind": "json_array", "length": 0, "sample_items": []}},
+    }
+
+
+def test_build_report_summarizes_failed_results_for_stdout_triage() -> None:
+    results = [
+        {"endpoint": "/ok", "branch": "nominal", "ok": True},
+        {
+            "endpoint": "/bad",
+            "branch": "nominal",
+            "ok": False,
+            "failure_kind": "status_mismatch",
+            "error": "expected status 200, got 500",
+        },
+    ]
+
+    report = build_report(base_url="http://example.test", fixture_count=2, results=results)
+
+    assert report["branch_count"] == 2
+    assert report["ok_count"] == 1
+    assert report["failed_count"] == 1
+    assert report["failure_kinds"] == {"status_mismatch": 1}
+    assert report["failed_results"] == [results[1]]
 
 
 def test_verify_fixture_reports_missing_endpoint_with_path(tmp_path: Path) -> None:
