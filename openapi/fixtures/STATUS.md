@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 23
 - handled nominal endpoint fixtures: 22
-- handled branch-axis fixtures: 18
+- handled branch-axis fixtures: 20
 
 Legend:
 
@@ -514,8 +514,8 @@ fixture has verified them yet.
 - [ ] `ToObjectPath.Lighting=Penumbra`
 - [ ] `ToObjectPath.Lighting=Umbra`
 - [ ] `ToObjectPath.OccultationBodies=explicit`
-- [ ] `ComputeAER=true`
-- [ ] `UseLightTimeDelay=true`
+- [x] `ComputeAER=true`
+- [x] `UseLightTimeDelay=true`
 
 ### `/access/ChainCompute`
 
