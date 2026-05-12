@@ -1,0 +1,38 @@
+schema_version: 1
+endpoint: /CAT/GetTLE
+method: POST
+openapi_operation_id: null
+openapi_request_schema: TLE_Input
+openapi_response_schema: TleInfo2
+branches:
+  nominal:
+    request:
+      Name: FIXTURE-LEO
+      SSC: "99001"
+      Epoch: "2021-04-30T12:00:00.000Z"
+      BStar: 0.000037381
+      Sma: 6778.0
+      Ecc: 0.0002714
+      Inc: 51.6441
+      W: 302.6679
+      RAAN: 217.3237
+      TA: 206.5255
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - SAT_Name
+          - SAT_Number
+          - TLE_Line1
+          - TLE_Line2
+        fields:
+          SAT_Name:
+            kind: json_string
+          SAT_Number:
+            kind: json_string
+          TLE_Line1:
+            kind: json_string
+          TLE_Line2:
+            kind: json_string

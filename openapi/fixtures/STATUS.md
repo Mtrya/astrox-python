@@ -6,8 +6,8 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 9
-- handled nominal endpoint fixtures: 8
+- fixture endpoint records: 13
+- handled nominal endpoint fixtures: 12
 - handled branch-axis fixtures: 4
 
 Legend:
@@ -36,13 +36,13 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 ### CAT
 
-- [ ] `/CAT/CA_ComputeV3` nominal
-- [ ] `/CAT/CA_ComputeV4` nominal
+- [x] `/CAT/CA_ComputeV3` nominal
+- [x] `/CAT/CA_ComputeV4` nominal
 - [ ] `/CAT/DebrisBreakup` nominal
 - [ ] `/CAT/DebrisBreakupNASA` nominal
 - [ ] `/CAT/DebrisBreakupSimple` nominal
-- [ ] `/CAT/GetTLE` nominal
-- [ ] `/CAT/LifeTimeTLE` nominal
+- [x] `/CAT/GetTLE` nominal
+- [x] `/CAT/LifeTimeTLE` nominal
 
 ### Coverage
 
@@ -325,10 +325,10 @@ These endpoints currently only have a required `nominal` fixture in this status
 file. This does not prove that no branch-changing options exist; it only means
 the current heuristics did not identify branch axes.
 
-- [ ] `/CAT/CA_ComputeV3`
-- [ ] `/CAT/CA_ComputeV4`
+- [x] `/CAT/CA_ComputeV3`
+- [x] `/CAT/CA_ComputeV4`
 - [ ] `/CAT/DebrisBreakupNASA`
-- [ ] `/CAT/LifeTimeTLE`
+- [x] `/CAT/LifeTimeTLE`
 - [ ] `/LandingZone`
 - [ ] `/Lighting/SolarAER`
 - [ ] `/OrbitConvert/CalGEOYMLambertDv`
@@ -356,8 +356,8 @@ the current heuristics did not identify branch axes.
 - [x] `/WeatherForecast`
 - [x] `/city`
 - [x] `/facility`
-- [ ] `/satcat`
-- [ ] `/ssc`
+- [x] `/satcat`
+- [x] `/ssc`
 - [ ] `/ssc/admin/upload-database-archive`
 - [ ] `/celestial/ephemeris`
 - [ ] `/celestial/mpc`
