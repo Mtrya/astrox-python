@@ -6,8 +6,8 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 3
-- handled nominal endpoint fixtures: 3
+- fixture endpoint records: 6
+- handled nominal endpoint fixtures: 6
 - handled branch-axis fixtures: 4
 
 Legend:
@@ -136,9 +136,9 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 ### Catalog and Database GET/File Endpoints
 
-- [ ] `/WeatherForecast` nominal
-- [ ] `/city` nominal
-- [ ] `/facility` nominal
+- [x] `/WeatherForecast` nominal
+- [x] `/city` nominal
+- [x] `/facility` nominal
 - [ ] `/satcat` nominal
 - [ ] `/ssc` nominal
 - [ ] `/ssc/admin/upload-database-archive` nominal
@@ -352,9 +352,9 @@ the current heuristics did not identify branch axes.
 - [ ] `/Propagator/sgp4`
 - [ ] `/Terrain/AzElMask`
 - [ ] `/Terrain/AzElMaskSimple`
-- [ ] `/WeatherForecast`
-- [ ] `/city`
-- [ ] `/facility`
+- [x] `/WeatherForecast`
+- [x] `/city`
+- [x] `/facility`
 - [ ] `/satcat`
 - [ ] `/ssc`
 - [ ] `/ssc/admin/upload-database-archive`
