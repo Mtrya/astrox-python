@@ -11,10 +11,33 @@ from scripts.openapi_fixtures.shapes import ShapeMismatch, assert_shape, fingerp
 from scripts.openapi_fixtures.verify import (
     content_type_matches,
     iter_fixture_paths,
+    load_fixture,
     request_kwargs,
+    validate_fixture,
     verify_branch,
     verify_fixture,
 )
+
+
+def valid_fixture_data() -> dict[str, Any]:
+    return {
+        "schema_version": 1,
+        "endpoint": "/Example",
+        "method": "POST",
+        "openapi_operation_id": None,
+        "openapi_request_schema": "ExampleInput",
+        "openapi_response_schema": "ExampleOutput",
+        "branches": {
+            "nominal": {
+                "request": {},
+                "expect": {
+                    "status": 200,
+                    "content_type": "application/json",
+                    "response": {"kind": "json_object"},
+                },
+            }
+        },
+    }
 
 
 def test_shape_accepts_state_vector() -> None:
@@ -92,12 +115,94 @@ def test_verify_fixture_reports_missing_endpoint_with_path(tmp_path: Path) -> No
             raise AssertionError("should not request")
 
     try:
-        verify_fixture(fixture, session=UnusedSession(), base_url="http://example.test", timeout=1.0)  # type: ignore[arg-type]
+        verify_fixture(
+            fixture,
+            session=UnusedSession(),  # type: ignore[arg-type]
+            base_url="http://example.test",
+            timeout=1.0,
+        )
     except ValueError as exc:
         assert str(fixture) in str(exc)
         assert "endpoint" in str(exc)
     else:  # pragma: no cover
         raise AssertionError("expected ValueError")
+
+
+def test_load_fixture_validates_before_live_requests(tmp_path: Path) -> None:
+    fixture = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    del data["branches"]["nominal"]["expect"]["response"]
+    fixture.write_text(yaml.safe_dump(data), encoding="utf-8")
+
+    class UnusedSession:
+        def request(self, *args: Any, **kwargs: Any) -> Any:  # pragma: no cover
+            raise AssertionError("should not request")
+
+    try:
+        verify_fixture(
+            fixture,
+            session=UnusedSession(),  # type: ignore[arg-type]
+            base_url="http://example.test",
+            timeout=1.0,
+        )
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture) in message
+        assert "branches.nominal.expect.response" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_requires_top_level_fields(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+
+    try:
+        validate_fixture({"schema_version": 1}, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "endpoint" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_rejects_invalid_expect_status(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"]["status"] = True
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal.expect.status" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_rejects_invalid_response_shape(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"]["response"] = {
+        "kind": "json_object",
+        "fields": {"Answer": {"kind": "json_float"}},
+    }
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal.expect.response.fields.Answer.kind" in message
+        assert "must be one of" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_current_fixture_files_pass_schema_validation() -> None:
+    for fixture_path in iter_fixture_paths(Path("openapi/fixtures")):
+        load_fixture(fixture_path)
 
 
 def test_discover_lists_endpoint_branch_axes(tmp_path: Path) -> None:
