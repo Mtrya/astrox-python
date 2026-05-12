@@ -29,6 +29,11 @@ def response_kind(value: Any) -> str:
 
 def assert_shape(value: Any, shape: Mapping[str, Any], *, path: str = "$") -> None:
     """Assert that a decoded JSON value matches a fixture response shape."""
+    alternatives = shape.get("any_of")
+    if alternatives is not None:
+        _assert_any_of_shape(value, alternatives, path=path)
+        return
+
     expected_kind = shape.get("kind")
     actual_kind = response_kind(value)
     if expected_kind != actual_kind:
@@ -38,6 +43,18 @@ def assert_shape(value: Any, shape: Mapping[str, Any], *, path: str = "$") -> No
         _assert_array_shape(value, shape, path=path)
     elif actual_kind == "json_object":
         _assert_object_shape(value, shape, path=path)
+
+
+def _assert_any_of_shape(value: Any, alternatives: Any, *, path: str) -> None:
+    messages = []
+    for alternative in alternatives:
+        try:
+            assert_shape(value, alternative, path=path)
+        except ShapeMismatch as exc:
+            messages.append(str(exc))
+        else:
+            return
+    raise ShapeMismatch(f"{path} did not match any_of alternatives: {'; '.join(messages)}")
 
 
 def _assert_array_shape(value: Sequence[Any], shape: Mapping[str, Any], *, path: str) -> None:
@@ -84,4 +101,3 @@ def fingerprint_shape(value: Any) -> Any:
             "fields": {key: fingerprint_shape(value[key]) for key in sorted(value)},
         }
     return {"kind": kind}
-

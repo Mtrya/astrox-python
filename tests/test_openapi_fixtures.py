@@ -9,12 +9,64 @@ import yaml
 from scripts.openapi_fixtures.discover import discover, load_spec
 from scripts.openapi_fixtures.shapes import ShapeMismatch, assert_shape, fingerprint_shape
 from scripts.openapi_fixtures.verify import (
+    build_report,
     content_type_matches,
     iter_fixture_paths,
+    load_fixture,
     request_kwargs,
+    validate_fixture,
     verify_branch,
     verify_fixture,
 )
+
+
+class StubResponse:
+    def __init__(
+        self,
+        *,
+        status_code: int = 200,
+        headers: dict[str, str] | None = None,
+        body: Any = None,
+        json_error: ValueError | None = None,
+    ) -> None:
+        self.status_code = status_code
+        self.headers = headers if headers is not None else {"content-type": "application/json"}
+        self.body = body if body is not None else {}
+        self.json_error = json_error
+
+    def json(self) -> Any:
+        if self.json_error is not None:
+            raise self.json_error
+        return self.body
+
+
+class StubSession:
+    def __init__(self, response: StubResponse) -> None:
+        self.response = response
+
+    def request(self, *args: Any, **kwargs: Any) -> StubResponse:
+        return self.response
+
+
+def valid_fixture_data() -> dict[str, Any]:
+    return {
+        "schema_version": 1,
+        "endpoint": "/Example",
+        "method": "POST",
+        "openapi_operation_id": None,
+        "openapi_request_schema": "ExampleInput",
+        "openapi_response_schema": "ExampleOutput",
+        "branches": {
+            "nominal": {
+                "request": {},
+                "expect": {
+                    "status": 200,
+                    "content_type": "application/json",
+                    "response": {"kind": "json_object"},
+                },
+            }
+        },
+    }
 
 
 def test_shape_accepts_state_vector() -> None:
@@ -29,6 +81,38 @@ def test_shape_rejects_wrong_array_length() -> None:
         assert_shape([1.0], {"kind": "json_array", "length": 3, "items": {"kind": "json_number"}})
     except ShapeMismatch as exc:
         assert "expected length 3" in str(exc)
+    else:  # pragma: no cover
+        raise AssertionError("expected ShapeMismatch")
+
+
+def test_shape_any_of_accepts_nullable_array() -> None:
+    shape = {
+        "any_of": [
+            {"kind": "json_null"},
+            {"kind": "json_array", "items": {"kind": "json_number"}},
+        ]
+    }
+
+    assert_shape(None, shape)
+    assert_shape([1.0, 2.0], shape)
+
+
+def test_shape_any_of_reports_alternative_mismatches() -> None:
+    try:
+        assert_shape(
+            {"Cities": []},
+            {
+                "any_of": [
+                    {"kind": "json_null"},
+                    {"kind": "json_array"},
+                ]
+            },
+        )
+    except ShapeMismatch as exc:
+        message = str(exc)
+        assert "did not match any_of alternatives" in message
+        assert "expected json_null" in message
+        assert "expected json_array" in message
     else:  # pragma: no cover
         raise AssertionError("expected ShapeMismatch")
 
@@ -59,8 +143,80 @@ def test_content_type_matches_ignores_parameters() -> None:
 
 def test_request_kwargs_sends_get_payload_as_params() -> None:
     assert request_kwargs("GET", {"cityName": "Beijing"}) == {"params": {"cityName": "Beijing"}}
+    assert request_kwargs("get", {"cityName": "Beijing"}) == {"params": {"cityName": "Beijing"}}
     assert request_kwargs("POST", {"SemimajorAxis": 1.0}) == {"json": {"SemimajorAxis": 1.0}}
     assert request_kwargs("GET", None) == {}
+    assert request_kwargs("POST", None) == {}
+
+
+def test_verify_branch_sends_get_payload_as_query_params() -> None:
+    class Response:
+        status_code = 200
+        headers = {"content-type": "application/json"}
+
+    class RecordingSession:
+        def __init__(self) -> None:
+            self.calls: list[dict[str, Any]] = []
+
+        def request(self, method: str, url: str, **kwargs: Any) -> Response:
+            self.calls.append({"method": method, "url": url, "kwargs": kwargs})
+            return Response()
+
+    session = RecordingSession()
+
+    result = verify_branch(
+        session=session,  # type: ignore[arg-type]
+        base_url="http://example.test/",
+        timeout=2.0,
+        endpoint="/city",
+        method="GET",
+        branch_id="by_city",
+        branch={"request": {"cityName": "Beijing"}, "expect": {"status": 200}},
+    )
+
+    assert result["ok"] is True
+    assert session.calls == [
+        {
+            "method": "GET",
+            "url": "http://example.test/city",
+            "kwargs": {"timeout": 2.0, "params": {"cityName": "Beijing"}},
+        }
+    ]
+
+
+def test_verify_branch_omits_payload_for_no_body_request() -> None:
+    class Response:
+        status_code = 200
+        headers = {"content-type": "application/json"}
+
+    class RecordingSession:
+        def __init__(self) -> None:
+            self.calls: list[dict[str, Any]] = []
+
+        def request(self, method: str, url: str, **kwargs: Any) -> Response:
+            self.calls.append({"method": method, "url": url, "kwargs": kwargs})
+            return Response()
+
+    session = RecordingSession()
+
+    result = verify_branch(
+        session=session,  # type: ignore[arg-type]
+        base_url="http://example.test",
+        timeout=2.0,
+        endpoint="/WeatherForecast",
+        method="GET",
+        branch_id="nominal",
+        branch={"expect": {"status": 200}},
+    )
+
+    assert result["ok"] is True
+    assert session.calls == [
+        {
+            "method": "GET",
+            "url": "http://example.test/WeatherForecast",
+            "kwargs": {"timeout": 2.0},
+        }
+    ]
 
 
 def test_verify_branch_reports_request_exception() -> None:
@@ -80,7 +236,98 @@ def test_verify_branch_reports_request_exception() -> None:
 
     assert result["ok"] is False
     assert result["status"] is None
+    assert result["failure_kind"] == "request_failed"
     assert "slow upstream" in result["error"]
+
+
+def test_verify_branch_classifies_status_mismatch() -> None:
+    result = verify_branch(
+        session=StubSession(StubResponse(status_code=500)),  # type: ignore[arg-type]
+        base_url="http://example.test",
+        timeout=1.0,
+        endpoint="/Example",
+        method="GET",
+        branch_id="nominal",
+        branch={"expect": {"status": 200}},
+    )
+
+    assert result["ok"] is False
+    assert result["failure_kind"] == "status_mismatch"
+    assert result["expected_status"] == 200
+    assert result["actual_status"] == 500
+
+
+def test_verify_branch_classifies_content_type_mismatch() -> None:
+    result = verify_branch(
+        session=StubSession(StubResponse(headers={"content-type": "text/plain"})),  # type: ignore[arg-type]
+        base_url="http://example.test",
+        timeout=1.0,
+        endpoint="/Example",
+        method="GET",
+        branch_id="nominal",
+        branch={"expect": {"status": 200, "content_type": "application/json"}},
+    )
+
+    assert result["ok"] is False
+    assert result["failure_kind"] == "content_type_mismatch"
+    assert result["expected_content_type"] == "application/json"
+    assert result["actual_content_type"] == "text/plain"
+
+
+def test_verify_branch_classifies_non_json_response() -> None:
+    result = verify_branch(
+        session=StubSession(StubResponse(json_error=ValueError("no json"))),  # type: ignore[arg-type]
+        base_url="http://example.test",
+        timeout=1.0,
+        endpoint="/Example",
+        method="GET",
+        branch_id="nominal",
+        branch={"expect": {"status": 200, "response": {"kind": "json_object"}}},
+    )
+
+    assert result["ok"] is False
+    assert result["failure_kind"] == "non_json_response"
+    assert "no json" in result["error"]
+
+
+def test_verify_branch_classifies_shape_mismatch() -> None:
+    result = verify_branch(
+        session=StubSession(StubResponse(body={"Answer": []})),  # type: ignore[arg-type]
+        base_url="http://example.test",
+        timeout=1.0,
+        endpoint="/Example",
+        method="GET",
+        branch_id="nominal",
+        branch={"expect": {"status": 200, "response": {"kind": "json_array"}}},
+    )
+
+    assert result["ok"] is False
+    assert result["failure_kind"] == "shape_mismatch"
+    assert result["actual_shape"] == {
+        "kind": "json_object",
+        "fields": {"Answer": {"kind": "json_array", "length": 0, "sample_items": []}},
+    }
+
+
+def test_build_report_summarizes_failed_results_for_stdout_triage() -> None:
+    results = [
+        {"endpoint": "/ok", "branch": "nominal", "ok": True},
+        {
+            "endpoint": "/bad",
+            "branch": "nominal",
+            "ok": False,
+            "failure_kind": "status_mismatch",
+            "error": "expected status 200, got 500",
+        },
+    ]
+
+    report = build_report(base_url="http://example.test", fixture_count=2, results=results)
+
+    assert report["branch_count"] == 2
+    assert report["ok_count"] == 1
+    assert report["failed_count"] == 1
+    assert report["failure_kinds"] == {"status_mismatch": 1}
+    assert report["failed_results"] == [results[1]]
 
 
 def test_verify_fixture_reports_missing_endpoint_with_path(tmp_path: Path) -> None:
@@ -92,12 +339,197 @@ def test_verify_fixture_reports_missing_endpoint_with_path(tmp_path: Path) -> No
             raise AssertionError("should not request")
 
     try:
-        verify_fixture(fixture, session=UnusedSession(), base_url="http://example.test", timeout=1.0)  # type: ignore[arg-type]
+        verify_fixture(
+            fixture,
+            session=UnusedSession(),  # type: ignore[arg-type]
+            base_url="http://example.test",
+            timeout=1.0,
+        )
     except ValueError as exc:
         assert str(fixture) in str(exc)
         assert "endpoint" in str(exc)
     else:  # pragma: no cover
         raise AssertionError("expected ValueError")
+
+
+def test_load_fixture_validates_before_live_requests(tmp_path: Path) -> None:
+    fixture = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    del data["branches"]["nominal"]["expect"]["response"]
+    fixture.write_text(yaml.safe_dump(data), encoding="utf-8")
+
+    class UnusedSession:
+        def request(self, *args: Any, **kwargs: Any) -> Any:  # pragma: no cover
+            raise AssertionError("should not request")
+
+    try:
+        verify_fixture(
+            fixture,
+            session=UnusedSession(),  # type: ignore[arg-type]
+            base_url="http://example.test",
+            timeout=1.0,
+        )
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture) in message
+        assert "branches.nominal.expect.response" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_requires_top_level_fields(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+
+    try:
+        validate_fixture({"schema_version": 1}, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "endpoint" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_rejects_invalid_expect_status(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"]["status"] = True
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal.expect.status" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_rejects_invalid_response_shape(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"]["response"] = {
+        "kind": "json_object",
+        "fields": {"Answer": {"kind": "json_float"}},
+    }
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal.expect.response.fields.Answer.kind" in message
+        assert "must be one of" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_accepts_any_of_response_shape(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "city.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"]["response"] = {
+        "kind": "json_object",
+        "required_fields": ["Cities"],
+        "fields": {
+            "Cities": {
+                "any_of": [
+                    {"kind": "json_null"},
+                    {"kind": "json_array", "items": {"kind": "json_object"}},
+                ]
+            }
+        },
+    }
+
+    validate_fixture(data, path=fixture_path)
+
+
+def test_validate_fixture_rejects_empty_any_of(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"]["response"] = {"any_of": []}
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal.expect.response.any_of" in message
+        assert "non-empty list" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_rejects_mixed_any_of_shape_keys(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"]["response"] = {
+        "kind": "json_null",
+        "any_of": [{"kind": "json_null"}],
+    }
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal.expect.response" in message
+        assert "must not combine any_of" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_allows_missing_request_for_no_body_branch(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "weather.yaml"
+    data = valid_fixture_data()
+    data["endpoint"] = "/WeatherForecast"
+    data["method"] = "GET"
+    data["openapi_request_schema"] = None
+    del data["branches"]["nominal"]["request"]
+
+    validate_fixture(data, path=fixture_path)
+
+
+def test_validate_fixture_rejects_non_object_get_query_request(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "city.yaml"
+    data = valid_fixture_data()
+    data["endpoint"] = "/city"
+    data["method"] = "GET"
+    data["branches"]["nominal"]["request"] = ["cityName", "Beijing"]
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal.request" in message
+        assert "GET query parameters" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_rejects_unknown_branch_keys(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["requests"] = {}
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal" in message
+        assert "unknown keys" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_current_fixture_files_pass_schema_validation() -> None:
+    for fixture_path in iter_fixture_paths(Path("openapi/fixtures")):
+        load_fixture(fixture_path)
+
+
+def axis_by_path(endpoint: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return {axis["path"]: axis for axis in endpoint["branch_axes"]}
 
 
 def test_discover_lists_endpoint_branch_axes(tmp_path: Path) -> None:
@@ -155,6 +587,172 @@ def test_discover_lists_endpoint_branch_axes(tmp_path: Path) -> None:
             "operation_id": "Example_Post",
             "request_schema": "ExampleInput",
             "response_schema": "array",
-            "branch_axes": [{"path": "$.properties.Mode", "kind": "enum", "values": ["A", "B"]}],
+            "branch_axes": [
+                {
+                    "path": "$.Mode",
+                    "kind": "enum",
+                    "values": ["A", "B"],
+                    "provenance": {
+                        "ref": "#/components/schemas/ExampleInput",
+                        "schema": "ExampleInput",
+                    },
+                }
+            ],
         }
     ]
+
+
+def test_discover_resolves_refs_items_combinators_and_discriminators(tmp_path: Path) -> None:
+    spec_path = tmp_path / "openapi.yaml"
+    spec_path.write_text(
+        yaml.safe_dump(
+            {
+                "paths": {
+                    "/Example": {
+                        "post": {
+                            "requestBody": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": {"$ref": "#/components/schemas/ExampleInput"}
+                                    }
+                                }
+                            },
+                            "responses": {
+                                "200": {
+                                    "content": {
+                                        "application/json": {"schema": {"type": "object"}}
+                                    }
+                                }
+                            },
+                        }
+                    }
+                },
+                "components": {
+                    "schemas": {
+                        "ExampleInput": {
+                            "type": "object",
+                            "allOf": [{"$ref": "#/components/schemas/BaseOptions"}],
+                            "properties": {
+                                "Grid": {"$ref": "#/components/schemas/Grid"},
+                                "Assets": {
+                                    "type": "array",
+                                    "items": {"$ref": "#/components/schemas/Asset"},
+                                },
+                            },
+                        },
+                        "BaseOptions": {
+                            "type": "object",
+                            "properties": {
+                                "CoordType": {"type": "string", "enum": ["Cartesian", "Spherical"]}
+                            },
+                        },
+                        "Grid": {
+                            "type": "object",
+                            "oneOf": [
+                                {"$ref": "#/components/schemas/GridGlobal"},
+                                {"$ref": "#/components/schemas/GridLatLon"},
+                            ],
+                            "discriminator": {
+                                "propertyName": "$type",
+                                "mapping": {
+                                    "Global": "#/components/schemas/GridGlobal",
+                                    "LatLonBounds": "#/components/schemas/GridLatLon",
+                                },
+                            },
+                        },
+                        "GridGlobal": {
+                            "type": "object",
+                            "properties": {"$type": {"type": "string", "enum": ["Global"]}},
+                        },
+                        "GridLatLon": {
+                            "type": "object",
+                            "properties": {"$type": {"type": "string", "enum": ["LatLonBounds"]}},
+                        },
+                        "Asset": {
+                            "type": "object",
+                            "properties": {"Position": {"$ref": "#/components/schemas/EntityPosition"}},
+                        },
+                        "EntityPosition": {
+                            "type": "object",
+                            "anyOf": [
+                                {"$ref": "#/components/schemas/EntityPositionJ2"},
+                                {"$ref": "#/components/schemas/EntityPositionSite"},
+                            ],
+                            "discriminator": {
+                                "propertyName": "$type",
+                                "mapping": {
+                                    "J2": "#/components/schemas/EntityPositionJ2",
+                                    "SitePosition": "#/components/schemas/EntityPositionSite",
+                                },
+                            },
+                        },
+                        "EntityPositionJ2": {
+                            "type": "object",
+                            "properties": {"$type": {"type": "string", "enum": ["J2"]}},
+                        },
+                        "EntityPositionSite": {
+                            "type": "object",
+                            "properties": {"$type": {"type": "string", "enum": ["SitePosition"]}},
+                        },
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    endpoint = discover(load_spec(spec_path))[0]
+    axes = axis_by_path(endpoint)
+
+    assert axes["$.Grid"] == {
+        "path": "$.Grid",
+        "kind": "discriminator",
+        "property": "$type",
+        "values": ["Global", "LatLonBounds"],
+        "provenance": {"ref": "#/components/schemas/Grid", "schema": "Grid"},
+    }
+    assert axes["$.Assets[].Position"] == {
+        "path": "$.Assets[].Position",
+        "kind": "discriminator",
+        "property": "$type",
+        "values": ["J2", "SitePosition"],
+        "provenance": {"ref": "#/components/schemas/EntityPosition", "schema": "EntityPosition"},
+    }
+    assert axes["$.CoordType"] == {
+        "path": "$.CoordType",
+        "kind": "enum",
+        "values": ["Cartesian", "Spherical"],
+        "provenance": {"ref": "#/components/schemas/BaseOptions", "schema": "BaseOptions"},
+    }
+    assert "$.Grid.$type" not in axes
+
+
+def test_discover_real_spec_known_branch_axes() -> None:
+    endpoints = {
+        endpoint["endpoint"]: endpoint
+        for endpoint in discover(load_spec(Path("openapi/astrox.openapi.yaml")))
+    }
+
+    rocket_axes = axis_by_path(endpoints["/Rocket/RocketGuid"])
+    assert rocket_axes["$"]["kind"] == "discriminator"
+    assert rocket_axes["$"]["property"] == "$type"
+    assert set(rocket_axes["$"]["values"]) == {"CZ2CD", "KZ1A", "CZ7A", "CZ3BC", "CZ4BC"}
+
+    coverage_axes = axis_by_path(endpoints["/Coverage/GetGridPoints"])
+    assert coverage_axes["$.Grid"]["kind"] == "discriminator"
+    assert set(coverage_axes["$.Grid"]["values"]) == {
+        "CbLatLonBounds",
+        "Global",
+        "LatitudeBounds",
+        "LatLonBounds",
+    }
+
+    access_axes = axis_by_path(endpoints["/access/AccessComputeV2"])
+    assert access_axes["$.FromObjectPath.Position"]["kind"] == "discriminator"
+    assert access_axes["$.ToObjectPath.Position"]["kind"] == "discriminator"
+    assert "J2" in access_axes["$.FromObjectPath.Position"]["values"]
+    assert "SitePosition" in access_axes["$.ToObjectPath.Position"]["values"]
+
+    chain_axes = axis_by_path(endpoints["/access/ChainCompute"])
+    assert chain_axes["$.AllObjects[]"]["kind"] == "discriminator"
+    assert set(chain_axes["$.AllObjects[]"]["values"]) == {"EntityPath", "EntityPathGroup"}
