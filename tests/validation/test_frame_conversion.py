@@ -6,7 +6,6 @@ Reference values computed with brahe v0.9.0 and tudatpy v0.8.0.
 import pytest
 
 from astrox.orbit_convert import kepler_to_rv, rv_to_kepler
-from astrox.models import Keplerian, Cartesian
 
 
 # Reference: brahe v0.9.0
@@ -16,6 +15,7 @@ from astrox.models import Keplerian, Cartesian
 # a = 6778137 m, mu = 3.986004418e14 m^3/s^2
 # v = sqrt(3.986004418e14 / 6778137) = 7668.6 m/s
 LEO_400KM_VELOCITY_REF = 7668.6  # m/s
+EARTH_MU = 3.986004418e14  # m^3/s^2
 
 
 def test_kepler_to_rv_circular_equatorial(session):
@@ -26,22 +26,20 @@ def test_kepler_to_rv_circular_equatorial(session):
     Velocity should be purely in Y direction.
     """
     result = kepler_to_rv(
-        central_body="Earth",
-        semi_major_axis=6778137.0,
+        semimajor_axis=6778137.0,
         eccentricity=0.0,
         inclination=0.0,
-        arg_of_periapsis=0.0,
-        raan=0.0,
+        argument_of_periapsis=0.0,
+        right_ascension_of_ascending_node=0.0,
         true_anomaly=0.0,
+        gravitational_parameter=EARTH_MU,
         session=session,
     )
 
-    assert result["IsSuccess"] is True
-    assert "Position" in result
-    assert "Velocity" in result
+    assert len(result) == 6
 
-    pos = result["Position"]
-    vel = result["Velocity"]
+    pos = result[:3]
+    vel = result[3:]
 
     # For circular equatorial at TA=0:
     # Position should be approximately [a, 0, 0]
@@ -68,31 +66,27 @@ def test_rv_to_kepler_roundtrip(session):
 
     # Convert to RV
     rv_result = kepler_to_rv(
-        central_body="Earth",
-        semi_major_axis=a,
+        semimajor_axis=a,
         eccentricity=e,
         inclination=i,
-        arg_of_periapsis=0.0,
-        raan=0.0,
+        argument_of_periapsis=0.0,
+        right_ascension_of_ascending_node=0.0,
         true_anomaly=0.0,
+        gravitational_parameter=EARTH_MU,
         session=session,
     )
 
-    assert rv_result["IsSuccess"] is True
+    assert len(rv_result) == 6
 
     # Extract position and velocity
-    pos = rv_result["Position"]
-    vel = rv_result["Velocity"]
+    pos = rv_result[:3]
+    vel = rv_result[3:]
 
     # Convert back to Keplerian
     kepler_result = rv_to_kepler(
-        central_body="Earth",
-        position=pos,
-        velocity=vel,
+        position_velocity=pos + vel,
         session=session,
     )
-
-    assert kepler_result["IsSuccess"] is True
 
     # Verify elements match (within tolerance)
     assert kepler_result["SemimajorAxis"] == pytest.approx(a, rel=1e-6)

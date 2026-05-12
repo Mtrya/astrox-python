@@ -109,9 +109,9 @@ from astrox._models import (
     OrientationLVLH,
     OrientationVNC,
     OrientationVVLH,
-    # Sensors (with discriminators for ISensor union)
-    ISensorConicSensor,
-    ISensorRectangularSensor,
+    # Sensors (with discriminators for AgSensor union)
+    AgSensorConicSensor,
+    AgSensorRectangularSensor,
     # Core domain models (already have good names)
     AccessAER,
     AccessData,
@@ -263,8 +263,8 @@ EntityPositionSite = IEntityPositionEntityPositionSite
 EntityPositionTwoBody = IEntityPositionEntityPositionTwoBody
 
 # Sensor aliases for convenience
-ConicSensor = ISensorConicSensor
-RectangularSensor = ISensorRectangularSensor
+ConicSensor = AgSensorConicSensor
+RectangularSensor = AgSensorRectangularSensor
 
 # ============================================================================
 # RESULTS & OUTPUTS

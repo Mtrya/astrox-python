@@ -12,9 +12,6 @@ wheels/
 .venv
 
 # Internal & intermediate docs
-docs/internal/*
-docs/templates/*
 *.md
 !README.md
-!docs/endpoints/*.md
-!docs/state/*.md
+!openapi/**/*.md
