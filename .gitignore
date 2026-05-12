@@ -1,0 +1,20 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.codex
+.runtime/
+
+# Virtual environments
+.venv
+
+# Internal & intermediate docs
+docs/internal/*
+docs/templates/*
+*.md
+!README.md
+!docs/endpoints/*.md
+!docs/state/*.md
