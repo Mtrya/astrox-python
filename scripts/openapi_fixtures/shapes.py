@@ -10,6 +10,9 @@ class ShapeMismatch(AssertionError):
     """Raised when a response does not match a fixture shape."""
 
 
+MISSING = object()
+
+
 def response_kind(value: Any) -> str:
     """Return the fixture kind name for a decoded JSON value."""
     if value is None:
@@ -38,12 +41,15 @@ def assert_shape(value: Any, shape: Mapping[str, Any], *, path: str = "$") -> No
     if expected_kind == "text":
         if not isinstance(value, str):
             raise ShapeMismatch(f"{path} expected text, got {response_kind(value)}")
+        _assert_const(value, shape, path=path)
         _assert_text_shape(value, shape, path=path)
         return
 
     actual_kind = response_kind(value)
     if expected_kind != actual_kind:
         raise ShapeMismatch(f"{path} expected {expected_kind}, got {actual_kind}")
+
+    _assert_const(value, shape, path=path)
 
     if actual_kind == "json_array":
         _assert_array_shape(value, shape, path=path)
@@ -89,6 +95,12 @@ def _assert_object_shape(value: Mapping[str, Any], shape: Mapping[str, Any], *, 
         if field not in value:
             raise ShapeMismatch(f"{path} missing shaped field {field!r}")
         assert_shape(value[field], field_shape, path=f"{path}.{field}")
+
+
+def _assert_const(value: Any, shape: Mapping[str, Any], *, path: str) -> None:
+    expected = shape.get("const", MISSING)
+    if expected is not MISSING and value != expected:
+        raise ShapeMismatch(f"{path} expected const {expected!r}, got {value!r}")
 
 
 def _assert_text_shape(value: str, shape: Mapping[str, Any], *, path: str) -> None:

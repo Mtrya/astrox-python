@@ -6,9 +6,9 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 20
-- handled nominal endpoint fixtures: 19
-- handled branch-axis fixtures: 7
+- fixture endpoint records: 24
+- handled nominal endpoint fixtures: 23
+- handled branch-axis fixtures: 23
 
 Legend:
 
@@ -27,8 +27,8 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 ### Access
 
-- [ ] `/access/AccessComputeV2` nominal
-- [ ] `/access/ChainCompute` nominal
+- [x] `/access/AccessComputeV2` nominal
+- [x] `/access/ChainCompute` nominal
 
 ### Astrogator
 
@@ -79,9 +79,9 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 ### Lighting
 
-- [ ] `/Lighting/LightingTimes` nominal
+- [x] `/Lighting/LightingTimes` nominal
 - [ ] `/Lighting/SolarAER` nominal
-- [ ] `/Lighting/SolarIntensity` nominal
+- [x] `/Lighting/SolarIntensity` nominal
 
 ### Orbit Convert
 
@@ -405,12 +405,37 @@ Additional FOM endpoint branch axes:
 
 ### `/Lighting/LightingTimes`
 
-- [ ] `Position.*` covers all Position Variants
+- [x] `Position.$type=SitePosition`
+- [x] `Position.$type=J2`
+- [x] `Position.$type=SGP4`
+- [x] `Position.$type=TwoBody`
+- [ ] `Position.$type=AstrogatorMCS`
+- [ ] `Position.$type=HPOP`
+- [ ] `Position.$type=SimpleAscent`
+- [ ] `Position.$type=Ballistic`
+- [ ] `Position.$type=CentralBody`
+- [ ] `Position.$type=CzmlPositions`
+- [ ] `Position.$type=CzmlPosition`
+
+Unchecked Lighting position variants remain deferred because phase 1 did not
+establish reusable payload patterns for them, and no endpoint-specific live
+fixture has verified them yet.
+
 - [ ] `OccultationBodies=explicit`
 
 ### `/Lighting/SolarIntensity`
 
-- [ ] `Position.*` covers all Position Variants
+- [x] `Position.$type=SitePosition`
+- [x] `Position.$type=J2`
+- [x] `Position.$type=SGP4`
+- [x] `Position.$type=TwoBody`
+- [ ] `Position.$type=AstrogatorMCS`
+- [ ] `Position.$type=HPOP`
+- [ ] `Position.$type=SimpleAscent`
+- [ ] `Position.$type=Ballistic`
+- [ ] `Position.$type=CentralBody`
+- [ ] `Position.$type=CzmlPositions`
+- [ ] `Position.$type=CzmlPosition`
 - [ ] `OccultationBodies=explicit`
 
 ### `/Propagator/Ballistic`
@@ -468,7 +493,10 @@ Additional FOM endpoint branch axes:
 
 ### `/access/AccessComputeV2`
 
-- [ ] `FromObjectPath.Position.*` covers all Position Variants
+- [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=J2`
+- [x] `FromObjectPath.Position.$type=J2 -> ToObjectPath.Position.$type=SitePosition`
+- [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=SGP4`
+- [ ] other `FromObjectPath.Position.* -> ToObjectPath.Position.*` pairs
 - [ ] `FromObjectPath.Orientation.*` covers all Entity Orientation Variants
 - [ ] `FromObjectPath.Sensor.*` covers all Entity Sensor Variants
 - [ ] `FromObjectPath.SensorPointing.*` covers all Sensor Pointing Variants
@@ -486,13 +514,13 @@ Additional FOM endpoint branch axes:
 - [ ] `ToObjectPath.Lighting=Penumbra`
 - [ ] `ToObjectPath.Lighting=Umbra`
 - [ ] `ToObjectPath.OccultationBodies=explicit`
-- [ ] `ComputeAER=true`
-- [ ] `UseLightTimeDelay=true`
+- [x] `ComputeAER=true`
+- [x] `UseLightTimeDelay=true`
 
 ### `/access/ChainCompute`
 
-- [ ] `AllObjects.$type=EntityPath`
-- [ ] `AllObjects.$type=EntityPathGroup`
+- [x] `AllObjects.$type=EntityPath`
+- [x] `AllObjects.$type=EntityPathGroup` failure-only wire shape
 - [ ] `AllObjects.Position.*` covers all Position Variants
 - [ ] `AllObjects.Orientation.*` covers all Entity Orientation Variants
 - [ ] `AllObjects.Sensor.*` covers all Entity Sensor Variants
@@ -508,7 +536,7 @@ Additional FOM endpoint branch axes:
 - [ ] `EntityPathGroup.ToAccess_Restriction=AtLeastN`
 - [ ] `Connections=null`
 - [ ] `Connections=explicit`
-- [ ] `UseLightTimeDelay=true`
+- [x] `UseLightTimeDelay=true`
 
 ## No Additional Branch Axes Discovered Yet
 

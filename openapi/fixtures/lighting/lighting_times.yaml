@@ -1,0 +1,136 @@
+schema_version: 1
+endpoint: /Lighting/LightingTimes
+method: POST
+openapi_operation_id: null
+openapi_request_schema: LightingTimesInput
+openapi_response_schema: LightingTimesOut
+branches:
+  nominal:
+    request:
+      <<: &lighting_times_common_request
+        Start: "2024-01-01T00:00:00.000Z"
+        Stop: "2024-01-01T01:00:00.000Z"
+      Position:
+        $type: SitePosition
+        CentralBody: Earth
+        cartographicDegrees:
+          - 120.0
+          - 31.0
+          - 10.0
+    expect: &site_lighting_times_expect
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SunLight
+          - Penumbra
+          - Umbra
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          SunLight: &lighting_time_interval_section
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items: &time_interval
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration: *time_interval
+              MaxDuration: *time_interval
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Penumbra: &lighting_time_duration_section
+            kind: json_object
+            required_fields:
+              - MeanDuration
+              - TotalDuration
+            fields:
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Umbra: *lighting_time_duration_section
+  position_j2:
+    request:
+      <<: *lighting_times_common_request
+      Position:
+        $type: J2
+        Step: 600.0
+        OrbitEpoch: "2024-01-01T00:00:00.000Z"
+        OrbitalElements:
+          - 6778137.0
+          - 0.001
+          - 28.5
+          - 0.0
+          - 0.0
+          - 0.0
+    expect: &spacecraft_lighting_times_expect
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SunLight
+          - Penumbra
+          - Umbra
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          SunLight: *lighting_time_interval_section
+          Penumbra: *lighting_time_interval_section
+          Umbra: *lighting_time_interval_section
+  position_sgp4:
+    request:
+      Start: "2021-05-01T00:00:00.000Z"
+      Stop: "2021-05-01T01:00:00.000Z"
+      Position:
+        $type: SGP4
+        Step: 600.0
+        TLEs:
+          - 1 25544U 98067A   21120.54791667  .00001391  00000-0  33245-4 0  9993
+          - 2 25544  51.6443 206.1695 0002829  89.9572  27.6891 15.48915315281553
+    expect: *spacecraft_lighting_times_expect
+  position_two_body:
+    request:
+      <<: *lighting_times_common_request
+      Position:
+        $type: TwoBody
+        Step: 600.0
+        OrbitEpoch: "2024-01-01T00:00:00.000Z"
+        OrbitalElements:
+          - 6778137.0
+          - 0.001
+          - 28.5
+          - 0.0
+          - 0.0
+          - 0.0
+    expect: *spacecraft_lighting_times_expect

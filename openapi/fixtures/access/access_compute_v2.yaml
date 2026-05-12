@@ -1,0 +1,178 @@
+schema_version: 1
+endpoint: /access/AccessComputeV2
+method: POST
+openapi_operation_id: AccessComputeV2
+openapi_request_schema: AccessInput2
+openapi_response_schema: AccessOutput
+branches:
+  nominal:
+    request:
+      <<: &access_2024_window
+        Start: "2024-01-01T00:00:00.000Z"
+        Stop: "2024-01-02T00:00:00.000Z"
+        OutStep: 600.0
+      FromObjectPath:
+        Name: Facility/Phase3Site
+        Position: &site_position
+          $type: SitePosition
+          CentralBody: Earth
+          cartographicDegrees:
+            - 120.0
+            - 31.0
+            - 10.0
+      ToObjectPath:
+        Name: Satellite/Phase3To
+        Position: &j2_position
+          $type: J2
+          Step: 120.0
+          OrbitEpoch: "2024-01-01T00:00:00.000Z"
+          OrbitalElements:
+            - 6778137.0
+            - 0.001
+            - 51.6
+            - 0.0
+            - 0.0
+            - 0.0
+    expect: &access_default_expect
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Passes
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Passes:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - AccessStart
+                - AccessStop
+                - Duration
+              fields:
+                AccessStart:
+                  kind: json_string
+                AccessStop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+  j2_to_site:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        Name: Satellite/Phase3From
+        Position: *j2_position
+      ToObjectPath:
+        Name: Facility/Phase3Site
+        Position: *site_position
+    expect: *access_default_expect
+  compute_aer_true:
+    request:
+      <<: *access_2024_window
+      ComputeAER: true
+      FromObjectPath:
+        Name: Facility/Phase3Site
+        Position: *site_position
+      ToObjectPath:
+        Name: Satellite/Phase3To
+        Position: *j2_position
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Passes
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Passes:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - AccessStart
+                - AccessStop
+                - Duration
+                - MinElevationData
+                - MaxElevationData
+                - MinRangeData
+                - MaxRangeData
+                - AccessBeginData
+                - AccessEndData
+                - AllDatas
+              fields:
+                AccessStart:
+                  kind: json_string
+                AccessStop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+                MinElevationData: &access_aer_data
+                  kind: json_object
+                  required_fields:
+                    - Time
+                    - Azimuth
+                    - Elevation
+                    - Range
+                    - RangeDot
+                  fields:
+                    Time:
+                      kind: json_string
+                    Azimuth:
+                      kind: json_number
+                    Elevation:
+                      kind: json_number
+                    Range:
+                      kind: json_number
+                    RangeDot:
+                      kind: json_number
+                MaxElevationData: *access_aer_data
+                MinRangeData: *access_aer_data
+                MaxRangeData: *access_aer_data
+                AccessBeginData: *access_aer_data
+                AccessEndData: *access_aer_data
+                AllDatas:
+                  kind: json_array
+                  min_length: 1
+                  items: *access_aer_data
+  use_light_time_delay_true:
+    request:
+      <<: *access_2024_window
+      UseLightTimeDelay: true
+      FromObjectPath:
+        Name: Facility/Phase3Site
+        Position: *site_position
+      ToObjectPath:
+        Name: Satellite/Phase3To
+        Position: *j2_position
+    expect: *access_default_expect
+  site_to_sgp4:
+    request:
+      Start: "2021-05-01T00:00:00.000Z"
+      Stop: "2021-05-02T00:00:00.000Z"
+      OutStep: 600.0
+      FromObjectPath:
+        Name: Facility/Phase3Site
+        Position: *site_position
+      ToObjectPath:
+        Name: Satellite/Phase3To
+        Position:
+          $type: SGP4
+          Step: 120.0
+          TLEs:
+            - 1 25544U 98067A   21120.54791667  .00001391  00000-0  33245-4 0  9993
+            - 2 25544  51.6443 206.1695 0002829  89.9572  27.6891 15.48915315281553
+    expect: *access_default_expect

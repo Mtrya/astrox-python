@@ -1,0 +1,148 @@
+schema_version: 1
+endpoint: /Lighting/SolarIntensity
+method: POST
+openapi_operation_id: null
+openapi_request_schema: SolarIntensityInput
+openapi_response_schema: SolarIntensityOut
+branches:
+  nominal:
+    request:
+      <<: &solar_intensity_common_request
+        Start: "2024-01-01T00:00:00.000Z"
+        Stop: "2024-01-01T01:00:00.000Z"
+        TimeStepSec: 1800.0
+      Position: &site_position
+        $type: SitePosition
+        CentralBody: Earth
+        cartographicDegrees:
+          - 120.0
+          - 31.0
+          - 10.0
+    expect: &site_solar_intensity_expect
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Datas
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Datas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - $type
+                - Time
+                - Intensity
+                - PercentShadow
+                - ApparentSolarAzimuth
+                - ApparentSolarElevation
+                - TerrainElevation
+              fields:
+                $type:
+                  kind: json_string
+                Time:
+                  kind: json_string
+                Intensity:
+                  kind: json_number
+                PercentShadow:
+                  kind: json_number
+                ApparentSolarAzimuth:
+                  kind: json_number
+                ApparentSolarElevation:
+                  kind: json_number
+                TerrainElevation:
+                  kind: json_number
+  position_j2:
+    request:
+      <<: *solar_intensity_common_request
+      Position: &j2_position
+        $type: J2
+        Step: 600.0
+        OrbitEpoch: "2024-01-01T00:00:00.000Z"
+        OrbitalElements:
+          - 6778137.0
+          - 0.001
+          - 28.5
+          - 0.0
+          - 0.0
+          - 0.0
+    expect: &spacecraft_solar_intensity_expect
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Datas
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Datas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - $type
+                - Time
+                - Intensity
+                - PercentShadow
+                - CurrentCondition
+                - Obstruction
+                - ApparentSolarRange
+                - RelativeAngle
+              fields:
+                $type:
+                  kind: json_string
+                Time:
+                  kind: json_string
+                Intensity:
+                  kind: json_number
+                PercentShadow:
+                  kind: json_number
+                CurrentCondition:
+                  kind: json_string
+                Obstruction:
+                  kind: json_string
+                ApparentSolarRange:
+                  kind: json_number
+                RelativeAngle:
+                  kind: json_number
+  position_sgp4:
+    request:
+      <<: *solar_intensity_common_request
+      Start: "2021-05-01T00:00:00.000Z"
+      Stop: "2021-05-01T01:00:00.000Z"
+      Position:
+        $type: SGP4
+        Step: 600.0
+        TLEs:
+          - 1 25544U 98067A   21120.54791667  .00001391  00000-0  33245-4 0  9993
+          - 2 25544  51.6443 206.1695 0002829  89.9572  27.6891 15.48915315281553
+    expect: *spacecraft_solar_intensity_expect
+  position_two_body:
+    request:
+      <<: *solar_intensity_common_request
+      Position: &two_body_position
+        $type: TwoBody
+        Step: 600.0
+        OrbitEpoch: "2024-01-01T00:00:00.000Z"
+        OrbitalElements:
+          - 6778137.0
+          - 0.001
+          - 28.5
+          - 0.0
+          - 0.0
+          - 0.0
+    expect: *spacecraft_solar_intensity_expect

@@ -226,12 +226,31 @@ def _validate_response_shape(value: dict[str, Any], *, path: Path, field_path: s
             f"must be one of {sorted(SUPPORTED_RESPONSE_KINDS)}",
         )
 
+    if "const" in value:
+        _validate_const(value["const"], kind=kind, path=path, field_path=f"{field_path}.const")
+
     if kind == "json_array":
         _validate_array_shape(value, path=path, field_path=field_path)
     elif kind == "json_object":
         _validate_object_shape(value, path=path, field_path=field_path)
     elif kind == "text":
         _validate_text_shape(value, path=path, field_path=field_path)
+
+
+def _validate_const(value: Any, *, kind: str, path: Path, field_path: str) -> None:
+    if kind in {"json_array", "json_object"}:
+        raise _validation_error(path, field_path, "is only supported for primitive shapes")
+    if kind == "json_null":
+        if value is not None:
+            raise _validation_error(path, field_path, "must be null for json_null")
+    elif kind == "json_boolean":
+        if type(value) is not bool:
+            raise _validation_error(path, field_path, "must be a boolean for json_boolean")
+    elif kind == "json_number":
+        if not isinstance(value, int | float) or isinstance(value, bool):
+            raise _validation_error(path, field_path, "must be a number for json_number")
+    elif kind in {"json_string", "text"} and not isinstance(value, str):
+        raise _validation_error(path, field_path, f"must be a string for {kind}")
 
 
 def _validate_array_shape(value: dict[str, Any], *, path: Path, field_path: str) -> None:
