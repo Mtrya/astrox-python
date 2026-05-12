@@ -14,6 +14,7 @@ from scripts.openapi_fixtures.verify import (
     iter_fixture_paths,
     load_fixture,
     request_kwargs,
+    response_shape_expects_text,
     validate_fixture,
     verify_branch,
     verify_fixture,
@@ -335,6 +336,15 @@ def test_verify_branch_accepts_text_response_without_json_parse() -> None:
     assert result["ok"] is True
 
 
+def test_response_shape_expects_text_rejects_mixed_any_of() -> None:
+    try:
+        response_shape_expects_text({"any_of": [{"kind": "json_object"}, {"kind": "text"}]})
+    except ValueError as exc:
+        assert "must not mix text and JSON" in str(exc)
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
 def test_verify_branch_classifies_shape_mismatch() -> None:
     result = verify_branch(
         session=StubSession(StubResponse(body={"Answer": []})),  # type: ignore[arg-type]
@@ -503,6 +513,27 @@ def test_validate_fixture_accepts_text_response_shape(tmp_path: Path) -> None:
     del data["branches"]["nominal"]["request"]
 
     validate_fixture(data, path=fixture_path)
+
+
+def test_validate_fixture_rejects_mixed_text_and_json_any_of(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"]["response"] = {
+        "any_of": [
+            {"kind": "json_object"},
+            {"kind": "text"},
+        ]
+    }
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal.expect.response.any_of" in message
+        assert "must not mix text and JSON" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
 
 
 def test_validate_fixture_rejects_empty_any_of(tmp_path: Path) -> None:

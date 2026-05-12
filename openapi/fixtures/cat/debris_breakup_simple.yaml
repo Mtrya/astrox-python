@@ -79,7 +79,6 @@ branches:
   compute_life_of_time_true:
     request:
       <<: *debris_breakup_simple_request
-      MotherSate: *envisat_tle
       SSC_Pre: D4
       ComputeLifeOfTime: true
     expect: *debris_breakup_simple_expect

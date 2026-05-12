@@ -28,6 +28,13 @@ branches:
               - kind: json_array
                 items:
                   kind: json_object
+                  required_fields:
+                    - FacilityName
+                    - NetworkName
+                    - Latitude
+                    - Longitude
+                    - Altitude
+                    - CentralBodyName
                   fields:
                     FacilityName:
                       kind: json_string

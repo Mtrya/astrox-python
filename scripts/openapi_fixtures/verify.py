@@ -205,6 +205,13 @@ def _validate_response_shape(value: dict[str, Any], *, path: Path, field_path: s
                 path=path,
                 field_path=f"{field_path}.any_of[{index}]",
             )
+        text_expectations = [response_shape_expects_text(alternative) for alternative in alternatives]
+        if any(text_expectations) and not all(text_expectations):
+            raise _validation_error(
+                path,
+                f"{field_path}.any_of",
+                "must not mix text and JSON response shapes",
+            )
         return
 
     kind = _require_non_empty_string(
@@ -318,7 +325,10 @@ def response_shape_expects_text(shape: Any) -> bool:
         return True
     alternatives = shape.get("any_of")
     if isinstance(alternatives, list):
-        return any(response_shape_expects_text(alternative) for alternative in alternatives)
+        text_expectations = [response_shape_expects_text(alternative) for alternative in alternatives]
+        if any(text_expectations) and not all(text_expectations):
+            raise ValueError("any_of must not mix text and JSON response shapes")
+        return all(text_expectations)
     return False
 
 
