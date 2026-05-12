@@ -30,6 +30,7 @@ SUPPORTED_RESPONSE_KINDS = {
     "json_array",
     "json_object",
 }
+BRANCH_KEYS = {"request", "expect"}
 MISSING = object()
 
 
@@ -125,18 +126,36 @@ def validate_fixture(fixture: dict[str, Any], *, path: Path) -> None:
         if not isinstance(branch_id, str) or not branch_id:
             raise _validation_error(path, "branches", "keys must be non-empty strings")
         branch_path = f"branches.{branch_id}"
-        _validate_branch(branch, path=path, field_path=branch_path)
+        _validate_branch(branch, method=method, path=path, field_path=branch_path)
 
 
-def _validate_branch(value: Any, *, path: Path, field_path: str) -> None:
+def _validate_branch(value: Any, *, method: str, path: Path, field_path: str) -> None:
     branch = _require_object(value, path=path, field_path=field_path)
-    _required_value(branch, "request", path=path, field_path=f"{field_path}.request")
+    unknown_keys = sorted(set(branch) - BRANCH_KEYS)
+    if unknown_keys:
+        raise _validation_error(path, field_path, f"contains unknown keys {unknown_keys}")
+    if "request" in branch:
+        _validate_request_payload(
+            branch["request"],
+            method=method,
+            path=path,
+            field_path=f"{field_path}.request",
+        )
     expect = _require_object(
         _required_value(branch, "expect", path=path, field_path=f"{field_path}.expect"),
         path=path,
         field_path=f"{field_path}.expect",
     )
     _validate_expect(expect, path=path, field_path=f"{field_path}.expect")
+
+
+def _validate_request_payload(value: Any, *, method: str, path: Path, field_path: str) -> None:
+    if method == "GET" and value is not None and not isinstance(value, dict):
+        raise _validation_error(
+            path,
+            field_path,
+            "must be null or an object for GET query parameters",
+        )
 
 
 def _validate_expect(value: dict[str, Any], *, path: Path, field_path: str) -> None:

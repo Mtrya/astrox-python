@@ -82,8 +82,80 @@ def test_content_type_matches_ignores_parameters() -> None:
 
 def test_request_kwargs_sends_get_payload_as_params() -> None:
     assert request_kwargs("GET", {"cityName": "Beijing"}) == {"params": {"cityName": "Beijing"}}
+    assert request_kwargs("get", {"cityName": "Beijing"}) == {"params": {"cityName": "Beijing"}}
     assert request_kwargs("POST", {"SemimajorAxis": 1.0}) == {"json": {"SemimajorAxis": 1.0}}
     assert request_kwargs("GET", None) == {}
+    assert request_kwargs("POST", None) == {}
+
+
+def test_verify_branch_sends_get_payload_as_query_params() -> None:
+    class Response:
+        status_code = 200
+        headers = {"content-type": "application/json"}
+
+    class RecordingSession:
+        def __init__(self) -> None:
+            self.calls: list[dict[str, Any]] = []
+
+        def request(self, method: str, url: str, **kwargs: Any) -> Response:
+            self.calls.append({"method": method, "url": url, "kwargs": kwargs})
+            return Response()
+
+    session = RecordingSession()
+
+    result = verify_branch(
+        session=session,  # type: ignore[arg-type]
+        base_url="http://example.test/",
+        timeout=2.0,
+        endpoint="/city",
+        method="GET",
+        branch_id="by_city",
+        branch={"request": {"cityName": "Beijing"}, "expect": {"status": 200}},
+    )
+
+    assert result["ok"] is True
+    assert session.calls == [
+        {
+            "method": "GET",
+            "url": "http://example.test/city",
+            "kwargs": {"timeout": 2.0, "params": {"cityName": "Beijing"}},
+        }
+    ]
+
+
+def test_verify_branch_omits_payload_for_no_body_request() -> None:
+    class Response:
+        status_code = 200
+        headers = {"content-type": "application/json"}
+
+    class RecordingSession:
+        def __init__(self) -> None:
+            self.calls: list[dict[str, Any]] = []
+
+        def request(self, method: str, url: str, **kwargs: Any) -> Response:
+            self.calls.append({"method": method, "url": url, "kwargs": kwargs})
+            return Response()
+
+    session = RecordingSession()
+
+    result = verify_branch(
+        session=session,  # type: ignore[arg-type]
+        base_url="http://example.test",
+        timeout=2.0,
+        endpoint="/WeatherForecast",
+        method="GET",
+        branch_id="nominal",
+        branch={"expect": {"status": 200}},
+    )
+
+    assert result["ok"] is True
+    assert session.calls == [
+        {
+            "method": "GET",
+            "url": "http://example.test/WeatherForecast",
+            "kwargs": {"timeout": 2.0},
+        }
+    ]
 
 
 def test_verify_branch_reports_request_exception() -> None:
@@ -196,6 +268,50 @@ def test_validate_fixture_rejects_invalid_response_shape(tmp_path: Path) -> None
         assert str(fixture_path) in message
         assert "branches.nominal.expect.response.fields.Answer.kind" in message
         assert "must be one of" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_allows_missing_request_for_no_body_branch(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "weather.yaml"
+    data = valid_fixture_data()
+    data["endpoint"] = "/WeatherForecast"
+    data["method"] = "GET"
+    del data["branches"]["nominal"]["request"]
+
+    validate_fixture(data, path=fixture_path)
+
+
+def test_validate_fixture_rejects_non_object_get_query_request(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "city.yaml"
+    data = valid_fixture_data()
+    data["endpoint"] = "/city"
+    data["method"] = "GET"
+    data["branches"]["nominal"]["request"] = ["cityName", "Beijing"]
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal.request" in message
+        assert "GET query parameters" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_rejects_unknown_branch_keys(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["requests"] = {}
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal" in message
+        assert "unknown keys" in message
     else:  # pragma: no cover
         raise AssertionError("expected ValueError")
 
