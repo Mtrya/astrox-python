@@ -6,8 +6,8 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 16
-- handled nominal endpoint fixtures: 15
+- fixture endpoint records: 20
+- handled nominal endpoint fixtures: 19
 - handled branch-axis fixtures: 7
 
 Legend:
@@ -129,10 +129,10 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 ### Celestial
 
-- [ ] `/celestial/ephemeris` nominal
-- [ ] `/celestial/mpc` nominal
-- [ ] `/celestial/transfer` nominal
-- [ ] `/orbit/lambert` nominal
+- [x] `/celestial/ephemeris` nominal
+- [x] `/celestial/mpc` nominal
+- [x] `/celestial/transfer` nominal
+- [x] `/orbit/lambert` nominal
 
 ### Catalog and Database GET/File Endpoints
 
@@ -359,10 +359,10 @@ the current heuristics did not identify branch axes.
 - [x] `/satcat`
 - [x] `/ssc`
 - [ ] `/ssc/admin/upload-database-archive`
-- [ ] `/celestial/ephemeris`
-- [ ] `/celestial/mpc`
-- [ ] `/celestial/transfer`
-- [ ] `/orbit/lambert`
+- [x] `/celestial/ephemeris`
+- [x] `/celestial/mpc`
+- [x] `/celestial/transfer`
+- [x] `/orbit/lambert`
 - [ ] `/ziyou`
 
 ## Discovery Notes
