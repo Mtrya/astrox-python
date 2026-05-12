@@ -7,6 +7,9 @@ payloads and response shapes that the live server is expected to accept and
 return. They are not semantic or numerical oracles. Normal `pytest` tests should
 cover exact values, physics checks, and SDK behavior.
 
+Use `STATUS.md` to track which endpoint nominal fixtures and branch-axis
+fixtures have been handled.
+
 No endpoint fixture records are checked in yet. Add records incrementally, one
 endpoint file at a time, using this layout:
 
