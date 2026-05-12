@@ -6,9 +6,9 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 23
-- handled nominal endpoint fixtures: 22
-- handled branch-axis fixtures: 20
+- fixture endpoint records: 24
+- handled nominal endpoint fixtures: 23
+- handled branch-axis fixtures: 23
 
 Legend:
 
@@ -28,7 +28,7 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 ### Access
 
 - [x] `/access/AccessComputeV2` nominal
-- [ ] `/access/ChainCompute` nominal
+- [x] `/access/ChainCompute` nominal
 
 ### Astrogator
 
@@ -519,8 +519,8 @@ fixture has verified them yet.
 
 ### `/access/ChainCompute`
 
-- [ ] `AllObjects.$type=EntityPath`
-- [ ] `AllObjects.$type=EntityPathGroup`
+- [x] `AllObjects.$type=EntityPath`
+- [x] `AllObjects.$type=EntityPathGroup` failure-only wire shape
 - [ ] `AllObjects.Position.*` covers all Position Variants
 - [ ] `AllObjects.Orientation.*` covers all Entity Orientation Variants
 - [ ] `AllObjects.Sensor.*` covers all Entity Sensor Variants
@@ -536,7 +536,7 @@ fixture has verified them yet.
 - [ ] `EntityPathGroup.ToAccess_Restriction=AtLeastN`
 - [ ] `Connections=null`
 - [ ] `Connections=explicit`
-- [ ] `UseLightTimeDelay=true`
+- [x] `UseLightTimeDelay=true`
 
 ## No Additional Branch Axes Discovered Yet
 
