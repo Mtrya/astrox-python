@@ -107,13 +107,13 @@ class TestAliasEquivalence:
 
     def test_position_aliases(self):
         """Test entity position aliases."""
-        assert models.CentralBodyPosition is _models.EntityPositionCentralBody
-        assert models.CzmlPosition is _models.EntityPositionCzml
-        assert models.CzmlPositionsData is _models.EntityPositionCzmlPositions
-        assert models.J2Position is _models.EntityPositionJ2
-        assert models.SGP4Position is _models.EntityPositionSGP4
-        assert models.SitePosition is _models.EntityPositionSite
-        assert models.TwoBodyPosition is _models.EntityPositionTwoBody
+        assert models.CentralBodyPosition is _models.IEntityPositionEntityPositionCentralBody
+        assert models.CzmlPosition is _models.IEntityPositionEntityPositionCzml
+        assert models.CzmlPositionsData is _models.IEntityPositionEntityPositionCzmlPositions
+        assert models.J2Position is _models.IEntityPositionEntityPositionJ2
+        assert models.SGP4Position is _models.IEntityPositionEntityPositionSGP4
+        assert models.SitePosition is _models.IEntityPositionEntityPositionSite
+        assert models.TwoBodyPosition is _models.IEntityPositionEntityPositionTwoBody
 
     def test_results_aliases(self):
         """Test MCS result aliases."""

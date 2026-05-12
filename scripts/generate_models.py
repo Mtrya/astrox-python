@@ -85,46 +85,7 @@ def normalize_schema(schema: dict[str, Any]) -> str:
     Normalize a schema to a comparable string representation.
     Two schemas with identical structure will have the same normalized form.
     """
-    # Create a deep copy and remove metadata that doesn't affect structure
-    normalized = {}
-
-    # Copy properties in sorted order
-    if 'properties' in schema:
-        normalized['properties'] = {
-            k: {
-                'type': v.get('type'),
-                'description': v.get('description'),
-                'enum': v.get('enum'),
-                'format': v.get('format'),
-                '$ref': v.get('$ref'),
-                'items': v.get('items'),
-                'allOf': v.get('allOf'),
-                'oneOf': v.get('oneOf'),
-                'anyOf': v.get('anyOf'),
-            }
-            for k, v in sorted(schema['properties'].items())
-        }
-
-    if 'required' in schema:
-        normalized['required'] = sorted(schema['required'])
-
-    if 'type' in schema:
-        normalized['type'] = schema['type']
-
-    if 'enum' in schema:
-        normalized['enum'] = schema['enum']
-
-    if 'allOf' in schema:
-        normalized['allOf'] = schema['allOf']
-
-    if 'oneOf' in schema:
-        normalized['oneOf'] = schema['oneOf']
-
-    if 'anyOf' in schema:
-        normalized['anyOf'] = schema['anyOf']
-
-    # Convert to JSON string for comparison
-    return json.dumps(normalized, sort_keys=True)
+    return json.dumps(schema, sort_keys=True, ensure_ascii=False)
 
 
 def find_duplicate_schemas(spec: dict[str, Any]) -> dict[str, list[str]]:
