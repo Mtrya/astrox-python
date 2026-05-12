@@ -1,0 +1,105 @@
+schema_version: 1
+endpoint: /ssc
+method: GET
+openapi_operation_id: null
+openapi_request_schema: query
+openapi_response_schema: SatelliteDatabaseOutput
+branches:
+  nominal:
+    request:
+      sscNumber: "19467"
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - TotalCount
+          - TLEs
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          TotalCount:
+            kind: json_number
+          TLEs:
+            any_of:
+              - kind: json_null
+              - kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  fields:
+                    Active:
+                      kind: json_boolean
+                    CommonName:
+                      any_of:
+                        - kind: json_null
+                        - kind: json_string
+                    OfficialName:
+                      any_of:
+                        - kind: json_null
+                        - kind: json_string
+                    SatelliteNumber:
+                      any_of:
+                        - kind: json_null
+                        - kind: json_string
+                    TleEpoch:
+                      any_of:
+                        - kind: json_null
+                        - kind: json_string
+                    RevolutionNumber:
+                      kind: json_number
+                    TLE_Line1:
+                      any_of:
+                        - kind: json_null
+                        - kind: json_string
+                    TLE_Line2:
+                      any_of:
+                        - kind: json_null
+                        - kind: json_string
+                    InternationalDesignator:
+                      any_of:
+                        - kind: json_null
+                        - kind: json_string
+                    Owner:
+                      any_of:
+                        - kind: json_null
+                        - kind: json_string
+                    Mission:
+                      any_of:
+                        - kind: json_null
+                        - kind: json_string
+                    LaunchSite:
+                      any_of:
+                        - kind: json_null
+                        - kind: json_string
+                    LaunchDateString:
+                      any_of:
+                        - kind: json_null
+                        - kind: json_string
+                    OrbitDescription:
+                      any_of:
+                        - kind: json_null
+                        - kind: json_string
+                    Mass:
+                      kind: json_number
+                    Apogee:
+                      kind: json_number
+                    Perigee:
+                      kind: json_number
+                    Period:
+                      kind: json_number
+                    Inclination:
+                      kind: json_number
+                    LastDatabaseUpdate:
+                      any_of:
+                        - kind: json_null
+                        - kind: json_string
+                    WriteUp:
+                      any_of:
+                        - kind: json_null
+                        - kind: json_string

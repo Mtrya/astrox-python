@@ -1,0 +1,47 @@
+schema_version: 1
+endpoint: /CAT/CA_ComputeV3
+method: POST
+openapi_operation_id: null
+openapi_request_schema: CAInput
+openapi_response_schema: CAOutput
+branches:
+  nominal:
+    request:
+      Start_UTCG: "2021-04-30T00:00:00.000Z"
+      Stop_UTCG: "2021-04-30T00:10:00.000Z"
+      TolMaxDistance: 50.0
+      TolCrossDt: 10.0
+      TolTheta: 5.0
+      TolDh: 100.0
+      SAT1: &iss_tle
+        SAT_Name: ISS
+        SAT_Number: "25544"
+        TLE_Line1: "1 25544U 98067A   21120.75712704  .00001608  00000-0  37381-4 0  9990"
+        TLE_Line2: "2 25544  51.6441 217.3237 0002714 302.6679 206.5255 15.48964989281240"
+      Targets:
+        - *iss_tle
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - TotalNumber
+          - AfterApoPeriFilterNumber
+          - AfterCrossPlaneNumber
+          - CA_Results
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          TotalNumber:
+            kind: json_number
+          AfterApoPeriFilterNumber:
+            kind: json_number
+          AfterCrossPlaneNumber:
+            kind: json_number
+          CA_Results:
+            kind: json_array

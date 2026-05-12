@@ -1,0 +1,14 @@
+schema_version: 1
+endpoint: /satcat
+method: GET
+openapi_operation_id: null
+openapi_request_schema: null
+openapi_response_schema: text/plain
+branches:
+  nominal:
+    expect:
+      status: 200
+      content_type: text/plain
+      response:
+        kind: text
+        min_length: 1

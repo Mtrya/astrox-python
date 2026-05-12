@@ -35,6 +35,12 @@ def assert_shape(value: Any, shape: Mapping[str, Any], *, path: str = "$") -> No
         return
 
     expected_kind = shape.get("kind")
+    if expected_kind == "text":
+        if not isinstance(value, str):
+            raise ShapeMismatch(f"{path} expected text, got {response_kind(value)}")
+        _assert_text_shape(value, shape, path=path)
+        return
+
     actual_kind = response_kind(value)
     if expected_kind != actual_kind:
         raise ShapeMismatch(f"{path} expected {expected_kind}, got {actual_kind}")
@@ -85,8 +91,17 @@ def _assert_object_shape(value: Mapping[str, Any], shape: Mapping[str, Any], *, 
         assert_shape(value[field], field_shape, path=f"{path}.{field}")
 
 
+def _assert_text_shape(value: str, shape: Mapping[str, Any], *, path: str) -> None:
+    min_length = shape.get("min_length")
+    if min_length is not None and len(value) < min_length:
+        raise ShapeMismatch(f"{path} expected text length >= {min_length}, got {len(value)}")
+
+
 def fingerprint_shape(value: Any) -> Any:
     """Build a compact shape fingerprint for reporting unexpected responses."""
+    if isinstance(value, str):
+        return {"kind": "text", "length": len(value)}
+
     kind = response_kind(value)
     if kind == "json_array":
         item_fingerprints = [fingerprint_shape(item) for item in value[:5]]

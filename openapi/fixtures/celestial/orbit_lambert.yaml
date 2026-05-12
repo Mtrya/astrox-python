@@ -1,0 +1,51 @@
+schema_version: 1
+endpoint: /orbit/lambert
+method: POST
+openapi_operation_id: null
+openapi_request_schema: LambertRhGoodingInput
+openapi_response_schema: LambertRhGoodingResult
+branches:
+  nominal:
+    request:
+      RV1:
+        - 1112487.4
+        - 6184933.0
+        - 487640.8
+        - -8088.605
+        - 1334.5963
+        - 1525.882
+      RV2:
+        - -4963330.5
+        - 4154175.2
+        - 1301603.0
+        - -5569.688
+        - -5716.8755
+        - 323.9083
+      Gm: 398600441500000.0
+      TOF:
+        - 817.4257
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - DV1
+          - DV2
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          DV1:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_number
+          DV2:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_number

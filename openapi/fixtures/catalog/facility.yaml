@@ -1,0 +1,50 @@
+schema_version: 1
+endpoint: /facility
+method: GET
+openapi_operation_id: null
+openapi_request_schema: query
+openapi_response_schema: FacilityDataBaseOutput
+branches:
+  nominal:
+    request:
+      facilityName: Beijing
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Facilities
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Facilities:
+            any_of:
+              - kind: json_null
+              - kind: json_array
+                items:
+                  kind: json_object
+                  required_fields:
+                    - FacilityName
+                    - NetworkName
+                    - Latitude
+                    - Longitude
+                    - Altitude
+                    - CentralBodyName
+                  fields:
+                    FacilityName:
+                      kind: json_string
+                    NetworkName:
+                      kind: json_string
+                    Latitude:
+                      kind: json_number
+                    Longitude:
+                      kind: json_number
+                    Altitude:
+                      kind: json_number
+                    CentralBodyName:
+                      kind: json_string

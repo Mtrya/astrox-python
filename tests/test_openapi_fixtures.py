@@ -14,6 +14,7 @@ from scripts.openapi_fixtures.verify import (
     iter_fixture_paths,
     load_fixture,
     request_kwargs,
+    response_shape_expects_text,
     validate_fixture,
     verify_branch,
     verify_fixture,
@@ -27,11 +28,13 @@ class StubResponse:
         status_code: int = 200,
         headers: dict[str, str] | None = None,
         body: Any = None,
+        text: str = "",
         json_error: ValueError | None = None,
     ) -> None:
         self.status_code = status_code
         self.headers = headers if headers is not None else {"content-type": "application/json"}
         self.body = body if body is not None else {}
+        self.text = text
         self.json_error = json_error
 
     def json(self) -> Any:
@@ -117,6 +120,19 @@ def test_shape_any_of_reports_alternative_mismatches() -> None:
         raise AssertionError("expected ShapeMismatch")
 
 
+def test_shape_accepts_text_min_length() -> None:
+    assert_shape("satcat rows\n", {"kind": "text", "min_length": 1})
+
+
+def test_shape_rejects_short_text() -> None:
+    try:
+        assert_shape("", {"kind": "text", "min_length": 1})
+    except ShapeMismatch as exc:
+        assert "expected text length >= 1" in str(exc)
+    else:  # pragma: no cover
+        raise AssertionError("expected ShapeMismatch")
+
+
 def test_shape_fingerprint_reports_object_fields() -> None:
     assert fingerprint_shape({"b": [1], "a": None}) == {
         "kind": "json_object",
@@ -125,6 +141,10 @@ def test_shape_fingerprint_reports_object_fields() -> None:
             "b": {"kind": "json_array", "length": 1, "sample_items": [{"kind": "json_number"}]},
         },
     }
+
+
+def test_shape_fingerprint_reports_text_length() -> None:
+    assert fingerprint_shape("abc") == {"kind": "text", "length": 3}
 
 
 def test_iter_fixture_paths_ignores_readme(tmp_path: Path) -> None:
@@ -290,6 +310,41 @@ def test_verify_branch_classifies_non_json_response() -> None:
     assert "no json" in result["error"]
 
 
+def test_verify_branch_accepts_text_response_without_json_parse() -> None:
+    result = verify_branch(
+        session=StubSession(
+            StubResponse(
+                headers={"content-type": "text/plain; charset=utf-8"},
+                text="satcat rows\n",
+                json_error=ValueError("should not parse json"),
+            )
+        ),  # type: ignore[arg-type]
+        base_url="http://example.test",
+        timeout=1.0,
+        endpoint="/satcat",
+        method="GET",
+        branch_id="nominal",
+        branch={
+            "expect": {
+                "status": 200,
+                "content_type": "text/plain",
+                "response": {"kind": "text", "min_length": 1},
+            }
+        },
+    )
+
+    assert result["ok"] is True
+
+
+def test_response_shape_expects_text_rejects_mixed_any_of() -> None:
+    try:
+        response_shape_expects_text({"any_of": [{"kind": "json_object"}, {"kind": "text"}]})
+    except ValueError as exc:
+        assert "must not mix text and JSON" in str(exc)
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
 def test_verify_branch_classifies_shape_mismatch() -> None:
     result = verify_branch(
         session=StubSession(StubResponse(body={"Answer": []})),  # type: ignore[arg-type]
@@ -441,6 +496,44 @@ def test_validate_fixture_accepts_any_of_response_shape(tmp_path: Path) -> None:
     }
 
     validate_fixture(data, path=fixture_path)
+
+
+def test_validate_fixture_accepts_text_response_shape(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "satcat.yaml"
+    data = valid_fixture_data()
+    data["endpoint"] = "/satcat"
+    data["method"] = "GET"
+    data["openapi_request_schema"] = None
+    data["openapi_response_schema"] = "text/plain"
+    data["branches"]["nominal"]["expect"] = {
+        "status": 200,
+        "content_type": "text/plain",
+        "response": {"kind": "text", "min_length": 1},
+    }
+    del data["branches"]["nominal"]["request"]
+
+    validate_fixture(data, path=fixture_path)
+
+
+def test_validate_fixture_rejects_mixed_text_and_json_any_of(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"]["response"] = {
+        "any_of": [
+            {"kind": "json_object"},
+            {"kind": "text"},
+        ]
+    }
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal.expect.response.any_of" in message
+        assert "must not mix text and JSON" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
 
 
 def test_validate_fixture_rejects_empty_any_of(tmp_path: Path) -> None:

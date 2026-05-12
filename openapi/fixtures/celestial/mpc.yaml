@@ -1,0 +1,87 @@
+schema_version: 1
+endpoint: /celestial/mpc
+method: POST
+openapi_operation_id: mpc
+openapi_request_schema: MpcInput
+openapi_response_schema: MpcOutput
+branches:
+  nominal:
+    request:
+      TargetName: Apophis
+      ObserverFrame: MeanEclpJ2000
+      Start: "2025-01-01T00:00:00Z"
+      Stop: "2025-01-03T00:00:00Z"
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - OrbitElements
+          - Position
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          OrbitElements:
+            kind: json_object
+            required_fields:
+              - ArgOfPeriapsis
+              - Eccentricity
+              - EpochMjdTdt
+              - Inclination
+              - MeanAnomaly
+              - PeriTimeMjdTdt
+              - Q
+              - Raan
+              - SemimajorAxis
+            fields:
+              ArgOfPeriapsis:
+                kind: json_number
+              Eccentricity:
+                kind: json_number
+              EpochMjdTdt:
+                kind: json_number
+              Inclination:
+                kind: json_number
+              MeanAnomaly:
+                kind: json_number
+              PeriTimeMjdTdt:
+                kind: json_number
+              Q:
+                kind: json_number
+              Raan:
+                kind: json_number
+              SemimajorAxis:
+                kind: json_number
+          Position:
+            kind: json_object
+            required_fields:
+              - CentralBody
+              - cartesianVelocity
+              - epoch
+              - interpolationAlgorithm
+              - interpolationDegree
+              - interval
+              - referenceFrame
+            fields:
+              CentralBody:
+                kind: json_string
+              cartesianVelocity:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_number
+              epoch:
+                kind: json_string
+              interpolationAlgorithm:
+                kind: json_string
+              interpolationDegree:
+                kind: json_number
+              interval:
+                kind: json_string
+              referenceFrame:
+                kind: json_string

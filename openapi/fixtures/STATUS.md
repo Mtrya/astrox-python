@@ -6,9 +6,9 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 3
-- handled nominal endpoint fixtures: 3
-- handled branch-axis fixtures: 4
+- fixture endpoint records: 20
+- handled nominal endpoint fixtures: 19
+- handled branch-axis fixtures: 7
 
 Legend:
 
@@ -36,13 +36,13 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 ### CAT
 
-- [ ] `/CAT/CA_ComputeV3` nominal
-- [ ] `/CAT/CA_ComputeV4` nominal
-- [ ] `/CAT/DebrisBreakup` nominal
-- [ ] `/CAT/DebrisBreakupNASA` nominal
-- [ ] `/CAT/DebrisBreakupSimple` nominal
-- [ ] `/CAT/GetTLE` nominal
-- [ ] `/CAT/LifeTimeTLE` nominal
+- [x] `/CAT/CA_ComputeV3` nominal
+- [x] `/CAT/CA_ComputeV4` nominal
+- [x] `/CAT/DebrisBreakup` nominal
+- [x] `/CAT/DebrisBreakupNASA` nominal
+- [x] `/CAT/DebrisBreakupSimple` nominal
+- [x] `/CAT/GetTLE` nominal
+- [x] `/CAT/LifeTimeTLE` nominal
 
 ### Coverage
 
@@ -129,19 +129,20 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 ### Celestial
 
-- [ ] `/celestial/ephemeris` nominal
-- [ ] `/celestial/mpc` nominal
-- [ ] `/celestial/transfer` nominal
-- [ ] `/orbit/lambert` nominal
+- [x] `/celestial/ephemeris` nominal
+- [x] `/celestial/mpc` nominal
+- [x] `/celestial/transfer` nominal
+- [x] `/orbit/lambert` nominal
 
 ### Catalog and Database GET/File Endpoints
 
-- [ ] `/WeatherForecast` nominal
-- [ ] `/city` nominal
-- [ ] `/facility` nominal
-- [ ] `/satcat` nominal
-- [ ] `/ssc` nominal
+- [x] `/WeatherForecast` nominal
+- [x] `/city` nominal
+- [x] `/facility` nominal
+- [x] `/satcat` nominal
+- [x] `/ssc` nominal
 - [ ] `/ssc/admin/upload-database-archive` nominal
+  - [x] public `missing_file_and_api_key` validation error
 
 ### Other
 
@@ -183,6 +184,60 @@ These sets are reused by many endpoint branch axes below.
 - [ ] `GridPointConstraints.$type=Range`
 - [ ] `GridPointConstraints.$type=ElevationAngle`
 
+### Entity Orientation Variants
+
+- [ ] `Orientation.$type=FixedAtEpoch`
+- [ ] `Orientation.$type=Composite`
+- [ ] `Orientation.$type=Fixed`
+- [ ] `Orientation.$type=VNC`
+- [ ] `Orientation.$type=AlignedAndConstrained`
+- [ ] `Orientation.$type=LVLH`
+- [ ] `Orientation.$type=VVLH`
+- [ ] `Orientation.$type=CzmlOrientation`
+
+### Entity Sensor Variants
+
+- [ ] `Sensor.$type=Conic`
+- [ ] `Sensor.$type=Rectangular`
+
+### Sensor Pointing Variants
+
+- [ ] `SensorPointing.$type=Fixed`
+
+### Stopping Condition Variants
+
+- [ ] `StopCondition.$type=Apoapsis`
+- [ ] `StopCondition.$type=Duration`
+- [ ] `StopCondition.$type=Epoch`
+- [ ] `StopCondition.$type=Periapsis`
+- [ ] `StopCondition.$type=Scalar`
+
+### State Element Variants
+
+- [ ] `Element.$type=Cartesian`
+- [ ] `Element.$type=Keplerian`
+- [ ] `Element.$type=Spherical`
+
+### Attitude Control Variants
+
+- [ ] `AttitudeControl.$type=AntiVelocityVector`
+- [ ] `AttitudeControl.$type=Attitude`
+- [ ] `AttitudeControl.$type=VelocityVector`
+- [ ] `AttitudeControl.$type=ThrustVector`
+
+### CalcScalar Variants
+
+- [ ] `CalcScalar.$type=BPlane`
+- [ ] `CalcScalar.$type=Epoch`
+- [ ] `CalcScalar.$type=Relative`
+- [ ] `CalcScalar.$type=Duration`
+- [ ] `CalcScalar.$type=Cartographic`
+- [ ] `CalcScalar.$type=SphericalElement`
+- [ ] `CalcScalar.$type=DeltaSpherical`
+- [ ] `CalcScalar.$type=ModifiedKeplerianElement`
+- [ ] `CalcScalar.$type=PointElement`
+- [ ] `CalcScalar.$type=KeplerianElement`
+
 ## Endpoint Branch Axes
 
 ### `/Astrogator/RunMCS`
@@ -195,22 +250,74 @@ These sets are reused by many endpoint branch axes below.
 - [ ] `MainSequence.$type=TargetSequence`
 - [ ] `MainSequence.$type=Propagate`
 - [ ] `MainSequence.$type=Stop`
+- [ ] `MainSequence.Results.$type.*` covers all CalcScalar variants
+- [ ] `MainSequence.StopConditions.$type.*` covers all stopping condition variants
+- [ ] `MainSequence.JoiningConditions.$type.*` covers all stopping condition variants
+- [ ] `MainSequence.AttitudeControl.$type.*` covers all Attitude Control Variants
+- [ ] `MainSequence.InitialState.Element.$type.*` covers all State Element Variants
 - [ ] `Entities.Position.*` covers all Position Variants
+- [ ] `Entities.Orientation.*` covers all Entity Orientation Variants
+- [ ] `Entities.Sensor.*` covers all Entity Sensor Variants
+- [ ] `Entities.SensorPointing.*` covers all Sensor Pointing Variants
+- [ ] `Entities.Constraints.*` covers all Coverage Constraint Variants
+- [ ] `Entities.Lighting=DirectSun`
+- [ ] `Entities.Lighting=Penumbra`
+- [ ] `Entities.Lighting=Umbra`
+- [ ] `Entities.OccultationBodies=explicit`
+- [ ] `Propagators.NumericalIntegrator.$type=RKF7th8th`
+- [ ] `Propagators.GravityModel.$type=GravityField`
+- [ ] `Propagators.GravityModel.$type=TwoBody`
+- [ ] `Propagators.AtmosphericModel.$type=JacchiaRoberts`
+- [ ] `Propagators.SRPModel.$type=SRPSpherical`
 - [ ] `EngineModels.$type=EngineConstAcc`
 - [ ] `EngineModels.$type=EngineConstant`
 - [ ] `ComputeCzmlPositions=true`
 
+### `/CAT/CA_ComputeV3`
+
+- [ ] `Targets=null` database-backed target lookup
+
+### `/CAT/CA_ComputeV4`
+
+- [ ] `Targets=null` database-backed target lookup
+
 ### `/CAT/DebrisBreakup`
 
-- [ ] `ComputeLifeOfTime=true`
+- [x] `ComputeLifeOfTime=true`
 
 ### `/CAT/DebrisBreakupSimple`
 
-- [ ] `ComputeLifeOfTime=true`
+- [x] `ComputeLifeOfTime=true`
 
 ### `/CAT/GetTLE`
 
-- [ ] `IsMeanElements=true`
+- [x] `IsMeanElements=true`
+
+### `/city`
+
+- [ ] `typeOfCity=PopulatedPlace`
+- [ ] `typeOfCity=AdministrationCenter`
+- [ ] `typeOfCity=NationalCapital`
+- [ ] `typeOfCity=TerritorialCapital`
+
+### `/celestial/ephemeris`
+
+- [ ] `ObserverFrame=FIXED`
+- [ ] `ObserverFrame=INERTIAL`
+- [ ] `ObserverFrame=MeanEclpJ2000`
+- [ ] `ObserverFrame=J2000`
+
+### `/celestial/mpc`
+
+- [ ] `ObserverFrame=FIXED`
+- [ ] `ObserverFrame=INERTIAL`
+- [ ] `ObserverFrame=MeanEclpJ2000`
+- [ ] `ObserverFrame=J2000`
+
+### `/celestial/transfer`
+
+- [ ] `SunFrameName=MeanEclpJ2000`
+- [ ] `SunFrameName=ICRF`
 
 ### Coverage Family
 
@@ -242,10 +349,27 @@ Required branch axes for each endpoint above:
 
 - [ ] `Grid.*` covers all Coverage Grid Variants
 - [ ] `Assets.Position.*` covers all Position Variants
+- [ ] `Assets.Orientation.*` covers all Entity Orientation Variants
+- [ ] `Assets.Sensor.*` covers all Entity Sensor Variants
+- [ ] `Assets.SensorPointing.*` covers all Sensor Pointing Variants
+- [ ] `Assets.Constraints.*` covers all Coverage Constraint Variants
+- [ ] `Assets.Lighting=DirectSun`
+- [ ] `Assets.Lighting=Penumbra`
+- [ ] `Assets.Lighting=Umbra`
+- [ ] `Assets.OccultationBodies=explicit`
 - [ ] `GridPointSensor.*` covers all Coverage Sensor Variants
 - [ ] `GridPointConstraints.*` covers all Coverage Constraint Variants
+- [ ] `FilterType=AtLeastN`
+- [ ] `FilterType=ExactlyN`
 - [ ] `ContainAssetAccessResults=true`
 - [ ] `ContainCoveragePoints=true`
+
+Additional FOM endpoint branch axes:
+
+- [ ] `ComputeType=TotalTimeAbove`
+- [ ] `ComputeType=Maximum`
+- [ ] `ComputeType=Minimum`
+- [ ] `ComputeType=Average`
 
 ### `/Coverage/GetGridPoints`
 
@@ -253,22 +377,41 @@ Required branch axes for each endpoint above:
 
 ### `/InterfaceClass`
 
+- [ ] `AgVAAttitudeControlFinite.$type=AntiVelocityVector`
+- [ ] `AgVAAttitudeControlFinite.$type=Attitude`
+- [ ] `AgVAAttitudeControlFinite.$type=VelocityVector`
+- [ ] `AgVAAttitudeControlFinite.$type=ThrustVector`
 - [ ] `AgVAAttitudeControlFiniteAttitude.CoordType=EulerAngles`
 - [ ] `AgVAAttitudeControlFiniteAttitude.CoordType=Quaternion`
 - [ ] `AgVAAttitudeControlFiniteThrustVector.CoordType=Cartesian`
 - [ ] `AgVAAttitudeControlFiniteThrustVector.CoordType=Spherical`
+- [ ] `AgVAAttitudeControlImpulsive.$type=AntiVelocityVector`
+- [ ] `AgVAAttitudeControlImpulsive.$type=Attitude`
+- [ ] `AgVAAttitudeControlImpulsive.$type=VelocityVector`
+- [ ] `AgVAAttitudeControlImpulsive.$type=ThrustVector`
 - [ ] `AgVAAttitudeControlImpulsiveAttitude.CoordType=EulerAngles`
 - [ ] `AgVAAttitudeControlImpulsiveAttitude.CoordType=Quaternion`
 - [ ] `AgVAAttitudeControlImpulsiveThrustVector.CoordType=Cartesian`
 - [ ] `AgVAAttitudeControlImpulsiveThrustVector.CoordType=Spherical`
+- [ ] `AgVAStoppingConditionElement.$type=Apoapsis`
+- [ ] `AgVAStoppingConditionElement.$type=Duration`
+- [ ] `AgVAStoppingConditionElement.$type=Epoch`
+- [ ] `AgVAStoppingConditionElement.$type=Periapsis`
+- [ ] `AgVAStoppingConditionElement.$type=Scalar`
+- [ ] `AgVAElement.$type=Cartesian`
+- [ ] `AgVAElement.$type=Keplerian`
+- [ ] `AgVAElement.$type=Spherical`
+- [ ] `CalcScalar.$type.*` covers all CalcScalar variants
 
 ### `/Lighting/LightingTimes`
 
 - [ ] `Position.*` covers all Position Variants
+- [ ] `OccultationBodies=explicit`
 
 ### `/Lighting/SolarIntensity`
 
 - [ ] `Position.*` covers all Position Variants
+- [ ] `OccultationBodies=explicit`
 
 ### `/Propagator/Ballistic`
 
@@ -276,6 +419,24 @@ Required branch axes for each endpoint above:
 - [x] `BallisticType=DeltaV_MinEcc`
 - [x] `BallisticType=ApogeeAlt`
 - [x] `BallisticType=TimeOfFlight`
+
+### `/Propagator/HPOP`
+
+- [ ] `HpopPropagator.NumericalIntegrator.$type=RKF7th8th`
+- [ ] `HpopPropagator.GravityModel.$type=GravityField`
+- [ ] `HpopPropagator.GravityModel.$type=TwoBody`
+- [ ] `HpopPropagator.AtmosphericModel.$type=JacchiaRoberts`
+- [ ] `HpopPropagator.SRPModel.$type=SRPSpherical`
+- [ ] `HpopPropagator.SRPModel.ShadowModel=DualCone`
+- [ ] `HpopPropagator.SRPModel.ShadowModel=Cylindrical`
+- [ ] `HpopPropagator.SRPModel.SunPosition=Apparent`
+- [ ] `HpopPropagator.SRPModel.SunPosition=True`
+
+### `/OrbitWizard/Walker`
+
+- [ ] `WalkerType=Delta`
+- [ ] `WalkerType=Star`
+- [ ] `WalkerType=Custom`
 
 ### `/Rocket/RocketGuid`
 
@@ -308,7 +469,23 @@ Required branch axes for each endpoint above:
 ### `/access/AccessComputeV2`
 
 - [ ] `FromObjectPath.Position.*` covers all Position Variants
+- [ ] `FromObjectPath.Orientation.*` covers all Entity Orientation Variants
+- [ ] `FromObjectPath.Sensor.*` covers all Entity Sensor Variants
+- [ ] `FromObjectPath.SensorPointing.*` covers all Sensor Pointing Variants
+- [ ] `FromObjectPath.Constraints.*` covers all Coverage Constraint Variants
+- [ ] `FromObjectPath.Lighting=DirectSun`
+- [ ] `FromObjectPath.Lighting=Penumbra`
+- [ ] `FromObjectPath.Lighting=Umbra`
+- [ ] `FromObjectPath.OccultationBodies=explicit`
 - [ ] `ToObjectPath.Position.*` covers all Position Variants
+- [ ] `ToObjectPath.Orientation.*` covers all Entity Orientation Variants
+- [ ] `ToObjectPath.Sensor.*` covers all Entity Sensor Variants
+- [ ] `ToObjectPath.SensorPointing.*` covers all Sensor Pointing Variants
+- [ ] `ToObjectPath.Constraints.*` covers all Coverage Constraint Variants
+- [ ] `ToObjectPath.Lighting=DirectSun`
+- [ ] `ToObjectPath.Lighting=Penumbra`
+- [ ] `ToObjectPath.Lighting=Umbra`
+- [ ] `ToObjectPath.OccultationBodies=explicit`
 - [ ] `ComputeAER=true`
 - [ ] `UseLightTimeDelay=true`
 
@@ -316,6 +493,21 @@ Required branch axes for each endpoint above:
 
 - [ ] `AllObjects.$type=EntityPath`
 - [ ] `AllObjects.$type=EntityPathGroup`
+- [ ] `AllObjects.Position.*` covers all Position Variants
+- [ ] `AllObjects.Orientation.*` covers all Entity Orientation Variants
+- [ ] `AllObjects.Sensor.*` covers all Entity Sensor Variants
+- [ ] `AllObjects.SensorPointing.*` covers all Sensor Pointing Variants
+- [ ] `AllObjects.Constraints.*` covers all Coverage Constraint Variants
+- [ ] `AllObjects.Lighting=DirectSun`
+- [ ] `AllObjects.Lighting=Penumbra`
+- [ ] `AllObjects.Lighting=Umbra`
+- [ ] `AllObjects.OccultationBodies=explicit`
+- [ ] `EntityPathGroup.FromAccess_Restriction=AnyOf`
+- [ ] `EntityPathGroup.FromAccess_Restriction=AtLeastN`
+- [ ] `EntityPathGroup.ToAccess_Restriction=AnyOf`
+- [ ] `EntityPathGroup.ToAccess_Restriction=AtLeastN`
+- [ ] `Connections=null`
+- [ ] `Connections=explicit`
 - [ ] `UseLightTimeDelay=true`
 
 ## No Additional Branch Axes Discovered Yet
@@ -324,10 +516,8 @@ These endpoints currently only have a required `nominal` fixture in this status
 file. This does not prove that no branch-changing options exist; it only means
 the current heuristics did not identify branch axes.
 
-- [ ] `/CAT/CA_ComputeV3`
-- [ ] `/CAT/CA_ComputeV4`
-- [ ] `/CAT/DebrisBreakupNASA`
-- [ ] `/CAT/LifeTimeTLE`
+- [x] `/CAT/DebrisBreakupNASA`
+- [x] `/CAT/LifeTimeTLE`
 - [ ] `/LandingZone`
 - [ ] `/Lighting/SolarAER`
 - [ ] `/OrbitConvert/CalGEOYMLambertDv`
@@ -341,8 +531,6 @@ the current heuristics did not identify branch axes.
 - [ ] `/OrbitWizard/GEO`
 - [ ] `/OrbitWizard/Molniya`
 - [ ] `/OrbitWizard/SSO`
-- [ ] `/OrbitWizard/Walker`
-- [ ] `/Propagator/HPOP`
 - [ ] `/Propagator/J2`
 - [ ] `/Propagator/MultiJ2`
 - [ ] `/Propagator/MultiSgp4`
@@ -352,16 +540,12 @@ the current heuristics did not identify branch axes.
 - [ ] `/Propagator/sgp4`
 - [ ] `/Terrain/AzElMask`
 - [ ] `/Terrain/AzElMaskSimple`
-- [ ] `/WeatherForecast`
-- [ ] `/city`
-- [ ] `/facility`
-- [ ] `/satcat`
-- [ ] `/ssc`
+- [x] `/WeatherForecast`
+- [x] `/facility`
+- [x] `/satcat`
+- [x] `/ssc`
 - [ ] `/ssc/admin/upload-database-archive`
-- [ ] `/celestial/ephemeris`
-- [ ] `/celestial/mpc`
-- [ ] `/celestial/transfer`
-- [ ] `/orbit/lambert`
+- [x] `/orbit/lambert`
 - [ ] `/ziyou`
 
 ## Discovery Notes

@@ -1,0 +1,58 @@
+schema_version: 1
+endpoint: /city
+method: GET
+openapi_operation_id: null
+openapi_request_schema: query
+openapi_response_schema: CityDataBaseOutput
+branches:
+  nominal:
+    request:
+      cityName: Shanghai
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Cities
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Cities:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              fields:
+                CityName:
+                  any_of:
+                    - kind: json_null
+                    - kind: json_string
+                TypeOfCity:
+                  any_of:
+                    - kind: json_null
+                    - kind: json_string
+                ProvinceName:
+                  any_of:
+                    - kind: json_null
+                    - kind: json_string
+                CountryName:
+                  any_of:
+                    - kind: json_null
+                    - kind: json_string
+                ProvinceRank:
+                  kind: json_number
+                Population:
+                  kind: json_number
+                Latitude:
+                  kind: json_number
+                Longitude:
+                  kind: json_number
+                CentralBodyName:
+                  any_of:
+                    - kind: json_null
+                    - kind: json_string
