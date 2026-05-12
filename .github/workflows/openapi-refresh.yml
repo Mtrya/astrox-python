@@ -5,6 +5,10 @@ on:
     - cron: "43 2 * * *"
   workflow_dispatch:
 
+concurrency:
+  group: openapi-refresh
+  cancel-in-progress: true
+
 permissions:
   contents: write
   pull-requests: write
@@ -63,7 +67,13 @@ jobs:
             exit 0
           fi
 
-          branch="automation/openapi-model-refresh-${GITHUB_RUN_ID}"
+          existing="$(gh pr list --state open --search 'in:title "Refresh ASTROX OpenAPI and generated models"' --json number --jq 'length')"
+          if [ "${existing}" -gt 0 ]; then
+            echo "An OpenAPI/model refresh PR is already open."
+            exit 0
+          fi
+
+          branch="automation/openapi-model-refresh-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "${branch}"

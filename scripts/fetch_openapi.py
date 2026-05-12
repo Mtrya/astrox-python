@@ -18,15 +18,36 @@ DEFAULT_BASE_URL = "http://astrox.cn:8765"
 DEFAULT_OUTPUT = Path("openapi/astrox.openapi.yaml")
 
 
+def require_mapping(value: Any, context: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ValueError(f"{context} must be an object")
+    return value
+
+
+def require_key(mapping: dict[str, Any], key: str, context: str) -> Any:
+    try:
+        return mapping[key]
+    except KeyError as exc:
+        raise ValueError(f"{context} is missing required key {key!r}") from exc
+
+
+def validate_openapi_spec(spec: Any) -> dict[str, Any]:
+    document = require_mapping(spec, "OpenAPI document")
+    require_key(document, "openapi", "OpenAPI document")
+    info = require_mapping(require_key(document, "info", "OpenAPI document"), "OpenAPI info")
+    require_key(info, "version", "OpenAPI info")
+    paths = require_mapping(require_key(document, "paths", "OpenAPI document"), "OpenAPI paths")
+    components = require_mapping(require_key(document, "components", "OpenAPI document"), "OpenAPI components")
+    require_mapping(require_key(components, "schemas", "OpenAPI components"), "OpenAPI schemas")
+    if not paths:
+        raise ValueError("OpenAPI paths must be non-empty")
+    return document
+
+
 def fetch_openapi(base_url: str, timeout: float) -> dict[str, Any]:
     response = requests.get(f"{base_url.rstrip('/')}/openapi/v1.json", timeout=timeout)
     response.raise_for_status()
-    spec = response.json()
-    spec["openapi"]
-    spec["info"]["version"]
-    spec["paths"]
-    spec["components"]["schemas"]
-    return spec
+    return validate_openapi_spec(response.json())
 
 
 def stable_yaml(spec: dict[str, Any]) -> str:

@@ -96,7 +96,8 @@ def find_broken_discriminators(spec: dict[str, Any]) -> list[dict[str, str]]:
 def normalize_schema(schema: dict[str, Any]) -> str:
     """
     Normalize a schema to a comparable string representation.
-    Two schemas with identical structure will have the same normalized form.
+    The full schema object is compared so defaults, metadata, and nested
+    validation details do not get collapsed during model generation.
     """
     return json.dumps(schema, sort_keys=True, ensure_ascii=False)
 

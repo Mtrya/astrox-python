@@ -13,6 +13,7 @@ import argparse
 import json
 import os
 import sys
+import time
 from typing import Any
 
 import requests
@@ -32,28 +33,108 @@ DIRECT_SMOKE_PAYLOAD = {
 }
 
 
+def request_with_retry(
+    method: str,
+    url: str,
+    *,
+    timeout: float,
+    attempts: int = 3,
+    **kwargs: Any,
+) -> requests.Response:
+    last_exc: requests.RequestException | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            response = requests.request(method, url, timeout=timeout, **kwargs)
+            if response.status_code < 500:
+                response.raise_for_status()
+                return response
+            response.raise_for_status()
+        except requests.RequestException as exc:
+            last_exc = exc
+            if attempt == attempts:
+                break
+            time.sleep(0.5 * 2 ** (attempt - 1))
+    raise AssertionError(f"{method} {url} failed after {attempts} attempts: {last_exc}") from last_exc
+
+
+def require_mapping(value: Any, context: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise AssertionError(f"{context} must be an object")
+    return value
+
+
+def require_key(mapping: dict[str, Any], key: str, context: str) -> Any:
+    try:
+        return mapping[key]
+    except KeyError as exc:
+        raise AssertionError(f"{context} is missing required key {key!r}") from exc
+
+
 def fetch_openapi(base_url: str, timeout: float) -> dict[str, Any]:
-    response = requests.get(f"{base_url.rstrip('/')}/openapi/v1.json", timeout=timeout)
-    response.raise_for_status()
-    return response.json()
+    response = request_with_retry("GET", f"{base_url.rstrip('/')}/openapi/v1.json", timeout=timeout)
+    spec = response.json()
+    return require_mapping(spec, "live OpenAPI document")
 
 
 def check_live_openapi(live_spec: dict[str, Any]) -> dict[str, Any]:
-    openapi_version = live_spec["openapi"]
-    info_version = live_spec["info"]["version"]
-    paths = live_spec["paths"]
-    schemas = live_spec["components"]["schemas"]
+    openapi_version = require_key(live_spec, "openapi", "live OpenAPI document")
+    info = require_mapping(require_key(live_spec, "info", "live OpenAPI document"), "live OpenAPI info")
+    info_version = require_key(info, "version", "live OpenAPI info")
+    paths = require_mapping(require_key(live_spec, "paths", "live OpenAPI document"), "live OpenAPI paths")
+    components = require_mapping(
+        require_key(live_spec, "components", "live OpenAPI document"),
+        "live OpenAPI components",
+    )
+    schemas = require_mapping(
+        require_key(components, "schemas", "live OpenAPI components"),
+        "live OpenAPI schemas",
+    )
 
-    if not isinstance(paths, dict) or not paths:
+    if not paths:
         raise AssertionError("live OpenAPI paths must be a non-empty object")
-    if not isinstance(schemas, dict) or not schemas:
+    if not schemas:
         raise AssertionError("live OpenAPI schemas must be a non-empty object")
 
-    route = paths[DIRECT_SMOKE_ENDPOINT]["post"]
-    request_schema = route["requestBody"]["content"]["application/json"]["schema"]
-    response_schema = route["responses"]["200"]["content"]["application/json"]["schema"]
-    request_schema["$ref"]
-    response_schema["type"]
+    endpoint = require_mapping(
+        require_key(paths, DIRECT_SMOKE_ENDPOINT, "live OpenAPI paths"),
+        f"live OpenAPI path {DIRECT_SMOKE_ENDPOINT}",
+    )
+    route = require_mapping(
+        require_key(endpoint, "post", f"live OpenAPI path {DIRECT_SMOKE_ENDPOINT}"),
+        "direct smoke route",
+    )
+    request_body = require_mapping(
+        require_key(route, "requestBody", "direct smoke route"),
+        "direct smoke requestBody",
+    )
+    request_content = require_mapping(
+        require_key(request_body, "content", "direct smoke requestBody"),
+        "direct smoke request content",
+    )
+    request_media = require_mapping(
+        require_key(request_content, "application/json", "direct smoke request content"),
+        "direct smoke request JSON media",
+    )
+    request_schema = require_mapping(
+        require_key(request_media, "schema", "direct smoke request JSON media"),
+        "direct smoke request schema",
+    )
+    responses = require_mapping(require_key(route, "responses", "direct smoke route"), "direct smoke responses")
+    response_200 = require_mapping(require_key(responses, "200", "direct smoke responses"), "direct smoke 200 response")
+    response_content = require_mapping(
+        require_key(response_200, "content", "direct smoke 200 response"),
+        "direct smoke response content",
+    )
+    response_media = require_mapping(
+        require_key(response_content, "application/json", "direct smoke response content"),
+        "direct smoke response JSON media",
+    )
+    response_schema = require_mapping(
+        require_key(response_media, "schema", "direct smoke response JSON media"),
+        "direct smoke response schema",
+    )
+    require_key(request_schema, "$ref", "direct smoke request schema")
+    require_key(response_schema, "type", "direct smoke response schema")
 
     return {
         "openapi": openapi_version,
@@ -65,12 +146,12 @@ def check_live_openapi(live_spec: dict[str, Any]) -> dict[str, Any]:
 
 
 def check_direct_endpoint(base_url: str, timeout: float) -> dict[str, Any]:
-    response = requests.post(
+    response = request_with_retry(
+        "POST",
         f"{base_url.rstrip('/')}{DIRECT_SMOKE_ENDPOINT}",
         json=DIRECT_SMOKE_PAYLOAD,
         timeout=timeout,
     )
-    response.raise_for_status()
     body = response.json()
 
     if not isinstance(body, list) or len(body) != 6:
