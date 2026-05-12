@@ -29,6 +29,7 @@ SUPPORTED_RESPONSE_KINDS = {
     "json_string",
     "json_array",
     "json_object",
+    "text",
 }
 BRANCH_KEYS = {"request", "expect"}
 MISSING = object()
@@ -222,6 +223,8 @@ def _validate_response_shape(value: dict[str, Any], *, path: Path, field_path: s
         _validate_array_shape(value, path=path, field_path=field_path)
     elif kind == "json_object":
         _validate_object_shape(value, path=path, field_path=field_path)
+    elif kind == "text":
+        _validate_text_shape(value, path=path, field_path=field_path)
 
 
 def _validate_array_shape(value: dict[str, Any], *, path: Path, field_path: str) -> None:
@@ -275,6 +278,17 @@ def _validate_object_shape(value: dict[str, Any], *, path: Path, field_path: str
         )
 
 
+def _validate_text_shape(value: dict[str, Any], *, path: Path, field_path: str) -> None:
+    if "min_length" in value:
+        min_length = _require_int(
+            value["min_length"],
+            path=path,
+            field_path=f"{field_path}.min_length",
+        )
+        if min_length < 0:
+            raise _validation_error(path, f"{field_path}.min_length", "must be >= 0")
+
+
 def iter_fixture_paths(root: Path) -> list[Path]:
     if not root.exists():
         return []
@@ -294,6 +308,18 @@ def request_kwargs(method: str, request_payload: Any) -> dict[str, Any]:
     if method.upper() == "GET":
         return {"params": request_payload}
     return {"json": request_payload}
+
+
+def response_shape_expects_text(shape: Any) -> bool:
+    """Return whether a response shape should be matched against raw text."""
+    if not isinstance(shape, dict):
+        return False
+    if shape.get("kind") == "text":
+        return True
+    alternatives = shape.get("any_of")
+    if isinstance(alternatives, list):
+        return any(response_shape_expects_text(alternative) for alternative in alternatives)
+    return False
 
 
 def verify_branch(
@@ -359,13 +385,16 @@ def verify_branch(
     if expected_response is None:
         return result
 
-    try:
-        body = response.json()
-    except ValueError as exc:
-        result["ok"] = False
-        result["failure_kind"] = "non_json_response"
-        result["error"] = f"response was not JSON: {exc}"
-        return result
+    if response_shape_expects_text(expected_response):
+        body = response.text
+    else:
+        try:
+            body = response.json()
+        except ValueError as exc:
+            result["ok"] = False
+            result["failure_kind"] = "non_json_response"
+            result["error"] = f"response was not JSON: {exc}"
+            return result
 
     try:
         assert_shape(body, expected_response)

@@ -6,8 +6,8 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 6
-- handled nominal endpoint fixtures: 6
+- fixture endpoint records: 9
+- handled nominal endpoint fixtures: 8
 - handled branch-axis fixtures: 4
 
 Legend:
@@ -139,9 +139,10 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 - [x] `/WeatherForecast` nominal
 - [x] `/city` nominal
 - [x] `/facility` nominal
-- [ ] `/satcat` nominal
-- [ ] `/ssc` nominal
+- [x] `/satcat` nominal
+- [x] `/ssc` nominal
 - [ ] `/ssc/admin/upload-database-archive` nominal
+  - [x] public `missing_file_and_api_key` validation error
 
 ### Other
 

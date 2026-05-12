@@ -1,0 +1,39 @@
+schema_version: 1
+endpoint: /ssc/admin/upload-database-archive
+method: POST
+openapi_operation_id: null
+openapi_request_schema: multipart/form-data
+openapi_response_schema: ProblemDetails
+branches:
+  missing_file_and_api_key:
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+          errors:
+            kind: json_object
+            required_fields:
+              - file
+              - X-Api-Key
+            fields:
+              file:
+                kind: json_array
+                items:
+                  kind: json_string
+              X-Api-Key:
+                kind: json_array
+                items:
+                  kind: json_string
