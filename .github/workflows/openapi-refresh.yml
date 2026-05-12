@@ -1,0 +1,60 @@
+name: Refresh OpenAPI Baseline
+
+on:
+  schedule:
+    - cron: "43 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    name: Fetch latest OpenAPI baseline
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Fetch live OpenAPI
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: |
+          uv run python scripts/fetch_openapi.py \
+            --output openapi/astrox.openapi.yaml \
+            --archive-dir openapi/archive
+
+      - name: Open refresh pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$(git status --porcelain -- openapi)" ]; then
+            echo "OpenAPI baseline is already up to date."
+            exit 0
+          fi
+
+          branch="automation/openapi-refresh-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "${branch}"
+          git add openapi
+          git commit -m "Refresh ASTROX OpenAPI baseline"
+          git push --set-upstream origin "${branch}"
+          gh pr create \
+            --title "Refresh ASTROX OpenAPI baseline" \
+            --body "Automated refresh of the checked-in ASTROX OpenAPI baseline."

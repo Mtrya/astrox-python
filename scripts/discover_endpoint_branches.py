@@ -14,7 +14,7 @@ import re
 import sys
 from pathlib import Path
 
-DEFAULT_SPEC = Path("docs/internal/astrox-web-api-260118-fixed.yaml")
+DEFAULT_SPEC = Path("openapi/astrox.openapi.yaml")
 PRIMARY_NESTED_BRANCH_FIELDS = {"Position", "Grid"}
 PRIMARY_SCALAR_BRANCH_FIELDS = {
     "BallisticType",

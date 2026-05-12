@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Lightweight live smoke checks for ASTROX server reachability and schema drift.
+Lightweight live smoke checks for ASTROX server reachability and basic schema.
 
 This script is intentionally shallow. Exhaustive branch probing belongs in the
 scheduled drift CI; this blocking smoke check verifies that the live OpenAPI
-surface still matches the checked-in spec closely enough for normal PR work.
+surface is parseable and that one tiny direct endpoint route still works.
 """
 
 from __future__ import annotations
@@ -12,17 +12,12 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import sys
-from pathlib import Path
 from typing import Any
 
 import requests
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-LOCAL_SPEC = REPO_ROOT / "docs" / "internal" / "astrox-web-api-260118-fixed.yaml"
-GENERATED_MODELS = REPO_ROOT / "astrox" / "_models.py"
 DEFAULT_BASE_URL = "http://astrox.cn:8765"
 
 DIRECT_SMOKE_ENDPOINT = "/OrbitConvert/Kepler2RV"
@@ -37,48 +32,35 @@ DIRECT_SMOKE_PAYLOAD = {
 }
 
 
-def extract_local_paths(spec_path: Path) -> list[str]:
-    text = spec_path.read_text(encoding="utf-8")
-    return sorted(set(re.findall(r"^  (/[^:]+):$", text, flags=re.MULTILINE)))
-
-
-def extract_generated_api_version(models_path: Path) -> str | None:
-    text = models_path.read_text(encoding="utf-8")
-    match = re.search(r"^# API Version: (.+)$", text, flags=re.MULTILINE)
-    return match.group(1).strip() if match else None
-
-
 def fetch_openapi(base_url: str, timeout: float) -> dict[str, Any]:
     response = requests.get(f"{base_url.rstrip('/')}/openapi/v1.json", timeout=timeout)
     response.raise_for_status()
     return response.json()
 
 
-def check_live_paths(live_spec: dict[str, Any], local_paths: list[str]) -> dict[str, Any]:
-    live_paths = live_spec["paths"]
-    missing = [path for path in local_paths if path not in live_paths]
-    added = sorted(path for path in live_paths if path not in set(local_paths))
+def check_live_openapi(live_spec: dict[str, Any]) -> dict[str, Any]:
+    openapi_version = live_spec["openapi"]
+    info_version = live_spec["info"]["version"]
+    paths = live_spec["paths"]
+    schemas = live_spec["components"]["schemas"]
 
-    malformed_posts: list[str] = []
-    for path in local_paths:
-        if path not in live_paths:
-            continue
-        post = live_paths[path].get("post")
-        if post is None:
-            continue
-        post["responses"]
-        if "requestBody" in post:
-            content = post["requestBody"]["content"]
-            content["application/json"]["schema"]
-        else:
-            malformed_posts.append(path)
+    if not isinstance(paths, dict) or not paths:
+        raise AssertionError("live OpenAPI paths must be a non-empty object")
+    if not isinstance(schemas, dict) or not schemas:
+        raise AssertionError("live OpenAPI schemas must be a non-empty object")
+
+    route = paths[DIRECT_SMOKE_ENDPOINT]["post"]
+    request_schema = route["requestBody"]["content"]["application/json"]["schema"]
+    response_schema = route["responses"]["200"]["content"]["application/json"]["schema"]
+    request_schema["$ref"]
+    response_schema["type"]
 
     return {
-        "local_path_count": len(local_paths),
-        "live_path_count": len(live_paths),
-        "missing_paths": missing,
-        "added_paths": added,
-        "posts_without_request_body": malformed_posts,
+        "openapi": openapi_version,
+        "version": info_version,
+        "path_count": len(paths),
+        "schema_count": len(schemas),
+        "direct_endpoint_in_openapi": DIRECT_SMOKE_ENDPOINT,
     }
 
 
@@ -113,27 +95,10 @@ def main() -> int:
         action="store_true",
         help="Skip the tiny direct endpoint probe",
     )
-    parser.add_argument(
-        "--fail-on-version-drift",
-        action="store_true",
-        help="Fail if live OpenAPI version differs from generated local models",
-    )
     args = parser.parse_args()
 
-    local_paths = extract_local_paths(LOCAL_SPEC)
-    expected_version = extract_generated_api_version(GENERATED_MODELS)
     live_spec = fetch_openapi(args.base_url, args.timeout)
-
-    live_version = live_spec["info"]["version"]
-    version_mismatch = expected_version is not None and live_version != expected_version
-    if args.fail_on_version_drift and version_mismatch:
-        raise AssertionError(
-            f"OpenAPI version drift: generated={expected_version!r}, live={live_version!r}"
-        )
-
-    path_report = check_live_paths(live_spec, local_paths)
-    if path_report["missing_paths"]:
-        raise AssertionError(f"Missing live OpenAPI paths: {path_report['missing_paths']}")
+    openapi_report = check_live_openapi(live_spec)
 
     direct_report = None
     if not args.schema_only:
@@ -141,10 +106,7 @@ def main() -> int:
 
     result = {
         "base_url": args.base_url,
-        "generated_openapi_version": expected_version,
-        "openapi_version": live_version,
-        "version_mismatch": version_mismatch,
-        "path_report": path_report,
+        "openapi": openapi_report,
         "direct_probe": direct_report,
     }
     print("LIVE_SMOKE_RESULT_JSON=" + json.dumps(result, sort_keys=True))
