@@ -36,6 +36,12 @@ def iter_fixture_paths(root: Path) -> list[Path]:
     return sorted(path for path in root.rglob("*.yaml") if path.is_file())
 
 
+def content_type_matches(actual: str, expected_media_type: str) -> bool:
+    """Return whether a response Content-Type matches an expected media type."""
+    actual_media_type = actual.split(";", 1)[0].strip().lower()
+    return actual_media_type == expected_media_type.lower()
+
+
 def verify_branch(
     *,
     session: requests.Session,
@@ -70,6 +76,14 @@ def verify_branch(
         result["ok"] = False
         result["error"] = f"expected status {expected_status}, got {response.status_code}"
         return result
+
+    expected_content_type = expected.get("content_type")
+    if expected_content_type is not None:
+        actual_content_type = response.headers.get("content-type", "")
+        if not content_type_matches(actual_content_type, expected_content_type):
+            result["ok"] = False
+            result["error"] = f"expected content type {expected_content_type}, got {actual_content_type!r}"
+            return result
 
     if expected_response is None:
         return result
@@ -151,4 +165,3 @@ if __name__ == "__main__":
     except Exception as exc:
         print(f"OPENAPI_FIXTURE_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         raise
-

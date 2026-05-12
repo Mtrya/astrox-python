@@ -6,7 +6,7 @@ import yaml
 
 from scripts.openapi_fixtures.discover import discover, load_spec
 from scripts.openapi_fixtures.shapes import ShapeMismatch, assert_shape, fingerprint_shape
-from scripts.openapi_fixtures.verify import iter_fixture_paths
+from scripts.openapi_fixtures.verify import content_type_matches, iter_fixture_paths
 
 
 def test_shape_accepts_state_vector() -> None:
@@ -42,6 +42,11 @@ def test_iter_fixture_paths_ignores_readme(tmp_path: Path) -> None:
     (fixture_dir / "one.yaml").write_text("schema_version: 1\n", encoding="utf-8")
 
     assert iter_fixture_paths(fixture_dir) == [fixture_dir / "one.yaml"]
+
+
+def test_content_type_matches_ignores_parameters() -> None:
+    assert content_type_matches("application/json; charset=utf-8", "application/json")
+    assert not content_type_matches("text/plain; charset=utf-8", "application/json")
 
 
 def test_discover_lists_endpoint_branch_axes(tmp_path: Path) -> None:
@@ -102,4 +107,3 @@ def test_discover_lists_endpoint_branch_axes(tmp_path: Path) -> None:
             "branch_axes": [{"path": "$.properties.Mode", "kind": "enum", "values": ["A", "B"]}],
         }
     ]
-

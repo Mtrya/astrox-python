@@ -10,8 +10,7 @@ cover exact values, physics checks, and SDK behavior.
 Use `STATUS.md` to track which endpoint nominal fixtures and branch-axis
 fixtures have been handled.
 
-No endpoint fixture records are checked in yet. Add records incrementally, one
-endpoint file at a time, using this layout:
+Add records incrementally, one endpoint file at a time, using this layout:
 
 ```text
 openapi/fixtures/
@@ -29,7 +28,9 @@ Each endpoint file contains endpoint metadata and branch records:
 schema_version: 1
 endpoint: /OrbitConvert/Kepler2RV
 method: POST
-openapi_operation_id: OrbitConvert_Kepler2RV
+openapi_operation_id: null
+openapi_request_schema: KeplerElements
+openapi_response_schema: array
 branches:
   nominal:
     request:
@@ -42,11 +43,12 @@ branches:
       GravitationalParameter: 398600441800000.0
     expect:
       status: 200
+      content_type: application/json
       response:
         kind: json_array
         length: 6
         items:
-          kind: number
+          kind: json_number
 ```
 
 The scheduled fixture CI should verify only wire-level behavior:

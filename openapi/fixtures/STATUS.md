@@ -4,11 +4,11 @@ This file tracks the fixture corpus for observed ASTROX wire contracts.
 
 Source spec: `openapi/astrox.openapi.yaml`
 
-Status as of this scaffold:
+Current checked-in fixture coverage:
 
-- fixture endpoint records: 0
-- handled nominal endpoint fixtures: 0
-- handled branch-axis fixtures: 0
+- fixture endpoint records: 3
+- handled nominal endpoint fixtures: 3
+- handled branch-axis fixtures: 4
 
 Legend:
 
@@ -88,8 +88,8 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 - [ ] `/OrbitConvert/CalGEOYMLambertDv` nominal
 - [ ] `/OrbitConvert/GetKozaiIzsakMeanElements` nominal
 - [ ] `/OrbitConvert/Kepler2LLAAtAscendNode` nominal
-- [ ] `/OrbitConvert/Kepler2RV` nominal
-- [ ] `/OrbitConvert/RV2Kepler` nominal
+- [x] `/OrbitConvert/Kepler2RV` nominal
+- [x] `/OrbitConvert/RV2Kepler` nominal
 
 ### Orbit System
 
@@ -106,7 +106,7 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 ### Propagator
 
-- [ ] `/Propagator/Ballistic` nominal
+- [x] `/Propagator/Ballistic` nominal
 - [ ] `/Propagator/HPOP` nominal
 - [ ] `/Propagator/J2` nominal
 - [ ] `/Propagator/MultiJ2` nominal
@@ -272,10 +272,10 @@ Required branch axes for each endpoint above:
 
 ### `/Propagator/Ballistic`
 
-- [ ] `BallisticType=DeltaV`
-- [ ] `BallisticType=DeltaV_MinEcc`
-- [ ] `BallisticType=ApogeeAlt`
-- [ ] `BallisticType=TimeOfFlight`
+- [x] `BallisticType=DeltaV`
+- [x] `BallisticType=DeltaV_MinEcc`
+- [x] `BallisticType=ApogeeAlt`
+- [x] `BallisticType=TimeOfFlight`
 
 ### `/Rocket/RocketGuid`
 
@@ -333,8 +333,8 @@ the current heuristics did not identify branch axes.
 - [ ] `/OrbitConvert/CalGEOYMLambertDv`
 - [ ] `/OrbitConvert/GetKozaiIzsakMeanElements`
 - [ ] `/OrbitConvert/Kepler2LLAAtAscendNode`
-- [ ] `/OrbitConvert/Kepler2RV`
-- [ ] `/OrbitConvert/RV2Kepler`
+- [x] `/OrbitConvert/Kepler2RV`
+- [x] `/OrbitConvert/RV2Kepler`
 - [ ] `/OrbitSystem/CentralBodyFrame`
 - [ ] `/OrbitSystem/EarthMoonLibration`
 - [ ] `/OrbitSystem/EarthMoonLibration2`
