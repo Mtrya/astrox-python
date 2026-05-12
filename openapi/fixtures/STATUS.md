@@ -213,6 +213,32 @@ These sets are reused by many endpoint branch axes below.
 
 - [x] `IsMeanElements=true`
 
+### `/city`
+
+- [ ] `typeOfCity=PopulatedPlace`
+- [ ] `typeOfCity=AdministrationCenter`
+- [ ] `typeOfCity=NationalCapital`
+- [ ] `typeOfCity=TerritorialCapital`
+
+### `/celestial/ephemeris`
+
+- [ ] `ObserverFrame=FIXED`
+- [ ] `ObserverFrame=INERTIAL`
+- [ ] `ObserverFrame=MeanEclpJ2000`
+- [ ] `ObserverFrame=J2000`
+
+### `/celestial/mpc`
+
+- [ ] `ObserverFrame=FIXED`
+- [ ] `ObserverFrame=INERTIAL`
+- [ ] `ObserverFrame=MeanEclpJ2000`
+- [ ] `ObserverFrame=J2000`
+
+### `/celestial/transfer`
+
+- [ ] `SunFrameName=MeanEclpJ2000`
+- [ ] `SunFrameName=ICRF`
+
 ### Coverage Family
 
 The following endpoints currently share the same discovered branch axes:
@@ -354,14 +380,10 @@ the current heuristics did not identify branch axes.
 - [ ] `/Terrain/AzElMask`
 - [ ] `/Terrain/AzElMaskSimple`
 - [x] `/WeatherForecast`
-- [x] `/city`
 - [x] `/facility`
 - [x] `/satcat`
 - [x] `/ssc`
 - [ ] `/ssc/admin/upload-database-archive`
-- [x] `/celestial/ephemeris`
-- [x] `/celestial/mpc`
-- [x] `/celestial/transfer`
 - [x] `/orbit/lambert`
 - [ ] `/ziyou`
 
