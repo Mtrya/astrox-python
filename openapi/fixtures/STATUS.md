@@ -6,8 +6,8 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 24
-- handled nominal endpoint fixtures: 23
+- fixture endpoint records: 25
+- handled nominal endpoint fixtures: 24
 - handled branch-axis fixtures: 23
 
 Legend:
@@ -46,7 +46,7 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 ### Coverage
 
-- [ ] `/Coverage/ComputeCoverage` nominal
+- [x] `/Coverage/ComputeCoverage` nominal
 - [ ] `/Coverage/FOM/GridStats/CoverageTime` nominal
 - [ ] `/Coverage/FOM/GridStats/NumberOfAssets` nominal
 - [ ] `/Coverage/FOM/GridStats/ResponseTime` nominal

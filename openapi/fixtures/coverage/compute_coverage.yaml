@@ -1,0 +1,79 @@
+schema_version: 1
+endpoint: /Coverage/ComputeCoverage
+method: POST
+openapi_operation_id: null
+openapi_request_schema: CoverageInput
+openapi_response_schema: CoverageOutput
+branches:
+  nominal:
+    request:
+      Start: "2024-01-01T00:00:00.000Z"
+      Stop: "2024-01-01T00:05:00.000Z"
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -10.0
+        MaxLatitude: 10.0
+        Resolution: 20.0
+      Assets:
+        - Position:
+            $type: J2
+            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            OrbitalElements:
+              - 7178137.0
+              - 0.001
+              - 98.5
+              - 0.0
+              - 0.0
+              - 0.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+          GapDurationDatas:
+            kind: json_array
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
