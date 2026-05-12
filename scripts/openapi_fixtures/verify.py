@@ -181,6 +181,25 @@ def _validate_expect(value: dict[str, Any], *, path: Path, field_path: str) -> N
 
 
 def _validate_response_shape(value: dict[str, Any], *, path: Path, field_path: str) -> None:
+    if "any_of" in value:
+        if set(value) != {"any_of"}:
+            raise _validation_error(path, field_path, "must not combine any_of with other shape keys")
+        alternatives = value["any_of"]
+        if not isinstance(alternatives, list) or not alternatives:
+            raise _validation_error(path, f"{field_path}.any_of", "must be a non-empty list")
+        for index, alternative in enumerate(alternatives):
+            alternative_shape = _require_object(
+                alternative,
+                path=path,
+                field_path=f"{field_path}.any_of[{index}]",
+            )
+            _validate_response_shape(
+                alternative_shape,
+                path=path,
+                field_path=f"{field_path}.any_of[{index}]",
+            )
+        return
+
     kind = _require_non_empty_string(
         _required_value(value, "kind", path=path, field_path=f"{field_path}.kind"),
         path=path,

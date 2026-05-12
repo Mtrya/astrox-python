@@ -56,6 +56,38 @@ def test_shape_rejects_wrong_array_length() -> None:
         raise AssertionError("expected ShapeMismatch")
 
 
+def test_shape_any_of_accepts_nullable_array() -> None:
+    shape = {
+        "any_of": [
+            {"kind": "json_null"},
+            {"kind": "json_array", "items": {"kind": "json_number"}},
+        ]
+    }
+
+    assert_shape(None, shape)
+    assert_shape([1.0, 2.0], shape)
+
+
+def test_shape_any_of_reports_alternative_mismatches() -> None:
+    try:
+        assert_shape(
+            {"Cities": []},
+            {
+                "any_of": [
+                    {"kind": "json_null"},
+                    {"kind": "json_array"},
+                ]
+            },
+        )
+    except ShapeMismatch as exc:
+        message = str(exc)
+        assert "did not match any_of alternatives" in message
+        assert "expected json_null" in message
+        assert "expected json_array" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ShapeMismatch")
+
+
 def test_shape_fingerprint_reports_object_fields() -> None:
     assert fingerprint_shape({"b": [1], "a": None}) == {
         "kind": "json_object",
@@ -268,6 +300,60 @@ def test_validate_fixture_rejects_invalid_response_shape(tmp_path: Path) -> None
         assert str(fixture_path) in message
         assert "branches.nominal.expect.response.fields.Answer.kind" in message
         assert "must be one of" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_accepts_any_of_response_shape(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "city.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"]["response"] = {
+        "kind": "json_object",
+        "required_fields": ["Cities"],
+        "fields": {
+            "Cities": {
+                "any_of": [
+                    {"kind": "json_null"},
+                    {"kind": "json_array", "items": {"kind": "json_object"}},
+                ]
+            }
+        },
+    }
+
+    validate_fixture(data, path=fixture_path)
+
+
+def test_validate_fixture_rejects_empty_any_of(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"]["response"] = {"any_of": []}
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal.expect.response.any_of" in message
+        assert "non-empty list" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_rejects_mixed_any_of_shape_keys(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"]["response"] = {
+        "kind": "json_null",
+        "any_of": [{"kind": "json_null"}],
+    }
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal.expect.response" in message
+        assert "must not combine any_of" in message
     else:  # pragma: no cover
         raise AssertionError("expected ValueError")
 
