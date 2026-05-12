@@ -320,3 +320,8 @@ class TestImports:
         assert AccessAER is not None
         assert ConicSensor is not None
         assert TleInfo is not None
+
+    def test_sensor_aliases_follow_generated_names(self):
+        """Test sensor aliases against the current generated OpenAPI names."""
+        assert models.ConicSensor is _models.AgSensorConicSensor
+        assert models.RectangularSensor is _models.AgSensorRectangularSensor

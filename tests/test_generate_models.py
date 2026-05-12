@@ -5,6 +5,49 @@ from scripts.generate_models import normalize_schema, rename_numbered_schemas
 
 
 class GenerateModelsTests(unittest.TestCase):
+    def test_normalize_schema_ignores_documentation_metadata(self) -> None:
+        schema_a = {
+            "type": "object",
+            "description": "minimum elevation data",
+            "properties": {
+                "value": {
+                    "type": "number",
+                    "description": "first wording",
+                    "format": "double",
+                }
+            },
+        }
+        schema_b = {
+            "type": "object",
+            "description": "maximum elevation data",
+            "properties": {
+                "value": {
+                    "type": "number",
+                    "description": "second wording",
+                    "format": "double",
+                }
+            },
+        }
+
+        self.assertEqual(normalize_schema(schema_a), normalize_schema(schema_b))
+
+    def test_normalize_schema_ignores_root_nullable_only(self) -> None:
+        schema_a = {
+            "type": "object",
+            "nullable": True,
+            "properties": {"value": {"type": "number"}},
+        }
+        schema_b = {
+            "type": "object",
+            "properties": {"value": {"type": "number"}},
+        }
+
+        self.assertEqual(normalize_schema(schema_a), normalize_schema(schema_b))
+
+        nested_nullable = deepcopy(schema_b)
+        nested_nullable["properties"]["value"]["nullable"] = True
+        self.assertNotEqual(normalize_schema(schema_b), normalize_schema(nested_nullable))
+
     def test_normalize_schema_distinguishes_defaults(self) -> None:
         schema_a = {
             "type": "object",
@@ -42,8 +85,8 @@ class GenerateModelsTests(unittest.TestCase):
         spec = {
             "components": {
                 "schemas": {
-                    "Thing1": {"type": "string", "description": "v1"},
-                    "Thing2": {"type": "string", "description": "v2"},
+                    "Thing1": {"type": "string", "default": "v1"},
+                    "Thing2": {"type": "string", "default": "v2"},
                 }
             }
         }

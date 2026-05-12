@@ -25,6 +25,11 @@ OPENAPI_URL = "http://astrox.cn:8765/openapi/v1.json"
 OUTPUT_FILE = Path(__file__).parent.parent / "astrox" / "_models.py"
 
 SUFFIX_WHITELIST = {'J2', 'SGP4', 'TLE4'}
+SCHEMA_METADATA_KEYS = {
+    'description',
+    'externalDocs',
+    'title',
+}
 
 
 def fetch_openapi_spec(url: str) -> dict[str, Any]:
@@ -96,10 +101,23 @@ def find_broken_discriminators(spec: dict[str, Any]) -> list[dict[str, str]]:
 def normalize_schema(schema: dict[str, Any]) -> str:
     """
     Normalize a schema to a comparable string representation.
-    The full schema object is compared so defaults, metadata, and nested
-    validation details do not get collapsed during model generation.
+    Documentation-only metadata is ignored. Component-level ``nullable`` is also
+    ignored because it affects reference optionality, not the generated class
+    body. Defaults, nested nullability, refs, enums, nested properties, and other
+    validation details remain significant.
     """
-    return json.dumps(schema, sort_keys=True, ensure_ascii=False)
+    def strip_metadata(value: Any, *, is_root: bool = False) -> Any:
+        if isinstance(value, dict):
+            return {
+                key: strip_metadata(nested)
+                for key, nested in value.items()
+                if key not in SCHEMA_METADATA_KEYS and not (is_root and key == 'nullable')
+            }
+        if isinstance(value, list):
+            return [strip_metadata(item) for item in value]
+        return value
+
+    return json.dumps(strip_metadata(schema, is_root=True), sort_keys=True, ensure_ascii=False)
 
 
 def find_duplicate_schemas(spec: dict[str, Any]) -> dict[str, list[str]]:
