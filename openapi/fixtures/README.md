@@ -60,3 +60,8 @@ The scheduled fixture CI should verify only wire-level behavior:
 - response shape matches the fixture
 
 It should not assert exact numerical response values.
+
+Primitive response shapes may include `const` when a stable wire value is the
+branch contract, such as `IsSuccess: false` for an observed failure-only
+payload. Do not use `const` for floating point physics values, arrays, or
+objects.

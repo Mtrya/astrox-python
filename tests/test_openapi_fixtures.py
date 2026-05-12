@@ -124,6 +124,20 @@ def test_shape_accepts_text_min_length() -> None:
     assert_shape("satcat rows\n", {"kind": "text", "min_length": 1})
 
 
+def test_shape_accepts_primitive_const() -> None:
+    assert_shape(False, {"kind": "json_boolean", "const": False})
+    assert_shape("OK", {"kind": "json_string", "const": "OK"})
+
+
+def test_shape_rejects_primitive_const_mismatch() -> None:
+    try:
+        assert_shape(True, {"kind": "json_boolean", "const": False})
+    except ShapeMismatch as exc:
+        assert "expected const False" in str(exc)
+    else:  # pragma: no cover
+        raise AssertionError("expected ShapeMismatch")
+
+
 def test_shape_rejects_short_text() -> None:
     try:
         assert_shape("", {"kind": "text", "min_length": 1})
@@ -513,6 +527,55 @@ def test_validate_fixture_accepts_text_response_shape(tmp_path: Path) -> None:
     del data["branches"]["nominal"]["request"]
 
     validate_fixture(data, path=fixture_path)
+
+
+def test_validate_fixture_accepts_primitive_const_shape(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "failure.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"]["response"] = {
+        "kind": "json_object",
+        "fields": {"IsSuccess": {"kind": "json_boolean", "const": False}},
+    }
+
+    validate_fixture(data, path=fixture_path)
+
+
+def test_validate_fixture_rejects_object_const_shape(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"]["response"] = {
+        "kind": "json_object",
+        "const": {},
+    }
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal.expect.response.const" in message
+        assert "primitive" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_rejects_wrong_const_kind(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"]["response"] = {
+        "kind": "json_boolean",
+        "const": "false",
+    }
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal.expect.response.const" in message
+        assert "boolean" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
 
 
 def test_validate_fixture_rejects_mixed_text_and_json_any_of(tmp_path: Path) -> None:

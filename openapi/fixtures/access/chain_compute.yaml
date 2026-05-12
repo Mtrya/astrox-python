@@ -26,8 +26,6 @@ branches:
           Name: Satellite/Phase3To
           Position: &j2_position
             $type: J2
-            Start: "2024-01-01T00:00:00.000Z"
-            Stop: "2024-01-02T00:00:00.000Z"
             Step: 120.0
             OrbitEpoch: "2024-01-01T00:00:00.000Z"
             OrbitalElements:
@@ -107,6 +105,7 @@ branches:
         fields:
           IsSuccess:
             kind: json_boolean
+            const: false
           Message:
             kind: json_string
   use_light_time_delay_true:

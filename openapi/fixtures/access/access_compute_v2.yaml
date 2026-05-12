@@ -24,8 +24,6 @@ branches:
         Name: Satellite/Phase3To
         Position: &j2_position
           $type: J2
-          Start: "2024-01-01T00:00:00.000Z"
-          Stop: "2024-01-02T00:00:00.000Z"
           Step: 120.0
           OrbitEpoch: "2024-01-01T00:00:00.000Z"
           OrbitalElements:
@@ -173,8 +171,6 @@ branches:
         Name: Satellite/Phase3To
         Position:
           $type: SGP4
-          Start: "2021-05-01T00:00:00.000Z"
-          Stop: "2021-05-02T00:00:00.000Z"
           Step: 120.0
           TLEs:
             - 1 25544U 98067A   21120.54791667  .00001391  00000-0  33245-4 0  9993

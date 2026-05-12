@@ -24,8 +24,9 @@ Source evidence:
 ## Shared Rules
 
 - Include `$type` exactly as documented by the OpenAPI discriminator mapping.
-- Keep `Start` / `Stop` windows short when a probe only needs wire-shape
-  evidence.
+- For Access and Lighting probes with a top-level analysis window, omit nested
+  `Start` / `Stop` from J2, SGP4, and TwoBody positions unless an
+  endpoint-specific fixture needs explicit ephemeris bounds.
 - Do not rely on OpenAPI defaults for required fields; include the required
   fields explicitly in fixtures.
 - Do not assume a pattern accepted by one endpoint is accepted everywhere.
@@ -66,8 +67,6 @@ Observed reusable payload:
 ```yaml
 Position:
   $type: J2
-  Start: "2024-01-01T00:00:00.000Z"
-  Stop: "2024-01-01T01:00:00.000Z"
   Step: 600.0
   OrbitEpoch: "2024-01-01T00:00:00.000Z"
   OrbitalElements:
@@ -91,8 +90,6 @@ Observed reusable payload:
 ```yaml
 Position:
   $type: SGP4
-  Start: "2021-05-01T00:00:00.000Z"
-  Stop: "2021-05-01T01:00:00.000Z"
   Step: 600.0
   TLEs:
     - 1 25544U 98067A   21120.54791667  .00001391  00000-0  33245-4 0  9993
@@ -115,8 +112,6 @@ Observed reusable payload:
 ```yaml
 Position:
   $type: TwoBody
-  Start: "2024-01-01T00:00:00.000Z"
-  Stop: "2024-01-01T01:00:00.000Z"
   Step: 600.0
   OrbitEpoch: "2024-01-01T00:00:00.000Z"
   OrbitalElements:
