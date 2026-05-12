@@ -42,6 +42,15 @@ def content_type_matches(actual: str, expected_media_type: str) -> bool:
     return actual_media_type == expected_media_type.lower()
 
 
+def request_kwargs(method: str, request_payload: Any) -> dict[str, Any]:
+    """Build method-appropriate request keyword arguments for a fixture branch."""
+    if request_payload is None:
+        return {}
+    if method.upper() == "GET":
+        return {"params": request_payload}
+    return {"json": request_payload}
+
+
 def verify_branch(
     *,
     session: requests.Session,
@@ -57,12 +66,22 @@ def verify_branch(
     expected_response = expected.get("response")
     request_payload = branch.get("request")
 
-    response = session.request(
-        method,
-        f"{base_url.rstrip('/')}{endpoint}",
-        json=request_payload,
-        timeout=timeout,
-    )
+    try:
+        response = session.request(
+            method,
+            f"{base_url.rstrip('/')}{endpoint}",
+            timeout=timeout,
+            **request_kwargs(method, request_payload),
+        )
+    except requests.RequestException as exc:
+        return {
+            "endpoint": endpoint,
+            "method": method,
+            "branch": branch_id,
+            "status": None,
+            "ok": False,
+            "error": f"request failed: {exc}",
+        }
 
     result: dict[str, Any] = {
         "endpoint": endpoint,
@@ -106,8 +125,13 @@ def verify_branch(
 
 def verify_fixture(path: Path, *, session: requests.Session, base_url: str, timeout: float) -> list[dict[str, Any]]:
     fixture = load_fixture(path)
-    endpoint = fixture["endpoint"]
-    method = fixture.get("method", "POST").upper()
+    endpoint = fixture.get("endpoint")
+    if not isinstance(endpoint, str) or not endpoint:
+        raise ValueError(f"{path} missing required string field 'endpoint'")
+    method_value = fixture.get("method", "POST")
+    if not isinstance(method_value, str) or not method_value:
+        raise ValueError(f"{path} method must be a non-empty string")
+    method = method_value.upper()
     branches = fixture.get("branches", {})
     if not isinstance(branches, dict):
         raise ValueError(f"{path} branches must be an object")
@@ -135,7 +159,6 @@ def main() -> int:
     parser.add_argument("--fixture-dir", type=Path, default=DEFAULT_FIXTURE_DIR)
     parser.add_argument("--base-url", default=os.environ.get("ASTROX_BASE_URL", DEFAULT_BASE_URL))
     parser.add_argument("--timeout", type=float, default=30.0)
-    parser.add_argument("--report", type=Path)
     args = parser.parse_args()
 
     paths = iter_fixture_paths(args.fixture_dir)
@@ -151,10 +174,6 @@ def main() -> int:
         "failed_count": sum(1 for result in results if not result["ok"]),
         "results": results,
     }
-    text = json.dumps(report, indent=2, sort_keys=True)
-    if args.report:
-        args.report.parent.mkdir(parents=True, exist_ok=True)
-        args.report.write_text(text + "\n", encoding="utf-8")
     print("OPENAPI_FIXTURE_RESULT_JSON=" + json.dumps(report, sort_keys=True))
     return 1 if report["failed_count"] else 0
 

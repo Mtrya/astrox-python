@@ -7,7 +7,6 @@ wheels/
 *.egg-info
 .codex
 .runtime/
-artifacts/
 
 # Virtual environments
 .venv

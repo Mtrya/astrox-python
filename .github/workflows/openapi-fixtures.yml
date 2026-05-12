@@ -28,17 +28,7 @@ jobs:
         run: uv sync --group dev
 
       - name: Verify fixtures
+        timeout-minutes: 10
         env:
           ASTROX_BASE_URL: http://astrox.cn:8765
-        run: |
-          uv run python scripts/openapi_fixtures/verify.py \
-            --report artifacts/openapi-fixtures/report.json
-
-      - name: Upload fixture report
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: openapi-fixture-report
-          path: artifacts/openapi-fixtures/report.json
-          if-no-files-found: ignore
-
+        run: uv run python scripts/openapi_fixtures/verify.py
