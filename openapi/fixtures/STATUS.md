@@ -6,9 +6,9 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 20
-- handled nominal endpoint fixtures: 19
-- handled branch-axis fixtures: 7
+- fixture endpoint records: 21
+- handled nominal endpoint fixtures: 20
+- handled branch-axis fixtures: 11
 
 Legend:
 
@@ -81,7 +81,7 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 - [ ] `/Lighting/LightingTimes` nominal
 - [ ] `/Lighting/SolarAER` nominal
-- [ ] `/Lighting/SolarIntensity` nominal
+- [x] `/Lighting/SolarIntensity` nominal
 
 ### Orbit Convert
 
@@ -410,7 +410,17 @@ Additional FOM endpoint branch axes:
 
 ### `/Lighting/SolarIntensity`
 
-- [ ] `Position.*` covers all Position Variants
+- [x] `Position.$type=SitePosition`
+- [x] `Position.$type=J2`
+- [x] `Position.$type=SGP4`
+- [x] `Position.$type=TwoBody`
+- [ ] `Position.$type=AstrogatorMCS`
+- [ ] `Position.$type=HPOP`
+- [ ] `Position.$type=SimpleAscent`
+- [ ] `Position.$type=Ballistic`
+- [ ] `Position.$type=CentralBody`
+- [ ] `Position.$type=CzmlPositions`
+- [ ] `Position.$type=CzmlPosition`
 - [ ] `OccultationBodies=explicit`
 
 ### `/Propagator/Ballistic`
