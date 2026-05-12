@@ -634,7 +634,7 @@ def main() -> None:
         sys.exit(1)
 
     # Step 7: Update header
-    generated_at = "deterministic" if args.deterministic_header else None
+    generated_at = f"OpenAPI {spec_version}" if args.deterministic_header else None
     update_header(
         args.output,
         args.source,
