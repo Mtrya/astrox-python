@@ -16,6 +16,10 @@ Source evidence:
   `HTTP 200`, `IsSuccess=true`, and non-empty `Datas` arrays for the four
   patterns below. The checked-in endpoint-scoped evidence is
   `openapi/fixtures/lighting/solar_intensity.yaml`.
+- Live probes on 2026-05-13 against `/Lighting/LightingTimes` returned
+  `HTTP 200`, `IsSuccess=true`, and interval/duration response objects for the
+  same four patterns. The checked-in endpoint-scoped evidence is
+  `openapi/fixtures/lighting/lighting_times.yaml`.
 
 ## Shared Rules
 
@@ -127,6 +131,7 @@ Position:
 ## Deferred Variants
 
 `AstrogatorMCS`, `HPOP`, `SimpleAscent`, `Ballistic`, `CentralBody`,
-`CzmlPositions`, and `CzmlPosition` remain unclaimed here. Some need more
-context, previously generated ephemeris-like data, or endpoint-specific
-semantics before their payloads should be reused.
+`CzmlPositions`, and `CzmlPosition` remain unclaimed here and unchecked in
+endpoint `STATUS.md` entries. Some need more context, previously generated
+ephemeris-like data, or endpoint-specific semantics before their payloads should
+be reused.
