@@ -407,6 +407,10 @@ def test_current_fixture_files_pass_schema_validation() -> None:
         load_fixture(fixture_path)
 
 
+def axis_by_path(endpoint: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return {axis["path"]: axis for axis in endpoint["branch_axes"]}
+
+
 def test_discover_lists_endpoint_branch_axes(tmp_path: Path) -> None:
     spec_path = tmp_path / "openapi.yaml"
     spec_path.write_text(
@@ -462,6 +466,172 @@ def test_discover_lists_endpoint_branch_axes(tmp_path: Path) -> None:
             "operation_id": "Example_Post",
             "request_schema": "ExampleInput",
             "response_schema": "array",
-            "branch_axes": [{"path": "$.properties.Mode", "kind": "enum", "values": ["A", "B"]}],
+            "branch_axes": [
+                {
+                    "path": "$.Mode",
+                    "kind": "enum",
+                    "values": ["A", "B"],
+                    "provenance": {
+                        "ref": "#/components/schemas/ExampleInput",
+                        "schema": "ExampleInput",
+                    },
+                }
+            ],
         }
     ]
+
+
+def test_discover_resolves_refs_items_combinators_and_discriminators(tmp_path: Path) -> None:
+    spec_path = tmp_path / "openapi.yaml"
+    spec_path.write_text(
+        yaml.safe_dump(
+            {
+                "paths": {
+                    "/Example": {
+                        "post": {
+                            "requestBody": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": {"$ref": "#/components/schemas/ExampleInput"}
+                                    }
+                                }
+                            },
+                            "responses": {
+                                "200": {
+                                    "content": {
+                                        "application/json": {"schema": {"type": "object"}}
+                                    }
+                                }
+                            },
+                        }
+                    }
+                },
+                "components": {
+                    "schemas": {
+                        "ExampleInput": {
+                            "type": "object",
+                            "allOf": [{"$ref": "#/components/schemas/BaseOptions"}],
+                            "properties": {
+                                "Grid": {"$ref": "#/components/schemas/Grid"},
+                                "Assets": {
+                                    "type": "array",
+                                    "items": {"$ref": "#/components/schemas/Asset"},
+                                },
+                            },
+                        },
+                        "BaseOptions": {
+                            "type": "object",
+                            "properties": {
+                                "CoordType": {"type": "string", "enum": ["Cartesian", "Spherical"]}
+                            },
+                        },
+                        "Grid": {
+                            "type": "object",
+                            "oneOf": [
+                                {"$ref": "#/components/schemas/GridGlobal"},
+                                {"$ref": "#/components/schemas/GridLatLon"},
+                            ],
+                            "discriminator": {
+                                "propertyName": "$type",
+                                "mapping": {
+                                    "Global": "#/components/schemas/GridGlobal",
+                                    "LatLonBounds": "#/components/schemas/GridLatLon",
+                                },
+                            },
+                        },
+                        "GridGlobal": {
+                            "type": "object",
+                            "properties": {"$type": {"type": "string", "enum": ["Global"]}},
+                        },
+                        "GridLatLon": {
+                            "type": "object",
+                            "properties": {"$type": {"type": "string", "enum": ["LatLonBounds"]}},
+                        },
+                        "Asset": {
+                            "type": "object",
+                            "properties": {"Position": {"$ref": "#/components/schemas/EntityPosition"}},
+                        },
+                        "EntityPosition": {
+                            "type": "object",
+                            "anyOf": [
+                                {"$ref": "#/components/schemas/EntityPositionJ2"},
+                                {"$ref": "#/components/schemas/EntityPositionSite"},
+                            ],
+                            "discriminator": {
+                                "propertyName": "$type",
+                                "mapping": {
+                                    "J2": "#/components/schemas/EntityPositionJ2",
+                                    "SitePosition": "#/components/schemas/EntityPositionSite",
+                                },
+                            },
+                        },
+                        "EntityPositionJ2": {
+                            "type": "object",
+                            "properties": {"$type": {"type": "string", "enum": ["J2"]}},
+                        },
+                        "EntityPositionSite": {
+                            "type": "object",
+                            "properties": {"$type": {"type": "string", "enum": ["SitePosition"]}},
+                        },
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    endpoint = discover(load_spec(spec_path))[0]
+    axes = axis_by_path(endpoint)
+
+    assert axes["$.Grid"] == {
+        "path": "$.Grid",
+        "kind": "discriminator",
+        "property": "$type",
+        "values": ["Global", "LatLonBounds"],
+        "provenance": {"ref": "#/components/schemas/Grid", "schema": "Grid"},
+    }
+    assert axes["$.Assets[].Position"] == {
+        "path": "$.Assets[].Position",
+        "kind": "discriminator",
+        "property": "$type",
+        "values": ["J2", "SitePosition"],
+        "provenance": {"ref": "#/components/schemas/EntityPosition", "schema": "EntityPosition"},
+    }
+    assert axes["$.CoordType"] == {
+        "path": "$.CoordType",
+        "kind": "enum",
+        "values": ["Cartesian", "Spherical"],
+        "provenance": {"ref": "#/components/schemas/BaseOptions", "schema": "BaseOptions"},
+    }
+    assert "$.Grid.$type" not in axes
+
+
+def test_discover_real_spec_known_branch_axes() -> None:
+    endpoints = {
+        endpoint["endpoint"]: endpoint
+        for endpoint in discover(load_spec(Path("openapi/astrox.openapi.yaml")))
+    }
+
+    rocket_axes = axis_by_path(endpoints["/Rocket/RocketGuid"])
+    assert rocket_axes["$"]["kind"] == "discriminator"
+    assert rocket_axes["$"]["property"] == "$type"
+    assert set(rocket_axes["$"]["values"]) == {"CZ2CD", "KZ1A", "CZ7A", "CZ3BC", "CZ4BC"}
+
+    coverage_axes = axis_by_path(endpoints["/Coverage/GetGridPoints"])
+    assert coverage_axes["$.Grid"]["kind"] == "discriminator"
+    assert set(coverage_axes["$.Grid"]["values"]) == {
+        "CbLatLonBounds",
+        "Global",
+        "LatitudeBounds",
+        "LatLonBounds",
+    }
+
+    access_axes = axis_by_path(endpoints["/access/AccessComputeV2"])
+    assert access_axes["$.FromObjectPath.Position"]["kind"] == "discriminator"
+    assert access_axes["$.ToObjectPath.Position"]["kind"] == "discriminator"
+    assert "J2" in access_axes["$.FromObjectPath.Position"]["values"]
+    assert "SitePosition" in access_axes["$.ToObjectPath.Position"]["values"]
+
+    chain_axes = axis_by_path(endpoints["/access/ChainCompute"])
+    assert chain_axes["$.AllObjects[]"]["kind"] == "discriminator"
+    assert set(chain_axes["$.AllObjects[]"]["values"]) == {"EntityPath", "EntityPathGroup"}
