@@ -1,0 +1,85 @@
+schema_version: 1
+endpoint: /CAT/DebrisBreakupSimple
+method: POST
+openapi_operation_id: null
+openapi_request_schema: DebrisBreakupSimpleIn
+openapi_response_schema: DebrisBreakupOut
+branches:
+  nominal:
+    request: &debris_breakup_simple_request
+      MotherSate: &envisat_tle
+        SAT_Name: ENVISAT
+        SAT_Number: "27386"
+        TLE_Line1: "1 27386U 02009A   21120.50000000  .00000100  00000-0  10000-3 0  9999"
+        TLE_Line2: "2 27386  98.5400 180.0000 0001200 120.0000 240.0000 14.37000000950000"
+      Epoch: "2021-04-30T06:30:00.000Z"
+      Count: 1
+      SSC_Pre: D1
+      DeltaV: 200.0
+      A2M: 0.05
+      MinAzimuth: 0.0
+      MaxAzimuth: 10.0
+      MinElevation: 0.0
+      MaxElevation: 5.0
+      ComputeLifeOfTime: false
+    expect: &debris_breakup_simple_expect
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - DebrisTLEs
+          - AzElVel
+          - LifeYears
+          - AltitudeOfPerigee
+          - AltitudeOfApogee
+          - Periods
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          DebrisTLEs:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - SAT_Name
+                - SAT_Number
+                - TLE_Line1
+                - TLE_Line2
+              fields:
+                SAT_Name:
+                  kind: json_string
+                SAT_Number:
+                  kind: json_string
+                TLE_Line1:
+                  kind: json_string
+                TLE_Line2:
+                  kind: json_string
+          AzElVel:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_number
+          LifeYears: &number_array_shape
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_number
+          AltitudeOfPerigee: *number_array_shape
+          AltitudeOfApogee: *number_array_shape
+          Periods: *number_array_shape
+  compute_life_of_time_true:
+    request:
+      <<: *debris_breakup_simple_request
+      MotherSate: *envisat_tle
+      SSC_Pre: D4
+      ComputeLifeOfTime: true
+    expect: *debris_breakup_simple_expect

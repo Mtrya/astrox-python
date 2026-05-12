@@ -6,9 +6,9 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 13
-- handled nominal endpoint fixtures: 12
-- handled branch-axis fixtures: 4
+- fixture endpoint records: 16
+- handled nominal endpoint fixtures: 15
+- handled branch-axis fixtures: 7
 
 Legend:
 
@@ -38,9 +38,9 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 - [x] `/CAT/CA_ComputeV3` nominal
 - [x] `/CAT/CA_ComputeV4` nominal
-- [ ] `/CAT/DebrisBreakup` nominal
-- [ ] `/CAT/DebrisBreakupNASA` nominal
-- [ ] `/CAT/DebrisBreakupSimple` nominal
+- [x] `/CAT/DebrisBreakup` nominal
+- [x] `/CAT/DebrisBreakupNASA` nominal
+- [x] `/CAT/DebrisBreakupSimple` nominal
 - [x] `/CAT/GetTLE` nominal
 - [x] `/CAT/LifeTimeTLE` nominal
 
@@ -203,15 +203,15 @@ These sets are reused by many endpoint branch axes below.
 
 ### `/CAT/DebrisBreakup`
 
-- [ ] `ComputeLifeOfTime=true`
+- [x] `ComputeLifeOfTime=true`
 
 ### `/CAT/DebrisBreakupSimple`
 
-- [ ] `ComputeLifeOfTime=true`
+- [x] `ComputeLifeOfTime=true`
 
 ### `/CAT/GetTLE`
 
-- [ ] `IsMeanElements=true`
+- [x] `IsMeanElements=true`
 
 ### Coverage Family
 
@@ -327,7 +327,7 @@ the current heuristics did not identify branch axes.
 
 - [x] `/CAT/CA_ComputeV3`
 - [x] `/CAT/CA_ComputeV4`
-- [ ] `/CAT/DebrisBreakupNASA`
+- [x] `/CAT/DebrisBreakupNASA`
 - [x] `/CAT/LifeTimeTLE`
 - [ ] `/LandingZone`
 - [ ] `/Lighting/SolarAER`
