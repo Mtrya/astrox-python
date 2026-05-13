@@ -55,7 +55,6 @@ branches:
             const: false
           Message:
             kind: json_string
-            const: The type initializer for 'AeroSpace.Rocket.ScRocketStatic' threw an exception.
   is_optimize_true:
     request: &optimize_request
       <<: *landing_request
