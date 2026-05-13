@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 48
 - handled nominal endpoint fixtures: 46
-- handled branch-axis fixtures: 90
+- handled branch-axis fixtures: 104
 
 Legend:
 
@@ -276,7 +276,21 @@ where it is claimed.
 - [ ] `MainSequence.JoiningConditions.$type.*` covers all stopping condition variants
 - [ ] `MainSequence.AttitudeControl.$type.*` covers all Attitude Control Variants
 - [ ] `MainSequence.InitialState.Element.$type.*` covers all State Element Variants
-- [ ] `Entities.Position.*` covers all Position Variants
+The `Entities.Position.*` branches below are standalone nominal-MCS probes.
+They do not claim cross-product coverage with `Follow`, constraints, sensors,
+or other `MainSequence` variants.
+
+- [x] `Entities.Position.$type=SitePosition`
+- [x] `Entities.Position.$type=J2`
+- [x] `Entities.Position.$type=SGP4`
+- [x] `Entities.Position.$type=TwoBody`
+- [x] `Entities.Position.$type=AstrogatorMCS`
+- [x] `Entities.Position.$type=HPOP`
+- [x] `Entities.Position.$type=SimpleAscent`
+- [x] `Entities.Position.$type=Ballistic`
+- [x] `Entities.Position.$type=CentralBody`
+- [x] `Entities.Position.$type=CzmlPosition`
+- [x] `Entities.Position.$type=CzmlPositions`
 - [ ] `Entities.Orientation.*` covers all Entity Orientation Variants
 - [ ] `Entities.Sensor.*` covers all Entity Sensor Variants
 - [ ] `Entities.SensorPointing.*` covers all Sensor Pointing Variants
@@ -290,9 +304,12 @@ where it is claimed.
 - [ ] `Propagators.GravityModel.$type=TwoBody`
 - [ ] `Propagators.AtmosphericModel.$type=JacchiaRoberts`
 - [ ] `Propagators.SRPModel.$type=SRPSpherical`
-- [ ] `EngineModels.$type=EngineConstAcc`
-- [ ] `EngineModels.$type=EngineConstant`
-- [ ] `ComputeCzmlPositions=true`
+- [x] `EngineModels.$type=EngineConstAcc`
+- [x] `EngineModels.$type=EngineConstant`
+  - note: engine model branches are accepted as standalone root `EngineModels`
+    entries on the nominal MCS payload. This does not claim all maneuver
+    consumers accept every engine model.
+- [x] `ComputeCzmlPositions=true`
 
 ### `/CAT/CA_ComputeV3`
 

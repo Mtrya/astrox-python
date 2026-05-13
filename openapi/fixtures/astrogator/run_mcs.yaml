@@ -199,3 +199,221 @@ branches:
         - $type: Stop
           Name: Stop
     expect: *run_mcs_sequence_type_success_expect
+  entity_position_site:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: &entity_position_site
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+    expect: *run_mcs_sequence_type_success_expect
+  entity_position_j2:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: &entity_position_j2
+            $type: J2
+            Step: 600.0
+            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 28.5
+              - 0.0
+              - 0.0
+              - 0.0
+    expect: *run_mcs_sequence_type_success_expect
+  entity_position_sgp4:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position:
+            $type: SGP4
+            Step: 600.0
+            TLEs:
+              - 1 25544U 98067A   21120.54791667  .00001391  00000-0  33245-4 0  9993
+              - 2 25544  51.6443 206.1695 0002829  89.9572  27.6891 15.48915315281553
+    expect: *run_mcs_sequence_type_success_expect
+  entity_position_twobody:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: &entity_position_twobody
+            $type: TwoBody
+            Step: 600.0
+            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 28.5
+              - 0.0
+              - 0.0
+              - 0.0
+    expect: *run_mcs_sequence_type_success_expect
+  entity_position_astrogator_mcs:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position:
+            $type: AstrogatorMCS
+            MainSequence:
+              - *initial_state_segment
+            ComputeCzmlPositions: false
+    expect: *run_mcs_sequence_type_success_expect
+  entity_position_hpop:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position:
+            <<: *entity_position_twobody
+            $type: HPOP
+            Start: "2024-01-01T00:00:00.000Z"
+            Stop: "2024-01-01T00:10:00.000Z"
+    expect: *run_mcs_sequence_type_success_expect
+  entity_position_simple_ascent:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position:
+            $type: SimpleAscent
+            Start: "2024-01-01T00:00:00.000Z"
+            Stop: "2024-01-01T00:10:00.000Z"
+            LaunchLatitude: 28.60835
+            LaunchLongitude: -80.60418
+            LaunchAltitude: 0.0
+            BurnoutVelocity: 7725.84
+            BurnoutLatitude: 25.051
+            BurnoutLongitude: -51.326
+            BurnoutAltitude: 300000.0
+    expect: *run_mcs_sequence_type_success_expect
+  entity_position_ballistic:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position:
+            $type: Ballistic
+            Start: "2024-01-01T00:00:00.000Z"
+            Step: 30.0
+            LaunchLatitude: 28.5721
+            LaunchLongitude: -80.648
+            LaunchAltitude: 10.0
+            ImpactLatitude: 30.0
+            ImpactLongitude: -70.0
+            ImpactAltitude: 0.0
+    expect: *run_mcs_sequence_type_success_expect
+  entity_position_central_body:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Earth
+          Position:
+            $type: CentralBody
+            Name: Earth
+    expect: *run_mcs_sequence_type_success_expect
+  entity_position_czml_position:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: &entity_position_czml
+            $type: CzmlPosition
+            CentralBody: Earth
+            epoch: "2024-01-01T00:00:00Z"
+            referenceFrame: INERTIAL
+            cartesianVelocity:
+              - 0.0
+              - 6678137.0
+              - 0.0
+              - 0.0
+              - 0.0
+              - 7726.67
+              - 0.0
+    expect: *run_mcs_sequence_type_success_expect
+  entity_position_czml_positions:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position:
+            $type: CzmlPositions
+            CentralBody: Earth
+            CzmlPositions:
+              - CentralBody: Earth
+                epoch: "2024-01-01T00:00:00Z"
+                referenceFrame: INERTIAL
+                cartesianVelocity:
+                  - 0.0
+                  - 6678137.0
+                  - 0.0
+                  - 0.0
+                  - 0.0
+                  - 7726.67
+                  - 0.0
+    expect: *run_mcs_sequence_type_success_expect
+  engine_model_const_acc:
+    request:
+      <<: *run_mcs_initial_request
+      EngineModels:
+        - $type: EngineConstAcc
+          Name: FixtureEngine
+          Acceleration: 0.5
+          Isp: 300.0
+          g: 9.80665
+    expect: *run_mcs_sequence_type_success_expect
+  engine_model_constant:
+    request:
+      <<: *run_mcs_initial_request
+      EngineModels:
+        - $type: EngineConstant
+          Name: FixtureEngine
+          Thrust: 500.0
+          Isp: 300.0
+          g: 9.80665
+    expect: *run_mcs_sequence_type_success_expect
+  compute_czml_positions_true:
+    request:
+      <<: *run_mcs_initial_request
+      ComputeCzmlPositions: true
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - MainSequenceResults
+          - Positions
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          MainSequenceResults:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+          Positions:
+            kind: json_object
+            required_fields:
+              - CentralBody
+              - CzmlPositions
+            fields:
+              CentralBody:
+                kind: json_string
+              CzmlPositions:
+                kind: json_array
