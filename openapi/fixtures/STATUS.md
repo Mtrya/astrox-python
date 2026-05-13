@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 47
 - handled nominal endpoint fixtures: 45
-- handled branch-axis fixtures: 58
+- handled branch-axis fixtures: 84
 
 Legend:
 
@@ -398,31 +398,40 @@ properties before execution. A full schema-shaped payload currently reaches an
 empty HTTP 500 with no content type, so `/InterfaceClass` nominal remains
 unchecked.
 
-- [ ] `AgVAAttitudeControlFinite.$type=AntiVelocityVector`
-- [ ] `AgVAAttitudeControlFinite.$type=Attitude`
-- [ ] `AgVAAttitudeControlFinite.$type=VelocityVector`
-- [ ] `AgVAAttitudeControlFinite.$type=ThrustVector`
+- [x] `AgVAAttitudeControlFinite.$type=AntiVelocityVector` validation-only wire shape
+- [x] `AgVAAttitudeControlFinite.$type=Attitude` validation-only wire shape
+- [x] `AgVAAttitudeControlFinite.$type=VelocityVector` validation-only wire shape
+- [x] `AgVAAttitudeControlFinite.$type=ThrustVector` validation-only wire shape
 - [x] `AgVAAttitudeControlFiniteAttitude.CoordType=EulerAngles` validation-only wire shape
 - [x] `AgVAAttitudeControlFiniteAttitude.CoordType=Quaternion` validation-only wire shape
 - [x] `AgVAAttitudeControlFiniteThrustVector.CoordType=Cartesian` validation-only wire shape
 - [x] `AgVAAttitudeControlFiniteThrustVector.CoordType=Spherical` validation-only wire shape
-- [ ] `AgVAAttitudeControlImpulsive.$type=AntiVelocityVector`
-- [ ] `AgVAAttitudeControlImpulsive.$type=Attitude`
-- [ ] `AgVAAttitudeControlImpulsive.$type=VelocityVector`
-- [ ] `AgVAAttitudeControlImpulsive.$type=ThrustVector`
+- [x] `AgVAAttitudeControlImpulsive.$type=AntiVelocityVector` validation-only wire shape
+- [x] `AgVAAttitudeControlImpulsive.$type=Attitude` validation-only wire shape
+- [x] `AgVAAttitudeControlImpulsive.$type=VelocityVector` validation-only wire shape
+- [x] `AgVAAttitudeControlImpulsive.$type=ThrustVector` validation-only wire shape
 - [x] `AgVAAttitudeControlImpulsiveAttitude.CoordType=EulerAngles` validation-only wire shape
 - [x] `AgVAAttitudeControlImpulsiveAttitude.CoordType=Quaternion` validation-only wire shape
 - [x] `AgVAAttitudeControlImpulsiveThrustVector.CoordType=Cartesian` validation-only wire shape
 - [x] `AgVAAttitudeControlImpulsiveThrustVector.CoordType=Spherical` validation-only wire shape
-- [ ] `AgVAStoppingConditionElement.$type=Apoapsis`
-- [ ] `AgVAStoppingConditionElement.$type=Duration`
-- [ ] `AgVAStoppingConditionElement.$type=Epoch`
-- [ ] `AgVAStoppingConditionElement.$type=Periapsis`
-- [ ] `AgVAStoppingConditionElement.$type=Scalar`
-- [ ] `AgVAElement.$type=Cartesian`
-- [ ] `AgVAElement.$type=Keplerian`
-- [ ] `AgVAElement.$type=Spherical`
-- [ ] `CalcScalar.$type.*` covers all CalcScalar variants
+- [x] `AgVAStoppingConditionElement.$type=Apoapsis` validation-only wire shape
+- [x] `AgVAStoppingConditionElement.$type=Duration` validation-only wire shape
+- [x] `AgVAStoppingConditionElement.$type=Epoch` validation-only wire shape
+- [x] `AgVAStoppingConditionElement.$type=Periapsis` validation-only wire shape
+- [x] `AgVAStoppingConditionElement.$type=Scalar` validation-only wire shape
+- [x] `AgVAElement.$type=Cartesian` validation-only wire shape
+- [x] `AgVAElement.$type=Keplerian` validation-only wire shape
+- [x] `AgVAElement.$type=Spherical` validation-only wire shape
+- [x] `CalcScalar.$type=BPlane` validation-only wire shape
+- [x] `CalcScalar.$type=Cartographic` validation-only wire shape
+- [x] `CalcScalar.$type=DeltaSpherical` validation-only wire shape
+- [x] `CalcScalar.$type=Duration` validation-only wire shape
+- [x] `CalcScalar.$type=Epoch` validation-only wire shape
+- [x] `CalcScalar.$type=KeplerianElement` validation-only wire shape
+- [x] `CalcScalar.$type=ModifiedKeplerianElement` validation-only wire shape
+- [x] `CalcScalar.$type=PointElement` validation-only wire shape
+- [x] `CalcScalar.$type=Relative` validation-only wire shape
+- [x] `CalcScalar.$type=SphericalElement` validation-only wire shape
 
 ### `/Lighting/LightingTimes`
 
