@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 69
 - handled nominal endpoint fixtures: 67
-- handled branch-axis fixtures: 253
+- handled branch-axis fixtures: 255
 
 Legend:
 
@@ -268,18 +268,19 @@ where it is claimed.
 ### `/Astrogator/RunMCS`
 
 - [x] `MainSequence.$type=Sequence`
-- [ ] `MainSequence.$type=Follow`
-  - blocked: minimal `Follow` plus targeted `Entities` leader probes using J2
-    and AstrogatorMCS-shaped positions still return `Start Stop` construction
-    errors for the leader position, so the required leader context remains
-    unclear.
+- [x] `MainSequence.$type=Follow` failure-only wire shape
+  - reprobed on 2026-05-13: minimal `Follow` plus targeted `Entities` leader
+    probes using SitePosition, CzmlPosition, J2, and AstrogatorMCS-shaped
+    positions returns a structured `IsSuccess=false` response before creating a
+    follow point, so this covers constructor failure shape only.
 - [x] `MainSequence.$type=ManeuverFinite`
 - [x] `MainSequence.$type=ManeuverImpulsive`
 - [x] `MainSequence.$type=InitialState`
-- [ ] `MainSequence.$type=TargetSequence`
-  - blocked: minimal `TargetSequence` and DifferentialCorrector-shaped
-    `Profiles`/`Segments` probes return internal `Operators`/`Variables`
-    empty-list errors; the accepted target-operator construction is unclear.
+- [x] `MainSequence.$type=TargetSequence`
+  - reprobed on 2026-05-13: an inactive DifferentialCorrector profile with a
+    nominal segment list returns `TargetSequenceResult`; minimal/no-profile and
+    active-profile probes still return internal `Operators`/`Variables`
+    empty-list errors, so target convergence semantics remain unverified.
 - [x] `MainSequence.$type=Propagate`
 - [x] `MainSequence.$type=Stop`
 Result branches below verify accepted request/response wire shape on a minimal
@@ -287,8 +288,9 @@ Result branches below verify accepted request/response wire shape on a minimal
 non-empty named result in that minimal context.
 
 - [ ] `MainSequence.Results.$type=BPlane`
-  - blocked: minimal `InitialState` and `Propagate` result probes return an
-    empty response with no content type.
+  - blocked: reprobed on 2026-05-13. Minimal `InitialState` BPlane returns
+    empty HTTP 500 with no content type; `Propagate` BPlane returns empty HTTP
+    200 with no content type, so neither response is fixture-worthy.
 - [x] `MainSequence.Results.$type=Epoch`
 - [x] `MainSequence.Results.$type=Relative`
 - [x] `MainSequence.Results.$type=Duration`
@@ -306,9 +308,10 @@ non-empty named result in that minimal context.
 - [x] `MainSequence.StopConditions.$type=Scalar` failure-only wire shape
 
 - [ ] `MainSequence.JoiningConditions.$type.*` covers all stopping condition variants
-  - blocked: `Follow` construction still fails before `JoiningConditions` are
-    reached, even with SitePosition, CzmlPosition, and fully windowed J2 leader
-    entity probes.
+  - blocked: reprobed on 2026-05-13. `Follow` now has a structured
+    failure-only fixture, but `Joining=Specify` plus Duration and targeted
+    SitePosition, CzmlPosition, J2, and AstrogatorMCS leader probes still fail
+    before `JoiningConditions` are evaluated.
 
 Attitude-control branches below are standalone `ManeuverImpulsive` probes. They
 do not claim every finite/impulsive maneuver context accepts every attitude

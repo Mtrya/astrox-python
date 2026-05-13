@@ -249,6 +249,106 @@ branches:
         - $type: Stop
           Name: Stop
     expect: *run_mcs_sequence_type_success_expect
+  sequence_type_follow_failure:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - $type: Follow
+          Name: Follow
+          LeaderName: Leader
+      Entities:
+        - Name: Leader
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+    expect: &run_mcs_failure_expect
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
+  sequence_type_target_sequence:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - $type: TargetSequence
+          Name: Target
+          Action: RunNominalSequence
+          Segments:
+            - *initial_state_segment
+            - $type: Propagate
+              Name: Propagate
+              PropagatorName: FixturePropagator
+              StopConditions:
+                - *duration_stop_condition
+              MaxPropagationTime: 120
+          Profiles:
+            - $type: DifferentialCorrector
+              Name: DC
+              Active: false
+              ControlParameters:
+                - Name: StoppingConditions.Duration
+                  ParentName: Propagate
+                  InitialValue: "60"
+                  Enable: false
+              Results:
+                - Name: DurationSec
+                  ParentName: Propagate
+                  DesiredValue: "60"
+                  Enable: false
+      Propagators:
+        - *two_body_propagator
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - MainSequenceResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          MainSequenceResults:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - $type
+                - TypeName
+                - Name
+                - OperatorResults
+                - SegmentResults
+              fields:
+                $type:
+                  kind: json_string
+                  const: TargetSequenceResult
+                TypeName:
+                  kind: json_string
+                Name:
+                  kind: json_string
+                OperatorResults:
+                  kind: json_array
+                SegmentResults:
+                  kind: json_array
+                  min_length: 1
   entity_position_site:
     request:
       <<: *run_mcs_initial_request
@@ -1003,20 +1103,7 @@ branches:
           MaxPropagationTime: 120
       Propagators:
         - *two_body_propagator
-    expect: &run_mcs_failure_expect
-      status: 200
-      content_type: application/json
-      response:
-        kind: json_object
-        required_fields:
-          - IsSuccess
-          - Message
-        fields:
-          IsSuccess:
-            kind: json_boolean
-            const: false
-          Message:
-            kind: json_string
+    expect: *run_mcs_failure_expect
   attitude_control_anti_velocity_vector:
     request:
       <<: *run_mcs_initial_request
