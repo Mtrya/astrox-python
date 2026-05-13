@@ -6,7 +6,7 @@ openapi_request_schema: CoverageInput
 openapi_response_schema: CoverageOutput
 branches:
   nominal:
-    request:
+    request: &compute_coverage_base_request
       Start: "2024-01-01T00:00:00.000Z"
       Stop: "2024-01-01T01:00:00.000Z"
       Step: 120.0
@@ -36,7 +36,7 @@ branches:
               - 0.0
               - 0.0
               - 0.0
-    expect:
+    expect: &compute_coverage_success_expect
       status: 200
       content_type: application/json
       response:
@@ -104,3 +104,160 @@ branches:
             kind: json_array
           AssetAccessResults:
             kind: json_array
+  grid_point_sensor_conic:
+    request:
+      <<: *compute_coverage_base_request
+      GridPointSensor:
+        $type: Conic
+        innerHalfAngle: 0.0
+        outerHalfAngle: 45.0
+        minimumClockAngle: 0.0
+        maximumClockAngle: 360.0
+    expect: *compute_coverage_success_expect
+  grid_point_sensor_rectangular:
+    request:
+      <<: *compute_coverage_base_request
+      GridPointSensor:
+        $type: Rectangular
+        xHalfAngle: 45.0
+        yHalfAngle: 45.0
+    expect: *compute_coverage_success_expect
+  grid_point_constraints_az_el_mask:
+    request:
+      <<: *compute_coverage_base_request
+      GridPointConstraints:
+        - $type: AzElMask
+          MaxRange: 20000.0
+          AzElMaskData:
+            - 0.0
+            - 0.0
+            - 1.5707963267948966
+            - 0.0
+            - 3.141592653589793
+            - 0.0
+            - 4.71238898038469
+            - 0.0
+            - 6.283185307179586
+            - 0.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - PercentCovered
+          - GlobalCoverageDatas
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
+          PercentCovered:
+            kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+  grid_point_constraints_range:
+    request:
+      <<: *compute_coverage_base_request
+      GridPointConstraints:
+        - $type: Range
+          MinimumValue: 0.0
+          MaximumValue: 20000.0
+          IsMaximumEnabled: true
+    expect: *compute_coverage_success_expect
+  grid_point_constraints_elevation_angle:
+    request:
+      <<: *compute_coverage_base_request
+      GridPointConstraints:
+        - $type: ElevationAngle
+          MinimumValue: 0.0
+          IsMaximumEnabled: false
+    expect: *compute_coverage_success_expect
+  contain_asset_access_results_true:
+    request:
+      <<: *compute_coverage_base_request
+      ContainAssetAccessResults: true
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          AssetAccessResults:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_array
+  contain_coverage_points_true:
+    request:
+      <<: *compute_coverage_base_request
+      ContainCoveragePoints: true
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Points
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          Points:
+            kind: json_object
+            required_fields:
+              - CentralBodyName
+              - GridPoints
+              - Height
+              - Type
+            fields:
+              CentralBodyName:
+                kind: json_string
+              GridPoints:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - GridCellBoundaryVertices
+                    - Position
+                    - Weight
+                  fields:
+                    GridCellBoundaryVertices:
+                      kind: json_array
+                      min_length: 1
+                      items:
+                        kind: json_array
+                        min_length: 1
+                        items:
+                          kind: json_number
+                    Position:
+                      kind: json_array
+                      min_length: 1
+                      items:
+                        kind: json_number
+                    Weight:
+                      kind: json_number
+              Height:
+                kind: json_number
+              Type:
+                kind: json_string

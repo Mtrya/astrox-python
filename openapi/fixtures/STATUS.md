@@ -6,9 +6,9 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 28
-- handled nominal endpoint fixtures: 27
-- handled branch-axis fixtures: 27
+- fixture endpoint records: 44
+- handled nominal endpoint fixtures: 43
+- handled branch-axis fixtures: 36
 
 Legend:
 
@@ -47,24 +47,28 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 ### Coverage
 
 - [x] `/Coverage/ComputeCoverage` nominal
-- [ ] `/Coverage/FOM/GridStats/CoverageTime` nominal
-- [ ] `/Coverage/FOM/GridStats/NumberOfAssets` nominal
-- [ ] `/Coverage/FOM/GridStats/ResponseTime` nominal
-- [ ] `/Coverage/FOM/GridStats/RevisitTime` nominal
-- [ ] `/Coverage/FOM/GridStats/SimpleCoverage` nominal
-- [ ] `/Coverage/FOM/GridStatsOverTime/NumberOfAssets` nominal
+- [x] `/Coverage/FOM/GridStats/CoverageTime` nominal
+- [x] `/Coverage/FOM/GridStats/NumberOfAssets` nominal
+- [x] `/Coverage/FOM/GridStats/ResponseTime` nominal
+- [x] `/Coverage/FOM/GridStats/RevisitTime` nominal
+- [x] `/Coverage/FOM/GridStats/SimpleCoverage` nominal
+- [x] `/Coverage/FOM/GridStatsOverTime/NumberOfAssets` nominal
 - [ ] `/Coverage/FOM/GridStatsOverTime/ResponseTime` nominal
-- [ ] `/Coverage/FOM/GridStatsOverTime/RevisitTime` nominal
-- [ ] `/Coverage/FOM/GridStatsOverTime/SimpleCoverage` nominal
-- [ ] `/Coverage/FOM/ValueByGridPoint/CoverageTime` nominal
-- [ ] `/Coverage/FOM/ValueByGridPoint/NumberOfAssets` nominal
-- [ ] `/Coverage/FOM/ValueByGridPoint/ResponseTime` nominal
-- [ ] `/Coverage/FOM/ValueByGridPoint/RevisitTime` nominal
-- [ ] `/Coverage/FOM/ValueByGridPoint/SimpleCoverage` nominal
-- [ ] `/Coverage/FOM/ValueByGridPointAtTime/NumberOfAssets` nominal
+  - blocked: small Coverage base payload plus targeted `Time`, longer-window,
+    and two-asset corrections return empty HTTP 500 with no content type.
+- [x] `/Coverage/FOM/GridStatsOverTime/RevisitTime` nominal
+- [x] `/Coverage/FOM/GridStatsOverTime/SimpleCoverage` nominal
+- [x] `/Coverage/FOM/ValueByGridPoint/CoverageTime` nominal
+- [x] `/Coverage/FOM/ValueByGridPoint/NumberOfAssets` nominal
+- [x] `/Coverage/FOM/ValueByGridPoint/ResponseTime` nominal
+- [x] `/Coverage/FOM/ValueByGridPoint/RevisitTime` nominal
+- [x] `/Coverage/FOM/ValueByGridPoint/SimpleCoverage` nominal
+- [x] `/Coverage/FOM/ValueByGridPointAtTime/NumberOfAssets` nominal
 - [ ] `/Coverage/FOM/ValueByGridPointAtTime/ResponseTime` nominal
-- [ ] `/Coverage/FOM/ValueByGridPointAtTime/RevisitTime` nominal
-- [ ] `/Coverage/FOM/ValueByGridPointAtTime/SimpleCoverage` nominal
+  - blocked: endpoint requires `Time`, but valid-looking `Time` payloads
+    return empty HTTP 500 with no content type.
+- [x] `/Coverage/FOM/ValueByGridPointAtTime/RevisitTime` nominal
+- [x] `/Coverage/FOM/ValueByGridPointAtTime/SimpleCoverage` nominal
 - [x] `/Coverage/GetGridPoints` nominal
 - [x] `/Coverage/Report/CoverageByAsset` nominal
 - [x] `/Coverage/Report/PercentCoverage` nominal
@@ -175,14 +179,15 @@ These sets are reused by many endpoint branch axes below.
 
 ### Coverage Sensor Variants
 
-- [ ] `GridPointSensor.$type=Conic`
-- [ ] `GridPointSensor.$type=Rectangular`
+- [x] `GridPointSensor.$type=Conic`
+- [x] `GridPointSensor.$type=Rectangular`
 
 ### Coverage Constraint Variants
 
-- [ ] `GridPointConstraints.$type=AzElMask`
-- [ ] `GridPointConstraints.$type=Range`
-- [ ] `GridPointConstraints.$type=ElevationAngle`
+- [x] `GridPointConstraints.$type=AzElMask` failure-only wire shape on
+  `/Coverage/ComputeCoverage`
+- [x] `GridPointConstraints.$type=Range`
+- [x] `GridPointConstraints.$type=ElevationAngle`
 
 ### Entity Orientation Variants
 
@@ -357,17 +362,17 @@ Required branch axes for each endpoint above:
 - [ ] `Assets.Lighting=Penumbra`
 - [ ] `Assets.Lighting=Umbra`
 - [ ] `Assets.OccultationBodies=explicit`
-- [ ] `GridPointSensor.*` covers all Coverage Sensor Variants
-- [ ] `GridPointConstraints.*` covers all Coverage Constraint Variants
+- [x] `GridPointSensor.*` covers all Coverage Sensor Variants
+- [x] `GridPointConstraints.*` covers all Coverage Constraint Variants
 - [ ] `FilterType=AtLeastN`
 - [ ] `FilterType=ExactlyN`
-- [ ] `ContainAssetAccessResults=true`
-- [ ] `ContainCoveragePoints=true`
+- [x] `ContainAssetAccessResults=true`
+- [x] `ContainCoveragePoints=true`
 
 Additional FOM endpoint branch axes:
 
-- [ ] `ComputeType=TotalTimeAbove`
-- [ ] `ComputeType=Maximum`
+- [x] `ComputeType=TotalTimeAbove`
+- [x] `ComputeType=Maximum`
 - [ ] `ComputeType=Minimum`
 - [ ] `ComputeType=Average`
 
