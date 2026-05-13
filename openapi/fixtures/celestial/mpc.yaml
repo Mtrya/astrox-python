@@ -6,12 +6,12 @@ openapi_request_schema: MpcInput
 openapi_response_schema: MpcOutput
 branches:
   nominal:
-    request:
+    request: &mpc_common_request
       TargetName: Apophis
       ObserverFrame: MeanEclpJ2000
       Start: "2025-01-01T00:00:00Z"
       Stop: "2025-01-03T00:00:00Z"
-    expect:
+    expect: &mpc_success_expect
       status: 200
       content_type: application/json
       response:
@@ -85,3 +85,18 @@ branches:
                 kind: json_string
               referenceFrame:
                 kind: json_string
+  observer_frame_fixed:
+    request:
+      <<: *mpc_common_request
+      ObserverFrame: FIXED
+    expect: *mpc_success_expect
+  observer_frame_inertial:
+    request:
+      <<: *mpc_common_request
+      ObserverFrame: INERTIAL
+    expect: *mpc_success_expect
+  observer_frame_j2000:
+    request:
+      <<: *mpc_common_request
+      ObserverFrame: J2000
+    expect: *mpc_success_expect

@@ -1,19 +1,29 @@
 schema_version: 1
-endpoint: /celestial/ephemeris
+endpoint: /Propagator/J2
 method: POST
-openapi_operation_id: ephermeris
-openapi_request_schema: EphemerisInput
+openapi_operation_id: null
+openapi_request_schema: EntityPositionJ2
 openapi_response_schema: CzmlPositionOut
 branches:
   nominal:
-    request: &ephemeris_common_request
-      TargetName: Mars
-      ObserverName: Sun
-      ObserverFrame: MeanEclpJ2000
-      Start: "2024-01-01T00:00:00Z"
-      Stop: "2024-01-03T00:00:00Z"
-      Step: 86400.0
-    expect: &czml_position_out_expect
+    request:
+      Start: "2024-01-01T00:00:00.000Z"
+      Stop: "2024-01-01T00:10:00.000Z"
+      Step: 300.0
+      OrbitEpoch: "2024-01-01T00:00:00.000Z"
+      CoordSystem: Inertial
+      CoordType: Classical
+      J2NormalizedValue: 0.000484165143790815
+      RefDistance: 6378137.0
+      GravitationalParameter: 398600441500000.0
+      OrbitalElements:
+        - 6778137.0
+        - 0.001
+        - 28.5
+        - 0.0
+        - 0.0
+        - 0.0
+    expect:
       status: 200
       content_type: application/json
       response:
@@ -38,7 +48,6 @@ branches:
               - epoch
               - interpolationAlgorithm
               - interpolationDegree
-              - interval
               - referenceFrame
             fields:
               CentralBody:
@@ -54,22 +63,5 @@ branches:
                 kind: json_string
               interpolationDegree:
                 kind: json_number
-              interval:
-                kind: json_string
               referenceFrame:
                 kind: json_string
-  observer_frame_fixed:
-    request:
-      <<: *ephemeris_common_request
-      ObserverFrame: FIXED
-    expect: *czml_position_out_expect
-  observer_frame_inertial:
-    request:
-      <<: *ephemeris_common_request
-      ObserverFrame: INERTIAL
-    expect: *czml_position_out_expect
-  observer_frame_j2000:
-    request:
-      <<: *ephemeris_common_request
-      ObserverFrame: J2000
-    expect: *czml_position_out_expect

@@ -1,0 +1,50 @@
+schema_version: 1
+endpoint: /OrbitConvert/GetKozaiIzsakMeanElements
+method: POST
+openapi_operation_id: null
+openapi_request_schema: KeplerElements
+openapi_response_schema: MeanKeplerElements
+branches:
+  nominal:
+    request:
+      SemimajorAxis: 6778137.0
+      Eccentricity: 0.001
+      Inclination: 51.6
+      ArgumentOfPeriapsis: 0.0
+      RightAscensionOfAscendingNode: 0.0
+      TrueAnomaly: 0.0
+      GravitationalParameter: 398600441800000.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - SemimajorAxis
+          - Eccentricity
+          - Inclination
+          - ArgOfPerigee
+          - RAAN
+          - MeanAnomaly
+          - ArgOfLatitude
+          - LongitudeOfPerigee
+          - MeanLongitude
+        fields:
+          SemimajorAxis:
+            kind: json_number
+          Eccentricity:
+            kind: json_number
+          Inclination:
+            kind: json_number
+          ArgOfPerigee:
+            kind: json_number
+          RAAN:
+            kind: json_number
+          MeanAnomaly:
+            kind: json_number
+          ArgOfLatitude:
+            kind: json_number
+          LongitudeOfPerigee:
+            kind: json_number
+          MeanLongitude:
+            kind: json_number

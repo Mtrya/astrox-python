@@ -6,7 +6,7 @@ openapi_request_schema: PlanetTransferInput
 openapi_response_schema: PlanetTransferOutput
 branches:
   nominal:
-    request:
+    request: &transfer_common_request
       SunFrameName: MeanEclpJ2000
       DepartureCbName: Earth
       ArrivalCbName: Mars
@@ -15,7 +15,7 @@ branches:
       MinTofDays: 10
       DepartureStepDay: 1.0
       ArrivalStepDay: 1.0
-    expect:
+    expect: &transfer_success_expect
       status: 200
       content_type: application/json
       response:
@@ -72,3 +72,8 @@ branches:
                   min_length: 1
                   items:
                     kind: json_number
+  sun_frame_icrf:
+    request:
+      <<: *transfer_common_request
+      SunFrameName: ICRF
+    expect: *transfer_success_expect

@@ -1,0 +1,41 @@
+schema_version: 1
+endpoint: /ziyou
+method: POST
+openapi_operation_id: null
+openapi_request_schema: ZiyouInput
+openapi_response_schema: ZiyouOutput
+branches:
+  nominal:
+    request:
+      Type: Target
+      Start: "2024-01-01T00:00:00Z"
+      RV_J2000:
+        - 6678137.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 7726.67
+        - 0.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Target_StkEpheFile
+          - Ziyou_StkEpheFile
+          - Ziyou_StkAttiFile
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          Target_StkEpheFile:
+            kind: json_string
+          Ziyou_StkEpheFile:
+            kind: json_string
+          Ziyou_StkAttiFile:
+            kind: json_string

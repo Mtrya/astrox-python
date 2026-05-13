@@ -6,9 +6,9 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 48
-- handled nominal endpoint fixtures: 46
-- handled branch-axis fixtures: 148
+- fixture endpoint records: 70
+- handled nominal endpoint fixtures: 68
+- handled branch-axis fixtures: 255
 
 Legend:
 
@@ -55,7 +55,8 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 - [x] `/Coverage/FOM/GridStatsOverTime/NumberOfAssets` nominal
 - [ ] `/Coverage/FOM/GridStatsOverTime/ResponseTime` nominal
   - blocked: small Coverage base payload plus targeted `Time`, longer-window,
-    and two-asset corrections return empty HTTP 500 with no content type.
+    `ComputeType=Maximum`, and two-asset corrections return empty HTTP 500
+    with no content type. Reprobed on 2026-05-13 with the current base payload.
 - [x] `/Coverage/FOM/GridStatsOverTime/RevisitTime` nominal
 - [x] `/Coverage/FOM/GridStatsOverTime/SimpleCoverage` nominal
 - [x] `/Coverage/FOM/ValueByGridPoint/CoverageTime` nominal
@@ -66,7 +67,8 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 - [x] `/Coverage/FOM/ValueByGridPointAtTime/NumberOfAssets` nominal
 - [ ] `/Coverage/FOM/ValueByGridPointAtTime/ResponseTime` nominal
   - blocked: endpoint requires `Time`, but valid-looking `Time` payloads
-    return empty HTTP 500 with no content type.
+    return empty HTTP 500 with no content type. Reprobed on 2026-05-13 with
+    baseline, `ComputeType=Maximum`, longer-window, and two-asset payloads.
 - [x] `/Coverage/FOM/ValueByGridPointAtTime/RevisitTime` nominal
 - [x] `/Coverage/FOM/ValueByGridPointAtTime/SimpleCoverage` nominal
 - [x] `/Coverage/GetGridPoints` nominal
@@ -76,66 +78,75 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 ### Interface
 
 - [ ] `/InterfaceClass` nominal
+  - blocked: empty and single-fragment probes return structured HTTP 400
+    validation responses listing the current required `InterfaceInput`
+    properties. A generated schema-shaped payload covering all 53 current
+    top-level `InterfaceInput` properties reaches endpoint execution but still
+    returns an empty HTTP 500 with no content type. Reprobed on 2026-05-13.
 
 ### Landing Zone
 
-- [ ] `/LandingZone` nominal
+- [x] `/LandingZone` nominal
 
 ### Lighting
 
 - [x] `/Lighting/LightingTimes` nominal
-- [ ] `/Lighting/SolarAER` nominal
+- [x] `/Lighting/SolarAER` nominal
 - [x] `/Lighting/SolarIntensity` nominal
 
 ### Orbit Convert
 
-- [ ] `/OrbitConvert/CalGEOYMLambertDv` nominal
-- [ ] `/OrbitConvert/GetKozaiIzsakMeanElements` nominal
-- [ ] `/OrbitConvert/Kepler2LLAAtAscendNode` nominal
+- [x] `/OrbitConvert/CalGEOYMLambertDv` nominal
+- [x] `/OrbitConvert/GetKozaiIzsakMeanElements` nominal
+- [x] `/OrbitConvert/Kepler2LLAAtAscendNode` nominal
 - [x] `/OrbitConvert/Kepler2RV` nominal
 - [x] `/OrbitConvert/RV2Kepler` nominal
 
 ### Orbit System
 
 - [ ] `/OrbitSystem/CentralBodyFrame` nominal
-- [ ] `/OrbitSystem/EarthMoonLibration` nominal
-- [ ] `/OrbitSystem/EarthMoonLibration2` nominal
+  - blocked: endpoint requires `toCb` and `referenceFrame` as POST query
+    parameters, which the current fixture format cannot express for a
+    route/body fixture. A manual query-param probe with a minimal
+    `EntityPositionCzml3` body returns only a structured failure object.
+- [x] `/OrbitSystem/EarthMoonLibration` nominal failure-only wire shape
+- [x] `/OrbitSystem/EarthMoonLibration2` nominal failure-only wire shape
 
 ### Orbit Wizard
 
-- [ ] `/OrbitWizard/GEO` nominal
-- [ ] `/OrbitWizard/Molniya` nominal
-- [ ] `/OrbitWizard/SSO` nominal
-- [ ] `/OrbitWizard/Walker` nominal
+- [x] `/OrbitWizard/GEO` nominal
+- [x] `/OrbitWizard/Molniya` nominal
+- [x] `/OrbitWizard/SSO` nominal
+- [x] `/OrbitWizard/Walker` nominal
 
 ### Propagator
 
 - [x] `/Propagator/Ballistic` nominal
-- [ ] `/Propagator/HPOP` nominal
-- [ ] `/Propagator/J2` nominal
-- [ ] `/Propagator/MultiJ2` nominal
-- [ ] `/Propagator/MultiSgp4` nominal
-- [ ] `/Propagator/MultiTwoBody` nominal
-- [ ] `/Propagator/SimpleAscent` nominal
-- [ ] `/Propagator/TwoBody` nominal
-- [ ] `/Propagator/sgp4` nominal
+- [x] `/Propagator/HPOP` nominal
+- [x] `/Propagator/J2` nominal
+- [x] `/Propagator/MultiJ2` nominal
+- [x] `/Propagator/MultiSgp4` nominal
+- [x] `/Propagator/MultiTwoBody` nominal
+- [x] `/Propagator/SimpleAscent` nominal
+- [x] `/Propagator/TwoBody` nominal
+- [x] `/Propagator/sgp4` nominal
 
 ### Rocket
 
 - [ ] `/Rocket/RocketGuid` nominal
   - blocked: all documented root `$type` values (`CZ2CD`, `KZ1A`,
     `CZ7A`, `CZ3BC`, `CZ4BC`) return empty HTTP 500 responses with no content
-    type for minimal, example-derived, and fully populated schema-shaped
-    payload probes. Invalid discriminator values return structured HTTP 400,
-    so the server appears to recognize the documented discriminator names
-    before failing inside endpoint execution.
+    type for minimal payload probes. An example-derived `CZ3BC` payload also
+    returns empty HTTP 500. Invalid discriminator values return structured HTTP
+    400, so the server recognizes the documented discriminator names before
+    failing inside endpoint execution. Reprobed on 2026-05-13.
 - [x] `/Rocket/RocketLanding` nominal failure-only wire shape
 - [x] `/Rocket/RocketSegmentFA` nominal failure-only wire shape
 
 ### Terrain
 
-- [ ] `/Terrain/AzElMask` nominal
-- [ ] `/Terrain/AzElMaskSimple` nominal
+- [x] `/Terrain/AzElMask` nominal failure-only wire shape
+- [x] `/Terrain/AzElMaskSimple` nominal failure-only wire shape
 
 ### Celestial
 
@@ -152,11 +163,14 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 - [x] `/satcat` nominal
 - [x] `/ssc` nominal
 - [ ] `/ssc/admin/upload-database-archive` nominal
+  - blocked: real nominal upload requires `multipart/form-data`, `X-Api-Key`,
+    and a ZIP archive. The current verifier cannot express multipart files or
+    headers, and public fake-key multipart probes return structured HTTP 401.
   - [x] public `missing_file_and_api_key` validation error
 
 ### Other
 
-- [ ] `/ziyou` nominal
+- [x] `/ziyou` nominal
 
 ## Shared Branch Value Vocabulary
 
@@ -257,18 +271,19 @@ where it is claimed.
 ### `/Astrogator/RunMCS`
 
 - [x] `MainSequence.$type=Sequence`
-- [ ] `MainSequence.$type=Follow`
-  - blocked: minimal `Follow` plus targeted `Entities` leader probes using J2
-    and AstrogatorMCS-shaped positions still return `Start Stop` construction
-    errors for the leader position, so the required leader context remains
-    unclear.
+- [x] `MainSequence.$type=Follow` failure-only wire shape
+  - reprobed on 2026-05-13: minimal `Follow` plus targeted `Entities` leader
+    probes using SitePosition, CzmlPosition, J2, and AstrogatorMCS-shaped
+    positions returns a structured `IsSuccess=false` response before creating a
+    follow point, so this covers constructor failure shape only.
 - [x] `MainSequence.$type=ManeuverFinite`
 - [x] `MainSequence.$type=ManeuverImpulsive`
 - [x] `MainSequence.$type=InitialState`
-- [ ] `MainSequence.$type=TargetSequence`
-  - blocked: minimal `TargetSequence` and DifferentialCorrector-shaped
-    `Profiles`/`Segments` probes return internal `Operators`/`Variables`
-    empty-list errors; the accepted target-operator construction is unclear.
+- [x] `MainSequence.$type=TargetSequence`
+  - reprobed on 2026-05-13: an inactive DifferentialCorrector profile with a
+    nominal segment list returns `TargetSequenceResult`; minimal/no-profile and
+    active-profile probes still return internal `Operators`/`Variables`
+    empty-list errors, so target convergence semantics remain unverified.
 - [x] `MainSequence.$type=Propagate`
 - [x] `MainSequence.$type=Stop`
 Result branches below verify accepted request/response wire shape on a minimal
@@ -276,8 +291,9 @@ Result branches below verify accepted request/response wire shape on a minimal
 non-empty named result in that minimal context.
 
 - [ ] `MainSequence.Results.$type=BPlane`
-  - blocked: minimal `InitialState` and `Propagate` result probes return an
-    empty response with no content type.
+  - blocked: reprobed on 2026-05-13. Minimal `InitialState` BPlane returns
+    empty HTTP 500 with no content type; `Propagate` BPlane returns empty HTTP
+    200 with no content type, so neither response is fixture-worthy.
 - [x] `MainSequence.Results.$type=Epoch`
 - [x] `MainSequence.Results.$type=Relative`
 - [x] `MainSequence.Results.$type=Duration`
@@ -295,9 +311,10 @@ non-empty named result in that minimal context.
 - [x] `MainSequence.StopConditions.$type=Scalar` failure-only wire shape
 
 - [ ] `MainSequence.JoiningConditions.$type.*` covers all stopping condition variants
-  - blocked: `Follow` construction still fails before `JoiningConditions` are
-    reached, even with SitePosition, CzmlPosition, and fully windowed J2 leader
-    entity probes.
+  - blocked: reprobed on 2026-05-13. `Follow` now has a structured
+    failure-only fixture, but `Joining=Specify` plus Duration and targeted
+    SitePosition, CzmlPosition, J2, and AstrogatorMCS leader probes still fail
+    before `JoiningConditions` are evaluated.
 
 Attitude-control branches below are standalone `ManeuverImpulsive` probes. They
 do not claim every finite/impulsive maneuver context accepts every attitude
@@ -364,11 +381,15 @@ position or sequence subtype.
 
 ### `/CAT/CA_ComputeV3`
 
-- [ ] `Targets=null` database-backed target lookup
+- [x] `Targets=null` validation-only wire shape
+  - note: live `Targets: null` returns structured HTTP 400 validation
+    (`Targets` is required), so this does not confirm database-backed lookup.
 
 ### `/CAT/CA_ComputeV4`
 
-- [ ] `Targets=null` database-backed target lookup
+- [x] `Targets=null` validation-only wire shape
+  - note: live `Targets: null` returns structured HTTP 400 validation
+    (`Targets` is required), so this does not confirm database-backed lookup.
 
 ### `/CAT/DebrisBreakup`
 
@@ -384,29 +405,29 @@ position or sequence subtype.
 
 ### `/city`
 
-- [ ] `typeOfCity=PopulatedPlace`
-- [ ] `typeOfCity=AdministrationCenter`
-- [ ] `typeOfCity=NationalCapital`
-- [ ] `typeOfCity=TerritorialCapital`
+- [x] `typeOfCity=PopulatedPlace`
+- [x] `typeOfCity=AdministrationCenter`
+- [x] `typeOfCity=NationalCapital`
+- [x] `typeOfCity=TerritorialCapital`
 
 ### `/celestial/ephemeris`
 
-- [ ] `ObserverFrame=FIXED`
-- [ ] `ObserverFrame=INERTIAL`
-- [ ] `ObserverFrame=MeanEclpJ2000`
-- [ ] `ObserverFrame=J2000`
+- [x] `ObserverFrame=FIXED`
+- [x] `ObserverFrame=INERTIAL`
+- [x] `ObserverFrame=MeanEclpJ2000`
+- [x] `ObserverFrame=J2000`
 
 ### `/celestial/mpc`
 
-- [ ] `ObserverFrame=FIXED`
-- [ ] `ObserverFrame=INERTIAL`
-- [ ] `ObserverFrame=MeanEclpJ2000`
-- [ ] `ObserverFrame=J2000`
+- [x] `ObserverFrame=FIXED`
+- [x] `ObserverFrame=INERTIAL`
+- [x] `ObserverFrame=MeanEclpJ2000`
+- [x] `ObserverFrame=J2000`
 
 ### `/celestial/transfer`
 
-- [ ] `SunFrameName=MeanEclpJ2000`
-- [ ] `SunFrameName=ICRF`
+- [x] `SunFrameName=MeanEclpJ2000`
+- [x] `SunFrameName=ICRF`
 
 ### Coverage Family
 
@@ -434,22 +455,54 @@ The following endpoints currently share the same discovered branch axes:
 - `/Coverage/Report/CoverageByAsset`
 - `/Coverage/Report/PercentCoverage`
 
-Required branch axes for each endpoint above:
+Required branch axes are tracked by endpoint context. These rows do not claim
+that a branch fixture under one Coverage endpoint is reusable across every
+Coverage/FOM/report endpoint.
 
-- [ ] `Grid.*` covers all Coverage Grid Variants
-- [ ] `Assets.Position.*` covers all Position Variants
-- [ ] `Assets.Orientation.*` covers all Entity Orientation Variants
-- [ ] `Assets.Sensor.*` covers all Entity Sensor Variants
-- [ ] `Assets.SensorPointing.*` covers all Sensor Pointing Variants
-- [ ] `Assets.Constraints.*` covers all Coverage Constraint Variants
-- [ ] `Assets.Lighting=DirectSun`
-- [ ] `Assets.Lighting=Penumbra`
-- [ ] `Assets.Lighting=Umbra`
-- [ ] `Assets.OccultationBodies=explicit`
+Grid context:
+
+- [ ] `Grid.*` covers all Coverage endpoint contexts (deferred: only
+  `/Coverage/GetGridPoints` has all grid variants checked; this does not prove
+  every Coverage/FOM/report endpoint accepts every grid payload.)
+
+`/Coverage/ComputeCoverage` asset context:
+
+- [x] `Assets.Position.$type=J2`
+- [x] `Assets.Position.$type=TwoBody`
+- [x] `Assets.Position.$type=SGP4`
+- [ ] `Assets.Position.*` remaining variants (deferred to PR 10 row-class
+  matrix work; `SitePosition` reprobe returned a structured `IsSuccess=false`
+  response rather than the nominal success shape.)
+- [x] `Assets.Orientation.$type=VVLH`
+- [x] `Assets.Orientation.$type=LVLH`
+- [x] `Assets.Orientation.$type=VNC`
+- [ ] `Assets.Orientation.*` remaining variants (deferred to PR 10; complex
+  orientation constructors require endpoint-context probes.)
+- [x] `Assets.Sensor.$type=Conic`
+- [x] `Assets.Sensor.$type=Rectangular`
+- [x] `Assets.SensorPointing.$type=Fixed`
+- [x] `Assets.Constraints.$type=Range`
+- [x] `Assets.Constraints.$type=ElevationAngle`
+- [x] `Assets.Constraints.$type=AzElMask` rejection shape for non-ground asset
+- [x] `Assets.Lighting=DirectSun`
+- [x] `Assets.Lighting=Penumbra`
+- [x] `Assets.Lighting=Umbra`
+- [x] `Assets.OccultationBodies=explicit`
+
+Deferred Coverage asset endpoint contexts:
+
+- [ ] FOM GridStats asset matrix rows (deferred to PR 10; no fixture in this
+  endpoint class proves the ComputeCoverage asset variants are accepted there.)
+- [ ] FOM GridStatsOverTime asset matrix rows (deferred to PR 10; includes the
+  still-blocked ResponseTime endpoint.)
+- [ ] FOM ValueByGridPoint asset matrix rows (deferred to PR 10.)
+- [ ] FOM ValueByGridPointAtTime asset matrix rows (deferred to PR 10; includes
+  the still-blocked ResponseTime endpoint.)
+- [ ] Coverage report asset matrix rows (deferred to PR 10.)
 - [x] `GridPointSensor.*` covers all Coverage Sensor Variants
 - [x] `GridPointConstraints.*` covers all Coverage Constraint Variants
-- [ ] `FilterType=AtLeastN`
-- [ ] `FilterType=ExactlyN`
+- [x] `FilterType=AtLeastN`
+- [x] `FilterType=ExactlyN`
 - [x] `ContainAssetAccessResults=true`
 - [x] `ContainCoveragePoints=true`
 
@@ -457,8 +510,11 @@ Additional FOM endpoint branch axes:
 
 - [x] `ComputeType=TotalTimeAbove`
 - [x] `ComputeType=Maximum`
-- [ ] `ComputeType=Minimum`
-- [ ] `ComputeType=Average`
+- [x] `ComputeType=Minimum`
+- [x] `ComputeType=Average`
+  - note: `Minimum` and `Average` are checked on representative
+    `NumberOfAssets` GridStats and ValueByGridPoint fixtures. This does not
+    claim every FOM endpoint accepts every compute type.
 
 ### `/Coverage/GetGridPoints`
 
@@ -472,9 +528,9 @@ Additional FOM endpoint branch axes:
 Coordinate branches below are validation-boundary fixtures. Minimal
 single-coordinate payloads verify live as structured `application/problem+json`
 responses because the server requires many unrelated `InterfaceInput`
-properties before execution. A full schema-shaped payload currently reaches an
-empty HTTP 500 with no content type, so `/InterfaceClass` nominal remains
-unchecked.
+properties before execution. A generated payload covering all 53 current
+top-level `InterfaceInput` properties reaches an empty HTTP 500 with no content
+type, so `/InterfaceClass` nominal remains unchecked. Reprobed on 2026-05-13.
 
 - [x] `AgVAAttitudeControlFinite.$type=AntiVelocityVector` validation-only wire shape
 - [x] `AgVAAttitudeControlFinite.$type=Attitude` validation-only wire shape
@@ -517,19 +573,14 @@ unchecked.
 - [x] `Position.$type=J2`
 - [x] `Position.$type=SGP4`
 - [x] `Position.$type=TwoBody`
-- [ ] `Position.$type=AstrogatorMCS`
-- [ ] `Position.$type=HPOP`
-- [ ] `Position.$type=SimpleAscent`
-- [ ] `Position.$type=Ballistic`
-- [ ] `Position.$type=CentralBody`
-- [ ] `Position.$type=CzmlPositions`
-- [ ] `Position.$type=CzmlPosition`
-
-Unchecked Lighting position variants remain deferred because phase 1 did not
-establish reusable payload patterns for them, and no endpoint-specific live
-fixture has verified them yet.
-
-- [ ] `OccultationBodies=explicit`
+- [x] `Position.$type=AstrogatorMCS`
+- [x] `Position.$type=HPOP`
+- [x] `Position.$type=SimpleAscent`
+- [x] `Position.$type=Ballistic`
+- [x] `Position.$type=CentralBody`
+- [x] `Position.$type=CzmlPositions`
+- [x] `Position.$type=CzmlPosition`
+- [x] `OccultationBodies=explicit`
 
 ### `/Lighting/SolarIntensity`
 
@@ -537,14 +588,14 @@ fixture has verified them yet.
 - [x] `Position.$type=J2`
 - [x] `Position.$type=SGP4`
 - [x] `Position.$type=TwoBody`
-- [ ] `Position.$type=AstrogatorMCS`
-- [ ] `Position.$type=HPOP`
-- [ ] `Position.$type=SimpleAscent`
-- [ ] `Position.$type=Ballistic`
-- [ ] `Position.$type=CentralBody`
-- [ ] `Position.$type=CzmlPositions`
-- [ ] `Position.$type=CzmlPosition`
-- [ ] `OccultationBodies=explicit`
+- [x] `Position.$type=AstrogatorMCS`
+- [x] `Position.$type=HPOP`
+- [x] `Position.$type=SimpleAscent`
+- [x] `Position.$type=Ballistic`
+- [x] `Position.$type=CentralBody`
+- [x] `Position.$type=CzmlPositions`
+- [x] `Position.$type=CzmlPosition`
+- [x] `OccultationBodies=explicit`
 
 ### `/Propagator/Ballistic`
 
@@ -555,28 +606,33 @@ fixture has verified them yet.
 
 ### `/Propagator/HPOP`
 
-- [ ] `HpopPropagator.NumericalIntegrator.$type=RKF7th8th`
-- [ ] `HpopPropagator.GravityModel.$type=GravityField`
-- [ ] `HpopPropagator.GravityModel.$type=TwoBody`
-- [ ] `HpopPropagator.AtmosphericModel.$type=JacchiaRoberts`
-- [ ] `HpopPropagator.SRPModel.$type=SRPSpherical`
-- [ ] `HpopPropagator.SRPModel.ShadowModel=DualCone`
-- [ ] `HpopPropagator.SRPModel.ShadowModel=Cylindrical`
-- [ ] `HpopPropagator.SRPModel.SunPosition=Apparent`
-- [ ] `HpopPropagator.SRPModel.SunPosition=True`
+- [x] `HpopPropagator.NumericalIntegrator.$type=RKF7th8th`
+- [x] `HpopPropagator.GravityModel.$type=GravityField`
+- [x] `HpopPropagator.GravityModel.$type=TwoBody`
+- [x] `HpopPropagator.AtmosphericModel.$type=JacchiaRoberts`
+- [x] `HpopPropagator.SRPModel.$type=SRPSpherical`
+- [x] `HpopPropagator.SRPModel.ShadowModel=DualCone`
+- [x] `HpopPropagator.SRPModel.ShadowModel=Cylindrical`
+- [x] `HpopPropagator.SRPModel.SunPosition=Apparent`
+- [x] `HpopPropagator.SRPModel.SunPosition=True`
 
 ### `/OrbitWizard/Walker`
 
-- [ ] `WalkerType=Delta`
-- [ ] `WalkerType=Star`
-- [ ] `WalkerType=Custom`
+- [x] `WalkerType=Delta`
+- [x] `WalkerType=Star`
+- [x] `WalkerType=Custom`
 
 ### `/Rocket/RocketGuid`
+
+Reprobed on 2026-05-13: invalid discriminator values return structured HTTP 400
+`application/problem+json`, while each documented discriminator below still
+reaches an empty HTTP 500 with no content type.
 
 - [ ] `$type=CZ2CD` blocked: empty HTTP 500 with no content type.
 - [ ] `$type=KZ1A` blocked: empty HTTP 500 with no content type.
 - [ ] `$type=CZ7A` blocked: empty HTTP 500 with no content type.
-- [ ] `$type=CZ3BC` blocked: empty HTTP 500 with no content type.
+- [ ] `$type=CZ3BC` blocked: empty HTTP 500 with no content type; an
+  example-derived `CZ3BC` payload also returns the same empty HTTP 500.
 - [ ] `$type=CZ4BC` blocked: empty HTTP 500 with no content type.
 
 ### `/Rocket/RocketLanding`
@@ -613,25 +669,46 @@ initial, lower-bound, and upper-bound arrays.
 
 - [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=J2`
 - [x] `FromObjectPath.Position.$type=J2 -> ToObjectPath.Position.$type=SitePosition`
+- [x] `FromObjectPath.Position.$type=SGP4 -> ToObjectPath.Position.$type=SitePosition`
+- [x] `FromObjectPath.Position.$type=TwoBody -> ToObjectPath.Position.$type=SitePosition`
 - [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=SGP4`
-- [ ] other `FromObjectPath.Position.* -> ToObjectPath.Position.*` pairs
-- [ ] `FromObjectPath.Orientation.*` covers all Entity Orientation Variants
-- [ ] `FromObjectPath.Sensor.*` covers all Entity Sensor Variants
-- [ ] `FromObjectPath.SensorPointing.*` covers all Sensor Pointing Variants
-- [ ] `FromObjectPath.Constraints.*` covers all Coverage Constraint Variants
-- [ ] `FromObjectPath.Lighting=DirectSun`
-- [ ] `FromObjectPath.Lighting=Penumbra`
-- [ ] `FromObjectPath.Lighting=Umbra`
-- [ ] `FromObjectPath.OccultationBodies=explicit`
-- [ ] `ToObjectPath.Position.*` covers all Position Variants
-- [ ] `ToObjectPath.Orientation.*` covers all Entity Orientation Variants
-- [ ] `ToObjectPath.Sensor.*` covers all Entity Sensor Variants
-- [ ] `ToObjectPath.SensorPointing.*` covers all Sensor Pointing Variants
-- [ ] `ToObjectPath.Constraints.*` covers all Coverage Constraint Variants
-- [ ] `ToObjectPath.Lighting=DirectSun`
-- [ ] `ToObjectPath.Lighting=Penumbra`
-- [ ] `ToObjectPath.Lighting=Umbra`
-- [ ] `ToObjectPath.OccultationBodies=explicit`
+- [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=TwoBody`
+- [ ] remaining `FromObjectPath.Position.* -> ToObjectPath.Position.*` pairs
+  deferred: exhaustive position-pair cross-product coverage is out of scope;
+  AstrogatorMCS, HPOP, SimpleAscent, Ballistic, CentralBody, CzmlPositions, and
+  CzmlPosition need endpoint-specific construction work.
+- [x] `FromObjectPath.Orientation.$type=VVLH`
+- [x] `FromObjectPath.Orientation.$type=LVLH`
+- [x] `FromObjectPath.Orientation.$type=VNC`
+- [ ] `FromObjectPath.Orientation.*` remaining constructors deferred:
+  FixedAtEpoch, Composite, Fixed, AlignedAndConstrained, and CzmlOrientation
+  need endpoint-context probes.
+- [x] `FromObjectPath.Sensor.$type=Conic`
+- [x] `FromObjectPath.Sensor.$type=Rectangular`
+- [x] `FromObjectPath.SensorPointing.$type=Fixed`
+- [x] `FromObjectPath.Constraints.$type=Range`
+- [x] `FromObjectPath.Constraints.$type=ElevationAngle`
+- [x] `FromObjectPath.Constraints.$type=AzElMask`
+- [x] `FromObjectPath.Lighting=DirectSun`
+- [x] `FromObjectPath.Lighting=Penumbra`
+- [x] `FromObjectPath.Lighting=Umbra`
+- [x] `FromObjectPath.OccultationBodies=explicit`
+- [x] `ToObjectPath.Orientation.$type=VVLH`
+- [x] `ToObjectPath.Orientation.$type=LVLH`
+- [x] `ToObjectPath.Orientation.$type=VNC`
+- [ ] `ToObjectPath.Orientation.*` remaining constructors deferred:
+  FixedAtEpoch, Composite, Fixed, AlignedAndConstrained, and CzmlOrientation
+  need endpoint-context probes.
+- [x] `ToObjectPath.Sensor.$type=Conic`
+- [x] `ToObjectPath.Sensor.$type=Rectangular`
+- [x] `ToObjectPath.SensorPointing.$type=Fixed`
+- [x] `ToObjectPath.Constraints.$type=Range`
+- [x] `ToObjectPath.Constraints.$type=ElevationAngle`
+- [x] `ToObjectPath.Constraints.$type=AzElMask`
+- [x] `ToObjectPath.Lighting=DirectSun`
+- [x] `ToObjectPath.Lighting=Penumbra`
+- [x] `ToObjectPath.Lighting=Umbra`
+- [x] `ToObjectPath.OccultationBodies=explicit`
 - [x] `ComputeAER=true`
 - [x] `UseLightTimeDelay=true`
 
@@ -639,21 +716,35 @@ initial, lower-bound, and upper-bound arrays.
 
 - [x] `AllObjects.$type=EntityPath`
 - [x] `AllObjects.$type=EntityPathGroup` failure-only wire shape
-- [ ] `AllObjects.Position.*` covers all Position Variants
-- [ ] `AllObjects.Orientation.*` covers all Entity Orientation Variants
-- [ ] `AllObjects.Sensor.*` covers all Entity Sensor Variants
-- [ ] `AllObjects.SensorPointing.*` covers all Sensor Pointing Variants
-- [ ] `AllObjects.Constraints.*` covers all Coverage Constraint Variants
-- [ ] `AllObjects.Lighting=DirectSun`
-- [ ] `AllObjects.Lighting=Penumbra`
-- [ ] `AllObjects.Lighting=Umbra`
-- [ ] `AllObjects.OccultationBodies=explicit`
-- [ ] `EntityPathGroup.FromAccess_Restriction=AnyOf`
-- [ ] `EntityPathGroup.FromAccess_Restriction=AtLeastN`
-- [ ] `EntityPathGroup.ToAccess_Restriction=AnyOf`
-- [ ] `EntityPathGroup.ToAccess_Restriction=AtLeastN`
-- [ ] `Connections=null`
-- [ ] `Connections=explicit`
+- [x] `AllObjects.Position.$type=SitePosition`
+- [x] `AllObjects.Position.$type=J2`
+- [x] `AllObjects.Position.$type=SGP4`
+- [x] `AllObjects.Position.$type=TwoBody`
+- [ ] `AllObjects.Position.*` remaining variants deferred: AstrogatorMCS,
+  HPOP, SimpleAscent, Ballistic, CentralBody, CzmlPositions, and CzmlPosition
+  need endpoint-specific construction work.
+- [x] `AllObjects.Orientation.$type=VVLH`
+- [x] `AllObjects.Orientation.$type=LVLH`
+- [x] `AllObjects.Orientation.$type=VNC`
+- [ ] `AllObjects.Orientation.*` remaining constructors deferred:
+  FixedAtEpoch, Composite, Fixed, AlignedAndConstrained, and CzmlOrientation
+  need endpoint-context probes.
+- [x] `AllObjects.Sensor.$type=Conic`
+- [x] `AllObjects.Sensor.$type=Rectangular`
+- [x] `AllObjects.SensorPointing.$type=Fixed`
+- [x] `AllObjects.Constraints.$type=Range`
+- [x] `AllObjects.Constraints.$type=ElevationAngle`
+- [x] `AllObjects.Constraints.$type=AzElMask`
+- [x] `AllObjects.Lighting=DirectSun`
+- [x] `AllObjects.Lighting=Penumbra`
+- [x] `AllObjects.Lighting=Umbra`
+- [x] `AllObjects.OccultationBodies=explicit`
+- [x] `EntityPathGroup.FromAccess_Restriction=AnyOf` failure-only wire shape
+- [x] `EntityPathGroup.FromAccess_Restriction=AtLeastN` failure-only wire shape
+- [x] `EntityPathGroup.ToAccess_Restriction=AnyOf` failure-only wire shape
+- [x] `EntityPathGroup.ToAccess_Restriction=AtLeastN` failure-only wire shape
+- [x] `Connections=null`
+- [x] `Connections=explicit` failure-only wire shape
 - [x] `UseLightTimeDelay=true`
 
 ## No Additional Branch Axes Discovered Yet
@@ -664,35 +755,37 @@ the current heuristics did not identify branch axes.
 
 - [x] `/CAT/DebrisBreakupNASA`
 - [x] `/CAT/LifeTimeTLE`
-- [ ] `/LandingZone`
-- [ ] `/Lighting/SolarAER`
-- [ ] `/OrbitConvert/CalGEOYMLambertDv`
-- [ ] `/OrbitConvert/GetKozaiIzsakMeanElements`
-- [ ] `/OrbitConvert/Kepler2LLAAtAscendNode`
+- [x] `/LandingZone`
+- [x] `/Lighting/SolarAER`
+- [x] `/OrbitConvert/CalGEOYMLambertDv`
+- [x] `/OrbitConvert/GetKozaiIzsakMeanElements`
+- [x] `/OrbitConvert/Kepler2LLAAtAscendNode`
 - [x] `/OrbitConvert/Kepler2RV`
 - [x] `/OrbitConvert/RV2Kepler`
-- [ ] `/OrbitSystem/CentralBodyFrame`
-- [ ] `/OrbitSystem/EarthMoonLibration`
-- [ ] `/OrbitSystem/EarthMoonLibration2`
-- [ ] `/OrbitWizard/GEO`
-- [ ] `/OrbitWizard/Molniya`
-- [ ] `/OrbitWizard/SSO`
-- [ ] `/Propagator/J2`
-- [ ] `/Propagator/MultiJ2`
-- [ ] `/Propagator/MultiSgp4`
-- [ ] `/Propagator/MultiTwoBody`
-- [ ] `/Propagator/SimpleAscent`
-- [ ] `/Propagator/TwoBody`
-- [ ] `/Propagator/sgp4`
-- [ ] `/Terrain/AzElMask`
-- [ ] `/Terrain/AzElMaskSimple`
+- [ ] `/OrbitSystem/CentralBodyFrame` blocked: POST query params are required
+  but not representable in the current route/body fixture format.
+- [x] `/OrbitSystem/EarthMoonLibration` failure-only wire shape
+- [x] `/OrbitSystem/EarthMoonLibration2` failure-only wire shape
+- [x] `/OrbitWizard/GEO`
+- [x] `/OrbitWizard/Molniya`
+- [x] `/OrbitWizard/SSO`
+- [x] `/Propagator/J2`
+- [x] `/Propagator/MultiJ2`
+- [x] `/Propagator/MultiSgp4`
+- [x] `/Propagator/MultiTwoBody`
+- [x] `/Propagator/SimpleAscent`
+- [x] `/Propagator/TwoBody`
+- [x] `/Propagator/sgp4`
+- [x] `/Terrain/AzElMask` failure-only wire shape
+- [x] `/Terrain/AzElMaskSimple` failure-only wire shape
 - [x] `/WeatherForecast`
 - [x] `/facility`
 - [x] `/satcat`
 - [x] `/ssc`
-- [ ] `/ssc/admin/upload-database-archive`
+- [ ] `/ssc/admin/upload-database-archive` blocked: multipart upload plus
+  `X-Api-Key` is outside the current fixture transport and public credentials.
 - [x] `/orbit/lambert`
-- [ ] `/ziyou`
+- [x] `/ziyou`
 
 ## Discovery Notes
 

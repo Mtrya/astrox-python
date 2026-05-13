@@ -25,7 +25,7 @@ branches:
           Cities:
             kind: json_array
             min_length: 1
-            items:
+            items: &city_entry_shape
               kind: json_object
               fields:
                 CityName:
@@ -56,3 +56,55 @@ branches:
                   any_of:
                     - kind: json_null
                     - kind: json_string
+  type_of_city_populated_place:
+    request:
+      cityName: Shanghai
+      typeOfCity: PopulatedPlace
+    expect: &city_type_expect
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Cities
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Cities:
+            kind: json_array
+            min_length: 1
+            items: *city_entry_shape
+  type_of_city_administration_center:
+    request:
+      cityName: Hangzhou
+      typeOfCity: AdministrationCenter
+    expect: *city_type_expect
+  type_of_city_national_capital:
+    request:
+      cityName: Beijing
+      typeOfCity: NationalCapital
+    expect: *city_type_expect
+  type_of_city_territorial_capital:
+    request:
+      typeOfCity: TerritorialCapital
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Cities
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Cities:
+            kind: json_array
+            items: *city_entry_shape

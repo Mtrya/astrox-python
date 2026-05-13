@@ -17,7 +17,8 @@ branches:
         Resolution: 30.0
         Height: 0.0
       Assets:
-        - Name: Satellite/CoverageProbeJ2
+        - &compute_coverage_j2_asset
+          Name: Satellite/CoverageProbeJ2
           Position:
             $type: J2
             Start: "2024-01-01T00:00:00.000Z"
@@ -104,6 +105,192 @@ branches:
             kind: json_array
           AssetAccessResults:
             kind: json_array
+  asset_position_two_body:
+    request:
+      <<: *compute_coverage_base_request
+      Assets:
+        - <<: *compute_coverage_j2_asset
+          Position:
+            $type: TwoBody
+            Start: "2024-01-01T00:00:00.000Z"
+            Stop: "2024-01-01T01:00:00.000Z"
+            Step: 120.0
+            CentralBody: Earth
+            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
+    expect: *compute_coverage_success_expect
+  asset_position_sgp4:
+    request:
+      <<: *compute_coverage_base_request
+      Assets:
+        - <<: *compute_coverage_j2_asset
+          Position:
+            $type: SGP4
+            Start: "2024-01-01T00:00:00.000Z"
+            Stop: "2024-01-01T01:00:00.000Z"
+            Step: 120.0
+            SatelliteNumber: "25544"
+            TLEs:
+              - 1 25544U 98067A   23365.54847222  .00016717  00000+0  30473-3 0  9990
+              - 2 25544  51.6416  37.6420 0005307  38.9041  74.5146 15.50009939428469
+    expect: *compute_coverage_success_expect
+  asset_orientation_vvlh:
+    request:
+      <<: *compute_coverage_base_request
+      Assets:
+        - <<: *compute_coverage_j2_asset
+          Orientation:
+            $type: VVLH
+    expect: *compute_coverage_success_expect
+  asset_orientation_lvlh:
+    request:
+      <<: *compute_coverage_base_request
+      Assets:
+        - <<: *compute_coverage_j2_asset
+          Orientation:
+            $type: LVLH
+    expect: *compute_coverage_success_expect
+  asset_orientation_vnc:
+    request:
+      <<: *compute_coverage_base_request
+      Assets:
+        - <<: *compute_coverage_j2_asset
+          Orientation:
+            $type: VNC
+    expect: *compute_coverage_success_expect
+  asset_sensor_conic:
+    request:
+      <<: *compute_coverage_base_request
+      Assets:
+        - <<: *compute_coverage_j2_asset
+          Sensor:
+            $type: Conic
+            outerHalfAngle: 45.0
+    expect: *compute_coverage_success_expect
+  asset_sensor_rectangular:
+    request:
+      <<: *compute_coverage_base_request
+      Assets:
+        - <<: *compute_coverage_j2_asset
+          Sensor:
+            $type: Rectangular
+            xHalfAngle: 35.0
+            yHalfAngle: 25.0
+    expect: *compute_coverage_success_expect
+  asset_sensor_pointing_fixed:
+    request:
+      <<: *compute_coverage_base_request
+      Assets:
+        - <<: *compute_coverage_j2_asset
+          Sensor:
+            $type: Conic
+            outerHalfAngle: 45.0
+          SensorPointing:
+            $type: Fixed
+            Orientation:
+              $type: AzEl
+              Azimuth: 0.0
+              Elevation: 90.0
+    expect: *compute_coverage_success_expect
+  asset_constraints_range:
+    request:
+      <<: *compute_coverage_base_request
+      Assets:
+        - <<: *compute_coverage_j2_asset
+          Constraints:
+            - $type: Range
+              MinimumValue: 0.0
+              MaximumValue: 3000000.0
+              IsMaximumEnabled: true
+    expect: *compute_coverage_success_expect
+  asset_constraints_elevation_angle:
+    request:
+      <<: *compute_coverage_base_request
+      Assets:
+        - <<: *compute_coverage_j2_asset
+          Constraints:
+            - $type: ElevationAngle
+              MinimumValue: -90.0
+              MaximumValue: 90.0
+              IsMaximumEnabled: true
+    expect: *compute_coverage_success_expect
+  asset_constraints_az_el_mask:
+    request:
+      <<: *compute_coverage_base_request
+      Assets:
+        - <<: *compute_coverage_j2_asset
+          Constraints:
+            - $type: AzElMask
+              MaxRange: 3000.0
+              AzElMaskData:
+                - 0.0
+                - 0.0
+                - 1.5707963267948966
+                - 0.0
+                - 3.141592653589793
+                - 0.0
+                - 4.71238898038469
+                - 0.0
+                - 6.283185307179586
+                - 0.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - PercentCovered
+          - GlobalCoverageDatas
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
+          PercentCovered:
+            kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+  asset_lighting_direct_sun:
+    request:
+      <<: *compute_coverage_base_request
+      Assets:
+        - <<: *compute_coverage_j2_asset
+          Lighting: DirectSun
+    expect: *compute_coverage_success_expect
+  asset_lighting_penumbra:
+    request:
+      <<: *compute_coverage_base_request
+      Assets:
+        - <<: *compute_coverage_j2_asset
+          Lighting: Penumbra
+    expect: *compute_coverage_success_expect
+  asset_lighting_umbra:
+    request:
+      <<: *compute_coverage_base_request
+      Assets:
+        - <<: *compute_coverage_j2_asset
+          Lighting: Umbra
+    expect: *compute_coverage_success_expect
+  asset_occultation_bodies_explicit:
+    request:
+      <<: *compute_coverage_base_request
+      Assets:
+        - <<: *compute_coverage_j2_asset
+          OccultationBodies:
+            - Earth
+            - Moon
+    expect: *compute_coverage_success_expect
   grid_point_sensor_conic:
     request:
       <<: *compute_coverage_base_request
@@ -261,3 +448,15 @@ branches:
                 kind: json_number
               Type:
                 kind: json_string
+  filter_type_at_least_n:
+    request:
+      <<: *compute_coverage_base_request
+      FilterType: AtLeastN
+      NumberOfAssets: 1
+    expect: *compute_coverage_success_expect
+  filter_type_exactly_n:
+    request:
+      <<: *compute_coverage_base_request
+      FilterType: ExactlyN
+      NumberOfAssets: 1
+    expect: *compute_coverage_success_expect

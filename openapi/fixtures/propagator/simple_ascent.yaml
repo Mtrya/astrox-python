@@ -1,19 +1,24 @@
 schema_version: 1
-endpoint: /celestial/ephemeris
+endpoint: /Propagator/SimpleAscent
 method: POST
-openapi_operation_id: ephermeris
-openapi_request_schema: EphemerisInput
+openapi_operation_id: null
+openapi_request_schema: EntityPositionSimpleAscent
 openapi_response_schema: CzmlPositionOut
 branches:
   nominal:
-    request: &ephemeris_common_request
-      TargetName: Mars
-      ObserverName: Sun
-      ObserverFrame: MeanEclpJ2000
-      Start: "2024-01-01T00:00:00Z"
-      Stop: "2024-01-03T00:00:00Z"
-      Step: 86400.0
-    expect: &czml_position_out_expect
+    request:
+      Start: "2024-01-01T03:00:00.000Z"
+      Stop: "2024-01-01T03:02:00.000Z"
+      Step: 30.0
+      CentralBody: Earth
+      LaunchLatitude: 40.9575
+      LaunchLongitude: 100.2912
+      LaunchAltitude: 1000.0
+      BurnoutVelocity: 7800.0
+      BurnoutLatitude: 41.3
+      BurnoutLongitude: 101.0
+      BurnoutAltitude: 200000.0
+    expect:
       status: 200
       content_type: application/json
       response:
@@ -38,7 +43,6 @@ branches:
               - epoch
               - interpolationAlgorithm
               - interpolationDegree
-              - interval
               - referenceFrame
             fields:
               CentralBody:
@@ -54,22 +58,5 @@ branches:
                 kind: json_string
               interpolationDegree:
                 kind: json_number
-              interval:
-                kind: json_string
               referenceFrame:
                 kind: json_string
-  observer_frame_fixed:
-    request:
-      <<: *ephemeris_common_request
-      ObserverFrame: FIXED
-    expect: *czml_position_out_expect
-  observer_frame_inertial:
-    request:
-      <<: *ephemeris_common_request
-      ObserverFrame: INERTIAL
-    expect: *czml_position_out_expect
-  observer_frame_j2000:
-    request:
-      <<: *ephemeris_common_request
-      ObserverFrame: J2000
-    expect: *czml_position_out_expect

@@ -134,3 +134,203 @@ branches:
           - 0.0
           - 0.0
     expect: *spacecraft_lighting_times_expect
+  position_astrogator_mcs:
+    request:
+      Start: "2024-01-01T00:00:00.000Z"
+      Stop: "2024-01-01T00:10:00.000Z"
+      Position:
+        $type: AstrogatorMCS
+        ComputeCzmlPositions: true
+        MainSequence:
+          - &lighting_astrogator_initial_state
+            $type: InitialState
+            Name: Initial
+            InitialState:
+              Epoch: "2024-01-01T00:00:00Z"
+              CoordSystemName: Earth Inertial
+              Element:
+                $type: Cartesian
+                X: 6678137.0
+                Vy: 7726.67
+          - $type: Propagate
+            Name: Propagate
+            PropagatorName: FixturePropagator
+            StopConditions:
+              - $type: Duration
+                Name: Duration
+                Trip: 600.0
+            MaxPropagationTime: 900
+        Propagators:
+          - &lighting_twobody_propagator
+            Name: FixturePropagator
+            CentralBodyName: Earth
+            NumericalIntegrator:
+              $type: RKF7th8th
+              Name: RKF7th8th
+            GravityModel:
+              $type: TwoBody
+              Name: EarthTwoBody
+              Mu: 398600441800000.0
+    expect: &sunlight_only_lighting_times_expect
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SunLight
+          - Penumbra
+          - Umbra
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          SunLight: *lighting_time_interval_section
+          Penumbra: *lighting_time_duration_section
+          Umbra: *lighting_time_duration_section
+  position_hpop:
+    request:
+      Start: "2024-01-01T00:00:00.000Z"
+      Stop: "2024-01-01T00:10:00.000Z"
+      Position:
+        $type: HPOP
+        Start: "2024-01-01T00:00:00.000Z"
+        Stop: "2024-01-01T00:10:00.000Z"
+        OrbitEpoch: "2024-01-01T00:00:00.000Z"
+        CoordSystem: Inertial
+        CoordType: Classical
+        OrbitalElements:
+          - 6678137.0
+          - 0.0
+          - 28.5
+          - 0.0
+          - 0.0
+          - 0.0
+        HpopPropagator:
+          Name: Earth_HPOP
+          CentralBodyName: Earth
+          GravityModel:
+            $type: TwoBody
+            Name: EarthTwoBody
+            Mu: 398600441500000.0
+    expect: *spacecraft_lighting_times_expect
+  position_simple_ascent:
+    request:
+      Start: "2024-01-01T03:00:00.000Z"
+      Stop: "2024-01-01T03:02:00.000Z"
+      Position:
+        $type: SimpleAscent
+        Start: "2024-01-01T03:00:00.000Z"
+        Stop: "2024-01-01T03:02:00.000Z"
+        Step: 30.0
+        CentralBody: Earth
+        LaunchLatitude: 40.9575
+        LaunchLongitude: 100.2912
+        LaunchAltitude: 1000.0
+        BurnoutVelocity: 7800.0
+        BurnoutLatitude: 41.3
+        BurnoutLongitude: 101.0
+        BurnoutAltitude: 200000.0
+    expect: *sunlight_only_lighting_times_expect
+  position_ballistic:
+    request:
+      Start: "2024-01-01T12:00:00.000Z"
+      Stop: "2024-01-01T12:10:00.000Z"
+      Position:
+        $type: Ballistic
+        Start: "2024-01-01T12:00:00.000Z"
+        Step: 30.0
+        LaunchLatitude: 28.5721
+        LaunchLongitude: -80.648
+        LaunchAltitude: 10.0
+        ImpactLatitude: 30.0
+        ImpactLongitude: -70.0
+        ImpactAltitude: 0.0
+        BallisticType: TimeOfFlight
+        BallisticTypeValue: 600.0
+    expect: *spacecraft_lighting_times_expect
+  position_central_body:
+    request:
+      <<: *lighting_times_common_request
+      Position:
+        $type: CentralBody
+        Name: Earth
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SunLight
+          - Penumbra
+          - Umbra
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          SunLight: *lighting_time_duration_section
+          Penumbra: *lighting_time_duration_section
+          Umbra: *lighting_time_duration_section
+  position_czml_position:
+    request:
+      Start: "2024-01-01T00:00:00.000Z"
+      Stop: "2024-01-01T00:10:00.000Z"
+      Position: &lighting_czml_position
+        $type: CzmlPosition
+        CentralBody: Earth
+        epoch: "2024-01-01T00:00:00Z"
+        referenceFrame: INERTIAL
+        interpolationAlgorithm: LAGRANGE
+        interpolationDegree: 2
+        cartesianVelocity:
+          - 0.0
+          - 6678137.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 7726.67
+          - 0.0
+          - 60.0
+          - 6644774.1312973
+          - 666701.233545599
+          - 0.0
+          - -771.3798654025477
+          - 7688.068833728764
+          - 0.0
+          - 120.0
+          - 6545018.875944976
+          - 1326741.0087477376
+          - 0.0
+          - -1535.0523581742757
+          - 7572.651025008587
+          - 0.0
+    expect: *sunlight_only_lighting_times_expect
+  position_czml_positions:
+    request:
+      Start: "2024-01-01T00:00:00.000Z"
+      Stop: "2024-01-01T00:10:00.000Z"
+      Position:
+        $type: CzmlPositions
+        CentralBody: Earth
+        CzmlPositions:
+          - *lighting_czml_position
+    expect: *sunlight_only_lighting_times_expect
+  occultation_bodies_explicit:
+    request:
+      <<: *lighting_times_common_request
+      OccultationBodies:
+        - Earth
+        - Moon
+      Position:
+        $type: SitePosition
+        CentralBody: Earth
+        cartographicDegrees:
+          - 120.0
+          - 31.0
+          - 10.0
+    expect: *site_lighting_times_expect

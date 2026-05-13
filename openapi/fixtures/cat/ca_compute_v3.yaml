@@ -6,7 +6,7 @@ openapi_request_schema: CAInput
 openapi_response_schema: CAOutput
 branches:
   nominal:
-    request:
+    request: &ca_v3_common_request
       Start_UTCG: "2021-04-30T00:00:00.000Z"
       Stop_UTCG: "2021-04-30T00:10:00.000Z"
       TolMaxDistance: 50.0
@@ -20,7 +20,7 @@ branches:
         TLE_Line2: "2 25544  51.6441 217.3237 0002714 302.6679 206.5255 15.48964989281240"
       Targets:
         - *iss_tle
-    expect:
+    expect: &ca_v3_success_expect
       status: 200
       content_type: application/json
       response:
@@ -45,3 +45,27 @@ branches:
             kind: json_number
           CA_Results:
             kind: json_array
+  targets_null_validation_error:
+    request:
+      <<: *ca_v3_common_request
+      Targets: null
+    expect: &validation_problem_expect
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
