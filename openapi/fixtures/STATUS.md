@@ -6,9 +6,9 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 36
-- handled nominal endpoint fixtures: 35
-- handled branch-axis fixtures: 34
+- fixture endpoint records: 44
+- handled nominal endpoint fixtures: 43
+- handled branch-axis fixtures: 36
 
 Legend:
 
@@ -58,15 +58,17 @@ Every endpoint should eventually have at least one `nominal` fixture record.
     and two-asset corrections return empty HTTP 500 with no content type.
 - [x] `/Coverage/FOM/GridStatsOverTime/RevisitTime` nominal
 - [x] `/Coverage/FOM/GridStatsOverTime/SimpleCoverage` nominal
-- [ ] `/Coverage/FOM/ValueByGridPoint/CoverageTime` nominal
-- [ ] `/Coverage/FOM/ValueByGridPoint/NumberOfAssets` nominal
-- [ ] `/Coverage/FOM/ValueByGridPoint/ResponseTime` nominal
-- [ ] `/Coverage/FOM/ValueByGridPoint/RevisitTime` nominal
-- [ ] `/Coverage/FOM/ValueByGridPoint/SimpleCoverage` nominal
-- [ ] `/Coverage/FOM/ValueByGridPointAtTime/NumberOfAssets` nominal
+- [x] `/Coverage/FOM/ValueByGridPoint/CoverageTime` nominal
+- [x] `/Coverage/FOM/ValueByGridPoint/NumberOfAssets` nominal
+- [x] `/Coverage/FOM/ValueByGridPoint/ResponseTime` nominal
+- [x] `/Coverage/FOM/ValueByGridPoint/RevisitTime` nominal
+- [x] `/Coverage/FOM/ValueByGridPoint/SimpleCoverage` nominal
+- [x] `/Coverage/FOM/ValueByGridPointAtTime/NumberOfAssets` nominal
 - [ ] `/Coverage/FOM/ValueByGridPointAtTime/ResponseTime` nominal
-- [ ] `/Coverage/FOM/ValueByGridPointAtTime/RevisitTime` nominal
-- [ ] `/Coverage/FOM/ValueByGridPointAtTime/SimpleCoverage` nominal
+  - blocked: endpoint requires `Time`, but valid-looking `Time` payloads
+    return empty HTTP 500 with no content type.
+- [x] `/Coverage/FOM/ValueByGridPointAtTime/RevisitTime` nominal
+- [x] `/Coverage/FOM/ValueByGridPointAtTime/SimpleCoverage` nominal
 - [x] `/Coverage/GetGridPoints` nominal
 - [x] `/Coverage/Report/CoverageByAsset` nominal
 - [x] `/Coverage/Report/PercentCoverage` nominal
@@ -369,8 +371,8 @@ Required branch axes for each endpoint above:
 
 Additional FOM endpoint branch axes:
 
-- [ ] `ComputeType=TotalTimeAbove`
-- [ ] `ComputeType=Maximum`
+- [x] `ComputeType=TotalTimeAbove`
+- [x] `ComputeType=Maximum`
 - [ ] `ComputeType=Minimum`
 - [ ] `ComputeType=Average`
 
