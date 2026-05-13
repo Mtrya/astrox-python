@@ -174,7 +174,6 @@ branches:
       GridPointConstraints:
         - $type: ElevationAngle
           MinimumValue: 0.0
-          MaximumValue: 90.0
           IsMaximumEnabled: false
     expect: *compute_coverage_success_expect
   contain_asset_access_results_true:
