@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 70
 - handled nominal endpoint fixtures: 68
-- handled branch-axis fixtures: 255
+- handled branch-axis fixtures: 274
 
 Legend:
 
@@ -20,6 +20,12 @@ Legend:
 This inventory is intentionally more cautious than OpenAPI. A discovered branch
 axis is only a candidate until a fixture record actually verifies that the live
 server accepts that branch and returns the expected wire shape.
+
+For deferred matrix rows, `representative N + M` means every row context and
+every column variant has at least one checked fixture branch. It does not mean
+every row x column cell is covered. Any unchecked matrix entry keeps its
+unverified cells out of SDK assumptions until a fixture records the exact
+endpoint context.
 
 ## Required Nominal Fixtures
 
@@ -457,13 +463,21 @@ The following endpoints currently share the same discovered branch axes:
 
 Required branch axes are tracked by endpoint context. These rows do not claim
 that a branch fixture under one Coverage endpoint is reusable across every
-Coverage/FOM/report endpoint.
+Coverage/FOM/report endpoint. PR 10 matrix work should use representative
+row/column evidence unless a row explicitly says full endpoint x option
+coverage was verified.
 
 Grid context:
 
-- [ ] `Grid.*` covers all Coverage endpoint contexts (deferred: only
-  `/Coverage/GetGridPoints` has all grid variants checked; this does not prove
-  every Coverage/FOM/report endpoint accepts every grid payload.)
+- [ ] Coverage grid matrix representative rows and columns
+  - row contexts: `/Coverage/GetGridPoints`, `/Coverage/ComputeCoverage`, FOM
+    GridStats, FOM GridStatsOverTime, FOM ValueByGridPoint, FOM
+    ValueByGridPointAtTime, and Coverage report endpoints.
+  - column variants: `CbLatLonBounds`, `Global`, `LatitudeBounds`, and
+    `LatLonBounds`.
+  - deferred: `/Coverage/GetGridPoints` has all grid variants checked, but this
+    does not prove every Coverage/FOM/report endpoint accepts every grid
+    payload.
 
 `/Coverage/ComputeCoverage` asset context:
 
@@ -489,16 +503,19 @@ Grid context:
 - [x] `Assets.Lighting=Umbra`
 - [x] `Assets.OccultationBodies=explicit`
 
-Deferred Coverage asset endpoint contexts:
+Deferred Coverage asset matrix row contexts:
 
-- [ ] FOM GridStats asset matrix rows (deferred to PR 10; no fixture in this
-  endpoint class proves the ComputeCoverage asset variants are accepted there.)
-- [ ] FOM GridStatsOverTime asset matrix rows (deferred to PR 10; includes the
-  still-blocked ResponseTime endpoint.)
-- [ ] FOM ValueByGridPoint asset matrix rows (deferred to PR 10.)
-- [ ] FOM ValueByGridPointAtTime asset matrix rows (deferred to PR 10; includes
-  the still-blocked ResponseTime endpoint.)
-- [ ] Coverage report asset matrix rows (deferred to PR 10.)
+- [ ] FOM GridStats asset row context (deferred to PR 10 representative matrix
+  work; no fixture in this endpoint class proves the ComputeCoverage asset
+  variants are accepted there.)
+- [ ] FOM GridStatsOverTime asset row context (deferred to PR 10
+  representative matrix work; includes the still-blocked ResponseTime endpoint.)
+- [ ] FOM ValueByGridPoint asset row context (deferred to PR 10 representative
+  matrix work.)
+- [ ] FOM ValueByGridPointAtTime asset row context (deferred to PR 10
+  representative matrix work; includes the still-blocked ResponseTime endpoint.)
+- [ ] Coverage report asset row context (deferred to PR 10 representative
+  matrix work.)
 - [x] `GridPointSensor.*` covers all Coverage Sensor Variants
 - [x] `GridPointConstraints.*` covers all Coverage Constraint Variants
 - [x] `FilterType=AtLeastN`
@@ -569,6 +586,9 @@ type, so `/InterfaceClass` nominal remains unchecked. Reprobed on 2026-05-13.
 
 ### `/Lighting/LightingTimes`
 
+Lighting Position branches are endpoint-specific. They do not claim reusable
+Position coverage for Access, Coverage, Astrogator, or other endpoint families.
+
 - [x] `Position.$type=SitePosition`
 - [x] `Position.$type=J2`
 - [x] `Position.$type=SGP4`
@@ -583,6 +603,11 @@ type, so `/InterfaceClass` nominal remains unchecked. Reprobed on 2026-05-13.
 - [x] `OccultationBodies=explicit`
 
 ### `/Lighting/SolarIntensity`
+
+Lighting Position branches are endpoint-specific. Together with
+`/Lighting/LightingTimes`, the current fixtures cover the Lighting endpoint x
+Position matrix cells listed below, but no non-Lighting endpoint inherits this
+coverage.
 
 - [x] `Position.$type=SitePosition`
 - [x] `Position.$type=J2`
@@ -667,22 +692,60 @@ initial, lower-bound, and upper-bound arrays.
 
 ### `/access/AccessComputeV2`
 
+Position-pair rows are matrix cells already checked by fixtures. The deferred
+entry below is for representative `N + M` row/column coverage, not exhaustive
+`FromObjectPath.Position x ToObjectPath.Position` coverage.
+
 - [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=J2`
 - [x] `FromObjectPath.Position.$type=J2 -> ToObjectPath.Position.$type=SitePosition`
 - [x] `FromObjectPath.Position.$type=SGP4 -> ToObjectPath.Position.$type=SitePosition`
 - [x] `FromObjectPath.Position.$type=TwoBody -> ToObjectPath.Position.$type=SitePosition`
 - [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=SGP4`
 - [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=TwoBody`
-- [ ] remaining `FromObjectPath.Position.* -> ToObjectPath.Position.*` pairs
-  deferred: exhaustive position-pair cross-product coverage is out of scope;
-  AstrogatorMCS, HPOP, SimpleAscent, Ballistic, CentralBody, CzmlPositions, and
-  CzmlPosition need endpoint-specific construction work.
+- [x] `FromObjectPath.Position.$type=AstrogatorMCS -> ToObjectPath.Position.$type=SitePosition`
+  wire-shape only; `Passes` may be empty
+- [x] `FromObjectPath.Position.$type=HPOP -> ToObjectPath.Position.$type=SitePosition`
+  wire-shape only; `Passes` may be empty
+- [x] `FromObjectPath.Position.$type=SimpleAscent -> ToObjectPath.Position.$type=SitePosition`
+  wire-shape only; `Passes` may be empty
+- [x] `FromObjectPath.Position.$type=Ballistic -> ToObjectPath.Position.$type=SitePosition`
+  wire-shape only; `Passes` may be empty
+- [x] `FromObjectPath.Position.$type=CentralBody -> ToObjectPath.Position.$type=SitePosition`
+  wire-shape only; `Passes` may be empty
+- [x] `FromObjectPath.Position.$type=CzmlPosition -> ToObjectPath.Position.$type=SitePosition`
+  wire-shape only; `Passes` may be empty
+- [x] `FromObjectPath.Position.$type=CzmlPositions -> ToObjectPath.Position.$type=SitePosition`
+  wire-shape only; `Passes` may be empty
+- [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=AstrogatorMCS`
+  wire-shape only; `Passes` may be empty
+- [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=HPOP`
+  wire-shape only; `Passes` may be empty
+- [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=SimpleAscent`
+  wire-shape only; `Passes` may be empty
+- [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=Ballistic`
+  wire-shape only; `Passes` may be empty
+- [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=CentralBody`
+  wire-shape only; `Passes` may be empty
+- [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=CzmlPosition`
+  wire-shape only; `Passes` may be empty
+- [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=CzmlPositions`
+  wire-shape only; `Passes` may be empty
+
+Representative AccessComputeV2 Position matrix coverage is now `N + M`: every
+currently discovered From position row and every To position column has at
+least one checked branch. This does not claim every From x To pair works.
+
+Entity option branches below are side/value evidence on the current Access
+baseline. They do not claim cross-products with every Position pair, every
+other entity option, or both Access sides unless the side/value branch is
+listed explicitly.
+
 - [x] `FromObjectPath.Orientation.$type=VVLH`
 - [x] `FromObjectPath.Orientation.$type=LVLH`
 - [x] `FromObjectPath.Orientation.$type=VNC`
-- [ ] `FromObjectPath.Orientation.*` remaining constructors deferred:
-  FixedAtEpoch, Composite, Fixed, AlignedAndConstrained, and CzmlOrientation
-  need endpoint-context probes.
+- [x] `FromObjectPath.Orientation.$type=FixedAtEpoch`
+- [x] `FromObjectPath.Orientation.$type=Composite`
+- [x] `FromObjectPath.Orientation.$type=Fixed`
 - [x] `FromObjectPath.Sensor.$type=Conic`
 - [x] `FromObjectPath.Sensor.$type=Rectangular`
 - [x] `FromObjectPath.SensorPointing.$type=Fixed`
@@ -696,9 +759,15 @@ initial, lower-bound, and upper-bound arrays.
 - [x] `ToObjectPath.Orientation.$type=VVLH`
 - [x] `ToObjectPath.Orientation.$type=LVLH`
 - [x] `ToObjectPath.Orientation.$type=VNC`
-- [ ] `ToObjectPath.Orientation.*` remaining constructors deferred:
-  FixedAtEpoch, Composite, Fixed, AlignedAndConstrained, and CzmlOrientation
-  need endpoint-context probes.
+- [x] `ToObjectPath.Orientation.$type=AlignedAndConstrained` failure-only wire shape
+- [x] `ToObjectPath.Orientation.$type=CzmlOrientation`
+
+Representative AccessComputeV2 entity option matrix coverage is now `N + M`:
+both Access sides and every currently discovered Orientation, Sensor,
+SensorPointing, Constraints, Lighting, and OccultationBodies option value have
+at least one checked branch. This does not claim every side x option value cell
+or every option-family combination works.
+
 - [x] `ToObjectPath.Sensor.$type=Conic`
 - [x] `ToObjectPath.Sensor.$type=Rectangular`
 - [x] `ToObjectPath.SensorPointing.$type=Fixed`
@@ -713,6 +782,10 @@ initial, lower-bound, and upper-bound arrays.
 - [x] `UseLightTimeDelay=true`
 
 ### `/access/ChainCompute`
+
+`AllObjects` rows are representative endpoint-context branches. They do not
+claim full chain topology, multi-object, or option-family cross-product
+coverage.
 
 - [x] `AllObjects.$type=EntityPath`
 - [x] `AllObjects.$type=EntityPathGroup` failure-only wire shape
