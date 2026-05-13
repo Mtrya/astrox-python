@@ -156,6 +156,221 @@ branches:
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3Sgp4
     expect: *chain_success_expect
+  allobjects_position_astrogator_mcs:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Name: Satellite/Phase10ChainAstrogatorMCS
+          Position: &astrogator_mcs_position
+            $type: AstrogatorMCS
+            ComputeCzmlPositions: true
+            MainSequence:
+              - $type: InitialState
+                Name: Initial
+                InitialState:
+                  Epoch: "2024-01-01T00:00:00Z"
+                  CoordSystemName: Earth Inertial
+                  Element:
+                    $type: Cartesian
+                    X: 6678137.0
+                    Vy: 7726.67
+              - $type: Propagate
+                Name: Propagate
+                PropagatorName: FixturePropagator
+                StopConditions:
+                  - $type: Duration
+                    Name: Duration
+                    Trip: 600.0
+                MaxPropagationTime: 900
+            Propagators:
+              - Name: FixturePropagator
+                CentralBodyName: Earth
+                NumericalIntegrator:
+                  $type: RKF7th8th
+                  Name: RKF7th8th
+                GravityModel:
+                  $type: TwoBody
+                  Name: EarthTwoBody
+                  Mu: 398600441800000.0
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase10ChainAstrogatorMCS
+    expect: &chain_success_allow_empty_access_expect
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
+  allobjects_position_hpop:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Name: Satellite/Phase10ChainHPOP
+          Position: &hpop_position
+            $type: HPOP
+            Start: "2024-01-01T00:00:00.000Z"
+            Stop: "2024-01-01T00:10:00.000Z"
+            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6678137.0
+              - 0.0
+              - 28.5
+              - 0.0
+              - 0.0
+              - 0.0
+            HpopPropagator:
+              Name: Earth_HPOP
+              CentralBodyName: Earth
+              GravityModel:
+                $type: TwoBody
+                Name: EarthTwoBody
+                Mu: 398600441500000.0
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase10ChainHPOP
+    expect: *chain_success_allow_empty_access_expect
+  allobjects_position_simple_ascent:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Name: Satellite/Phase10ChainSimpleAscent
+          Position: &simple_ascent_position
+            $type: SimpleAscent
+            Start: "2024-01-01T03:00:00.000Z"
+            Stop: "2024-01-01T03:02:00.000Z"
+            Step: 30.0
+            CentralBody: Earth
+            LaunchLatitude: 40.9575
+            LaunchLongitude: 100.2912
+            LaunchAltitude: 1000.0
+            BurnoutVelocity: 7800.0
+            BurnoutLatitude: 41.3
+            BurnoutLongitude: 101.0
+            BurnoutAltitude: 200000.0
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase10ChainSimpleAscent
+    expect: *chain_success_allow_empty_access_expect
+  allobjects_position_ballistic:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Name: Satellite/Phase10ChainBallistic
+          Position: &ballistic_position
+            $type: Ballistic
+            Start: "2024-01-01T12:00:00.000Z"
+            Step: 30.0
+            LaunchLatitude: 28.5721
+            LaunchLongitude: -80.648
+            LaunchAltitude: 10.0
+            ImpactLatitude: 30.0
+            ImpactLongitude: -70.0
+            ImpactAltitude: 0.0
+            BallisticType: TimeOfFlight
+            BallisticTypeValue: 600.0
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase10ChainBallistic
+    expect: *chain_success_allow_empty_access_expect
+  allobjects_position_central_body:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Name: CentralBody/Earth
+          Position: &central_body_position
+            $type: CentralBody
+            Name: Earth
+      StartObject: Facility/Phase3Site
+      EndObject: CentralBody/Earth
+    expect: *chain_success_allow_empty_access_expect
+  allobjects_position_czml_position:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Name: Satellite/Phase10ChainCzmlPosition
+          Position: &czml_position
+            $type: CzmlPosition
+            CentralBody: Earth
+            epoch: "2024-01-01T00:00:00Z"
+            referenceFrame: INERTIAL
+            interpolationAlgorithm: LAGRANGE
+            interpolationDegree: 2
+            cartesianVelocity:
+              - 0.0
+              - 6678137.0
+              - 0.0
+              - 0.0
+              - 0.0
+              - 7726.67
+              - 0.0
+              - 60.0
+              - 6644774.1312973
+              - 666701.233545599
+              - 0.0
+              - -771.3798654025477
+              - 7688.068833728764
+              - 0.0
+              - 120.0
+              - 6545018.875944976
+              - 1326741.0087477376
+              - 0.0
+              - -1535.0523581742757
+              - 7572.651025008587
+              - 0.0
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase10ChainCzmlPosition
+    expect: *chain_success_allow_empty_access_expect
+  allobjects_position_czml_positions:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Name: Satellite/Phase10ChainCzmlPositions
+          Position:
+            $type: CzmlPositions
+            CentralBody: Earth
+            CzmlPositions:
+              - *czml_position
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase10ChainCzmlPositions
+    expect: *chain_success_allow_empty_access_expect
   allobjects_orientation_vvlh:
     request:
       <<: *chain_2024_window
@@ -188,6 +403,92 @@ branches:
             $type: VNC
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
+    expect: *chain_success_expect
+  allobjects_orientation_fixed_at_epoch:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Name: Satellite/Phase10ChainFixedAtEpoch
+          Orientation:
+            $type: FixedAtEpoch
+            SourceAxesName: VNC(Earth)
+            ReferenceAxesName: Earth Inertial
+            Epoch: "2024-01-01T00:00:00Z"
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase10ChainFixedAtEpoch
+    expect: *chain_success_expect
+  allobjects_orientation_composite:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Name: Satellite/Phase10ChainComposite
+          Orientation:
+            $type: Composite
+            Intervals:
+              - $type: VNC
+                Start: "2024-01-01T00:00:00Z"
+                Stop: "2024-01-01T00:10:00Z"
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase10ChainComposite
+    expect: *chain_success_expect
+  allobjects_orientation_fixed:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Name: Satellite/Phase10ChainFixed
+          Orientation:
+            $type: Fixed
+            ReferenceAxesName: Earth Inertial
+            FixedOrientation:
+              $type: Quaternion
+              QS: 1.0
+              QX: 0.0
+              QY: 0.0
+              QZ: 0.0
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase10ChainFixed
+    expect: *chain_success_expect
+  allobjects_orientation_aligned_and_constrained:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Name: Satellite/Phase10ChainAlignedAndConstrained
+          Orientation:
+            $type: AlignedAndConstrained
+            Principal: Earth Center
+            PrincipalAxis: +Z
+            Reference: Velocity
+            ReferenceAxis: +X
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase10ChainAlignedAndConstrained
+    expect: *chain_failure_expect
+  allobjects_orientation_czml:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Name: Satellite/Phase10ChainCzmlOrientation
+          Orientation:
+            $type: CzmlOrientation
+            CentralBody: Earth
+            epoch: "2024-01-01T00:00:00Z"
+            unitQuaternion:
+              - 0.0
+              - 0.0
+              - 0.0
+              - 0.0
+              - 1.0
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase10ChainCzmlOrientation
     expect: *chain_success_expect
   allobjects_sensor_conic:
     request:

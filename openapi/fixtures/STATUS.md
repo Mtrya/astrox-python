@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 70
 - handled nominal endpoint fixtures: 68
-- handled branch-axis fixtures: 274
+- handled branch-axis fixtures: 286
 
 Legend:
 
@@ -793,15 +793,35 @@ coverage.
 - [x] `AllObjects.Position.$type=J2`
 - [x] `AllObjects.Position.$type=SGP4`
 - [x] `AllObjects.Position.$type=TwoBody`
-- [ ] `AllObjects.Position.*` remaining variants deferred: AstrogatorMCS,
-  HPOP, SimpleAscent, Ballistic, CentralBody, CzmlPositions, and CzmlPosition
-  need endpoint-specific construction work.
+- [x] `AllObjects.Position.$type=AstrogatorMCS` wire-shape only;
+  `CompleteChainAccess` may be empty
+- [x] `AllObjects.Position.$type=HPOP` wire-shape only;
+  `CompleteChainAccess` may be empty
+- [x] `AllObjects.Position.$type=SimpleAscent` wire-shape only;
+  `CompleteChainAccess` may be empty
+- [x] `AllObjects.Position.$type=Ballistic` wire-shape only;
+  `CompleteChainAccess` may be empty
+- [x] `AllObjects.Position.$type=CentralBody` wire-shape only;
+  `CompleteChainAccess` may be empty
+- [x] `AllObjects.Position.$type=CzmlPosition` wire-shape only;
+  `CompleteChainAccess` may be empty
+- [x] `AllObjects.Position.$type=CzmlPositions` wire-shape only;
+  `CompleteChainAccess` may be empty
 - [x] `AllObjects.Orientation.$type=VVLH`
 - [x] `AllObjects.Orientation.$type=LVLH`
 - [x] `AllObjects.Orientation.$type=VNC`
-- [ ] `AllObjects.Orientation.*` remaining constructors deferred:
-  FixedAtEpoch, Composite, Fixed, AlignedAndConstrained, and CzmlOrientation
-  need endpoint-context probes.
+- [x] `AllObjects.Orientation.$type=FixedAtEpoch`
+- [x] `AllObjects.Orientation.$type=Composite`
+- [x] `AllObjects.Orientation.$type=Fixed`
+- [x] `AllObjects.Orientation.$type=AlignedAndConstrained` failure-only wire shape
+- [x] `AllObjects.Orientation.$type=CzmlOrientation`
+
+Representative ChainCompute `AllObjects` matrix coverage is now complete for
+currently discovered Position, Orientation, Sensor, SensorPointing,
+Constraints, Lighting, and OccultationBodies option values. This does not
+claim full chain topology, multi-object, or option-family cross-product
+coverage.
+
 - [x] `AllObjects.Sensor.$type=Conic`
 - [x] `AllObjects.Sensor.$type=Rectangular`
 - [x] `AllObjects.SensorPointing.$type=Fixed`
