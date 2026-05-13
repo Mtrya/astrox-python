@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 28
 - handled nominal endpoint fixtures: 27
-- handled branch-axis fixtures: 32
+- handled branch-axis fixtures: 34
 
 Legend:
 
@@ -362,8 +362,8 @@ Required branch axes for each endpoint above:
 - [x] `GridPointConstraints.*` covers all Coverage Constraint Variants
 - [ ] `FilterType=AtLeastN`
 - [ ] `FilterType=ExactlyN`
-- [ ] `ContainAssetAccessResults=true`
-- [ ] `ContainCoveragePoints=true`
+- [x] `ContainAssetAccessResults=true`
+- [x] `ContainCoveragePoints=true`
 
 Additional FOM endpoint branch axes:
 

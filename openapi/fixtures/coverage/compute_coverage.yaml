@@ -177,3 +177,88 @@ branches:
           MaximumValue: 90.0
           IsMaximumEnabled: false
     expect: *compute_coverage_success_expect
+  contain_asset_access_results_true:
+    request:
+      <<: *compute_coverage_base_request
+      ContainAssetAccessResults: true
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          AssetAccessResults:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_array
+  contain_coverage_points_true:
+    request:
+      <<: *compute_coverage_base_request
+      ContainCoveragePoints: true
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Points
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          Points:
+            kind: json_object
+            required_fields:
+              - CentralBodyName
+              - GridPoints
+              - Height
+              - Type
+            fields:
+              CentralBodyName:
+                kind: json_string
+              GridPoints:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - GridCellBoundaryVertices
+                    - Position
+                    - Weight
+                  fields:
+                    GridCellBoundaryVertices:
+                      kind: json_array
+                      min_length: 1
+                      items:
+                        kind: json_array
+                        min_length: 1
+                        items:
+                          kind: json_number
+                    Position:
+                      kind: json_array
+                      min_length: 1
+                      items:
+                        kind: json_number
+                    Weight:
+                      kind: json_number
+              Height:
+                kind: json_number
+              Type:
+                kind: json_string
