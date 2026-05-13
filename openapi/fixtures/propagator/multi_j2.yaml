@@ -1,0 +1,61 @@
+schema_version: 1
+endpoint: /Propagator/MultiJ2
+method: POST
+openapi_operation_id: null
+openapi_request_schema: MultiSatesInput
+openapi_response_schema: MultiSatesOutput
+branches:
+  nominal:
+    request:
+      Epoch: "2024-01-01T00:10:00.000Z"
+      AllSateElements:
+        - OrbitEpoch: "2024-01-01T00:00:00.000Z"
+          SemimajorAxis: 6778137.0
+          Eccentricity: 0.001
+          Inclination: 28.5
+          ArgumentOfPeriapsis: 0.0
+          RightAscensionOfAscendingNode: 0.0
+          TrueAnomaly: 0.0
+          GravitationalParameter: 398600441500000.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - AllElementsAtEpoch
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          AllElementsAtEpoch:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - SemimajorAxis
+                - Eccentricity
+                - Inclination
+                - ArgumentOfPeriapsis
+                - RightAscensionOfAscendingNode
+                - TrueAnomaly
+                - GravitationalParameter
+              fields:
+                SemimajorAxis:
+                  kind: json_number
+                Eccentricity:
+                  kind: json_number
+                Inclination:
+                  kind: json_number
+                ArgumentOfPeriapsis:
+                  kind: json_number
+                RightAscensionOfAscendingNode:
+                  kind: json_number
+                TrueAnomaly:
+                  kind: json_number
+                GravitationalParameter:
+                  kind: json_number

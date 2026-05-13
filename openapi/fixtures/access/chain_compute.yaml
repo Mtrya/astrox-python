@@ -118,6 +118,213 @@ branches:
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
     expect: *chain_success_expect
+  allobjects_position_twobody:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Name: Satellite/Phase3TwoBody
+          Position: &two_body_position
+            $type: TwoBody
+            Step: 120.0
+            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3TwoBody
+    expect: *chain_success_expect
+  allobjects_position_sgp4:
+    request:
+      Start: "2021-05-01T00:00:00.000Z"
+      Stop: "2021-05-02T00:00:00.000Z"
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Name: Satellite/Phase3Sgp4
+          Position: &sgp4_position
+            $type: SGP4
+            Step: 120.0
+            TLEs:
+              - 1 25544U 98067A   21120.54791667  .00001391  00000-0  33245-4 0  9993
+              - 2 25544  51.6443 206.1695 0002829  89.9572  27.6891 15.48915315281553
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3Sgp4
+    expect: *chain_success_expect
+  allobjects_orientation_vvlh:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Orientation: &orientation_vvlh
+            $type: VVLH
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3To
+    expect: *chain_success_expect
+  allobjects_orientation_lvlh:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Orientation: &orientation_lvlh
+            $type: LVLH
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3To
+    expect: *chain_success_expect
+  allobjects_orientation_vnc:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Orientation: &orientation_vnc
+            $type: VNC
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3To
+    expect: *chain_success_expect
+  allobjects_sensor_conic:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Sensor: &sensor_conic
+            $type: Conic
+            outerHalfAngle: 45.0
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3To
+    expect: *chain_success_expect
+  allobjects_sensor_rectangular:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Sensor: &sensor_rectangular
+            $type: Rectangular
+            xHalfAngle: 35.0
+            yHalfAngle: 25.0
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3To
+    expect: *chain_success_expect
+  allobjects_sensor_pointing_fixed:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Sensor: *sensor_conic
+          SensorPointing:
+            $type: Fixed
+            Orientation:
+              $type: AzEl
+              Azimuth: 0.0
+              Elevation: 90.0
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3To
+    expect: *chain_success_expect
+  allobjects_constraints_range:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - <<: *site_entity_path
+          Constraints:
+            - &constraint_range
+              $type: Range
+              MinimumValue: 0.0
+              MaximumValue: 50000.0
+              IsMaximumEnabled: true
+        - *j2_entity_path
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3To
+    expect: *chain_success_expect
+  allobjects_constraints_elevation_angle:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - <<: *site_entity_path
+          Constraints:
+            - &constraint_elevation_angle
+              $type: ElevationAngle
+              MinimumValue: 0.0
+              IsMaximumEnabled: false
+        - *j2_entity_path
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3To
+    expect: *chain_success_expect
+  allobjects_constraints_az_el_mask:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - <<: *site_entity_path
+          Constraints:
+            - &constraint_az_el_mask
+              $type: AzElMask
+              MaxRange: 50000.0
+              AzElMaskData:
+                - 0.0
+                - 0.0
+                - 1.5707963267948966
+                - 0.0
+                - 3.141592653589793
+                - 0.0
+                - 4.71238898038469
+                - 0.0
+                - 6.283185307179586
+                - 0.0
+        - *j2_entity_path
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3To
+    expect: *chain_success_expect
+  allobjects_lighting_direct_sun:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Lighting: DirectSun
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3To
+    expect: *chain_success_expect
+  allobjects_lighting_penumbra:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Lighting: Penumbra
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3To
+    expect: *chain_success_expect
+  allobjects_lighting_umbra:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          Lighting: Umbra
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3To
+    expect: *chain_success_expect
+  allobjects_occultation_bodies_explicit:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - <<: *j2_entity_path
+          OccultationBodies:
+            - Earth
+            - Moon
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3To
+    expect: *chain_success_expect
   connections_null:
     request:
       <<: *chain_2024_window

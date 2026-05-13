@@ -12,6 +12,7 @@ branches:
         Stop: "2024-01-02T00:00:00.000Z"
         OutStep: 600.0
       FromObjectPath:
+        &site_object
         Name: Facility/Phase3Site
         Position: &site_position
           $type: SitePosition
@@ -21,6 +22,7 @@ branches:
             - 31.0
             - 10.0
       ToObjectPath:
+        &j2_object
         Name: Satellite/Phase3To
         Position: &j2_position
           $type: J2
@@ -67,22 +69,19 @@ branches:
     request:
       <<: *access_2024_window
       FromObjectPath:
+        <<: *j2_object
         Name: Satellite/Phase3From
-        Position: *j2_position
       ToObjectPath:
-        Name: Facility/Phase3Site
-        Position: *site_position
+        <<: *site_object
     expect: *access_default_expect
   compute_aer_true:
     request:
       <<: *access_2024_window
       ComputeAER: true
       FromObjectPath:
-        Name: Facility/Phase3Site
-        Position: *site_position
+        <<: *site_object
       ToObjectPath:
-        Name: Satellite/Phase3To
-        Position: *j2_position
+        <<: *j2_object
     expect:
       status: 200
       content_type: application/json
@@ -153,11 +152,9 @@ branches:
       <<: *access_2024_window
       UseLightTimeDelay: true
       FromObjectPath:
-        Name: Facility/Phase3Site
-        Position: *site_position
+        <<: *site_object
       ToObjectPath:
-        Name: Satellite/Phase3To
-        Position: *j2_position
+        <<: *j2_object
     expect: *access_default_expect
   site_to_sgp4:
     request:
@@ -165,14 +162,346 @@ branches:
       Stop: "2021-05-02T00:00:00.000Z"
       OutStep: 600.0
       FromObjectPath:
-        Name: Facility/Phase3Site
-        Position: *site_position
+        <<: *site_object
       ToObjectPath:
-        Name: Satellite/Phase3To
+        <<: *j2_object
         Position:
+          &sgp4_position
           $type: SGP4
           Step: 120.0
           TLEs:
             - 1 25544U 98067A   21120.54791667  .00001391  00000-0  33245-4 0  9993
             - 2 25544  51.6443 206.1695 0002829  89.9572  27.6891 15.48915315281553
+    expect: *access_default_expect
+  from_position_sgp4_to_site:
+    request:
+      Start: "2021-05-01T00:00:00.000Z"
+      Stop: "2021-05-02T00:00:00.000Z"
+      OutStep: 600.0
+      FromObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3FromSgp4
+        Position: *sgp4_position
+      ToObjectPath:
+        <<: *site_object
+    expect: *access_default_expect
+  from_position_twobody_to_site:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3FromTwoBody
+        Position: &two_body_position
+          $type: TwoBody
+          Step: 120.0
+          OrbitEpoch: "2024-01-01T00:00:00.000Z"
+          OrbitalElements:
+            - 6778137.0
+            - 0.001
+            - 51.6
+            - 0.0
+            - 0.0
+            - 0.0
+      ToObjectPath:
+        <<: *site_object
+    expect: *access_default_expect
+  site_to_twobody:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *site_object
+      ToObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3ToTwoBody
+        Position: *two_body_position
+    expect: *access_default_expect
+  from_orientation_vvlh:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3From
+        Orientation: &orientation_vvlh
+          $type: VVLH
+      ToObjectPath:
+        <<: *site_object
+    expect: *access_default_expect
+  from_orientation_lvlh:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3From
+        Orientation: &orientation_lvlh
+          $type: LVLH
+      ToObjectPath:
+        <<: *site_object
+    expect: *access_default_expect
+  from_orientation_vnc:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3From
+        Orientation: &orientation_vnc
+          $type: VNC
+      ToObjectPath:
+        <<: *site_object
+    expect: *access_default_expect
+  to_orientation_vvlh:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *site_object
+      ToObjectPath:
+        <<: *j2_object
+        Orientation: *orientation_vvlh
+    expect: *access_default_expect
+  to_orientation_lvlh:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *site_object
+      ToObjectPath:
+        <<: *j2_object
+        Orientation: *orientation_lvlh
+    expect: *access_default_expect
+  to_orientation_vnc:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *site_object
+      ToObjectPath:
+        <<: *j2_object
+        Orientation: *orientation_vnc
+    expect: *access_default_expect
+  from_sensor_conic:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3From
+        Sensor: &sensor_conic
+          $type: Conic
+          outerHalfAngle: 45.0
+      ToObjectPath:
+        <<: *site_object
+    expect: *access_default_expect
+  from_sensor_rectangular:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3From
+        Sensor: &sensor_rectangular
+          $type: Rectangular
+          xHalfAngle: 35.0
+          yHalfAngle: 25.0
+      ToObjectPath:
+        <<: *site_object
+    expect: *access_default_expect
+  to_sensor_conic:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *site_object
+      ToObjectPath:
+        <<: *j2_object
+        Sensor: *sensor_conic
+    expect: *access_default_expect
+  to_sensor_rectangular:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *site_object
+      ToObjectPath:
+        <<: *j2_object
+        Sensor: *sensor_rectangular
+    expect: *access_default_expect
+  from_sensor_pointing_fixed:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3From
+        Sensor: *sensor_conic
+        SensorPointing: &sensor_pointing_fixed
+          $type: Fixed
+          Orientation:
+            $type: AzEl
+            Azimuth: 0.0
+            Elevation: 90.0
+      ToObjectPath:
+        <<: *site_object
+    expect: *access_default_expect
+  to_sensor_pointing_fixed:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *site_object
+      ToObjectPath:
+        <<: *j2_object
+        Sensor: *sensor_conic
+        SensorPointing: *sensor_pointing_fixed
+    expect: *access_default_expect
+  from_constraints_range:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *site_object
+        Constraints:
+          - &constraint_range
+            $type: Range
+            MinimumValue: 0.0
+            MaximumValue: 50000.0
+            IsMaximumEnabled: true
+      ToObjectPath:
+        <<: *j2_object
+    expect: *access_default_expect
+  from_constraints_elevation_angle:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *site_object
+        Constraints:
+          - &constraint_elevation_angle
+            $type: ElevationAngle
+            MinimumValue: 0.0
+            IsMaximumEnabled: false
+      ToObjectPath:
+        <<: *j2_object
+    expect: *access_default_expect
+  from_constraints_az_el_mask:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *site_object
+        Constraints:
+          - &constraint_az_el_mask
+            $type: AzElMask
+            MaxRange: 50000.0
+            AzElMaskData:
+              - 0.0
+              - 0.0
+              - 1.5707963267948966
+              - 0.0
+              - 3.141592653589793
+              - 0.0
+              - 4.71238898038469
+              - 0.0
+              - 6.283185307179586
+              - 0.0
+      ToObjectPath:
+        <<: *j2_object
+    expect: *access_default_expect
+  to_constraints_range:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3From
+      ToObjectPath:
+        <<: *site_object
+        Constraints:
+          - *constraint_range
+    expect: *access_default_expect
+  to_constraints_elevation_angle:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3From
+      ToObjectPath:
+        <<: *site_object
+        Constraints:
+          - *constraint_elevation_angle
+    expect: *access_default_expect
+  to_constraints_az_el_mask:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3From
+      ToObjectPath:
+        <<: *site_object
+        Constraints:
+          - *constraint_az_el_mask
+    expect: *access_default_expect
+  from_lighting_direct_sun:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3From
+        Lighting: DirectSun
+      ToObjectPath:
+        <<: *site_object
+    expect: *access_default_expect
+  from_lighting_penumbra:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3From
+        Lighting: Penumbra
+      ToObjectPath:
+        <<: *site_object
+    expect: *access_default_expect
+  from_lighting_umbra:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3From
+        Lighting: Umbra
+      ToObjectPath:
+        <<: *site_object
+    expect: *access_default_expect
+  to_lighting_direct_sun:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *site_object
+      ToObjectPath:
+        <<: *j2_object
+        Lighting: DirectSun
+    expect: *access_default_expect
+  to_lighting_penumbra:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *site_object
+      ToObjectPath:
+        <<: *j2_object
+        Lighting: Penumbra
+    expect: *access_default_expect
+  to_lighting_umbra:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *site_object
+      ToObjectPath:
+        <<: *j2_object
+        Lighting: Umbra
+    expect: *access_default_expect
+  from_occultation_bodies_explicit:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *j2_object
+        Name: Satellite/Phase3From
+        OccultationBodies: &occultation_bodies_explicit
+          - Earth
+          - Moon
+      ToObjectPath:
+        <<: *site_object
+    expect: *access_default_expect
+  to_occultation_bodies_explicit:
+    request:
+      <<: *access_2024_window
+      FromObjectPath:
+        <<: *site_object
+      ToObjectPath:
+        <<: *j2_object
+        OccultationBodies: *occultation_bodies_explicit
     expect: *access_default_expect

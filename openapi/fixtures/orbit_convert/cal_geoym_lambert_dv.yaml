@@ -1,0 +1,34 @@
+schema_version: 1
+endpoint: /OrbitConvert/CalGEOYMLambertDv
+method: POST
+openapi_operation_id: null
+openapi_request_schema: GEOYMLambertInput
+openapi_response_schema: array
+branches:
+  nominal:
+    request:
+      keplerPt:
+        SemimajorAxis: 42164000.0
+        Eccentricity: 0.0
+        Inclination: 0.0
+        ArgumentOfPeriapsis: 0.0
+        RightAscensionOfAscendingNode: 0.0
+        TrueAnomaly: 0.0
+        GravitationalParameter: 398600441800000.0
+      keplerMb:
+        SemimajorAxis: 6778137.0
+        Eccentricity: 0.001
+        Inclination: 51.6
+        ArgumentOfPeriapsis: 0.0
+        RightAscensionOfAscendingNode: 0.0
+        TrueAnomaly: 0.0
+        GravitationalParameter: 398600441800000.0
+      tof: 3600.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_array
+        length: 6
+        items:
+          kind: json_number

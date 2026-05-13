@@ -1,0 +1,56 @@
+schema_version: 1
+endpoint: /Propagator/MultiSgp4
+method: POST
+openapi_operation_id: null
+openapi_request_schema: MultiSgp4Input
+openapi_response_schema: MultiSgp4Output
+branches:
+  nominal:
+    request:
+      Epoch: "2024-01-01T00:10:00.000Z"
+      TLEs:
+        - |-
+          1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9990
+          2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - AllElementsAtEpoch
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          AllElementsAtEpoch:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - SemimajorAxis
+                - Eccentricity
+                - Inclination
+                - ArgumentOfPeriapsis
+                - RightAscensionOfAscendingNode
+                - TrueAnomaly
+                - GravitationalParameter
+              fields:
+                SemimajorAxis:
+                  kind: json_number
+                Eccentricity:
+                  kind: json_number
+                Inclination:
+                  kind: json_number
+                ArgumentOfPeriapsis:
+                  kind: json_number
+                RightAscensionOfAscendingNode:
+                  kind: json_number
+                TrueAnomaly:
+                  kind: json_number
+                GravitationalParameter:
+                  kind: json_number

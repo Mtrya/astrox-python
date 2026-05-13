@@ -1,0 +1,53 @@
+schema_version: 1
+endpoint: /OrbitWizard/GEO
+method: POST
+openapi_operation_id: null
+openapi_request_schema: GEO_Input
+openapi_response_schema: GEO_Output
+branches:
+  nominal:
+    request:
+      OrbitEpoch: "2024-01-01T00:00:00.000Z"
+      Inclination: 0.1
+      SubSatellitePoint: 120.0
+    expect: &orbit_wizard_expect
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Elements_TOD
+          - Elements_Inertial
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Elements_TOD: &kepler_elements
+            kind: json_object
+            required_fields:
+              - SemimajorAxis
+              - Eccentricity
+              - Inclination
+              - ArgumentOfPeriapsis
+              - RightAscensionOfAscendingNode
+              - TrueAnomaly
+              - GravitationalParameter
+            fields:
+              SemimajorAxis:
+                kind: json_number
+              Eccentricity:
+                kind: json_number
+              Inclination:
+                kind: json_number
+              ArgumentOfPeriapsis:
+                kind: json_number
+              RightAscensionOfAscendingNode:
+                kind: json_number
+              TrueAnomaly:
+                kind: json_number
+              GravitationalParameter:
+                kind: json_number
+          Elements_Inertial: *kepler_elements

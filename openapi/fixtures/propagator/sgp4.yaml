@@ -1,0 +1,58 @@
+schema_version: 1
+endpoint: /Propagator/sgp4
+method: POST
+openapi_operation_id: null
+openapi_request_schema: EntityPositionSGP4
+openapi_response_schema: CzmlPositionOut
+branches:
+  nominal:
+    request:
+      Start: "2024-01-01T00:00:00.000Z"
+      Stop: "2024-01-01T00:10:00.000Z"
+      Step: 300.0
+      SatelliteNumber: "25544"
+      TLEs:
+        - 1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9990
+        - 2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Period
+          - Position
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Period:
+            kind: json_number
+          Position:
+            kind: json_object
+            required_fields:
+              - CentralBody
+              - cartesianVelocity
+              - epoch
+              - interpolationAlgorithm
+              - interpolationDegree
+              - referenceFrame
+            fields:
+              CentralBody:
+                kind: json_string
+              cartesianVelocity:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_number
+              epoch:
+                kind: json_string
+              interpolationAlgorithm:
+                kind: json_string
+              interpolationDegree:
+                kind: json_number
+              referenceFrame:
+                kind: json_string

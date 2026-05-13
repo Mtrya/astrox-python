@@ -6,9 +6,9 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 50
-- handled nominal endpoint fixtures: 48
-- handled branch-axis fixtures: 180
+- fixture endpoint records: 69
+- handled nominal endpoint fixtures: 67
+- handled branch-axis fixtures: 239
 
 Legend:
 
@@ -55,7 +55,8 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 - [x] `/Coverage/FOM/GridStatsOverTime/NumberOfAssets` nominal
 - [ ] `/Coverage/FOM/GridStatsOverTime/ResponseTime` nominal
   - blocked: small Coverage base payload plus targeted `Time`, longer-window,
-    and two-asset corrections return empty HTTP 500 with no content type.
+    `ComputeType=Maximum`, and two-asset corrections return empty HTTP 500
+    with no content type. Reprobed on 2026-05-13 with the current base payload.
 - [x] `/Coverage/FOM/GridStatsOverTime/RevisitTime` nominal
 - [x] `/Coverage/FOM/GridStatsOverTime/SimpleCoverage` nominal
 - [x] `/Coverage/FOM/ValueByGridPoint/CoverageTime` nominal
@@ -66,7 +67,8 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 - [x] `/Coverage/FOM/ValueByGridPointAtTime/NumberOfAssets` nominal
 - [ ] `/Coverage/FOM/ValueByGridPointAtTime/ResponseTime` nominal
   - blocked: endpoint requires `Time`, but valid-looking `Time` payloads
-    return empty HTTP 500 with no content type.
+    return empty HTTP 500 with no content type. Reprobed on 2026-05-13 with
+    baseline, `ComputeType=Maximum`, longer-window, and two-asset payloads.
 - [x] `/Coverage/FOM/ValueByGridPointAtTime/RevisitTime` nominal
 - [x] `/Coverage/FOM/ValueByGridPointAtTime/SimpleCoverage` nominal
 - [x] `/Coverage/GetGridPoints` nominal
@@ -79,46 +81,50 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 ### Landing Zone
 
-- [ ] `/LandingZone` nominal
+- [x] `/LandingZone` nominal
 
 ### Lighting
 
 - [x] `/Lighting/LightingTimes` nominal
-- [ ] `/Lighting/SolarAER` nominal
+- [x] `/Lighting/SolarAER` nominal
 - [x] `/Lighting/SolarIntensity` nominal
 
 ### Orbit Convert
 
-- [ ] `/OrbitConvert/CalGEOYMLambertDv` nominal
-- [ ] `/OrbitConvert/GetKozaiIzsakMeanElements` nominal
-- [ ] `/OrbitConvert/Kepler2LLAAtAscendNode` nominal
+- [x] `/OrbitConvert/CalGEOYMLambertDv` nominal
+- [x] `/OrbitConvert/GetKozaiIzsakMeanElements` nominal
+- [x] `/OrbitConvert/Kepler2LLAAtAscendNode` nominal
 - [x] `/OrbitConvert/Kepler2RV` nominal
 - [x] `/OrbitConvert/RV2Kepler` nominal
 
 ### Orbit System
 
 - [ ] `/OrbitSystem/CentralBodyFrame` nominal
-- [ ] `/OrbitSystem/EarthMoonLibration` nominal
-- [ ] `/OrbitSystem/EarthMoonLibration2` nominal
+  - blocked: endpoint requires `toCb` and `referenceFrame` as POST query
+    parameters, which the current fixture format cannot express for a
+    route/body fixture. A manual query-param probe with a minimal
+    `EntityPositionCzml3` body returns only a structured failure object.
+- [x] `/OrbitSystem/EarthMoonLibration` nominal failure-only wire shape
+- [x] `/OrbitSystem/EarthMoonLibration2` nominal failure-only wire shape
 
 ### Orbit Wizard
 
-- [ ] `/OrbitWizard/GEO` nominal
-- [ ] `/OrbitWizard/Molniya` nominal
-- [ ] `/OrbitWizard/SSO` nominal
+- [x] `/OrbitWizard/GEO` nominal
+- [x] `/OrbitWizard/Molniya` nominal
+- [x] `/OrbitWizard/SSO` nominal
 - [x] `/OrbitWizard/Walker` nominal
 
 ### Propagator
 
 - [x] `/Propagator/Ballistic` nominal
 - [x] `/Propagator/HPOP` nominal
-- [ ] `/Propagator/J2` nominal
-- [ ] `/Propagator/MultiJ2` nominal
-- [ ] `/Propagator/MultiSgp4` nominal
-- [ ] `/Propagator/MultiTwoBody` nominal
-- [ ] `/Propagator/SimpleAscent` nominal
-- [ ] `/Propagator/TwoBody` nominal
-- [ ] `/Propagator/sgp4` nominal
+- [x] `/Propagator/J2` nominal
+- [x] `/Propagator/MultiJ2` nominal
+- [x] `/Propagator/MultiSgp4` nominal
+- [x] `/Propagator/MultiTwoBody` nominal
+- [x] `/Propagator/SimpleAscent` nominal
+- [x] `/Propagator/TwoBody` nominal
+- [x] `/Propagator/sgp4` nominal
 
 ### Rocket
 
@@ -134,8 +140,8 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 ### Terrain
 
-- [ ] `/Terrain/AzElMask` nominal
-- [ ] `/Terrain/AzElMaskSimple` nominal
+- [x] `/Terrain/AzElMask` nominal failure-only wire shape
+- [x] `/Terrain/AzElMaskSimple` nominal failure-only wire shape
 
 ### Celestial
 
@@ -438,36 +444,50 @@ The following endpoints currently share the same discovered branch axes:
 - `/Coverage/Report/CoverageByAsset`
 - `/Coverage/Report/PercentCoverage`
 
-Required branch axes for each endpoint above:
+Required branch axes are tracked by endpoint context. These rows do not claim
+that a branch fixture under one Coverage endpoint is reusable across every
+Coverage/FOM/report endpoint.
 
-Unchecked endpoint-family matrix rows below are deferred deliberately. They
-would require endpoint-by-endpoint fixture records before they could be marked
-handled without overclaiming reusable Coverage payload coverage.
+Grid context:
 
-- [ ] `Grid.*` covers all Coverage Grid Variants (deferred: only
+- [ ] `Grid.*` covers all Coverage endpoint contexts (deferred: only
   `/Coverage/GetGridPoints` has all grid variants checked; this does not prove
   every Coverage/FOM/report endpoint accepts every grid payload.)
-- [ ] `Assets.Position.*` covers all Position Variants (deferred:
-  endpoint-family-wide asset position coverage would be a cross-product matrix,
-  not a single reusable branch.)
-- [ ] `Assets.Orientation.*` covers all Entity Orientation Variants (deferred:
-  no Coverage-family fixture currently proves all asset orientation variants.)
-- [ ] `Assets.Sensor.*` covers all Entity Sensor Variants (deferred: no
-  Coverage-family fixture currently proves all asset sensor variants.)
-- [ ] `Assets.SensorPointing.*` covers all Sensor Pointing Variants (deferred:
-  no Coverage-family fixture currently proves all asset sensor-pointing
-  variants.)
-- [ ] `Assets.Constraints.*` covers all Coverage Constraint Variants (deferred:
-  grid-point constraints are checked separately and do not imply asset
-  constraint coverage.)
-- [ ] `Assets.Lighting=DirectSun` (deferred: no Coverage-family fixture
-  currently proves asset lighting constraints.)
-- [ ] `Assets.Lighting=Penumbra` (deferred: no Coverage-family fixture
-  currently proves asset lighting constraints.)
-- [ ] `Assets.Lighting=Umbra` (deferred: no Coverage-family fixture currently
-  proves asset lighting constraints.)
-- [ ] `Assets.OccultationBodies=explicit` (deferred: no Coverage-family
-  fixture currently proves asset occultation-body handling.)
+
+`/Coverage/ComputeCoverage` asset context:
+
+- [x] `Assets.Position.$type=J2`
+- [x] `Assets.Position.$type=TwoBody`
+- [x] `Assets.Position.$type=SGP4`
+- [ ] `Assets.Position.*` remaining variants (deferred to PR 10 row-class
+  matrix work; `SitePosition` reprobe returned a structured `IsSuccess=false`
+  response rather than the nominal success shape.)
+- [x] `Assets.Orientation.$type=VVLH`
+- [x] `Assets.Orientation.$type=LVLH`
+- [x] `Assets.Orientation.$type=VNC`
+- [ ] `Assets.Orientation.*` remaining variants (deferred to PR 10; complex
+  orientation constructors require endpoint-context probes.)
+- [x] `Assets.Sensor.$type=Conic`
+- [x] `Assets.Sensor.$type=Rectangular`
+- [x] `Assets.SensorPointing.$type=Fixed`
+- [x] `Assets.Constraints.$type=Range`
+- [x] `Assets.Constraints.$type=ElevationAngle`
+- [x] `Assets.Constraints.$type=AzElMask` rejection shape for non-ground asset
+- [x] `Assets.Lighting=DirectSun`
+- [x] `Assets.Lighting=Penumbra`
+- [x] `Assets.Lighting=Umbra`
+- [x] `Assets.OccultationBodies=explicit`
+
+Deferred Coverage asset endpoint contexts:
+
+- [ ] FOM GridStats asset matrix rows (deferred to PR 10; no fixture in this
+  endpoint class proves the ComputeCoverage asset variants are accepted there.)
+- [ ] FOM GridStatsOverTime asset matrix rows (deferred to PR 10; includes the
+  still-blocked ResponseTime endpoint.)
+- [ ] FOM ValueByGridPoint asset matrix rows (deferred to PR 10.)
+- [ ] FOM ValueByGridPointAtTime asset matrix rows (deferred to PR 10; includes
+  the still-blocked ResponseTime endpoint.)
+- [ ] Coverage report asset matrix rows (deferred to PR 10.)
 - [x] `GridPointSensor.*` covers all Coverage Sensor Variants
 - [x] `GridPointConstraints.*` covers all Coverage Constraint Variants
 - [x] `FilterType=AtLeastN`
@@ -638,43 +658,46 @@ initial, lower-bound, and upper-bound arrays.
 
 - [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=J2`
 - [x] `FromObjectPath.Position.$type=J2 -> ToObjectPath.Position.$type=SitePosition`
+- [x] `FromObjectPath.Position.$type=SGP4 -> ToObjectPath.Position.$type=SitePosition`
+- [x] `FromObjectPath.Position.$type=TwoBody -> ToObjectPath.Position.$type=SitePosition`
 - [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=SGP4`
-- [ ] other `FromObjectPath.Position.* -> ToObjectPath.Position.*` pairs
-  deferred: exhaustive position-pair cross-product coverage is out of scope.
-- [ ] `FromObjectPath.Orientation.*` covers all Entity Orientation Variants
-  deferred: no AccessComputeV2 fixture proves the full orientation matrix.
-- [ ] `FromObjectPath.Sensor.*` covers all Entity Sensor Variants deferred: no
-  AccessComputeV2 fixture proves the full sensor matrix.
-- [ ] `FromObjectPath.SensorPointing.*` covers all Sensor Pointing Variants
-  deferred: no AccessComputeV2 fixture proves the full sensor-pointing matrix.
-- [ ] `FromObjectPath.Constraints.*` covers all Coverage Constraint Variants
-  deferred: no AccessComputeV2 fixture proves the full constraint matrix.
-- [ ] `FromObjectPath.Lighting=DirectSun` deferred: no AccessComputeV2 fixture
-  proves from-object lighting constraints.
-- [ ] `FromObjectPath.Lighting=Penumbra` deferred: no AccessComputeV2 fixture
-  proves from-object lighting constraints.
-- [ ] `FromObjectPath.Lighting=Umbra` deferred: no AccessComputeV2 fixture
-  proves from-object lighting constraints.
-- [ ] `FromObjectPath.OccultationBodies=explicit` deferred: no AccessComputeV2
-  fixture proves from-object occultation bodies.
-- [ ] `ToObjectPath.Position.*` covers all Position Variants deferred:
-  exhaustive position-pair cross-product coverage is out of scope.
-- [ ] `ToObjectPath.Orientation.*` covers all Entity Orientation Variants
-  deferred: no AccessComputeV2 fixture proves the full orientation matrix.
-- [ ] `ToObjectPath.Sensor.*` covers all Entity Sensor Variants deferred: no
-  AccessComputeV2 fixture proves the full sensor matrix.
-- [ ] `ToObjectPath.SensorPointing.*` covers all Sensor Pointing Variants
-  deferred: no AccessComputeV2 fixture proves the full sensor-pointing matrix.
-- [ ] `ToObjectPath.Constraints.*` covers all Coverage Constraint Variants
-  deferred: no AccessComputeV2 fixture proves the full constraint matrix.
-- [ ] `ToObjectPath.Lighting=DirectSun` deferred: no AccessComputeV2 fixture
-  proves to-object lighting constraints.
-- [ ] `ToObjectPath.Lighting=Penumbra` deferred: no AccessComputeV2 fixture
-  proves to-object lighting constraints.
-- [ ] `ToObjectPath.Lighting=Umbra` deferred: no AccessComputeV2 fixture
-  proves to-object lighting constraints.
-- [ ] `ToObjectPath.OccultationBodies=explicit` deferred: no AccessComputeV2
-  fixture proves to-object occultation bodies.
+- [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=TwoBody`
+- [ ] remaining `FromObjectPath.Position.* -> ToObjectPath.Position.*` pairs
+  deferred: exhaustive position-pair cross-product coverage is out of scope;
+  AstrogatorMCS, HPOP, SimpleAscent, Ballistic, CentralBody, CzmlPositions, and
+  CzmlPosition need endpoint-specific construction work.
+- [x] `FromObjectPath.Orientation.$type=VVLH`
+- [x] `FromObjectPath.Orientation.$type=LVLH`
+- [x] `FromObjectPath.Orientation.$type=VNC`
+- [ ] `FromObjectPath.Orientation.*` remaining constructors deferred:
+  FixedAtEpoch, Composite, Fixed, AlignedAndConstrained, and CzmlOrientation
+  need endpoint-context probes.
+- [x] `FromObjectPath.Sensor.$type=Conic`
+- [x] `FromObjectPath.Sensor.$type=Rectangular`
+- [x] `FromObjectPath.SensorPointing.$type=Fixed`
+- [x] `FromObjectPath.Constraints.$type=Range`
+- [x] `FromObjectPath.Constraints.$type=ElevationAngle`
+- [x] `FromObjectPath.Constraints.$type=AzElMask`
+- [x] `FromObjectPath.Lighting=DirectSun`
+- [x] `FromObjectPath.Lighting=Penumbra`
+- [x] `FromObjectPath.Lighting=Umbra`
+- [x] `FromObjectPath.OccultationBodies=explicit`
+- [x] `ToObjectPath.Orientation.$type=VVLH`
+- [x] `ToObjectPath.Orientation.$type=LVLH`
+- [x] `ToObjectPath.Orientation.$type=VNC`
+- [ ] `ToObjectPath.Orientation.*` remaining constructors deferred:
+  FixedAtEpoch, Composite, Fixed, AlignedAndConstrained, and CzmlOrientation
+  need endpoint-context probes.
+- [x] `ToObjectPath.Sensor.$type=Conic`
+- [x] `ToObjectPath.Sensor.$type=Rectangular`
+- [x] `ToObjectPath.SensorPointing.$type=Fixed`
+- [x] `ToObjectPath.Constraints.$type=Range`
+- [x] `ToObjectPath.Constraints.$type=ElevationAngle`
+- [x] `ToObjectPath.Constraints.$type=AzElMask`
+- [x] `ToObjectPath.Lighting=DirectSun`
+- [x] `ToObjectPath.Lighting=Penumbra`
+- [x] `ToObjectPath.Lighting=Umbra`
+- [x] `ToObjectPath.OccultationBodies=explicit`
 - [x] `ComputeAER=true`
 - [x] `UseLightTimeDelay=true`
 
@@ -682,24 +705,29 @@ initial, lower-bound, and upper-bound arrays.
 
 - [x] `AllObjects.$type=EntityPath`
 - [x] `AllObjects.$type=EntityPathGroup` failure-only wire shape
-- [ ] `AllObjects.Position.*` covers all Position Variants deferred:
-  ChainCompute has not verified every position variant in the chain context.
-- [ ] `AllObjects.Orientation.*` covers all Entity Orientation Variants
-  deferred: ChainCompute has not verified the full orientation matrix.
-- [ ] `AllObjects.Sensor.*` covers all Entity Sensor Variants deferred:
-  ChainCompute has not verified the full sensor matrix.
-- [ ] `AllObjects.SensorPointing.*` covers all Sensor Pointing Variants
-  deferred: ChainCompute has not verified the full sensor-pointing matrix.
-- [ ] `AllObjects.Constraints.*` covers all Coverage Constraint Variants
-  deferred: ChainCompute has not verified the full constraint matrix.
-- [ ] `AllObjects.Lighting=DirectSun` deferred: ChainCompute has not verified
-  all-object lighting constraints.
-- [ ] `AllObjects.Lighting=Penumbra` deferred: ChainCompute has not verified
-  all-object lighting constraints.
-- [ ] `AllObjects.Lighting=Umbra` deferred: ChainCompute has not verified
-  all-object lighting constraints.
-- [ ] `AllObjects.OccultationBodies=explicit` deferred: ChainCompute has not
-  verified all-object occultation bodies.
+- [x] `AllObjects.Position.$type=SitePosition`
+- [x] `AllObjects.Position.$type=J2`
+- [x] `AllObjects.Position.$type=SGP4`
+- [x] `AllObjects.Position.$type=TwoBody`
+- [ ] `AllObjects.Position.*` remaining variants deferred: AstrogatorMCS,
+  HPOP, SimpleAscent, Ballistic, CentralBody, CzmlPositions, and CzmlPosition
+  need endpoint-specific construction work.
+- [x] `AllObjects.Orientation.$type=VVLH`
+- [x] `AllObjects.Orientation.$type=LVLH`
+- [x] `AllObjects.Orientation.$type=VNC`
+- [ ] `AllObjects.Orientation.*` remaining constructors deferred:
+  FixedAtEpoch, Composite, Fixed, AlignedAndConstrained, and CzmlOrientation
+  need endpoint-context probes.
+- [x] `AllObjects.Sensor.$type=Conic`
+- [x] `AllObjects.Sensor.$type=Rectangular`
+- [x] `AllObjects.SensorPointing.$type=Fixed`
+- [x] `AllObjects.Constraints.$type=Range`
+- [x] `AllObjects.Constraints.$type=ElevationAngle`
+- [x] `AllObjects.Constraints.$type=AzElMask`
+- [x] `AllObjects.Lighting=DirectSun`
+- [x] `AllObjects.Lighting=Penumbra`
+- [x] `AllObjects.Lighting=Umbra`
+- [x] `AllObjects.OccultationBodies=explicit`
 - [x] `EntityPathGroup.FromAccess_Restriction=AnyOf` failure-only wire shape
 - [x] `EntityPathGroup.FromAccess_Restriction=AtLeastN` failure-only wire shape
 - [x] `EntityPathGroup.ToAccess_Restriction=AnyOf` failure-only wire shape
@@ -716,28 +744,29 @@ the current heuristics did not identify branch axes.
 
 - [x] `/CAT/DebrisBreakupNASA`
 - [x] `/CAT/LifeTimeTLE`
-- [ ] `/LandingZone`
-- [ ] `/Lighting/SolarAER`
-- [ ] `/OrbitConvert/CalGEOYMLambertDv`
-- [ ] `/OrbitConvert/GetKozaiIzsakMeanElements`
-- [ ] `/OrbitConvert/Kepler2LLAAtAscendNode`
+- [x] `/LandingZone`
+- [x] `/Lighting/SolarAER`
+- [x] `/OrbitConvert/CalGEOYMLambertDv`
+- [x] `/OrbitConvert/GetKozaiIzsakMeanElements`
+- [x] `/OrbitConvert/Kepler2LLAAtAscendNode`
 - [x] `/OrbitConvert/Kepler2RV`
 - [x] `/OrbitConvert/RV2Kepler`
-- [ ] `/OrbitSystem/CentralBodyFrame`
-- [ ] `/OrbitSystem/EarthMoonLibration`
-- [ ] `/OrbitSystem/EarthMoonLibration2`
-- [ ] `/OrbitWizard/GEO`
-- [ ] `/OrbitWizard/Molniya`
-- [ ] `/OrbitWizard/SSO`
-- [ ] `/Propagator/J2`
-- [ ] `/Propagator/MultiJ2`
-- [ ] `/Propagator/MultiSgp4`
-- [ ] `/Propagator/MultiTwoBody`
-- [ ] `/Propagator/SimpleAscent`
-- [ ] `/Propagator/TwoBody`
-- [ ] `/Propagator/sgp4`
-- [ ] `/Terrain/AzElMask`
-- [ ] `/Terrain/AzElMaskSimple`
+- [ ] `/OrbitSystem/CentralBodyFrame` blocked: POST query params are required
+  but not representable in the current route/body fixture format.
+- [x] `/OrbitSystem/EarthMoonLibration` failure-only wire shape
+- [x] `/OrbitSystem/EarthMoonLibration2` failure-only wire shape
+- [x] `/OrbitWizard/GEO`
+- [x] `/OrbitWizard/Molniya`
+- [x] `/OrbitWizard/SSO`
+- [x] `/Propagator/J2`
+- [x] `/Propagator/MultiJ2`
+- [x] `/Propagator/MultiSgp4`
+- [x] `/Propagator/MultiTwoBody`
+- [x] `/Propagator/SimpleAscent`
+- [x] `/Propagator/TwoBody`
+- [x] `/Propagator/sgp4`
+- [x] `/Terrain/AzElMask` failure-only wire shape
+- [x] `/Terrain/AzElMaskSimple` failure-only wire shape
 - [x] `/WeatherForecast`
 - [x] `/facility`
 - [x] `/satcat`

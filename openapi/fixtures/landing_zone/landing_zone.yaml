@@ -1,0 +1,45 @@
+schema_version: 1
+endpoint: /LandingZone
+method: POST
+openapi_operation_id: null
+openapi_request_schema: LandingZoneInput
+openapi_response_schema: LandingZoneOuput
+branches:
+  nominal:
+    request:
+      FaSheDian:
+        - 100.0
+        - 30.0
+        - 0.0
+      LuoDian:
+        - 101.0
+        - 31.0
+        - 0.0
+      ZoneXYs:
+        - 0.0
+        - 0.0
+        - 10.0
+        - 0.0
+        - 10.0
+        - 10.0
+        - 0.0
+        - 10.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - cartographicDegrees
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          cartographicDegrees:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_number
