@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 50
 - handled nominal endpoint fixtures: 48
-- handled branch-axis fixtures: 190
+- handled branch-axis fixtures: 180
 
 Legend:
 
