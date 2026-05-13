@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 69
 - handled nominal endpoint fixtures: 67
-- handled branch-axis fixtures: 239
+- handled branch-axis fixtures: 253
 
 Legend:
 
@@ -562,18 +562,13 @@ unchecked.
 - [x] `Position.$type=J2`
 - [x] `Position.$type=SGP4`
 - [x] `Position.$type=TwoBody`
-- [ ] `Position.$type=AstrogatorMCS` deferred
-- [ ] `Position.$type=HPOP` deferred
-- [ ] `Position.$type=SimpleAscent` deferred
-- [ ] `Position.$type=Ballistic` deferred
-- [ ] `Position.$type=CentralBody` deferred
-- [ ] `Position.$type=CzmlPositions` deferred
-- [ ] `Position.$type=CzmlPosition` deferred
-
-Unchecked Lighting position variants remain deferred because endpoint-specific
-live fixtures have not verified them yet; PR 09 only checked explicit
-occultation bodies on already-working position payloads.
-
+- [x] `Position.$type=AstrogatorMCS`
+- [x] `Position.$type=HPOP`
+- [x] `Position.$type=SimpleAscent`
+- [x] `Position.$type=Ballistic`
+- [x] `Position.$type=CentralBody`
+- [x] `Position.$type=CzmlPositions`
+- [x] `Position.$type=CzmlPosition`
 - [x] `OccultationBodies=explicit`
 
 ### `/Lighting/SolarIntensity`
@@ -582,13 +577,13 @@ occultation bodies on already-working position payloads.
 - [x] `Position.$type=J2`
 - [x] `Position.$type=SGP4`
 - [x] `Position.$type=TwoBody`
-- [ ] `Position.$type=AstrogatorMCS` deferred
-- [ ] `Position.$type=HPOP` deferred
-- [ ] `Position.$type=SimpleAscent` deferred
-- [ ] `Position.$type=Ballistic` deferred
-- [ ] `Position.$type=CentralBody` deferred
-- [ ] `Position.$type=CzmlPositions` deferred
-- [ ] `Position.$type=CzmlPosition` deferred
+- [x] `Position.$type=AstrogatorMCS`
+- [x] `Position.$type=HPOP`
+- [x] `Position.$type=SimpleAscent`
+- [x] `Position.$type=Ballistic`
+- [x] `Position.$type=CentralBody`
+- [x] `Position.$type=CzmlPositions`
+- [x] `Position.$type=CzmlPosition`
 - [x] `OccultationBodies=explicit`
 
 ### `/Propagator/Ballistic`
