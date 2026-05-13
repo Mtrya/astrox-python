@@ -6,9 +6,9 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 47
-- handled nominal endpoint fixtures: 45
-- handled branch-axis fixtures: 84
+- fixture endpoint records: 48
+- handled nominal endpoint fixtures: 46
+- handled branch-axis fixtures: 148
 
 Legend:
 
@@ -32,7 +32,7 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 ### Astrogator
 
-- [ ] `/Astrogator/RunMCS` nominal
+- [x] `/Astrogator/RunMCS` nominal
 
 ### CAT
 
@@ -256,36 +256,111 @@ where it is claimed.
 
 ### `/Astrogator/RunMCS`
 
-- [ ] `MainSequence.$type=Sequence`
+- [x] `MainSequence.$type=Sequence`
 - [ ] `MainSequence.$type=Follow`
-- [ ] `MainSequence.$type=ManeuverFinite`
-- [ ] `MainSequence.$type=ManeuverImpulsive`
-- [ ] `MainSequence.$type=InitialState`
+  - blocked: minimal `Follow` plus targeted `Entities` leader probes using J2
+    and AstrogatorMCS-shaped positions still return `Start Stop` construction
+    errors for the leader position, so the required leader context remains
+    unclear.
+- [x] `MainSequence.$type=ManeuverFinite`
+- [x] `MainSequence.$type=ManeuverImpulsive`
+- [x] `MainSequence.$type=InitialState`
 - [ ] `MainSequence.$type=TargetSequence`
-- [ ] `MainSequence.$type=Propagate`
-- [ ] `MainSequence.$type=Stop`
-- [ ] `MainSequence.Results.$type.*` covers all CalcScalar variants
-- [ ] `MainSequence.StopConditions.$type.*` covers all stopping condition variants
+  - blocked: minimal `TargetSequence` and DifferentialCorrector-shaped
+    `Profiles`/`Segments` probes return internal `Operators`/`Variables`
+    empty-list errors; the accepted target-operator construction is unclear.
+- [x] `MainSequence.$type=Propagate`
+- [x] `MainSequence.$type=Stop`
+Result branches below verify accepted request/response wire shape on a minimal
+`InitialState` segment. They do not assert that every selector yields a
+non-empty named result in that minimal context.
+
+- [ ] `MainSequence.Results.$type=BPlane`
+  - blocked: minimal `InitialState` and `Propagate` result probes return an
+    empty response with no content type.
+- [x] `MainSequence.Results.$type=Epoch`
+- [x] `MainSequence.Results.$type=Relative`
+- [x] `MainSequence.Results.$type=Duration`
+- [x] `MainSequence.Results.$type=Cartographic`
+- [x] `MainSequence.Results.$type=SphericalElement`
+- [x] `MainSequence.Results.$type=DeltaSpherical`
+- [x] `MainSequence.Results.$type=ModifiedKeplerianElement`
+- [x] `MainSequence.Results.$type=PointElement`
+- [x] `MainSequence.Results.$type=KeplerianElement`
+
+- [x] `MainSequence.StopConditions.$type=Duration`
+- [x] `MainSequence.StopConditions.$type=Epoch`
+- [x] `MainSequence.StopConditions.$type=Apoapsis`
+- [x] `MainSequence.StopConditions.$type=Periapsis`
+- [x] `MainSequence.StopConditions.$type=Scalar` failure-only wire shape
+
 - [ ] `MainSequence.JoiningConditions.$type.*` covers all stopping condition variants
-- [ ] `MainSequence.AttitudeControl.$type.*` covers all Attitude Control Variants
-- [ ] `MainSequence.InitialState.Element.$type.*` covers all State Element Variants
-- [ ] `Entities.Position.*` covers all Position Variants
-- [ ] `Entities.Orientation.*` covers all Entity Orientation Variants
-- [ ] `Entities.Sensor.*` covers all Entity Sensor Variants
-- [ ] `Entities.SensorPointing.*` covers all Sensor Pointing Variants
-- [ ] `Entities.Constraints.*` covers all Coverage Constraint Variants
-- [ ] `Entities.Lighting=DirectSun`
-- [ ] `Entities.Lighting=Penumbra`
-- [ ] `Entities.Lighting=Umbra`
-- [ ] `Entities.OccultationBodies=explicit`
-- [ ] `Propagators.NumericalIntegrator.$type=RKF7th8th`
-- [ ] `Propagators.GravityModel.$type=GravityField`
-- [ ] `Propagators.GravityModel.$type=TwoBody`
-- [ ] `Propagators.AtmosphericModel.$type=JacchiaRoberts`
-- [ ] `Propagators.SRPModel.$type=SRPSpherical`
-- [ ] `EngineModels.$type=EngineConstAcc`
-- [ ] `EngineModels.$type=EngineConstant`
-- [ ] `ComputeCzmlPositions=true`
+  - blocked: `Follow` construction still fails before `JoiningConditions` are
+    reached, even with SitePosition, CzmlPosition, and fully windowed J2 leader
+    entity probes.
+
+Attitude-control branches below are standalone `ManeuverImpulsive` probes. They
+do not claim every finite/impulsive maneuver context accepts every attitude
+payload shape.
+
+- [x] `MainSequence.AttitudeControl.$type=AntiVelocityVector`
+- [x] `MainSequence.AttitudeControl.$type=Attitude`
+- [x] `MainSequence.AttitudeControl.$type=VelocityVector`
+- [x] `MainSequence.AttitudeControl.$type=ThrustVector`
+
+- [x] `MainSequence.InitialState.Element.$type=Cartesian`
+- [x] `MainSequence.InitialState.Element.$type=Keplerian`
+- [x] `MainSequence.InitialState.Element.$type=Spherical`
+The `Entities.Position.*` branches below are standalone nominal-MCS probes.
+They do not claim cross-product coverage with `Follow`, constraints, sensors,
+or other `MainSequence` variants.
+
+- [x] `Entities.Position.$type=SitePosition`
+- [x] `Entities.Position.$type=J2`
+- [x] `Entities.Position.$type=SGP4`
+- [x] `Entities.Position.$type=TwoBody`
+- [x] `Entities.Position.$type=AstrogatorMCS`
+- [x] `Entities.Position.$type=HPOP`
+- [x] `Entities.Position.$type=SimpleAscent`
+- [x] `Entities.Position.$type=Ballistic`
+- [x] `Entities.Position.$type=CentralBody`
+- [x] `Entities.Position.$type=CzmlPosition`
+- [x] `Entities.Position.$type=CzmlPositions`
+
+The entity-context branches below are standalone nominal-MCS probes with a
+single `SitePosition` entity unless noted. They do not claim reusable branch
+coverage outside `/Astrogator/RunMCS` or cross-product coverage with every
+position or sequence subtype.
+
+- [x] `Entities.Orientation.$type=FixedAtEpoch`
+- [x] `Entities.Orientation.$type=Composite`
+- [x] `Entities.Orientation.$type=Fixed`
+- [x] `Entities.Orientation.$type=VNC`
+- [x] `Entities.Orientation.$type=AlignedAndConstrained`
+- [x] `Entities.Orientation.$type=LVLH`
+- [x] `Entities.Orientation.$type=VVLH`
+- [x] `Entities.Orientation.$type=CzmlOrientation`
+- [x] `Entities.Sensor.$type=Conic`
+- [x] `Entities.Sensor.$type=Rectangular`
+- [x] `Entities.SensorPointing.$type=Fixed`
+- [x] `Entities.Constraints.$type=AzElMask`
+- [x] `Entities.Constraints.$type=Range`
+- [x] `Entities.Constraints.$type=ElevationAngle`
+- [x] `Entities.Lighting=DirectSun`
+- [x] `Entities.Lighting=Penumbra`
+- [x] `Entities.Lighting=Umbra`
+- [x] `Entities.OccultationBodies=explicit`
+- [x] `Propagators.NumericalIntegrator.$type=RKF7th8th`
+- [x] `Propagators.GravityModel.$type=GravityField`
+- [x] `Propagators.GravityModel.$type=TwoBody`
+- [x] `Propagators.AtmosphericModel.$type=JacchiaRoberts`
+- [x] `Propagators.SRPModel.$type=SRPSpherical`
+- [x] `EngineModels.$type=EngineConstAcc`
+- [x] `EngineModels.$type=EngineConstant`
+  - note: engine model branches are accepted as standalone root `EngineModels`
+    entries on the nominal MCS payload. This does not claim all maneuver
+    consumers accept every engine model.
+- [x] `ComputeCzmlPositions=true`
 
 ### `/CAT/CA_ComputeV3`
 
