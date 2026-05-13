@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 70
 - handled nominal endpoint fixtures: 68
-- handled branch-axis fixtures: 286
+- handled branch-axis fixtures: 307
 
 Legend:
 
@@ -469,29 +469,36 @@ coverage was verified.
 
 Grid context:
 
-- [ ] Coverage grid matrix representative rows and columns
-  - row contexts: `/Coverage/GetGridPoints`, `/Coverage/ComputeCoverage`, FOM
+- [x] Coverage grid matrix representative rows and columns
+  - representative `N + M` only: `/Coverage/GetGridPoints` and
+    `/Coverage/ComputeCoverage` have all four grid variants checked, while FOM
     GridStats, FOM GridStatsOverTime, FOM ValueByGridPoint, FOM
-    ValueByGridPointAtTime, and Coverage report endpoints.
-  - column variants: `CbLatLonBounds`, `Global`, `LatitudeBounds`, and
-    `LatLonBounds`.
-  - deferred: `/Coverage/GetGridPoints` has all grid variants checked, but this
-    does not prove every Coverage/FOM/report endpoint accepts every grid
-    payload.
+    ValueByGridPointAtTime, and Coverage report rows are represented by their
+    nominal `LatitudeBounds` fixture records.
+  - this does not claim every Coverage/FOM/report endpoint accepts every grid
+    variant.
 
 `/Coverage/ComputeCoverage` asset context:
 
+- [x] `Assets.Position.$type=SitePosition` failure-only wire shape
 - [x] `Assets.Position.$type=J2`
 - [x] `Assets.Position.$type=TwoBody`
 - [x] `Assets.Position.$type=SGP4`
-- [ ] `Assets.Position.*` remaining variants (deferred to PR 10 row-class
-  matrix work; `SitePosition` reprobe returned a structured `IsSuccess=false`
-  response rather than the nominal success shape.)
+- [x] `Assets.Position.$type=AstrogatorMCS`
+- [x] `Assets.Position.$type=HPOP`
+- [x] `Assets.Position.$type=SimpleAscent` failure-only wire shape
+- [x] `Assets.Position.$type=Ballistic` failure-only wire shape
+- [x] `Assets.Position.$type=CentralBody` failure-only wire shape
+- [x] `Assets.Position.$type=CzmlPositions`
+- [x] `Assets.Position.$type=CzmlPosition`
+- [x] `Assets.Orientation.$type=FixedAtEpoch`
+- [x] `Assets.Orientation.$type=Composite`
+- [x] `Assets.Orientation.$type=Fixed`
 - [x] `Assets.Orientation.$type=VVLH`
 - [x] `Assets.Orientation.$type=LVLH`
 - [x] `Assets.Orientation.$type=VNC`
-- [ ] `Assets.Orientation.*` remaining variants (deferred to PR 10; complex
-  orientation constructors require endpoint-context probes.)
+- [x] `Assets.Orientation.$type=AlignedAndConstrained` failure-only wire shape
+- [x] `Assets.Orientation.$type=CzmlOrientation`
 - [x] `Assets.Sensor.$type=Conic`
 - [x] `Assets.Sensor.$type=Rectangular`
 - [x] `Assets.SensorPointing.$type=Fixed`
@@ -503,19 +510,21 @@ Grid context:
 - [x] `Assets.Lighting=Umbra`
 - [x] `Assets.OccultationBodies=explicit`
 
-Deferred Coverage asset matrix row contexts:
+Coverage asset matrix row contexts:
 
-- [ ] FOM GridStats asset row context (deferred to PR 10 representative matrix
-  work; no fixture in this endpoint class proves the ComputeCoverage asset
-  variants are accepted there.)
-- [ ] FOM GridStatsOverTime asset row context (deferred to PR 10
-  representative matrix work; includes the still-blocked ResponseTime endpoint.)
-- [ ] FOM ValueByGridPoint asset row context (deferred to PR 10 representative
-  matrix work.)
-- [ ] FOM ValueByGridPointAtTime asset row context (deferred to PR 10
-  representative matrix work; includes the still-blocked ResponseTime endpoint.)
-- [ ] Coverage report asset row context (deferred to PR 10 representative
-  matrix work.)
+- [x] FOM GridStats asset row context representative `Assets.Position.$type=TwoBody`
+- [x] FOM GridStatsOverTime asset row context representative
+  `Assets.Position.$type=TwoBody`
+- [x] FOM ValueByGridPoint asset row context representative
+  `Assets.Position.$type=TwoBody`
+- [x] FOM ValueByGridPointAtTime asset row context representative
+  `Assets.Position.$type=TwoBody`
+- [x] Coverage report asset row context representative
+  `Assets.Position.$type=TwoBody`
+- representative `N + M` only: `/Coverage/ComputeCoverage` carries the
+  option-value column evidence, while the FOM/report rows carry one checked
+  non-default asset representative each. This does not claim every Coverage
+  endpoint row accepts every asset option.
 - [x] `GridPointSensor.*` covers all Coverage Sensor Variants
 - [x] `GridPointConstraints.*` covers all Coverage Constraint Variants
 - [x] `FilterType=AtLeastN`
