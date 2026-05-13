@@ -1,0 +1,104 @@
+schema_version: 1
+endpoint: /InterfaceClass
+method: POST
+openapi_operation_id: null
+openapi_request_schema: InterfaceInput
+openapi_response_schema: string
+branches:
+  finite_attitude_euler_angles:
+    request:
+      AgVAAttitudeControlFiniteAttitude:
+        CoordType: EulerAngles
+        RefAxesName: VNC(Earth)
+        A: 0.0
+        B: 0.0
+        C: 0.0
+        Sequence: "313"
+    expect: &validation_problem_expect
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
+  finite_attitude_quaternion:
+    request:
+      AgVAAttitudeControlFiniteAttitude:
+        CoordType: Quaternion
+        RefAxesName: VNC(Earth)
+        QX: 0.0
+        QY: 0.0
+        QZ: 0.0
+        QS: 1.0
+    expect: *validation_problem_expect
+  finite_thrust_vector_cartesian:
+    request:
+      AgVAAttitudeControlFiniteThrustVector:
+        CoordType: Cartesian
+        ThrustAxesName: VNC(Earth)
+        X: 1.0
+        Y: 0.0
+        Z: 0.0
+    expect: *validation_problem_expect
+  finite_thrust_vector_spherical:
+    request:
+      AgVAAttitudeControlFiniteThrustVector:
+        CoordType: Spherical
+        ThrustAxesName: VNC(Earth)
+        Azimuth: 0.0
+        Elevation: 0.0
+    expect: *validation_problem_expect
+  impulsive_attitude_euler_angles:
+    request:
+      AgVAAttitudeControlImpulsiveAttitude:
+        DeltaVMagnitude: 1.0
+        CoordType: EulerAngles
+        RefAxesName: VNC(Earth)
+        A: 0.0
+        B: 0.0
+        C: 0.0
+        Sequence: "313"
+    expect: *validation_problem_expect
+  impulsive_attitude_quaternion:
+    request:
+      AgVAAttitudeControlImpulsiveAttitude:
+        DeltaVMagnitude: 1.0
+        CoordType: Quaternion
+        RefAxesName: VNC(Earth)
+        QX: 0.0
+        QY: 0.0
+        QZ: 0.0
+        QS: 1.0
+    expect: *validation_problem_expect
+  impulsive_thrust_vector_cartesian:
+    request:
+      AgVAAttitudeControlImpulsiveThrustVector:
+        CoordType: Cartesian
+        ThrustAxesName: VNC(Earth)
+        Magnitude: 1.0
+        X: 1.0
+        Y: 0.0
+        Z: 0.0
+    expect: *validation_problem_expect
+  impulsive_thrust_vector_spherical:
+    request:
+      AgVAAttitudeControlImpulsiveThrustVector:
+        CoordType: Spherical
+        ThrustAxesName: VNC(Earth)
+        Magnitude: 1.0
+        Azimuth: 0.0
+        Elevation: 0.0
+    expect: *validation_problem_expect

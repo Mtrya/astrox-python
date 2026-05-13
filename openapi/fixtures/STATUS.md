@@ -6,9 +6,9 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 44
-- handled nominal endpoint fixtures: 43
-- handled branch-axis fixtures: 36
+- fixture endpoint records: 47
+- handled nominal endpoint fixtures: 45
+- handled branch-axis fixtures: 58
 
 Legend:
 
@@ -123,8 +123,14 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 ### Rocket
 
 - [ ] `/Rocket/RocketGuid` nominal
-- [ ] `/Rocket/RocketLanding` nominal
-- [ ] `/Rocket/RocketSegmentFA` nominal
+  - blocked: all documented root `$type` values (`CZ2CD`, `KZ1A`,
+    `CZ7A`, `CZ3BC`, `CZ4BC`) return empty HTTP 500 responses with no content
+    type for minimal, example-derived, and fully populated schema-shaped
+    payload probes. Invalid discriminator values return structured HTTP 400,
+    so the server appears to recognize the documented discriminator names
+    before failing inside endpoint execution.
+- [x] `/Rocket/RocketLanding` nominal failure-only wire shape
+- [x] `/Rocket/RocketSegmentFA` nominal failure-only wire shape
 
 ### Terrain
 
@@ -385,22 +391,29 @@ Additional FOM endpoint branch axes:
 
 ### `/InterfaceClass`
 
+Coordinate branches below are validation-boundary fixtures. Minimal
+single-coordinate payloads verify live as structured `application/problem+json`
+responses because the server requires many unrelated `InterfaceInput`
+properties before execution. A full schema-shaped payload currently reaches an
+empty HTTP 500 with no content type, so `/InterfaceClass` nominal remains
+unchecked.
+
 - [ ] `AgVAAttitudeControlFinite.$type=AntiVelocityVector`
 - [ ] `AgVAAttitudeControlFinite.$type=Attitude`
 - [ ] `AgVAAttitudeControlFinite.$type=VelocityVector`
 - [ ] `AgVAAttitudeControlFinite.$type=ThrustVector`
-- [ ] `AgVAAttitudeControlFiniteAttitude.CoordType=EulerAngles`
-- [ ] `AgVAAttitudeControlFiniteAttitude.CoordType=Quaternion`
-- [ ] `AgVAAttitudeControlFiniteThrustVector.CoordType=Cartesian`
-- [ ] `AgVAAttitudeControlFiniteThrustVector.CoordType=Spherical`
+- [x] `AgVAAttitudeControlFiniteAttitude.CoordType=EulerAngles` validation-only wire shape
+- [x] `AgVAAttitudeControlFiniteAttitude.CoordType=Quaternion` validation-only wire shape
+- [x] `AgVAAttitudeControlFiniteThrustVector.CoordType=Cartesian` validation-only wire shape
+- [x] `AgVAAttitudeControlFiniteThrustVector.CoordType=Spherical` validation-only wire shape
 - [ ] `AgVAAttitudeControlImpulsive.$type=AntiVelocityVector`
 - [ ] `AgVAAttitudeControlImpulsive.$type=Attitude`
 - [ ] `AgVAAttitudeControlImpulsive.$type=VelocityVector`
 - [ ] `AgVAAttitudeControlImpulsive.$type=ThrustVector`
-- [ ] `AgVAAttitudeControlImpulsiveAttitude.CoordType=EulerAngles`
-- [ ] `AgVAAttitudeControlImpulsiveAttitude.CoordType=Quaternion`
-- [ ] `AgVAAttitudeControlImpulsiveThrustVector.CoordType=Cartesian`
-- [ ] `AgVAAttitudeControlImpulsiveThrustVector.CoordType=Spherical`
+- [x] `AgVAAttitudeControlImpulsiveAttitude.CoordType=EulerAngles` validation-only wire shape
+- [x] `AgVAAttitudeControlImpulsiveAttitude.CoordType=Quaternion` validation-only wire shape
+- [x] `AgVAAttitudeControlImpulsiveThrustVector.CoordType=Cartesian` validation-only wire shape
+- [x] `AgVAAttitudeControlImpulsiveThrustVector.CoordType=Spherical` validation-only wire shape
 - [ ] `AgVAStoppingConditionElement.$type=Apoapsis`
 - [ ] `AgVAStoppingConditionElement.$type=Duration`
 - [ ] `AgVAStoppingConditionElement.$type=Epoch`
@@ -473,31 +486,41 @@ fixture has verified them yet.
 
 ### `/Rocket/RocketGuid`
 
-- [ ] `$type=CZ2CD`
-- [ ] `$type=KZ1A`
-- [ ] `$type=CZ7A`
-- [ ] `$type=CZ3BC`
-- [ ] `$type=CZ4BC`
+- [ ] `$type=CZ2CD` blocked: empty HTTP 500 with no content type.
+- [ ] `$type=KZ1A` blocked: empty HTTP 500 with no content type.
+- [ ] `$type=CZ7A` blocked: empty HTTP 500 with no content type.
+- [ ] `$type=CZ3BC` blocked: empty HTTP 500 with no content type.
+- [ ] `$type=CZ4BC` blocked: empty HTTP 500 with no content type.
 
 ### `/Rocket/RocketLanding`
 
-- [ ] `IsOptimize=true`
-- [ ] `VariableX0=Phicx20`
-- [ ] `VariableX0=Psicx20`
-- [ ] `VariableX0=Dt2`
-- [ ] `VariableX0=Height4`
-- [ ] `VariableLowerBound=Phicx20`
-- [ ] `VariableLowerBound=Psicx20`
-- [ ] `VariableLowerBound=Dt2`
-- [ ] `VariableLowerBound=Height4`
-- [ ] `VariableUpperBound=Phicx20`
-- [ ] `VariableUpperBound=Psicx20`
-- [ ] `VariableUpperBound=Dt2`
-- [ ] `VariableUpperBound=Height4`
+- [x] `IsOptimize=true` failure-only wire shape
+
+Variable array branches are single-slot probes on the known-good
+`IsOptimize=true` payload. They do not claim cross-product coverage across
+initial, lower-bound, and upper-bound arrays.
+
+- [x] `VariableX0=Phicx20` failure-only wire shape
+- [x] `VariableX0=Psicx20` failure-only wire shape
+- [x] `VariableX0=Dt2` failure-only wire shape
+- [x] `VariableX0=Height4` failure-only wire shape
+- [x] `VariableLowerBound=Phicx20` failure-only wire shape
+- [x] `VariableLowerBound=Psicx20` failure-only wire shape
+- [x] `VariableLowerBound=Dt2` failure-only wire shape
+- [x] `VariableLowerBound=Height4` failure-only wire shape
+- [x] `VariableUpperBound=Phicx20` failure-only wire shape
+- [x] `VariableUpperBound=Psicx20` failure-only wire shape
+- [x] `VariableUpperBound=Dt2` failure-only wire shape
+- [x] `VariableUpperBound=Height4` failure-only wire shape
 
 ### `/Rocket/RocketSegmentFA`
 
-- [ ] `UseMcsProfile=true`
+- [x] `UseMcsProfile=true` failure-only wire shape
+  - uncertainty: `UseMcsProfile=true` was live-confirmed only as a boolean
+    branch on the same schema-shaped payload. The server returns a
+    `RocketSegmentFA` static-initializer failure before validating or executing
+    `McsProfiles`, so Astrogator/MCS profile payload semantics remain
+    unverified and out of scope for this phase.
 
 ### `/access/AccessComputeV2`
 
