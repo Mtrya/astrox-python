@@ -6,14 +6,14 @@ openapi_request_schema: EphemerisInput
 openapi_response_schema: CzmlPositionOut
 branches:
   nominal:
-    request:
+    request: &ephemeris_common_request
       TargetName: Mars
       ObserverName: Sun
       ObserverFrame: MeanEclpJ2000
       Start: "2024-01-01T00:00:00Z"
       Stop: "2024-01-03T00:00:00Z"
       Step: 86400.0
-    expect:
+    expect: &czml_position_out_expect
       status: 200
       content_type: application/json
       response:
@@ -58,3 +58,21 @@ branches:
                 kind: json_string
               referenceFrame:
                 kind: json_string
+  observer_frame_fixed:
+    request:
+      <<: *ephemeris_common_request
+      ObserverFrame: FIXED
+    expect: *czml_position_out_expect
+  observer_frame_inertial:
+    request:
+      <<: *ephemeris_common_request
+      ObserverFrame: INERTIAL
+    expect: *czml_position_out_expect
+  observer_frame_mean_eclp_j2000:
+    request: *ephemeris_common_request
+    expect: *czml_position_out_expect
+  observer_frame_j2000:
+    request:
+      <<: *ephemeris_common_request
+      ObserverFrame: J2000
+    expect: *czml_position_out_expect

@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 50
 - handled nominal endpoint fixtures: 48
-- handled branch-axis fixtures: 160
+- handled branch-axis fixtures: 176
 
 Legend:
 
@@ -364,11 +364,15 @@ position or sequence subtype.
 
 ### `/CAT/CA_ComputeV3`
 
-- [ ] `Targets=null` database-backed target lookup
+- [x] `Targets=null` validation-only wire shape
+  - note: live `Targets: null` returns structured HTTP 400 validation
+    (`Targets` is required), so this does not confirm database-backed lookup.
 
 ### `/CAT/CA_ComputeV4`
 
-- [ ] `Targets=null` database-backed target lookup
+- [x] `Targets=null` validation-only wire shape
+  - note: live `Targets: null` returns structured HTTP 400 validation
+    (`Targets` is required), so this does not confirm database-backed lookup.
 
 ### `/CAT/DebrisBreakup`
 
@@ -384,29 +388,29 @@ position or sequence subtype.
 
 ### `/city`
 
-- [ ] `typeOfCity=PopulatedPlace`
-- [ ] `typeOfCity=AdministrationCenter`
-- [ ] `typeOfCity=NationalCapital`
-- [ ] `typeOfCity=TerritorialCapital`
+- [x] `typeOfCity=PopulatedPlace`
+- [x] `typeOfCity=AdministrationCenter`
+- [x] `typeOfCity=NationalCapital`
+- [x] `typeOfCity=TerritorialCapital`
 
 ### `/celestial/ephemeris`
 
-- [ ] `ObserverFrame=FIXED`
-- [ ] `ObserverFrame=INERTIAL`
-- [ ] `ObserverFrame=MeanEclpJ2000`
-- [ ] `ObserverFrame=J2000`
+- [x] `ObserverFrame=FIXED`
+- [x] `ObserverFrame=INERTIAL`
+- [x] `ObserverFrame=MeanEclpJ2000`
+- [x] `ObserverFrame=J2000`
 
 ### `/celestial/mpc`
 
-- [ ] `ObserverFrame=FIXED`
-- [ ] `ObserverFrame=INERTIAL`
-- [ ] `ObserverFrame=MeanEclpJ2000`
-- [ ] `ObserverFrame=J2000`
+- [x] `ObserverFrame=FIXED`
+- [x] `ObserverFrame=INERTIAL`
+- [x] `ObserverFrame=MeanEclpJ2000`
+- [x] `ObserverFrame=J2000`
 
 ### `/celestial/transfer`
 
-- [ ] `SunFrameName=MeanEclpJ2000`
-- [ ] `SunFrameName=ICRF`
+- [x] `SunFrameName=MeanEclpJ2000`
+- [x] `SunFrameName=ICRF`
 
 ### Coverage Family
 
