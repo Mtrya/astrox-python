@@ -81,3 +81,25 @@ branches:
       <<: *value_by_grid_point_number_of_assets_request
       ComputeType: Average
     expect: *value_by_grid_point_success_expect
+  asset_row_two_body:
+    request:
+      <<: *value_by_grid_point_number_of_assets_request
+      Assets:
+        - Name: Satellite/CoverageMatrixTwoBodyValueByGridPoint
+          Position:
+            $type: TwoBody
+            Start: "2024-01-01T00:00:00.000Z"
+            Stop: "2024-01-01T01:00:00.000Z"
+            Step: 120.0
+            CentralBody: Earth
+            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
+    expect: *value_by_grid_point_success_expect
