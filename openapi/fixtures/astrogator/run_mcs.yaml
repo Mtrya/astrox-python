@@ -88,8 +88,48 @@ branches:
                           kind: json_number
                     Keplerian:
                       kind: json_object
+                      required_fields:
+                        - SemiMajorAxis
+                        - Eccentricity
+                        - Inclination
+                        - RAAN
+                        - ArgOfPeriapsis
+                        - TrueAnomaly
+                      fields:
+                        SemiMajorAxis:
+                          kind: json_number
+                        Eccentricity:
+                          kind: json_number
+                        Inclination:
+                          kind: json_number
+                        RAAN:
+                          kind: json_number
+                        ArgOfPeriapsis:
+                          kind: json_number
+                        TrueAnomaly:
+                          kind: json_number
                     Spherical:
                       kind: json_object
+                      required_fields:
+                        - RightAscension
+                        - Declination
+                        - RadiusMagnitude
+                        - HorizFPA
+                        - VelocityAzimuth
+                        - VelocityMagnitude
+                      fields:
+                        RightAscension:
+                          kind: json_number
+                        Declination:
+                          kind: json_number
+                        RadiusMagnitude:
+                          kind: json_number
+                        HorizFPA:
+                          kind: json_number
+                        VelocityAzimuth:
+                          kind: json_number
+                        VelocityMagnitude:
+                          kind: json_number
                 FinalState: *mcs_state
                 DurationSec:
                   kind: json_number
@@ -126,11 +166,21 @@ branches:
               required_fields:
                 - TypeName
                 - Name
+                - InitialState
+                - FinalState
+                - DurationSec
+                - Results
               fields:
                 TypeName:
                   kind: json_string
                 Name:
                   kind: json_string
+                InitialState: *mcs_state
+                FinalState: *mcs_state
+                DurationSec:
+                  kind: json_number
+                Results:
+                  kind: json_object
   sequence_type_maneuver_impulsive:
     request:
       <<: *run_mcs_initial_request
