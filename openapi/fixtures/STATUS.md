@@ -6,9 +6,9 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 48
-- handled nominal endpoint fixtures: 46
-- handled branch-axis fixtures: 148
+- fixture endpoint records: 50
+- handled nominal endpoint fixtures: 48
+- handled branch-axis fixtures: 160
 
 Legend:
 
@@ -106,12 +106,12 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 - [ ] `/OrbitWizard/GEO` nominal
 - [ ] `/OrbitWizard/Molniya` nominal
 - [ ] `/OrbitWizard/SSO` nominal
-- [ ] `/OrbitWizard/Walker` nominal
+- [x] `/OrbitWizard/Walker` nominal
 
 ### Propagator
 
 - [x] `/Propagator/Ballistic` nominal
-- [ ] `/Propagator/HPOP` nominal
+- [x] `/Propagator/HPOP` nominal
 - [ ] `/Propagator/J2` nominal
 - [ ] `/Propagator/MultiJ2` nominal
 - [ ] `/Propagator/MultiSgp4` nominal
@@ -555,21 +555,21 @@ fixture has verified them yet.
 
 ### `/Propagator/HPOP`
 
-- [ ] `HpopPropagator.NumericalIntegrator.$type=RKF7th8th`
-- [ ] `HpopPropagator.GravityModel.$type=GravityField`
-- [ ] `HpopPropagator.GravityModel.$type=TwoBody`
-- [ ] `HpopPropagator.AtmosphericModel.$type=JacchiaRoberts`
-- [ ] `HpopPropagator.SRPModel.$type=SRPSpherical`
-- [ ] `HpopPropagator.SRPModel.ShadowModel=DualCone`
-- [ ] `HpopPropagator.SRPModel.ShadowModel=Cylindrical`
-- [ ] `HpopPropagator.SRPModel.SunPosition=Apparent`
-- [ ] `HpopPropagator.SRPModel.SunPosition=True`
+- [x] `HpopPropagator.NumericalIntegrator.$type=RKF7th8th`
+- [x] `HpopPropagator.GravityModel.$type=GravityField`
+- [x] `HpopPropagator.GravityModel.$type=TwoBody`
+- [x] `HpopPropagator.AtmosphericModel.$type=JacchiaRoberts`
+- [x] `HpopPropagator.SRPModel.$type=SRPSpherical`
+- [x] `HpopPropagator.SRPModel.ShadowModel=DualCone`
+- [x] `HpopPropagator.SRPModel.ShadowModel=Cylindrical`
+- [x] `HpopPropagator.SRPModel.SunPosition=Apparent`
+- [x] `HpopPropagator.SRPModel.SunPosition=True`
 
 ### `/OrbitWizard/Walker`
 
-- [ ] `WalkerType=Delta`
-- [ ] `WalkerType=Star`
-- [ ] `WalkerType=Custom`
+- [x] `WalkerType=Delta`
+- [x] `WalkerType=Star`
+- [x] `WalkerType=Custom`
 
 ### `/Rocket/RocketGuid`
 

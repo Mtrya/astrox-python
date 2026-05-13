@@ -1,0 +1,86 @@
+schema_version: 1
+endpoint: /OrbitWizard/Walker
+method: POST
+openapi_operation_id: null
+openapi_request_schema: Walker_Input
+openapi_response_schema: Walker_Output
+branches:
+  nominal:
+    request: &walker_delta_request
+      SeedKepler: &walker_seed_kepler
+        SemimajorAxis: 7000000.0
+        Eccentricity: 0.0
+        Inclination: 53.0
+        ArgumentOfPeriapsis: 0.0
+        RightAscensionOfAscendingNode: 0.0
+        TrueAnomaly: 0.0
+        GravitationalParameter: 398600441800000.0
+      WalkerType: Delta
+      NumPlanes: 2
+      NumSatsPerPlane: 2
+      InterPlanePhaseIncrement: 1
+    expect: &walker_success_expect
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - WalkerSatellites
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          WalkerSatellites:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - SemimajorAxis
+                  - Eccentricity
+                  - Inclination
+                  - ArgumentOfPeriapsis
+                  - RightAscensionOfAscendingNode
+                  - TrueAnomaly
+                  - GravitationalParameter
+                fields:
+                  SemimajorAxis:
+                    kind: json_number
+                  Eccentricity:
+                    kind: json_number
+                  Inclination:
+                    kind: json_number
+                  ArgumentOfPeriapsis:
+                    kind: json_number
+                  RightAscensionOfAscendingNode:
+                    kind: json_number
+                  TrueAnomaly:
+                    kind: json_number
+                  GravitationalParameter:
+                    kind: json_number
+  walker_type_delta:
+    request: *walker_delta_request
+    expect: *walker_success_expect
+  walker_type_star:
+    request:
+      SeedKepler: *walker_seed_kepler
+      WalkerType: Star
+      NumPlanes: 2
+      NumSatsPerPlane: 2
+      InterPlanePhaseIncrement: 1
+    expect: *walker_success_expect
+  walker_type_custom:
+    request:
+      SeedKepler: *walker_seed_kepler
+      WalkerType: Custom
+      NumPlanes: 2
+      NumSatsPerPlane: 2
+      InterPlaneTrueAnomalyIncrement: 30.0
+      RAANIncrement: 60.0
+    expect: *walker_success_expect
