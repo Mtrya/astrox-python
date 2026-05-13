@@ -6,9 +6,9 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 47
-- handled nominal endpoint fixtures: 45
-- handled branch-axis fixtures: 84
+- fixture endpoint records: 48
+- handled nominal endpoint fixtures: 46
+- handled branch-axis fixtures: 85
 
 Legend:
 
@@ -32,7 +32,7 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 ### Astrogator
 
-- [ ] `/Astrogator/RunMCS` nominal
+- [x] `/Astrogator/RunMCS` nominal
 
 ### CAT
 
@@ -260,7 +260,7 @@ where it is claimed.
 - [ ] `MainSequence.$type=Follow`
 - [ ] `MainSequence.$type=ManeuverFinite`
 - [ ] `MainSequence.$type=ManeuverImpulsive`
-- [ ] `MainSequence.$type=InitialState`
+- [x] `MainSequence.$type=InitialState`
 - [ ] `MainSequence.$type=TargetSequence`
 - [ ] `MainSequence.$type=Propagate`
 - [ ] `MainSequence.$type=Stop`

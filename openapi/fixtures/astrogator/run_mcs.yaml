@@ -1,0 +1,96 @@
+schema_version: 1
+endpoint: /Astrogator/RunMCS
+method: POST
+openapi_operation_id: null
+openapi_request_schema: AstrogatorMCS
+openapi_response_schema: MCSOutput
+branches:
+  nominal:
+    request:
+      MainSequence:
+        - $type: InitialState
+          Name: Initial
+          InitialState:
+            Epoch: "2024-01-01T00:00:00Z"
+            CoordSystemName: Earth Inertial
+            Element:
+              $type: Cartesian
+              X: 6678137.0
+              Vy: 7726.67
+      ComputeCzmlPositions: false
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - MainSequenceResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          MainSequenceResults:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - TypeName
+                - Name
+                - InitialState
+                - FinalState
+                - DurationSec
+                - Results
+              fields:
+                TypeName:
+                  kind: json_string
+                Name:
+                  kind: json_string
+                InitialState: &mcs_state
+                  kind: json_object
+                  required_fields:
+                    - Epoch
+                    - CoordSystemName
+                    - Cartesian
+                    - Keplerian
+                    - Spherical
+                  fields:
+                    Epoch:
+                      kind: json_string
+                    CoordSystemName:
+                      kind: json_string
+                    Cartesian:
+                      kind: json_object
+                      required_fields:
+                        - X
+                        - Y
+                        - Z
+                        - Vx
+                        - Vy
+                        - Vz
+                      fields:
+                        X:
+                          kind: json_number
+                        Y:
+                          kind: json_number
+                        Z:
+                          kind: json_number
+                        Vx:
+                          kind: json_number
+                        Vy:
+                          kind: json_number
+                        Vz:
+                          kind: json_number
+                    Keplerian:
+                      kind: json_object
+                    Spherical:
+                      kind: json_object
+                FinalState: *mcs_state
+                DurationSec:
+                  kind: json_number
+                Results:
+                  kind: json_object
