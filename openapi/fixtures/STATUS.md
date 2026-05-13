@@ -6,8 +6,8 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 69
-- handled nominal endpoint fixtures: 67
+- fixture endpoint records: 70
+- handled nominal endpoint fixtures: 68
 - handled branch-axis fixtures: 255
 
 Legend:
@@ -163,11 +163,14 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 - [x] `/satcat` nominal
 - [x] `/ssc` nominal
 - [ ] `/ssc/admin/upload-database-archive` nominal
+  - blocked: real nominal upload requires `multipart/form-data`, `X-Api-Key`,
+    and a ZIP archive. The current verifier cannot express multipart files or
+    headers, and public fake-key multipart probes return structured HTTP 401.
   - [x] public `missing_file_and_api_key` validation error
 
 ### Other
 
-- [ ] `/ziyou` nominal
+- [x] `/ziyou` nominal
 
 ## Shared Branch Value Vocabulary
 
@@ -779,9 +782,10 @@ the current heuristics did not identify branch axes.
 - [x] `/facility`
 - [x] `/satcat`
 - [x] `/ssc`
-- [ ] `/ssc/admin/upload-database-archive`
+- [ ] `/ssc/admin/upload-database-archive` blocked: multipart upload plus
+  `X-Api-Key` is outside the current fixture transport and public credentials.
 - [x] `/orbit/lambert`
-- [ ] `/ziyou`
+- [x] `/ziyou`
 
 ## Discovery Notes
 
