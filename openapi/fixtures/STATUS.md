@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 48
 - handled nominal endpoint fixtures: 46
-- handled branch-axis fixtures: 125
+- handled branch-axis fixtures: 148
 
 Legend:
 
@@ -326,19 +326,35 @@ or other `MainSequence` variants.
 - [x] `Entities.Position.$type=CentralBody`
 - [x] `Entities.Position.$type=CzmlPosition`
 - [x] `Entities.Position.$type=CzmlPositions`
-- [ ] `Entities.Orientation.*` covers all Entity Orientation Variants
-- [ ] `Entities.Sensor.*` covers all Entity Sensor Variants
-- [ ] `Entities.SensorPointing.*` covers all Sensor Pointing Variants
-- [ ] `Entities.Constraints.*` covers all Coverage Constraint Variants
-- [ ] `Entities.Lighting=DirectSun`
-- [ ] `Entities.Lighting=Penumbra`
-- [ ] `Entities.Lighting=Umbra`
-- [ ] `Entities.OccultationBodies=explicit`
-- [ ] `Propagators.NumericalIntegrator.$type=RKF7th8th`
-- [ ] `Propagators.GravityModel.$type=GravityField`
-- [ ] `Propagators.GravityModel.$type=TwoBody`
-- [ ] `Propagators.AtmosphericModel.$type=JacchiaRoberts`
-- [ ] `Propagators.SRPModel.$type=SRPSpherical`
+
+The entity-context branches below are standalone nominal-MCS probes with a
+single `SitePosition` entity unless noted. They do not claim reusable branch
+coverage outside `/Astrogator/RunMCS` or cross-product coverage with every
+position or sequence subtype.
+
+- [x] `Entities.Orientation.$type=FixedAtEpoch`
+- [x] `Entities.Orientation.$type=Composite`
+- [x] `Entities.Orientation.$type=Fixed`
+- [x] `Entities.Orientation.$type=VNC`
+- [x] `Entities.Orientation.$type=AlignedAndConstrained`
+- [x] `Entities.Orientation.$type=LVLH`
+- [x] `Entities.Orientation.$type=VVLH`
+- [x] `Entities.Orientation.$type=CzmlOrientation`
+- [x] `Entities.Sensor.$type=Conic`
+- [x] `Entities.Sensor.$type=Rectangular`
+- [x] `Entities.SensorPointing.$type=Fixed`
+- [x] `Entities.Constraints.$type=AzElMask`
+- [x] `Entities.Constraints.$type=Range`
+- [x] `Entities.Constraints.$type=ElevationAngle`
+- [x] `Entities.Lighting=DirectSun`
+- [x] `Entities.Lighting=Penumbra`
+- [x] `Entities.Lighting=Umbra`
+- [x] `Entities.OccultationBodies=explicit`
+- [x] `Propagators.NumericalIntegrator.$type=RKF7th8th`
+- [x] `Propagators.GravityModel.$type=GravityField`
+- [x] `Propagators.GravityModel.$type=TwoBody`
+- [x] `Propagators.AtmosphericModel.$type=JacchiaRoberts`
+- [x] `Propagators.SRPModel.$type=SRPSpherical`
 - [x] `EngineModels.$type=EngineConstAcc`
 - [x] `EngineModels.$type=EngineConstant`
   - note: engine model branches are accepted as standalone root `EngineModels`

@@ -362,6 +362,307 @@ branches:
                   - 7726.67
                   - 0.0
     expect: *run_mcs_sequence_type_success_expect
+  entity_orientation_fixed_at_epoch:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Orientation:
+            $type: FixedAtEpoch
+            SourceAxesName: VNC(Earth)
+            ReferenceAxesName: Earth Inertial
+            Epoch: "2024-01-01T00:00:00Z"
+    expect: *run_mcs_sequence_type_success_expect
+  entity_orientation_composite:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Orientation:
+            $type: Composite
+            Intervals:
+              - $type: VNC
+                Start: "2024-01-01T00:00:00Z"
+                Stop: "2024-01-01T00:10:00Z"
+    expect: *run_mcs_sequence_type_success_expect
+  entity_orientation_fixed:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Orientation:
+            $type: Fixed
+            ReferenceAxesName: Earth Inertial
+            FixedOrientation:
+              $type: Quaternion
+              QS: 1.0
+              QX: 0.0
+              QY: 0.0
+              QZ: 0.0
+    expect: *run_mcs_sequence_type_success_expect
+  entity_orientation_vnc:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Orientation:
+            $type: VNC
+    expect: *run_mcs_sequence_type_success_expect
+  entity_orientation_aligned_and_constrained:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Orientation:
+            $type: AlignedAndConstrained
+            Principal: Earth Center
+            PrincipalAxis: +Z
+            Reference: Velocity
+            ReferenceAxis: +X
+    expect: *run_mcs_sequence_type_success_expect
+  entity_orientation_lvlh:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Orientation:
+            $type: LVLH
+    expect: *run_mcs_sequence_type_success_expect
+  entity_orientation_vvlh:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Orientation:
+            $type: VVLH
+    expect: *run_mcs_sequence_type_success_expect
+  entity_orientation_czml:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Orientation:
+            $type: CzmlOrientation
+            CentralBody: Earth
+            epoch: "2024-01-01T00:00:00Z"
+            unitQuaternion:
+              - 0.0
+              - 0.0
+              - 0.0
+              - 0.0
+              - 1.0
+    expect: *run_mcs_sequence_type_success_expect
+  entity_sensor_conic:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Sensor:
+            $type: Conic
+            outerHalfAngle: 45.0
+    expect: *run_mcs_sequence_type_success_expect
+  entity_sensor_rectangular:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Sensor:
+            $type: Rectangular
+            xHalfAngle: 20.0
+            yHalfAngle: 10.0
+    expect: *run_mcs_sequence_type_success_expect
+  entity_sensor_pointing_fixed:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Sensor:
+            $type: Conic
+            outerHalfAngle: 45.0
+          SensorPointing:
+            $type: Fixed
+            Orientation:
+              $type: AzEl
+              Azimuth: 0.0
+              Elevation: 90.0
+    expect: *run_mcs_sequence_type_success_expect
+  entity_constraint_azelmask:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Constraints:
+            - $type: AzElMask
+              MaxRange: 10000000.0
+              AzElMaskData:
+                - 0.0
+                - 0.0
+                - 6.283185307179586
+                - 0.0
+    expect: *run_mcs_sequence_type_success_expect
+  entity_constraint_range:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Constraints:
+            - $type: Range
+              MinimumValue: 0.0
+              MaximumValue: 10000000.0
+              IsMaximumEnabled: true
+    expect: *run_mcs_sequence_type_success_expect
+  entity_constraint_elevation_angle:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Constraints:
+            - $type: ElevationAngle
+              MinimumValue: 0.0
+              IsMaximumEnabled: false
+    expect: *run_mcs_sequence_type_success_expect
+  entity_lighting_direct_sun:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Lighting: DirectSun
+    expect: *run_mcs_sequence_type_success_expect
+  entity_lighting_penumbra:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Lighting: Penumbra
+    expect: *run_mcs_sequence_type_success_expect
+  entity_lighting_umbra:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          Lighting: Umbra
+    expect: *run_mcs_sequence_type_success_expect
+  entity_occultation_bodies:
+    request:
+      <<: *run_mcs_initial_request
+      Entities:
+        - Name: Satellite/EntityProbe
+          Position: *entity_position_site
+          OccultationBodies:
+            - Earth
+    expect: *run_mcs_sequence_type_success_expect
+  propagator_numerical_integrator_rkf:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: Propagate
+          Name: Propagate
+          PropagatorName: FixturePropagator
+          StopConditions:
+            - *duration_stop_condition
+          MaxPropagationTime: 120
+      Propagators:
+        - <<: *two_body_propagator
+          NumericalIntegrator:
+            $type: RKF7th8th
+            Name: RKF7th8th
+    expect: *run_mcs_sequence_type_success_expect
+  propagator_gravity_model_gravity_field:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: Propagate
+          Name: Propagate
+          PropagatorName: FixturePropagator
+          StopConditions:
+            - *duration_stop_condition
+          MaxPropagationTime: 120
+      Propagators:
+        - <<: *two_body_propagator
+          GravityModel:
+            $type: GravityField
+            Name: EarthGravityField
+            GravityFileName: EGM2008.grv
+            Degree: 2
+            Order: 2
+    expect: *run_mcs_sequence_type_success_expect
+  propagator_gravity_model_twobody:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: Propagate
+          Name: Propagate
+          PropagatorName: FixturePropagator
+          StopConditions:
+            - *duration_stop_condition
+          MaxPropagationTime: 120
+      Propagators:
+        - <<: *two_body_propagator
+          GravityModel:
+            $type: TwoBody
+            Name: EarthTwoBody
+            Mu: 398600441800000.0
+    expect: *run_mcs_sequence_type_success_expect
+  propagator_atmospheric_model_jacchia_roberts:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: Propagate
+          Name: Propagate
+          PropagatorName: FixturePropagator
+          StopConditions:
+            - *duration_stop_condition
+          MaxPropagationTime: 120
+      Propagators:
+        - <<: *two_body_propagator
+          AtmosphericModel:
+            $type: JacchiaRoberts
+            Name: JacchiaRoberts
+            F10p7: 150.0
+    expect: *run_mcs_sequence_type_success_expect
+  propagator_srp_model_spherical:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: Propagate
+          Name: Propagate
+          PropagatorName: FixturePropagator
+          StopConditions:
+            - *duration_stop_condition
+          MaxPropagationTime: 120
+      Propagators:
+        - <<: *two_body_propagator
+          SRPModel:
+            $type: SRPSpherical
+            Name: SRPSpherical
+            ShadowModel: DualCone
+            SunPosition: Apparent
+            EclipsingBodies:
+              - Earth
+              - Moon
+    expect: *run_mcs_sequence_type_success_expect
   engine_model_const_acc:
     request:
       <<: *run_mcs_initial_request
