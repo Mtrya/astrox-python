@@ -6,9 +6,9 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 25
-- handled nominal endpoint fixtures: 24
-- handled branch-axis fixtures: 23
+- fixture endpoint records: 28
+- handled nominal endpoint fixtures: 27
+- handled branch-axis fixtures: 27
 
 Legend:
 
@@ -65,9 +65,9 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 - [ ] `/Coverage/FOM/ValueByGridPointAtTime/ResponseTime` nominal
 - [ ] `/Coverage/FOM/ValueByGridPointAtTime/RevisitTime` nominal
 - [ ] `/Coverage/FOM/ValueByGridPointAtTime/SimpleCoverage` nominal
-- [ ] `/Coverage/GetGridPoints` nominal
-- [ ] `/Coverage/Report/CoverageByAsset` nominal
-- [ ] `/Coverage/Report/PercentCoverage` nominal
+- [x] `/Coverage/GetGridPoints` nominal
+- [x] `/Coverage/Report/CoverageByAsset` nominal
+- [x] `/Coverage/Report/PercentCoverage` nominal
 
 ### Interface
 
@@ -373,7 +373,10 @@ Additional FOM endpoint branch axes:
 
 ### `/Coverage/GetGridPoints`
 
-- [ ] `Grid.*` covers all Coverage Grid Variants
+- [x] `Grid.$type=CbLatLonBounds`
+- [x] `Grid.$type=Global`
+- [x] `Grid.$type=LatitudeBounds`
+- [x] `Grid.$type=LatLonBounds`
 
 ### `/InterfaceClass`
 

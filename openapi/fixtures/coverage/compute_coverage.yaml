@@ -8,20 +8,31 @@ branches:
   nominal:
     request:
       Start: "2024-01-01T00:00:00.000Z"
-      Stop: "2024-01-01T00:05:00.000Z"
+      Stop: "2024-01-01T01:00:00.000Z"
+      Step: 120.0
       Grid:
         $type: LatitudeBounds
-        MinLatitude: -10.0
-        MaxLatitude: 10.0
-        Resolution: 20.0
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - Position:
+        - Name: Satellite/CoverageProbeJ2
+          Position:
             $type: J2
+            Start: "2024-01-01T00:00:00.000Z"
+            Stop: "2024-01-01T01:00:00.000Z"
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
             OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            CoordSystem: Inertial
+            CoordType: Classical
             OrbitalElements:
-              - 7178137.0
+              - 6978137.0
               - 0.001
-              - 98.5
+              - 55.0
               - 0.0
               - 0.0
               - 0.0
@@ -71,8 +82,24 @@ branches:
             kind: json_number
           AccessDurationDatas:
             kind: json_array
+            min_length: 1
+            items: &duration_distribution
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
           GapDurationDatas:
             kind: json_array
+            min_length: 1
+            items: *duration_distribution
           GlobalCoverageDatas:
             kind: json_array
           AssetAccessResults:

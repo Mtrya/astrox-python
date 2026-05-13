@@ -1,0 +1,100 @@
+schema_version: 1
+endpoint: /Coverage/GetGridPoints
+method: POST
+openapi_operation_id: null
+openapi_request_schema: CoverageGridInput
+openapi_response_schema: CoverageGridPointsOut
+branches:
+  nominal:
+    request:
+      Grid:
+        $type: CbLatLonBounds
+        CentralBodyName: Earth
+        MinLatitude: -1.0
+        MaxLatitude: 1.0
+        MinLongitude: -1.0
+        MaxLongitude: 1.0
+    expect: &grid_points_success
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Points
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          Points:
+            kind: json_object
+            required_fields:
+              - CentralBodyName
+              - Type
+              - Height
+              - GridPoints
+            fields:
+              CentralBodyName:
+                kind: json_string
+              Type:
+                kind: json_string
+              Height:
+                kind: json_number
+              GridPoints:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Position
+                    - GridCellBoundaryVertices
+                    - Weight
+                  fields:
+                    Position:
+                      kind: json_array
+                      length: 2
+                      items:
+                        kind: json_number
+                    GridCellBoundaryVertices:
+                      kind: json_array
+                      min_length: 1
+                      items:
+                        kind: json_array
+                        length: 2
+                        items:
+                          kind: json_number
+                    Weight:
+                      kind: json_number
+  grid_global:
+    request:
+      Grid:
+        $type: Global
+        CentralBodyName: Earth
+        Resolution: 60.0
+        Height: 0.0
+    expect: *grid_points_success
+  grid_latitude_bounds:
+    request:
+      Grid:
+        $type: LatitudeBounds
+        CentralBodyName: Earth
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
+    expect: *grid_points_success
+  grid_lat_lon_bounds:
+    request:
+      Grid:
+        $type: LatLonBounds
+        CentralBodyName: Earth
+        MinLatitude: 0.0
+        MaxLatitude: 1.0
+        MinLongitude: 0.0
+        MaxLongitude: 1.0
+        Resolution: 1.0
+        Height: 0.0
+    expect: *grid_points_success
