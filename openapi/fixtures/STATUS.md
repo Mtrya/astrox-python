@@ -6,9 +6,9 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 44
-- handled nominal endpoint fixtures: 43
-- handled branch-axis fixtures: 36
+- fixture endpoint records: 47
+- handled nominal endpoint fixtures: 45
+- handled branch-axis fixtures: 84
 
 Legend:
 
@@ -123,8 +123,14 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 ### Rocket
 
 - [ ] `/Rocket/RocketGuid` nominal
-- [ ] `/Rocket/RocketLanding` nominal
-- [ ] `/Rocket/RocketSegmentFA` nominal
+  - blocked: all documented root `$type` values (`CZ2CD`, `KZ1A`,
+    `CZ7A`, `CZ3BC`, `CZ4BC`) return empty HTTP 500 responses with no content
+    type for minimal, example-derived, and fully populated schema-shaped
+    payload probes. Invalid discriminator values return structured HTTP 400,
+    so the server appears to recognize the documented discriminator names
+    before failing inside endpoint execution.
+- [x] `/Rocket/RocketLanding` nominal failure-only wire shape
+- [x] `/Rocket/RocketSegmentFA` nominal failure-only wire shape
 
 ### Terrain
 
@@ -152,96 +158,99 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 - [ ] `/ziyou` nominal
 
-## Reusable Branch Value Sets
+## Shared Branch Value Vocabulary
 
-These sets are reused by many endpoint branch axes below.
+These are branch values that appear in multiple endpoint schemas. They are an
+inventory, not coverage status: checkboxes only appear under concrete endpoint
+or endpoint-family axes below. A value listed here is not reusable handled
+coverage until a checked-in fixture verifies it in the specific endpoint context
+where it is claimed.
 
 ### Position Variants
 
-- [ ] `Position.$type=J2`
-- [ ] `Position.$type=SitePosition`
-- [ ] `Position.$type=AstrogatorMCS`
-- [ ] `Position.$type=HPOP`
-- [ ] `Position.$type=SimpleAscent`
-- [ ] `Position.$type=Ballistic`
-- [ ] `Position.$type=SGP4`
-- [ ] `Position.$type=CentralBody`
-- [ ] `Position.$type=CzmlPositions`
-- [ ] `Position.$type=CzmlPosition`
-- [ ] `Position.$type=TwoBody`
+- `Position.$type=J2`
+- `Position.$type=SitePosition`
+- `Position.$type=AstrogatorMCS`
+- `Position.$type=HPOP`
+- `Position.$type=SimpleAscent`
+- `Position.$type=Ballistic`
+- `Position.$type=SGP4`
+- `Position.$type=CentralBody`
+- `Position.$type=CzmlPositions`
+- `Position.$type=CzmlPosition`
+- `Position.$type=TwoBody`
 
 ### Coverage Grid Variants
 
-- [ ] `Grid.$type=CbLatLonBounds`
-- [ ] `Grid.$type=Global`
-- [ ] `Grid.$type=LatitudeBounds`
-- [ ] `Grid.$type=LatLonBounds`
+- `Grid.$type=CbLatLonBounds`
+- `Grid.$type=Global`
+- `Grid.$type=LatitudeBounds`
+- `Grid.$type=LatLonBounds`
 
 ### Coverage Sensor Variants
 
-- [x] `GridPointSensor.$type=Conic`
-- [x] `GridPointSensor.$type=Rectangular`
+- `GridPointSensor.$type=Conic`
+- `GridPointSensor.$type=Rectangular`
 
 ### Coverage Constraint Variants
 
-- [x] `GridPointConstraints.$type=AzElMask` failure-only wire shape on
-  `/Coverage/ComputeCoverage`
-- [x] `GridPointConstraints.$type=Range`
-- [x] `GridPointConstraints.$type=ElevationAngle`
+- `GridPointConstraints.$type=AzElMask`
+- `GridPointConstraints.$type=Range`
+- `GridPointConstraints.$type=ElevationAngle`
 
 ### Entity Orientation Variants
 
-- [ ] `Orientation.$type=FixedAtEpoch`
-- [ ] `Orientation.$type=Composite`
-- [ ] `Orientation.$type=Fixed`
-- [ ] `Orientation.$type=VNC`
-- [ ] `Orientation.$type=AlignedAndConstrained`
-- [ ] `Orientation.$type=LVLH`
-- [ ] `Orientation.$type=VVLH`
-- [ ] `Orientation.$type=CzmlOrientation`
+- `Orientation.$type=FixedAtEpoch`
+- `Orientation.$type=Composite`
+- `Orientation.$type=Fixed`
+- `Orientation.$type=VNC`
+- `Orientation.$type=AlignedAndConstrained`
+- `Orientation.$type=LVLH`
+- `Orientation.$type=VVLH`
+- `Orientation.$type=CzmlOrientation`
 
 ### Entity Sensor Variants
 
-- [ ] `Sensor.$type=Conic`
-- [ ] `Sensor.$type=Rectangular`
+- `Sensor.$type=Conic`
+- `Sensor.$type=Rectangular`
 
 ### Sensor Pointing Variants
 
-- [ ] `SensorPointing.$type=Fixed`
+- `SensorPointing.$type=Fixed`
 
 ### Stopping Condition Variants
 
-- [ ] `StopCondition.$type=Apoapsis`
-- [ ] `StopCondition.$type=Duration`
-- [ ] `StopCondition.$type=Epoch`
-- [ ] `StopCondition.$type=Periapsis`
-- [ ] `StopCondition.$type=Scalar`
+- `StopCondition.$type=Apoapsis`
+- `StopCondition.$type=Duration`
+- `StopCondition.$type=Epoch`
+- `StopCondition.$type=Periapsis`
+- `StopCondition.$type=Scalar`
 
 ### State Element Variants
 
-- [ ] `Element.$type=Cartesian`
-- [ ] `Element.$type=Keplerian`
-- [ ] `Element.$type=Spherical`
+- `Element.$type=Cartesian`
+- `Element.$type=Keplerian`
+- `Element.$type=Spherical`
 
 ### Attitude Control Variants
 
-- [ ] `AttitudeControl.$type=AntiVelocityVector`
-- [ ] `AttitudeControl.$type=Attitude`
-- [ ] `AttitudeControl.$type=VelocityVector`
-- [ ] `AttitudeControl.$type=ThrustVector`
+- `AttitudeControl.$type=AntiVelocityVector`
+- `AttitudeControl.$type=Attitude`
+- `AttitudeControl.$type=VelocityVector`
+- `AttitudeControl.$type=ThrustVector`
 
 ### CalcScalar Variants
 
-- [ ] `CalcScalar.$type=BPlane`
-- [ ] `CalcScalar.$type=Epoch`
-- [ ] `CalcScalar.$type=Relative`
-- [ ] `CalcScalar.$type=Duration`
-- [ ] `CalcScalar.$type=Cartographic`
-- [ ] `CalcScalar.$type=SphericalElement`
-- [ ] `CalcScalar.$type=DeltaSpherical`
-- [ ] `CalcScalar.$type=ModifiedKeplerianElement`
-- [ ] `CalcScalar.$type=PointElement`
-- [ ] `CalcScalar.$type=KeplerianElement`
+- `CalcScalar.$type=BPlane`
+- `CalcScalar.$type=Epoch`
+- `CalcScalar.$type=Relative`
+- `CalcScalar.$type=Duration`
+- `CalcScalar.$type=Cartographic`
+- `CalcScalar.$type=SphericalElement`
+- `CalcScalar.$type=DeltaSpherical`
+- `CalcScalar.$type=ModifiedKeplerianElement`
+- `CalcScalar.$type=PointElement`
+- `CalcScalar.$type=KeplerianElement`
 
 ## Endpoint Branch Axes
 
@@ -385,31 +394,47 @@ Additional FOM endpoint branch axes:
 
 ### `/InterfaceClass`
 
-- [ ] `AgVAAttitudeControlFinite.$type=AntiVelocityVector`
-- [ ] `AgVAAttitudeControlFinite.$type=Attitude`
-- [ ] `AgVAAttitudeControlFinite.$type=VelocityVector`
-- [ ] `AgVAAttitudeControlFinite.$type=ThrustVector`
-- [ ] `AgVAAttitudeControlFiniteAttitude.CoordType=EulerAngles`
-- [ ] `AgVAAttitudeControlFiniteAttitude.CoordType=Quaternion`
-- [ ] `AgVAAttitudeControlFiniteThrustVector.CoordType=Cartesian`
-- [ ] `AgVAAttitudeControlFiniteThrustVector.CoordType=Spherical`
-- [ ] `AgVAAttitudeControlImpulsive.$type=AntiVelocityVector`
-- [ ] `AgVAAttitudeControlImpulsive.$type=Attitude`
-- [ ] `AgVAAttitudeControlImpulsive.$type=VelocityVector`
-- [ ] `AgVAAttitudeControlImpulsive.$type=ThrustVector`
-- [ ] `AgVAAttitudeControlImpulsiveAttitude.CoordType=EulerAngles`
-- [ ] `AgVAAttitudeControlImpulsiveAttitude.CoordType=Quaternion`
-- [ ] `AgVAAttitudeControlImpulsiveThrustVector.CoordType=Cartesian`
-- [ ] `AgVAAttitudeControlImpulsiveThrustVector.CoordType=Spherical`
-- [ ] `AgVAStoppingConditionElement.$type=Apoapsis`
-- [ ] `AgVAStoppingConditionElement.$type=Duration`
-- [ ] `AgVAStoppingConditionElement.$type=Epoch`
-- [ ] `AgVAStoppingConditionElement.$type=Periapsis`
-- [ ] `AgVAStoppingConditionElement.$type=Scalar`
-- [ ] `AgVAElement.$type=Cartesian`
-- [ ] `AgVAElement.$type=Keplerian`
-- [ ] `AgVAElement.$type=Spherical`
-- [ ] `CalcScalar.$type.*` covers all CalcScalar variants
+Coordinate branches below are validation-boundary fixtures. Minimal
+single-coordinate payloads verify live as structured `application/problem+json`
+responses because the server requires many unrelated `InterfaceInput`
+properties before execution. A full schema-shaped payload currently reaches an
+empty HTTP 500 with no content type, so `/InterfaceClass` nominal remains
+unchecked.
+
+- [x] `AgVAAttitudeControlFinite.$type=AntiVelocityVector` validation-only wire shape
+- [x] `AgVAAttitudeControlFinite.$type=Attitude` validation-only wire shape
+- [x] `AgVAAttitudeControlFinite.$type=VelocityVector` validation-only wire shape
+- [x] `AgVAAttitudeControlFinite.$type=ThrustVector` validation-only wire shape
+- [x] `AgVAAttitudeControlFiniteAttitude.CoordType=EulerAngles` validation-only wire shape
+- [x] `AgVAAttitudeControlFiniteAttitude.CoordType=Quaternion` validation-only wire shape
+- [x] `AgVAAttitudeControlFiniteThrustVector.CoordType=Cartesian` validation-only wire shape
+- [x] `AgVAAttitudeControlFiniteThrustVector.CoordType=Spherical` validation-only wire shape
+- [x] `AgVAAttitudeControlImpulsive.$type=AntiVelocityVector` validation-only wire shape
+- [x] `AgVAAttitudeControlImpulsive.$type=Attitude` validation-only wire shape
+- [x] `AgVAAttitudeControlImpulsive.$type=VelocityVector` validation-only wire shape
+- [x] `AgVAAttitudeControlImpulsive.$type=ThrustVector` validation-only wire shape
+- [x] `AgVAAttitudeControlImpulsiveAttitude.CoordType=EulerAngles` validation-only wire shape
+- [x] `AgVAAttitudeControlImpulsiveAttitude.CoordType=Quaternion` validation-only wire shape
+- [x] `AgVAAttitudeControlImpulsiveThrustVector.CoordType=Cartesian` validation-only wire shape
+- [x] `AgVAAttitudeControlImpulsiveThrustVector.CoordType=Spherical` validation-only wire shape
+- [x] `AgVAStoppingConditionElement.$type=Apoapsis` validation-only wire shape
+- [x] `AgVAStoppingConditionElement.$type=Duration` validation-only wire shape
+- [x] `AgVAStoppingConditionElement.$type=Epoch` validation-only wire shape
+- [x] `AgVAStoppingConditionElement.$type=Periapsis` validation-only wire shape
+- [x] `AgVAStoppingConditionElement.$type=Scalar` validation-only wire shape
+- [x] `AgVAElement.$type=Cartesian` validation-only wire shape
+- [x] `AgVAElement.$type=Keplerian` validation-only wire shape
+- [x] `AgVAElement.$type=Spherical` validation-only wire shape
+- [x] `CalcScalar.$type=BPlane` validation-only wire shape
+- [x] `CalcScalar.$type=Cartographic` validation-only wire shape
+- [x] `CalcScalar.$type=DeltaSpherical` validation-only wire shape
+- [x] `CalcScalar.$type=Duration` validation-only wire shape
+- [x] `CalcScalar.$type=Epoch` validation-only wire shape
+- [x] `CalcScalar.$type=KeplerianElement` validation-only wire shape
+- [x] `CalcScalar.$type=ModifiedKeplerianElement` validation-only wire shape
+- [x] `CalcScalar.$type=PointElement` validation-only wire shape
+- [x] `CalcScalar.$type=Relative` validation-only wire shape
+- [x] `CalcScalar.$type=SphericalElement` validation-only wire shape
 
 ### `/Lighting/LightingTimes`
 
@@ -473,31 +498,41 @@ fixture has verified them yet.
 
 ### `/Rocket/RocketGuid`
 
-- [ ] `$type=CZ2CD`
-- [ ] `$type=KZ1A`
-- [ ] `$type=CZ7A`
-- [ ] `$type=CZ3BC`
-- [ ] `$type=CZ4BC`
+- [ ] `$type=CZ2CD` blocked: empty HTTP 500 with no content type.
+- [ ] `$type=KZ1A` blocked: empty HTTP 500 with no content type.
+- [ ] `$type=CZ7A` blocked: empty HTTP 500 with no content type.
+- [ ] `$type=CZ3BC` blocked: empty HTTP 500 with no content type.
+- [ ] `$type=CZ4BC` blocked: empty HTTP 500 with no content type.
 
 ### `/Rocket/RocketLanding`
 
-- [ ] `IsOptimize=true`
-- [ ] `VariableX0=Phicx20`
-- [ ] `VariableX0=Psicx20`
-- [ ] `VariableX0=Dt2`
-- [ ] `VariableX0=Height4`
-- [ ] `VariableLowerBound=Phicx20`
-- [ ] `VariableLowerBound=Psicx20`
-- [ ] `VariableLowerBound=Dt2`
-- [ ] `VariableLowerBound=Height4`
-- [ ] `VariableUpperBound=Phicx20`
-- [ ] `VariableUpperBound=Psicx20`
-- [ ] `VariableUpperBound=Dt2`
-- [ ] `VariableUpperBound=Height4`
+- [x] `IsOptimize=true` failure-only wire shape
+
+Variable array branches are single-slot probes on the known-good
+`IsOptimize=true` payload. They do not claim cross-product coverage across
+initial, lower-bound, and upper-bound arrays.
+
+- [x] `VariableX0=Phicx20` failure-only wire shape
+- [x] `VariableX0=Psicx20` failure-only wire shape
+- [x] `VariableX0=Dt2` failure-only wire shape
+- [x] `VariableX0=Height4` failure-only wire shape
+- [x] `VariableLowerBound=Phicx20` failure-only wire shape
+- [x] `VariableLowerBound=Psicx20` failure-only wire shape
+- [x] `VariableLowerBound=Dt2` failure-only wire shape
+- [x] `VariableLowerBound=Height4` failure-only wire shape
+- [x] `VariableUpperBound=Phicx20` failure-only wire shape
+- [x] `VariableUpperBound=Psicx20` failure-only wire shape
+- [x] `VariableUpperBound=Dt2` failure-only wire shape
+- [x] `VariableUpperBound=Height4` failure-only wire shape
 
 ### `/Rocket/RocketSegmentFA`
 
-- [ ] `UseMcsProfile=true`
+- [x] `UseMcsProfile=true` failure-only wire shape
+  - uncertainty: `UseMcsProfile=true` was live-confirmed only as a boolean
+    branch on the same schema-shaped payload. The server returns a
+    `RocketSegmentFA` static-initializer failure before validating or executing
+    `McsProfiles`, so Astrogator/MCS profile payload semantics remain
+    unverified and out of scope for this phase.
 
 ### `/access/AccessComputeV2`
 
