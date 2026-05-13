@@ -6,8 +6,8 @@ Source spec: `openapi/astrox.openapi.yaml`
 
 Current checked-in fixture coverage:
 
-- fixture endpoint records: 28
-- handled nominal endpoint fixtures: 27
+- fixture endpoint records: 36
+- handled nominal endpoint fixtures: 35
 - handled branch-axis fixtures: 34
 
 Legend:
@@ -47,15 +47,17 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 ### Coverage
 
 - [x] `/Coverage/ComputeCoverage` nominal
-- [ ] `/Coverage/FOM/GridStats/CoverageTime` nominal
-- [ ] `/Coverage/FOM/GridStats/NumberOfAssets` nominal
-- [ ] `/Coverage/FOM/GridStats/ResponseTime` nominal
-- [ ] `/Coverage/FOM/GridStats/RevisitTime` nominal
-- [ ] `/Coverage/FOM/GridStats/SimpleCoverage` nominal
-- [ ] `/Coverage/FOM/GridStatsOverTime/NumberOfAssets` nominal
+- [x] `/Coverage/FOM/GridStats/CoverageTime` nominal
+- [x] `/Coverage/FOM/GridStats/NumberOfAssets` nominal
+- [x] `/Coverage/FOM/GridStats/ResponseTime` nominal
+- [x] `/Coverage/FOM/GridStats/RevisitTime` nominal
+- [x] `/Coverage/FOM/GridStats/SimpleCoverage` nominal
+- [x] `/Coverage/FOM/GridStatsOverTime/NumberOfAssets` nominal
 - [ ] `/Coverage/FOM/GridStatsOverTime/ResponseTime` nominal
-- [ ] `/Coverage/FOM/GridStatsOverTime/RevisitTime` nominal
-- [ ] `/Coverage/FOM/GridStatsOverTime/SimpleCoverage` nominal
+  - blocked: small Coverage base payload plus targeted `Time`, longer-window,
+    and two-asset corrections return empty HTTP 500 with no content type.
+- [x] `/Coverage/FOM/GridStatsOverTime/RevisitTime` nominal
+- [x] `/Coverage/FOM/GridStatsOverTime/SimpleCoverage` nominal
 - [ ] `/Coverage/FOM/ValueByGridPoint/CoverageTime` nominal
 - [ ] `/Coverage/FOM/ValueByGridPoint/NumberOfAssets` nominal
 - [ ] `/Coverage/FOM/ValueByGridPoint/ResponseTime` nominal
