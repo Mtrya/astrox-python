@@ -2,7 +2,7 @@ name: Refresh OpenAPI and Models
 
 on:
   schedule:
-    - cron: "43 2 * * *"
+    - cron: "18 18 * * *"
   workflow_dispatch:
 
 concurrency:
