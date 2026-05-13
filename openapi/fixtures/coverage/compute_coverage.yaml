@@ -261,3 +261,15 @@ branches:
                 kind: json_number
               Type:
                 kind: json_string
+  filter_type_at_least_n:
+    request:
+      <<: *compute_coverage_base_request
+      FilterType: AtLeastN
+      NumberOfAssets: 1
+    expect: *compute_coverage_success_expect
+  filter_type_exactly_n:
+    request:
+      <<: *compute_coverage_base_request
+      FilterType: ExactlyN
+      NumberOfAssets: 1
+    expect: *compute_coverage_success_expect

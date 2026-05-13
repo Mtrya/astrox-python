@@ -94,7 +94,7 @@ branches:
               Position: *j2_position
       StartObject: Facility/Phase3Site
       EndObject: Group/Targets
-    expect:
+    expect: &chain_failure_expect
       status: 200
       content_type: application/json
       response:
@@ -118,3 +118,85 @@ branches:
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
     expect: *chain_success_expect
+  connections_null:
+    request:
+      <<: *chain_2024_window
+      Connections: null
+      AllObjects:
+        - *site_entity_path
+        - *j2_entity_path
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3To
+    expect: *chain_success_expect
+  connections_explicit_failure_shape:
+    request:
+      <<: *chain_2024_window
+      Connections:
+        - FromObject: Facility/Phase3Site
+          ToObject: Satellite/Phase3To
+          MinUses: 0
+          MaxUses: 1
+      AllObjects:
+        - *site_entity_path
+        - *j2_entity_path
+      StartObject: Facility/Phase3Site
+      EndObject: Satellite/Phase3To
+    expect: *chain_failure_expect
+  entity_path_group_from_restriction_any_of:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - $type: EntityPathGroup
+          Name: Group/Targets
+          AssignedObjects:
+            - Name: Satellite/Phase3To
+              Position: *j2_position
+          FromAccess_Restriction: AnyOf
+      StartObject: Facility/Phase3Site
+      EndObject: Group/Targets
+    expect: *chain_failure_expect
+  entity_path_group_from_restriction_at_least_n:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - $type: EntityPathGroup
+          Name: Group/Targets
+          AssignedObjects:
+            - Name: Satellite/Phase3To
+              Position: *j2_position
+          FromAccess_Restriction: AtLeastN
+          FromAccess_Number: 1
+      StartObject: Facility/Phase3Site
+      EndObject: Group/Targets
+    expect: *chain_failure_expect
+  entity_path_group_to_restriction_any_of:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - $type: EntityPathGroup
+          Name: Group/Targets
+          AssignedObjects:
+            - Name: Satellite/Phase3To
+              Position: *j2_position
+          ToAccess_Restriction: AnyOf
+      StartObject: Facility/Phase3Site
+      EndObject: Group/Targets
+    expect: *chain_failure_expect
+  entity_path_group_to_restriction_at_least_n:
+    request:
+      <<: *chain_2024_window
+      AllObjects:
+        - *site_entity_path
+        - $type: EntityPathGroup
+          Name: Group/Targets
+          AssignedObjects:
+            - Name: Satellite/Phase3To
+              Position: *j2_position
+          ToAccess_Restriction: AtLeastN
+          ToAccess_Number: 1
+      StartObject: Facility/Phase3Site
+      EndObject: Group/Targets
+    expect: *chain_failure_expect

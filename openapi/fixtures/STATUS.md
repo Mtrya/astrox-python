@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 50
 - handled nominal endpoint fixtures: 48
-- handled branch-axis fixtures: 176
+- handled branch-axis fixtures: 190
 
 Legend:
 
@@ -440,20 +440,38 @@ The following endpoints currently share the same discovered branch axes:
 
 Required branch axes for each endpoint above:
 
-- [ ] `Grid.*` covers all Coverage Grid Variants
-- [ ] `Assets.Position.*` covers all Position Variants
-- [ ] `Assets.Orientation.*` covers all Entity Orientation Variants
-- [ ] `Assets.Sensor.*` covers all Entity Sensor Variants
-- [ ] `Assets.SensorPointing.*` covers all Sensor Pointing Variants
-- [ ] `Assets.Constraints.*` covers all Coverage Constraint Variants
-- [ ] `Assets.Lighting=DirectSun`
-- [ ] `Assets.Lighting=Penumbra`
-- [ ] `Assets.Lighting=Umbra`
-- [ ] `Assets.OccultationBodies=explicit`
+Unchecked endpoint-family matrix rows below are deferred deliberately. They
+would require endpoint-by-endpoint fixture records before they could be marked
+handled without overclaiming reusable Coverage payload coverage.
+
+- [ ] `Grid.*` covers all Coverage Grid Variants (deferred: only
+  `/Coverage/GetGridPoints` has all grid variants checked; this does not prove
+  every Coverage/FOM/report endpoint accepts every grid payload.)
+- [ ] `Assets.Position.*` covers all Position Variants (deferred:
+  endpoint-family-wide asset position coverage would be a cross-product matrix,
+  not a single reusable branch.)
+- [ ] `Assets.Orientation.*` covers all Entity Orientation Variants (deferred:
+  no Coverage-family fixture currently proves all asset orientation variants.)
+- [ ] `Assets.Sensor.*` covers all Entity Sensor Variants (deferred: no
+  Coverage-family fixture currently proves all asset sensor variants.)
+- [ ] `Assets.SensorPointing.*` covers all Sensor Pointing Variants (deferred:
+  no Coverage-family fixture currently proves all asset sensor-pointing
+  variants.)
+- [ ] `Assets.Constraints.*` covers all Coverage Constraint Variants (deferred:
+  grid-point constraints are checked separately and do not imply asset
+  constraint coverage.)
+- [ ] `Assets.Lighting=DirectSun` (deferred: no Coverage-family fixture
+  currently proves asset lighting constraints.)
+- [ ] `Assets.Lighting=Penumbra` (deferred: no Coverage-family fixture
+  currently proves asset lighting constraints.)
+- [ ] `Assets.Lighting=Umbra` (deferred: no Coverage-family fixture currently
+  proves asset lighting constraints.)
+- [ ] `Assets.OccultationBodies=explicit` (deferred: no Coverage-family
+  fixture currently proves asset occultation-body handling.)
 - [x] `GridPointSensor.*` covers all Coverage Sensor Variants
 - [x] `GridPointConstraints.*` covers all Coverage Constraint Variants
-- [ ] `FilterType=AtLeastN`
-- [ ] `FilterType=ExactlyN`
+- [x] `FilterType=AtLeastN`
+- [x] `FilterType=ExactlyN`
 - [x] `ContainAssetAccessResults=true`
 - [x] `ContainCoveragePoints=true`
 
@@ -461,8 +479,11 @@ Additional FOM endpoint branch axes:
 
 - [x] `ComputeType=TotalTimeAbove`
 - [x] `ComputeType=Maximum`
-- [ ] `ComputeType=Minimum`
-- [ ] `ComputeType=Average`
+- [x] `ComputeType=Minimum`
+- [x] `ComputeType=Average`
+  - note: `Minimum` and `Average` are checked on representative
+    `NumberOfAssets` GridStats and ValueByGridPoint fixtures. This does not
+    claim every FOM endpoint accepts every compute type.
 
 ### `/Coverage/GetGridPoints`
 
@@ -521,19 +542,19 @@ unchecked.
 - [x] `Position.$type=J2`
 - [x] `Position.$type=SGP4`
 - [x] `Position.$type=TwoBody`
-- [ ] `Position.$type=AstrogatorMCS`
-- [ ] `Position.$type=HPOP`
-- [ ] `Position.$type=SimpleAscent`
-- [ ] `Position.$type=Ballistic`
-- [ ] `Position.$type=CentralBody`
-- [ ] `Position.$type=CzmlPositions`
-- [ ] `Position.$type=CzmlPosition`
+- [ ] `Position.$type=AstrogatorMCS` deferred
+- [ ] `Position.$type=HPOP` deferred
+- [ ] `Position.$type=SimpleAscent` deferred
+- [ ] `Position.$type=Ballistic` deferred
+- [ ] `Position.$type=CentralBody` deferred
+- [ ] `Position.$type=CzmlPositions` deferred
+- [ ] `Position.$type=CzmlPosition` deferred
 
-Unchecked Lighting position variants remain deferred because phase 1 did not
-establish reusable payload patterns for them, and no endpoint-specific live
-fixture has verified them yet.
+Unchecked Lighting position variants remain deferred because endpoint-specific
+live fixtures have not verified them yet; PR 09 only checked explicit
+occultation bodies on already-working position payloads.
 
-- [ ] `OccultationBodies=explicit`
+- [x] `OccultationBodies=explicit`
 
 ### `/Lighting/SolarIntensity`
 
@@ -541,14 +562,14 @@ fixture has verified them yet.
 - [x] `Position.$type=J2`
 - [x] `Position.$type=SGP4`
 - [x] `Position.$type=TwoBody`
-- [ ] `Position.$type=AstrogatorMCS`
-- [ ] `Position.$type=HPOP`
-- [ ] `Position.$type=SimpleAscent`
-- [ ] `Position.$type=Ballistic`
-- [ ] `Position.$type=CentralBody`
-- [ ] `Position.$type=CzmlPositions`
-- [ ] `Position.$type=CzmlPosition`
-- [ ] `OccultationBodies=explicit`
+- [ ] `Position.$type=AstrogatorMCS` deferred
+- [ ] `Position.$type=HPOP` deferred
+- [ ] `Position.$type=SimpleAscent` deferred
+- [ ] `Position.$type=Ballistic` deferred
+- [ ] `Position.$type=CentralBody` deferred
+- [ ] `Position.$type=CzmlPositions` deferred
+- [ ] `Position.$type=CzmlPosition` deferred
+- [x] `OccultationBodies=explicit`
 
 ### `/Propagator/Ballistic`
 
@@ -619,23 +640,41 @@ initial, lower-bound, and upper-bound arrays.
 - [x] `FromObjectPath.Position.$type=J2 -> ToObjectPath.Position.$type=SitePosition`
 - [x] `FromObjectPath.Position.$type=SitePosition -> ToObjectPath.Position.$type=SGP4`
 - [ ] other `FromObjectPath.Position.* -> ToObjectPath.Position.*` pairs
+  deferred: exhaustive position-pair cross-product coverage is out of scope.
 - [ ] `FromObjectPath.Orientation.*` covers all Entity Orientation Variants
-- [ ] `FromObjectPath.Sensor.*` covers all Entity Sensor Variants
+  deferred: no AccessComputeV2 fixture proves the full orientation matrix.
+- [ ] `FromObjectPath.Sensor.*` covers all Entity Sensor Variants deferred: no
+  AccessComputeV2 fixture proves the full sensor matrix.
 - [ ] `FromObjectPath.SensorPointing.*` covers all Sensor Pointing Variants
+  deferred: no AccessComputeV2 fixture proves the full sensor-pointing matrix.
 - [ ] `FromObjectPath.Constraints.*` covers all Coverage Constraint Variants
-- [ ] `FromObjectPath.Lighting=DirectSun`
-- [ ] `FromObjectPath.Lighting=Penumbra`
-- [ ] `FromObjectPath.Lighting=Umbra`
-- [ ] `FromObjectPath.OccultationBodies=explicit`
-- [ ] `ToObjectPath.Position.*` covers all Position Variants
+  deferred: no AccessComputeV2 fixture proves the full constraint matrix.
+- [ ] `FromObjectPath.Lighting=DirectSun` deferred: no AccessComputeV2 fixture
+  proves from-object lighting constraints.
+- [ ] `FromObjectPath.Lighting=Penumbra` deferred: no AccessComputeV2 fixture
+  proves from-object lighting constraints.
+- [ ] `FromObjectPath.Lighting=Umbra` deferred: no AccessComputeV2 fixture
+  proves from-object lighting constraints.
+- [ ] `FromObjectPath.OccultationBodies=explicit` deferred: no AccessComputeV2
+  fixture proves from-object occultation bodies.
+- [ ] `ToObjectPath.Position.*` covers all Position Variants deferred:
+  exhaustive position-pair cross-product coverage is out of scope.
 - [ ] `ToObjectPath.Orientation.*` covers all Entity Orientation Variants
-- [ ] `ToObjectPath.Sensor.*` covers all Entity Sensor Variants
+  deferred: no AccessComputeV2 fixture proves the full orientation matrix.
+- [ ] `ToObjectPath.Sensor.*` covers all Entity Sensor Variants deferred: no
+  AccessComputeV2 fixture proves the full sensor matrix.
 - [ ] `ToObjectPath.SensorPointing.*` covers all Sensor Pointing Variants
+  deferred: no AccessComputeV2 fixture proves the full sensor-pointing matrix.
 - [ ] `ToObjectPath.Constraints.*` covers all Coverage Constraint Variants
-- [ ] `ToObjectPath.Lighting=DirectSun`
-- [ ] `ToObjectPath.Lighting=Penumbra`
-- [ ] `ToObjectPath.Lighting=Umbra`
-- [ ] `ToObjectPath.OccultationBodies=explicit`
+  deferred: no AccessComputeV2 fixture proves the full constraint matrix.
+- [ ] `ToObjectPath.Lighting=DirectSun` deferred: no AccessComputeV2 fixture
+  proves to-object lighting constraints.
+- [ ] `ToObjectPath.Lighting=Penumbra` deferred: no AccessComputeV2 fixture
+  proves to-object lighting constraints.
+- [ ] `ToObjectPath.Lighting=Umbra` deferred: no AccessComputeV2 fixture
+  proves to-object lighting constraints.
+- [ ] `ToObjectPath.OccultationBodies=explicit` deferred: no AccessComputeV2
+  fixture proves to-object occultation bodies.
 - [x] `ComputeAER=true`
 - [x] `UseLightTimeDelay=true`
 
@@ -643,21 +682,30 @@ initial, lower-bound, and upper-bound arrays.
 
 - [x] `AllObjects.$type=EntityPath`
 - [x] `AllObjects.$type=EntityPathGroup` failure-only wire shape
-- [ ] `AllObjects.Position.*` covers all Position Variants
+- [ ] `AllObjects.Position.*` covers all Position Variants deferred:
+  ChainCompute has not verified every position variant in the chain context.
 - [ ] `AllObjects.Orientation.*` covers all Entity Orientation Variants
-- [ ] `AllObjects.Sensor.*` covers all Entity Sensor Variants
+  deferred: ChainCompute has not verified the full orientation matrix.
+- [ ] `AllObjects.Sensor.*` covers all Entity Sensor Variants deferred:
+  ChainCompute has not verified the full sensor matrix.
 - [ ] `AllObjects.SensorPointing.*` covers all Sensor Pointing Variants
+  deferred: ChainCompute has not verified the full sensor-pointing matrix.
 - [ ] `AllObjects.Constraints.*` covers all Coverage Constraint Variants
-- [ ] `AllObjects.Lighting=DirectSun`
-- [ ] `AllObjects.Lighting=Penumbra`
-- [ ] `AllObjects.Lighting=Umbra`
-- [ ] `AllObjects.OccultationBodies=explicit`
-- [ ] `EntityPathGroup.FromAccess_Restriction=AnyOf`
-- [ ] `EntityPathGroup.FromAccess_Restriction=AtLeastN`
-- [ ] `EntityPathGroup.ToAccess_Restriction=AnyOf`
-- [ ] `EntityPathGroup.ToAccess_Restriction=AtLeastN`
-- [ ] `Connections=null`
-- [ ] `Connections=explicit`
+  deferred: ChainCompute has not verified the full constraint matrix.
+- [ ] `AllObjects.Lighting=DirectSun` deferred: ChainCompute has not verified
+  all-object lighting constraints.
+- [ ] `AllObjects.Lighting=Penumbra` deferred: ChainCompute has not verified
+  all-object lighting constraints.
+- [ ] `AllObjects.Lighting=Umbra` deferred: ChainCompute has not verified
+  all-object lighting constraints.
+- [ ] `AllObjects.OccultationBodies=explicit` deferred: ChainCompute has not
+  verified all-object occultation bodies.
+- [x] `EntityPathGroup.FromAccess_Restriction=AnyOf` failure-only wire shape
+- [x] `EntityPathGroup.FromAccess_Restriction=AtLeastN` failure-only wire shape
+- [x] `EntityPathGroup.ToAccess_Restriction=AnyOf` failure-only wire shape
+- [x] `EntityPathGroup.ToAccess_Restriction=AtLeastN` failure-only wire shape
+- [x] `Connections=null`
+- [x] `Connections=explicit` failure-only wire shape
 - [x] `UseLightTimeDelay=true`
 
 ## No Additional Branch Axes Discovered Yet

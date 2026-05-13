@@ -134,3 +134,17 @@ branches:
           - 0.0
           - 0.0
     expect: *spacecraft_lighting_times_expect
+  occultation_bodies_explicit:
+    request:
+      <<: *lighting_times_common_request
+      OccultationBodies:
+        - Earth
+        - Moon
+      Position:
+        $type: SitePosition
+        CentralBody: Earth
+        cartographicDegrees:
+          - 120.0
+          - 31.0
+          - 10.0
+    expect: *site_lighting_times_expect

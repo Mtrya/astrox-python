@@ -146,3 +146,11 @@ branches:
           - 0.0
           - 0.0
     expect: *spacecraft_solar_intensity_expect
+  occultation_bodies_explicit:
+    request:
+      <<: *solar_intensity_common_request
+      OccultationBodies:
+        - Earth
+        - Moon
+      Position: *site_position
+    expect: *site_solar_intensity_expect
