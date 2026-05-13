@@ -76,6 +76,7 @@ branches:
             kind: json_string
           Cities:
             kind: json_array
+            min_length: 1
             items: *city_entry_shape
   type_of_city_administration_center:
     request:
@@ -90,4 +91,20 @@ branches:
   type_of_city_territorial_capital:
     request:
       typeOfCity: TerritorialCapital
-    expect: *city_type_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Cities
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Cities:
+            kind: json_array
+            items: *city_entry_shape

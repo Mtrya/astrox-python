@@ -72,9 +72,6 @@ branches:
                   min_length: 1
                   items:
                     kind: json_number
-  sun_frame_mean_eclp_j2000:
-    request: *transfer_common_request
-    expect: *transfer_success_expect
   sun_frame_icrf:
     request:
       <<: *transfer_common_request

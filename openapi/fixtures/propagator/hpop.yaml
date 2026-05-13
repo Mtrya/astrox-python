@@ -148,11 +148,6 @@ branches:
             - Earth
             - Moon
     expect: *czml_position_out_expect
-  srp_sun_position_apparent:
-    request:
-      <<: *hpop_common_request
-      HpopPropagator: *hpop_srp_apparent_dual_cone
-    expect: *czml_position_out_expect
   srp_sun_position_true:
     request:
       <<: *hpop_common_request

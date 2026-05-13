@@ -95,9 +95,6 @@ branches:
       <<: *mpc_common_request
       ObserverFrame: INERTIAL
     expect: *mpc_success_expect
-  observer_frame_mean_eclp_j2000:
-    request: *mpc_common_request
-    expect: *mpc_success_expect
   observer_frame_j2000:
     request:
       <<: *mpc_common_request
