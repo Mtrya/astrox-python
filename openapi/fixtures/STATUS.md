@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 28
 - handled nominal endpoint fixtures: 27
-- handled branch-axis fixtures: 29
+- handled branch-axis fixtures: 32
 
 Legend:
 
@@ -180,9 +180,10 @@ These sets are reused by many endpoint branch axes below.
 
 ### Coverage Constraint Variants
 
-- [ ] `GridPointConstraints.$type=AzElMask`
-- [ ] `GridPointConstraints.$type=Range`
-- [ ] `GridPointConstraints.$type=ElevationAngle`
+- [x] `GridPointConstraints.$type=AzElMask` failure-only wire shape on
+  `/Coverage/ComputeCoverage`
+- [x] `GridPointConstraints.$type=Range`
+- [x] `GridPointConstraints.$type=ElevationAngle`
 
 ### Entity Orientation Variants
 
@@ -358,7 +359,7 @@ Required branch axes for each endpoint above:
 - [ ] `Assets.Lighting=Umbra`
 - [ ] `Assets.OccultationBodies=explicit`
 - [x] `GridPointSensor.*` covers all Coverage Sensor Variants
-- [ ] `GridPointConstraints.*` covers all Coverage Constraint Variants
+- [x] `GridPointConstraints.*` covers all Coverage Constraint Variants
 - [ ] `FilterType=AtLeastN`
 - [ ] `FilterType=ExactlyN`
 - [ ] `ContainAssetAccessResults=true`

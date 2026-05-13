@@ -122,3 +122,58 @@ branches:
         xHalfAngle: 45.0
         yHalfAngle: 45.0
     expect: *compute_coverage_success_expect
+  grid_point_constraints_az_el_mask:
+    request:
+      <<: *compute_coverage_base_request
+      GridPointConstraints:
+        - $type: AzElMask
+          MaxRange: 20000.0
+          AzElMaskData:
+            - 0.0
+            - 0.0
+            - 1.5707963267948966
+            - 0.0
+            - 3.141592653589793
+            - 0.0
+            - 4.71238898038469
+            - 0.0
+            - 6.283185307179586
+            - 0.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - PercentCovered
+          - GlobalCoverageDatas
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
+          PercentCovered:
+            kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+  grid_point_constraints_range:
+    request:
+      <<: *compute_coverage_base_request
+      GridPointConstraints:
+        - $type: Range
+          MinimumValue: 0.0
+          MaximumValue: 20000.0
+          IsMaximumEnabled: true
+    expect: *compute_coverage_success_expect
+  grid_point_constraints_elevation_angle:
+    request:
+      <<: *compute_coverage_base_request
+      GridPointConstraints:
+        - $type: ElevationAngle
+          MinimumValue: 0.0
+          MaximumValue: 90.0
+          IsMaximumEnabled: false
+    expect: *compute_coverage_success_expect
