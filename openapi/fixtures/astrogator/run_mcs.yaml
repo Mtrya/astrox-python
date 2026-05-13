@@ -6,9 +6,10 @@ openapi_request_schema: AstrogatorMCS
 openapi_response_schema: MCSOutput
 branches:
   nominal:
-    request:
+    request: &run_mcs_initial_request
       MainSequence:
-        - $type: InitialState
+        - &initial_state_segment
+          $type: InitialState
           Name: Initial
           InitialState:
             Epoch: "2024-01-01T00:00:00Z"
@@ -94,3 +95,107 @@ branches:
                   kind: json_number
                 Results:
                   kind: json_object
+  sequence_type_sequence:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - $type: Sequence
+          Name: Sequence
+          Segments:
+            - *initial_state_segment
+    expect: &run_mcs_sequence_type_success_expect
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - MainSequenceResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          MainSequenceResults:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - TypeName
+                - Name
+              fields:
+                TypeName:
+                  kind: json_string
+                Name:
+                  kind: json_string
+  sequence_type_maneuver_impulsive:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: ManeuverImpulsive
+          Name: Impulse
+          PropulsionMethodValue: EngineModel
+          AttitudeControl:
+            $type: VelocityVector
+            DeltaVMagnitude: 1.0
+    expect: *run_mcs_sequence_type_success_expect
+  sequence_type_propagate:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: Propagate
+          Name: Propagate
+          PropagatorName: FixturePropagator
+          StopConditions:
+            - &duration_stop_condition
+              $type: Duration
+              Name: Duration
+              Trip: 60.0
+          MaxPropagationTime: 120
+      Propagators:
+        - &two_body_propagator
+          Name: FixturePropagator
+          CentralBodyName: Earth
+          NumericalIntegrator:
+            $type: RKF7th8th
+            Name: RKF7th8th
+          GravityModel:
+            $type: TwoBody
+            Name: EarthTwoBody
+            Mu: 398600441800000.0
+    expect: *run_mcs_sequence_type_success_expect
+  sequence_type_maneuver_finite:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: ManeuverFinite
+          Name: Finite
+          PropagatorName: FixturePropagator
+          StopConditions:
+            - *duration_stop_condition
+          PropulsionMethodValue: FixtureEngine
+          AttitudeControl:
+            $type: VelocityVector
+          MaxPropagationTime: 120
+      Propagators:
+        - *two_body_propagator
+      EngineModels:
+        - $type: EngineConstant
+          Name: FixtureEngine
+          Thrust: 500.0
+          Isp: 300.0
+    expect: *run_mcs_sequence_type_success_expect
+  sequence_type_stop:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: Stop
+          Name: Stop
+    expect: *run_mcs_sequence_type_success_expect

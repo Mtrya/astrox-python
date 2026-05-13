@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 48
 - handled nominal endpoint fixtures: 46
-- handled branch-axis fixtures: 85
+- handled branch-axis fixtures: 90
 
 Legend:
 
@@ -256,14 +256,21 @@ where it is claimed.
 
 ### `/Astrogator/RunMCS`
 
-- [ ] `MainSequence.$type=Sequence`
+- [x] `MainSequence.$type=Sequence`
 - [ ] `MainSequence.$type=Follow`
-- [ ] `MainSequence.$type=ManeuverFinite`
-- [ ] `MainSequence.$type=ManeuverImpulsive`
+  - blocked: minimal `Follow` plus targeted `Entities` leader probes using J2
+    and AstrogatorMCS-shaped positions still return `Start Stop` construction
+    errors for the leader position, so the required leader context remains
+    unclear.
+- [x] `MainSequence.$type=ManeuverFinite`
+- [x] `MainSequence.$type=ManeuverImpulsive`
 - [x] `MainSequence.$type=InitialState`
 - [ ] `MainSequence.$type=TargetSequence`
-- [ ] `MainSequence.$type=Propagate`
-- [ ] `MainSequence.$type=Stop`
+  - blocked: minimal `TargetSequence` and DifferentialCorrector-shaped
+    `Profiles`/`Segments` probes return internal `Operators`/`Variables`
+    empty-list errors; the accepted target-operator construction is unclear.
+- [x] `MainSequence.$type=Propagate`
+- [x] `MainSequence.$type=Stop`
 - [ ] `MainSequence.Results.$type.*` covers all CalcScalar variants
 - [ ] `MainSequence.StopConditions.$type.*` covers all stopping condition variants
 - [ ] `MainSequence.JoiningConditions.$type.*` covers all stopping condition variants
