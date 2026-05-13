@@ -158,96 +158,99 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 
 - [ ] `/ziyou` nominal
 
-## Reusable Branch Value Sets
+## Shared Branch Value Vocabulary
 
-These sets are reused by many endpoint branch axes below.
+These are branch values that appear in multiple endpoint schemas. They are an
+inventory, not coverage status: checkboxes only appear under concrete endpoint
+or endpoint-family axes below. A value listed here is not reusable handled
+coverage until a checked-in fixture verifies it in the specific endpoint context
+where it is claimed.
 
 ### Position Variants
 
-- [ ] `Position.$type=J2`
-- [ ] `Position.$type=SitePosition`
-- [ ] `Position.$type=AstrogatorMCS`
-- [ ] `Position.$type=HPOP`
-- [ ] `Position.$type=SimpleAscent`
-- [ ] `Position.$type=Ballistic`
-- [ ] `Position.$type=SGP4`
-- [ ] `Position.$type=CentralBody`
-- [ ] `Position.$type=CzmlPositions`
-- [ ] `Position.$type=CzmlPosition`
-- [ ] `Position.$type=TwoBody`
+- `Position.$type=J2`
+- `Position.$type=SitePosition`
+- `Position.$type=AstrogatorMCS`
+- `Position.$type=HPOP`
+- `Position.$type=SimpleAscent`
+- `Position.$type=Ballistic`
+- `Position.$type=SGP4`
+- `Position.$type=CentralBody`
+- `Position.$type=CzmlPositions`
+- `Position.$type=CzmlPosition`
+- `Position.$type=TwoBody`
 
 ### Coverage Grid Variants
 
-- [ ] `Grid.$type=CbLatLonBounds`
-- [ ] `Grid.$type=Global`
-- [ ] `Grid.$type=LatitudeBounds`
-- [ ] `Grid.$type=LatLonBounds`
+- `Grid.$type=CbLatLonBounds`
+- `Grid.$type=Global`
+- `Grid.$type=LatitudeBounds`
+- `Grid.$type=LatLonBounds`
 
 ### Coverage Sensor Variants
 
-- [x] `GridPointSensor.$type=Conic`
-- [x] `GridPointSensor.$type=Rectangular`
+- `GridPointSensor.$type=Conic`
+- `GridPointSensor.$type=Rectangular`
 
 ### Coverage Constraint Variants
 
-- [x] `GridPointConstraints.$type=AzElMask` failure-only wire shape on
-  `/Coverage/ComputeCoverage`
-- [x] `GridPointConstraints.$type=Range`
-- [x] `GridPointConstraints.$type=ElevationAngle`
+- `GridPointConstraints.$type=AzElMask`
+- `GridPointConstraints.$type=Range`
+- `GridPointConstraints.$type=ElevationAngle`
 
 ### Entity Orientation Variants
 
-- [ ] `Orientation.$type=FixedAtEpoch`
-- [ ] `Orientation.$type=Composite`
-- [ ] `Orientation.$type=Fixed`
-- [ ] `Orientation.$type=VNC`
-- [ ] `Orientation.$type=AlignedAndConstrained`
-- [ ] `Orientation.$type=LVLH`
-- [ ] `Orientation.$type=VVLH`
-- [ ] `Orientation.$type=CzmlOrientation`
+- `Orientation.$type=FixedAtEpoch`
+- `Orientation.$type=Composite`
+- `Orientation.$type=Fixed`
+- `Orientation.$type=VNC`
+- `Orientation.$type=AlignedAndConstrained`
+- `Orientation.$type=LVLH`
+- `Orientation.$type=VVLH`
+- `Orientation.$type=CzmlOrientation`
 
 ### Entity Sensor Variants
 
-- [ ] `Sensor.$type=Conic`
-- [ ] `Sensor.$type=Rectangular`
+- `Sensor.$type=Conic`
+- `Sensor.$type=Rectangular`
 
 ### Sensor Pointing Variants
 
-- [ ] `SensorPointing.$type=Fixed`
+- `SensorPointing.$type=Fixed`
 
 ### Stopping Condition Variants
 
-- [ ] `StopCondition.$type=Apoapsis`
-- [ ] `StopCondition.$type=Duration`
-- [ ] `StopCondition.$type=Epoch`
-- [ ] `StopCondition.$type=Periapsis`
-- [ ] `StopCondition.$type=Scalar`
+- `StopCondition.$type=Apoapsis`
+- `StopCondition.$type=Duration`
+- `StopCondition.$type=Epoch`
+- `StopCondition.$type=Periapsis`
+- `StopCondition.$type=Scalar`
 
 ### State Element Variants
 
-- [ ] `Element.$type=Cartesian`
-- [ ] `Element.$type=Keplerian`
-- [ ] `Element.$type=Spherical`
+- `Element.$type=Cartesian`
+- `Element.$type=Keplerian`
+- `Element.$type=Spherical`
 
 ### Attitude Control Variants
 
-- [ ] `AttitudeControl.$type=AntiVelocityVector`
-- [ ] `AttitudeControl.$type=Attitude`
-- [ ] `AttitudeControl.$type=VelocityVector`
-- [ ] `AttitudeControl.$type=ThrustVector`
+- `AttitudeControl.$type=AntiVelocityVector`
+- `AttitudeControl.$type=Attitude`
+- `AttitudeControl.$type=VelocityVector`
+- `AttitudeControl.$type=ThrustVector`
 
 ### CalcScalar Variants
 
-- [ ] `CalcScalar.$type=BPlane`
-- [ ] `CalcScalar.$type=Epoch`
-- [ ] `CalcScalar.$type=Relative`
-- [ ] `CalcScalar.$type=Duration`
-- [ ] `CalcScalar.$type=Cartographic`
-- [ ] `CalcScalar.$type=SphericalElement`
-- [ ] `CalcScalar.$type=DeltaSpherical`
-- [ ] `CalcScalar.$type=ModifiedKeplerianElement`
-- [ ] `CalcScalar.$type=PointElement`
-- [ ] `CalcScalar.$type=KeplerianElement`
+- `CalcScalar.$type=BPlane`
+- `CalcScalar.$type=Epoch`
+- `CalcScalar.$type=Relative`
+- `CalcScalar.$type=Duration`
+- `CalcScalar.$type=Cartographic`
+- `CalcScalar.$type=SphericalElement`
+- `CalcScalar.$type=DeltaSpherical`
+- `CalcScalar.$type=ModifiedKeplerianElement`
+- `CalcScalar.$type=PointElement`
+- `CalcScalar.$type=KeplerianElement`
 
 ## Endpoint Branch Axes
 
