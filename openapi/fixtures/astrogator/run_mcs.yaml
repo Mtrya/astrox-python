@@ -19,7 +19,7 @@ branches:
               X: 6678137.0
               Vy: 7726.67
       ComputeCzmlPositions: false
-    expect:
+    expect: &run_mcs_initial_success_expect
       status: 200
       content_type: application/json
       response:
@@ -417,3 +417,298 @@ branches:
                 kind: json_string
               CzmlPositions:
                 kind: json_array
+  state_element_keplerian:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - $type: InitialState
+          Name: Initial
+          InitialState:
+            Epoch: "2024-01-01T00:00:00Z"
+            CoordSystemName: Earth Inertial
+            Element:
+              $type: Keplerian
+              GravitationalParameter: 398600441800000.0
+              SemiMajorAxis: 6678137.0
+              Eccentricity: 0.001
+              Inclination: 28.5
+              RAAN: 0.0
+              ArgOfPeriapsis: 0.0
+              TrueAnomaly: 0.0
+    expect: *run_mcs_initial_success_expect
+  state_element_spherical:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - $type: InitialState
+          Name: Initial
+          InitialState:
+            Epoch: "2024-01-01T00:00:00Z"
+            CoordSystemName: Earth Inertial
+            Element:
+              $type: Spherical
+              RightAscension: 0.0
+              Declination: 0.0
+              RadiusMagnitude: 6678137.0
+              HorizFPA: 0.0
+              VelocityAzimuth: 90.0
+              VelocityMagnitude: 7726.67
+    expect: *run_mcs_initial_success_expect
+  result_duration:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - <<: *initial_state_segment
+          Results:
+            - $type: Duration
+              Name: DurationResult
+    expect: &run_mcs_result_success_expect
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - MainSequenceResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          MainSequenceResults:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - TypeName
+                - Name
+                - Results
+              fields:
+                TypeName:
+                  kind: json_string
+                Name:
+                  kind: json_string
+                Results:
+                  kind: json_object
+  result_epoch:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - <<: *initial_state_segment
+          Results:
+            - $type: Epoch
+              Name: EpochResult
+    expect: *run_mcs_result_success_expect
+  result_relative:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - <<: *initial_state_segment
+          Results:
+            - $type: Relative
+              Name: RelativeDuration
+              CalcObject:
+                $type: Duration
+                Name: DurationResult
+              ReferenceName: Reference
+    expect: *run_mcs_result_success_expect
+  result_cartographic:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - <<: *initial_state_segment
+          Results:
+            - $type: Cartographic
+              Name: Latitude
+              ComponentName: Latitude
+              CentralBodyName: Earth
+    expect: *run_mcs_result_success_expect
+  result_spherical_element:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - <<: *initial_state_segment
+          Results:
+            - $type: SphericalElement
+              Name: Radius
+              ComponentName: RadiusMagnitude
+              CoordSystemName: Earth Inertial
+    expect: *run_mcs_result_success_expect
+  result_delta_spherical:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - <<: *initial_state_segment
+          Results:
+            - $type: DeltaSpherical
+              Name: DeltaR
+              ComponentName: Delta_RMag
+              CentralBodyName: Earth
+              ParentCbName: Sun
+    expect: *run_mcs_result_success_expect
+  result_modified_keplerian_element:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - <<: *initial_state_segment
+          Results:
+            - $type: ModifiedKeplerianElement
+              Name: ModSma
+              ComponentName: SemimajorAxis
+              Mu: 398600441800000.0
+              CoordSystemName: Earth Inertial
+    expect: *run_mcs_result_success_expect
+  result_point_element:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - <<: *initial_state_segment
+          Results:
+            - $type: PointElement
+              Name: PointX
+              ComponentName: X
+              CoordSystemName: Earth Inertial
+    expect: *run_mcs_result_success_expect
+  result_keplerian_element:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - <<: *initial_state_segment
+          Results:
+            - $type: KeplerianElement
+              Name: Sma
+              ComponentName: SemimajorAxis
+              Mu: 398600441800000.0
+              CoordSystemName: Earth Inertial
+    expect: *run_mcs_result_success_expect
+  stopping_condition_epoch:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: Propagate
+          Name: Propagate
+          PropagatorName: FixturePropagator
+          StopConditions:
+            - $type: Epoch
+              Name: Epoch
+              Trip: "2024-01-01T00:01:00.000Z"
+          MaxPropagationTime: 120
+      Propagators:
+        - *two_body_propagator
+    expect: *run_mcs_sequence_type_success_expect
+  stopping_condition_apoapsis:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: Propagate
+          Name: Propagate
+          PropagatorName: FixturePropagator
+          StopConditions:
+            - $type: Apoapsis
+              Name: Apoapsis
+              CentralBodyName: Earth
+              Mu: 398600441800000.0
+          MaxPropagationTime: 120
+      Propagators:
+        - *two_body_propagator
+    expect: *run_mcs_sequence_type_success_expect
+  stopping_condition_periapsis:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: Propagate
+          Name: Propagate
+          PropagatorName: FixturePropagator
+          StopConditions:
+            - $type: Periapsis
+              Name: Periapsis
+              CentralBodyName: Earth
+              Mu: 398600441800000.0
+          MaxPropagationTime: 120
+      Propagators:
+        - *two_body_propagator
+    expect: *run_mcs_sequence_type_success_expect
+  stopping_condition_scalar_failure:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: Propagate
+          Name: Propagate
+          PropagatorName: FixturePropagator
+          StopConditions:
+            - $type: Scalar
+              Name: ScalarDuration
+              Trip: 60.0
+              UserCalcObject:
+                $type: Duration
+                Name: DurationResult
+          MaxPropagationTime: 120
+      Propagators:
+        - *two_body_propagator
+    expect: &run_mcs_failure_expect
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
+  attitude_control_anti_velocity_vector:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: ManeuverImpulsive
+          Name: Impulse
+          PropulsionMethodValue: EngineModel
+          AttitudeControl:
+            $type: AntiVelocityVector
+            DeltaVMagnitude: 1.0
+    expect: *run_mcs_sequence_type_success_expect
+  attitude_control_attitude:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: ManeuverImpulsive
+          Name: Impulse
+          PropulsionMethodValue: EngineModel
+          AttitudeControl:
+            $type: Attitude
+            DeltaVMagnitude: 1.0
+            CoordType: Quaternion
+            RefAxesName: VNC(Earth)
+            QX: 0.0
+            QY: 0.0
+            QZ: 0.0
+            QS: 1.0
+    expect: *run_mcs_sequence_type_success_expect
+  attitude_control_thrust_vector:
+    request:
+      <<: *run_mcs_initial_request
+      MainSequence:
+        - *initial_state_segment
+        - $type: ManeuverImpulsive
+          Name: Impulse
+          PropulsionMethodValue: EngineModel
+          AttitudeControl:
+            $type: ThrustVector
+            CoordType: Cartesian
+            ThrustAxesName: VNC(Earth)
+            X: 1.0
+            Y: 0.0
+            Z: 0.0
+    expect: *run_mcs_sequence_type_success_expect

@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 48
 - handled nominal endpoint fixtures: 46
-- handled branch-axis fixtures: 104
+- handled branch-axis fixtures: 125
 
 Legend:
 
@@ -271,11 +271,46 @@ where it is claimed.
     empty-list errors; the accepted target-operator construction is unclear.
 - [x] `MainSequence.$type=Propagate`
 - [x] `MainSequence.$type=Stop`
-- [ ] `MainSequence.Results.$type.*` covers all CalcScalar variants
-- [ ] `MainSequence.StopConditions.$type.*` covers all stopping condition variants
+Result branches below verify accepted request/response wire shape on a minimal
+`InitialState` segment. They do not assert that every selector yields a
+non-empty named result in that minimal context.
+
+- [ ] `MainSequence.Results.$type=BPlane`
+  - blocked: minimal `InitialState` and `Propagate` result probes return an
+    empty response with no content type.
+- [x] `MainSequence.Results.$type=Epoch`
+- [x] `MainSequence.Results.$type=Relative`
+- [x] `MainSequence.Results.$type=Duration`
+- [x] `MainSequence.Results.$type=Cartographic`
+- [x] `MainSequence.Results.$type=SphericalElement`
+- [x] `MainSequence.Results.$type=DeltaSpherical`
+- [x] `MainSequence.Results.$type=ModifiedKeplerianElement`
+- [x] `MainSequence.Results.$type=PointElement`
+- [x] `MainSequence.Results.$type=KeplerianElement`
+
+- [x] `MainSequence.StopConditions.$type=Duration`
+- [x] `MainSequence.StopConditions.$type=Epoch`
+- [x] `MainSequence.StopConditions.$type=Apoapsis`
+- [x] `MainSequence.StopConditions.$type=Periapsis`
+- [x] `MainSequence.StopConditions.$type=Scalar` failure-only wire shape
+
 - [ ] `MainSequence.JoiningConditions.$type.*` covers all stopping condition variants
-- [ ] `MainSequence.AttitudeControl.$type.*` covers all Attitude Control Variants
-- [ ] `MainSequence.InitialState.Element.$type.*` covers all State Element Variants
+  - blocked: `Follow` construction still fails before `JoiningConditions` are
+    reached, even with SitePosition, CzmlPosition, and fully windowed J2 leader
+    entity probes.
+
+Attitude-control branches below are standalone `ManeuverImpulsive` probes. They
+do not claim every finite/impulsive maneuver context accepts every attitude
+payload shape.
+
+- [x] `MainSequence.AttitudeControl.$type=AntiVelocityVector`
+- [x] `MainSequence.AttitudeControl.$type=Attitude`
+- [x] `MainSequence.AttitudeControl.$type=VelocityVector`
+- [x] `MainSequence.AttitudeControl.$type=ThrustVector`
+
+- [x] `MainSequence.InitialState.Element.$type=Cartesian`
+- [x] `MainSequence.InitialState.Element.$type=Keplerian`
+- [x] `MainSequence.InitialState.Element.$type=Spherical`
 The `Entities.Position.*` branches below are standalone nominal-MCS probes.
 They do not claim cross-product coverage with `Follow`, constraints, sensors,
 or other `MainSequence` variants.
