@@ -78,6 +78,11 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 ### Interface
 
 - [ ] `/InterfaceClass` nominal
+  - blocked: empty and single-fragment probes return structured HTTP 400
+    validation responses listing the current required `InterfaceInput`
+    properties. A generated schema-shaped payload covering all 53 current
+    top-level `InterfaceInput` properties reaches endpoint execution but still
+    returns an empty HTTP 500 with no content type. Reprobed on 2026-05-13.
 
 ### Landing Zone
 
@@ -131,10 +136,10 @@ Every endpoint should eventually have at least one `nominal` fixture record.
 - [ ] `/Rocket/RocketGuid` nominal
   - blocked: all documented root `$type` values (`CZ2CD`, `KZ1A`,
     `CZ7A`, `CZ3BC`, `CZ4BC`) return empty HTTP 500 responses with no content
-    type for minimal, example-derived, and fully populated schema-shaped
-    payload probes. Invalid discriminator values return structured HTTP 400,
-    so the server appears to recognize the documented discriminator names
-    before failing inside endpoint execution.
+    type for minimal payload probes. An example-derived `CZ3BC` payload also
+    returns empty HTTP 500. Invalid discriminator values return structured HTTP
+    400, so the server recognizes the documented discriminator names before
+    failing inside endpoint execution. Reprobed on 2026-05-13.
 - [x] `/Rocket/RocketLanding` nominal failure-only wire shape
 - [x] `/Rocket/RocketSegmentFA` nominal failure-only wire shape
 
@@ -517,9 +522,9 @@ Additional FOM endpoint branch axes:
 Coordinate branches below are validation-boundary fixtures. Minimal
 single-coordinate payloads verify live as structured `application/problem+json`
 responses because the server requires many unrelated `InterfaceInput`
-properties before execution. A full schema-shaped payload currently reaches an
-empty HTTP 500 with no content type, so `/InterfaceClass` nominal remains
-unchecked.
+properties before execution. A generated payload covering all 53 current
+top-level `InterfaceInput` properties reaches an empty HTTP 500 with no content
+type, so `/InterfaceClass` nominal remains unchecked. Reprobed on 2026-05-13.
 
 - [x] `AgVAAttitudeControlFinite.$type=AntiVelocityVector` validation-only wire shape
 - [x] `AgVAAttitudeControlFinite.$type=Attitude` validation-only wire shape
@@ -613,10 +618,15 @@ unchecked.
 
 ### `/Rocket/RocketGuid`
 
+Reprobed on 2026-05-13: invalid discriminator values return structured HTTP 400
+`application/problem+json`, while each documented discriminator below still
+reaches an empty HTTP 500 with no content type.
+
 - [ ] `$type=CZ2CD` blocked: empty HTTP 500 with no content type.
 - [ ] `$type=KZ1A` blocked: empty HTTP 500 with no content type.
 - [ ] `$type=CZ7A` blocked: empty HTTP 500 with no content type.
-- [ ] `$type=CZ3BC` blocked: empty HTTP 500 with no content type.
+- [ ] `$type=CZ3BC` blocked: empty HTTP 500 with no content type; an
+  example-derived `CZ3BC` payload also returns the same empty HTTP 500.
 - [ ] `$type=CZ4BC` blocked: empty HTTP 500 with no content type.
 
 ### `/Rocket/RocketLanding`
