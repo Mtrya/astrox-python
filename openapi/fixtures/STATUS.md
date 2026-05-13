@@ -8,7 +8,7 @@ Current checked-in fixture coverage:
 
 - fixture endpoint records: 28
 - handled nominal endpoint fixtures: 27
-- handled branch-axis fixtures: 27
+- handled branch-axis fixtures: 29
 
 Legend:
 
@@ -175,8 +175,8 @@ These sets are reused by many endpoint branch axes below.
 
 ### Coverage Sensor Variants
 
-- [ ] `GridPointSensor.$type=Conic`
-- [ ] `GridPointSensor.$type=Rectangular`
+- [x] `GridPointSensor.$type=Conic`
+- [x] `GridPointSensor.$type=Rectangular`
 
 ### Coverage Constraint Variants
 
@@ -357,7 +357,7 @@ Required branch axes for each endpoint above:
 - [ ] `Assets.Lighting=Penumbra`
 - [ ] `Assets.Lighting=Umbra`
 - [ ] `Assets.OccultationBodies=explicit`
-- [ ] `GridPointSensor.*` covers all Coverage Sensor Variants
+- [x] `GridPointSensor.*` covers all Coverage Sensor Variants
 - [ ] `GridPointConstraints.*` covers all Coverage Constraint Variants
 - [ ] `FilterType=AtLeastN`
 - [ ] `FilterType=ExactlyN`

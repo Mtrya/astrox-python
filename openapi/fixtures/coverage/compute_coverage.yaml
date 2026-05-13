@@ -6,7 +6,7 @@ openapi_request_schema: CoverageInput
 openapi_response_schema: CoverageOutput
 branches:
   nominal:
-    request:
+    request: &compute_coverage_base_request
       Start: "2024-01-01T00:00:00.000Z"
       Stop: "2024-01-01T01:00:00.000Z"
       Step: 120.0
@@ -36,7 +36,7 @@ branches:
               - 0.0
               - 0.0
               - 0.0
-    expect:
+    expect: &compute_coverage_success_expect
       status: 200
       content_type: application/json
       response:
@@ -104,3 +104,21 @@ branches:
             kind: json_array
           AssetAccessResults:
             kind: json_array
+  grid_point_sensor_conic:
+    request:
+      <<: *compute_coverage_base_request
+      GridPointSensor:
+        $type: Conic
+        innerHalfAngle: 0.0
+        outerHalfAngle: 45.0
+        minimumClockAngle: 0.0
+        maximumClockAngle: 360.0
+    expect: *compute_coverage_success_expect
+  grid_point_sensor_rectangular:
+    request:
+      <<: *compute_coverage_base_request
+      GridPointSensor:
+        $type: Rectangular
+        xHalfAngle: 45.0
+        yHalfAngle: 45.0
+    expect: *compute_coverage_success_expect
