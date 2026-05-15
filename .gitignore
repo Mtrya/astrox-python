@@ -14,5 +14,6 @@ wheels/
 # Internal & intermediate docs
 *.md
 !README.md
+!docs/**/*.md
 !openapi/**/*.md
 !.agents/skills/**/*.md
