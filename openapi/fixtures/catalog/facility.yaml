@@ -6,6 +6,7 @@ openapi_request_schema: query
 openapi_response_schema: FacilityDataBaseOutput
 branches:
   nominal:
+    state: verified
     request:
       facilityName: Beijing
     expect:

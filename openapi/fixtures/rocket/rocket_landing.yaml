@@ -6,7 +6,8 @@ openapi_request_schema: RocketLandingInput
 openapi_response_schema: RocketLanding_Output
 branches:
   nominal:
-    request: &landing_request
+    state: verified
+    request:
       Name: fixture
       Text: fixture
       IsOptimize: false
@@ -44,7 +45,7 @@ branches:
     expect:
       status: 200
       content_type: application/json
-      response: &static_initializer_failure
+      response:
         kind: json_object
         required_fields:
           - IsSuccess
@@ -56,9 +57,42 @@ branches:
           Message:
             kind: json_string
   is_optimize_true:
-    request: &optimize_request
-      <<: *landing_request
+    state: verified
+    request:
+      Name: fixture
+      Text: fixture
       IsOptimize: true
+      A0: 90.0
+      FaSheDianLLA:
+        - 110.0
+        - 19.0
+        - 0.0
+      T0: 0.0
+      X0:
+        - 6378137.0
+        - 0.0
+        - 100000.0
+        - 0.0
+        - 0.0
+        - -100.0
+        - 10000.0
+      Phicx0: 90.0
+      Psicx0: 0.0
+      Sm: 8.814
+      Dt1: 10.0
+      Phicx20: 45.0
+      Psicx20: 0.0
+      Dt2: 20.0
+      Force2: 200000.0
+      Ips2: 3000.0
+      Height4: 1.0
+      Force4: 200000.0
+      Ips4: 3000.0
+      Sa4: 1.0
+      Cons_H: 0.0
+      Cons_Lambda: 110.0
+      Cons_B: 19.0
+      Cons_V: 1.0
       VariableX0:
         - 45.0
         - 0.0
@@ -77,106 +111,592 @@ branches:
     expect:
       status: 200
       content_type: application/json
-      response: *static_initializer_failure
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   variable_x0_phicx20:
+    state: verified
     request:
-      <<: *optimize_request
+      Name: fixture
+      Text: fixture
+      IsOptimize: true
+      A0: 90.0
+      FaSheDianLLA:
+        - 110.0
+        - 19.0
+        - 0.0
+      T0: 0.0
+      X0:
+        - 6378137.0
+        - 0.0
+        - 100000.0
+        - 0.0
+        - 0.0
+        - -100.0
+        - 10000.0
+      Phicx0: 90.0
+      Psicx0: 0.0
+      Sm: 8.814
+      Dt1: 10.0
+      Phicx20: 45.0
+      Psicx20: 0.0
+      Dt2: 20.0
+      Force2: 200000.0
+      Ips2: 3000.0
+      Height4: 1.0
+      Force4: 200000.0
+      Ips4: 3000.0
+      Sa4: 1.0
+      Cons_H: 0.0
+      Cons_Lambda: 110.0
+      Cons_B: 19.0
+      Cons_V: 1.0
       VariableX0:
         - 46.0
         - 0.0
         - 20.0
         - 1.0
+      VariableLowerBound:
+        - 30.0
+        - -5.0
+        - 10.0
+        - 0.5
+      VariableUpperBound:
+        - 60.0
+        - 5.0
+        - 30.0
+        - 2.0
     expect:
       status: 200
       content_type: application/json
-      response: *static_initializer_failure
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   variable_x0_psicx20:
+    state: verified
     request:
-      <<: *optimize_request
+      Name: fixture
+      Text: fixture
+      IsOptimize: true
+      A0: 90.0
+      FaSheDianLLA:
+        - 110.0
+        - 19.0
+        - 0.0
+      T0: 0.0
+      X0:
+        - 6378137.0
+        - 0.0
+        - 100000.0
+        - 0.0
+        - 0.0
+        - -100.0
+        - 10000.0
+      Phicx0: 90.0
+      Psicx0: 0.0
+      Sm: 8.814
+      Dt1: 10.0
+      Phicx20: 45.0
+      Psicx20: 0.0
+      Dt2: 20.0
+      Force2: 200000.0
+      Ips2: 3000.0
+      Height4: 1.0
+      Force4: 200000.0
+      Ips4: 3000.0
+      Sa4: 1.0
+      Cons_H: 0.0
+      Cons_Lambda: 110.0
+      Cons_B: 19.0
+      Cons_V: 1.0
       VariableX0:
         - 45.0
         - 1.0
         - 20.0
         - 1.0
+      VariableLowerBound:
+        - 30.0
+        - -5.0
+        - 10.0
+        - 0.5
+      VariableUpperBound:
+        - 60.0
+        - 5.0
+        - 30.0
+        - 2.0
     expect:
       status: 200
       content_type: application/json
-      response: *static_initializer_failure
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   variable_x0_dt2:
+    state: verified
     request:
-      <<: *optimize_request
+      Name: fixture
+      Text: fixture
+      IsOptimize: true
+      A0: 90.0
+      FaSheDianLLA:
+        - 110.0
+        - 19.0
+        - 0.0
+      T0: 0.0
+      X0:
+        - 6378137.0
+        - 0.0
+        - 100000.0
+        - 0.0
+        - 0.0
+        - -100.0
+        - 10000.0
+      Phicx0: 90.0
+      Psicx0: 0.0
+      Sm: 8.814
+      Dt1: 10.0
+      Phicx20: 45.0
+      Psicx20: 0.0
+      Dt2: 20.0
+      Force2: 200000.0
+      Ips2: 3000.0
+      Height4: 1.0
+      Force4: 200000.0
+      Ips4: 3000.0
+      Sa4: 1.0
+      Cons_H: 0.0
+      Cons_Lambda: 110.0
+      Cons_B: 19.0
+      Cons_V: 1.0
       VariableX0:
         - 45.0
         - 0.0
         - 21.0
         - 1.0
+      VariableLowerBound:
+        - 30.0
+        - -5.0
+        - 10.0
+        - 0.5
+      VariableUpperBound:
+        - 60.0
+        - 5.0
+        - 30.0
+        - 2.0
     expect:
       status: 200
       content_type: application/json
-      response: *static_initializer_failure
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   variable_x0_height4:
+    state: verified
     request:
-      <<: *optimize_request
+      Name: fixture
+      Text: fixture
+      IsOptimize: true
+      A0: 90.0
+      FaSheDianLLA:
+        - 110.0
+        - 19.0
+        - 0.0
+      T0: 0.0
+      X0:
+        - 6378137.0
+        - 0.0
+        - 100000.0
+        - 0.0
+        - 0.0
+        - -100.0
+        - 10000.0
+      Phicx0: 90.0
+      Psicx0: 0.0
+      Sm: 8.814
+      Dt1: 10.0
+      Phicx20: 45.0
+      Psicx20: 0.0
+      Dt2: 20.0
+      Force2: 200000.0
+      Ips2: 3000.0
+      Height4: 1.0
+      Force4: 200000.0
+      Ips4: 3000.0
+      Sa4: 1.0
+      Cons_H: 0.0
+      Cons_Lambda: 110.0
+      Cons_B: 19.0
+      Cons_V: 1.0
       VariableX0:
         - 45.0
         - 0.0
         - 20.0
         - 1.1
+      VariableLowerBound:
+        - 30.0
+        - -5.0
+        - 10.0
+        - 0.5
+      VariableUpperBound:
+        - 60.0
+        - 5.0
+        - 30.0
+        - 2.0
     expect:
       status: 200
       content_type: application/json
-      response: *static_initializer_failure
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   variable_lower_bound_phicx20:
+    state: verified
     request:
-      <<: *optimize_request
+      Name: fixture
+      Text: fixture
+      IsOptimize: true
+      A0: 90.0
+      FaSheDianLLA:
+        - 110.0
+        - 19.0
+        - 0.0
+      T0: 0.0
+      X0:
+        - 6378137.0
+        - 0.0
+        - 100000.0
+        - 0.0
+        - 0.0
+        - -100.0
+        - 10000.0
+      Phicx0: 90.0
+      Psicx0: 0.0
+      Sm: 8.814
+      Dt1: 10.0
+      Phicx20: 45.0
+      Psicx20: 0.0
+      Dt2: 20.0
+      Force2: 200000.0
+      Ips2: 3000.0
+      Height4: 1.0
+      Force4: 200000.0
+      Ips4: 3000.0
+      Sa4: 1.0
+      Cons_H: 0.0
+      Cons_Lambda: 110.0
+      Cons_B: 19.0
+      Cons_V: 1.0
+      VariableX0:
+        - 45.0
+        - 0.0
+        - 20.0
+        - 1.0
       VariableLowerBound:
         - 31.0
         - -5.0
         - 10.0
         - 0.5
+      VariableUpperBound:
+        - 60.0
+        - 5.0
+        - 30.0
+        - 2.0
     expect:
       status: 200
       content_type: application/json
-      response: *static_initializer_failure
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   variable_lower_bound_psicx20:
+    state: verified
     request:
-      <<: *optimize_request
+      Name: fixture
+      Text: fixture
+      IsOptimize: true
+      A0: 90.0
+      FaSheDianLLA:
+        - 110.0
+        - 19.0
+        - 0.0
+      T0: 0.0
+      X0:
+        - 6378137.0
+        - 0.0
+        - 100000.0
+        - 0.0
+        - 0.0
+        - -100.0
+        - 10000.0
+      Phicx0: 90.0
+      Psicx0: 0.0
+      Sm: 8.814
+      Dt1: 10.0
+      Phicx20: 45.0
+      Psicx20: 0.0
+      Dt2: 20.0
+      Force2: 200000.0
+      Ips2: 3000.0
+      Height4: 1.0
+      Force4: 200000.0
+      Ips4: 3000.0
+      Sa4: 1.0
+      Cons_H: 0.0
+      Cons_Lambda: 110.0
+      Cons_B: 19.0
+      Cons_V: 1.0
+      VariableX0:
+        - 45.0
+        - 0.0
+        - 20.0
+        - 1.0
       VariableLowerBound:
         - 30.0
         - -4.0
         - 10.0
         - 0.5
+      VariableUpperBound:
+        - 60.0
+        - 5.0
+        - 30.0
+        - 2.0
     expect:
       status: 200
       content_type: application/json
-      response: *static_initializer_failure
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   variable_lower_bound_dt2:
+    state: verified
     request:
-      <<: *optimize_request
+      Name: fixture
+      Text: fixture
+      IsOptimize: true
+      A0: 90.0
+      FaSheDianLLA:
+        - 110.0
+        - 19.0
+        - 0.0
+      T0: 0.0
+      X0:
+        - 6378137.0
+        - 0.0
+        - 100000.0
+        - 0.0
+        - 0.0
+        - -100.0
+        - 10000.0
+      Phicx0: 90.0
+      Psicx0: 0.0
+      Sm: 8.814
+      Dt1: 10.0
+      Phicx20: 45.0
+      Psicx20: 0.0
+      Dt2: 20.0
+      Force2: 200000.0
+      Ips2: 3000.0
+      Height4: 1.0
+      Force4: 200000.0
+      Ips4: 3000.0
+      Sa4: 1.0
+      Cons_H: 0.0
+      Cons_Lambda: 110.0
+      Cons_B: 19.0
+      Cons_V: 1.0
+      VariableX0:
+        - 45.0
+        - 0.0
+        - 20.0
+        - 1.0
       VariableLowerBound:
         - 30.0
         - -5.0
         - 11.0
         - 0.5
+      VariableUpperBound:
+        - 60.0
+        - 5.0
+        - 30.0
+        - 2.0
     expect:
       status: 200
       content_type: application/json
-      response: *static_initializer_failure
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   variable_lower_bound_height4:
+    state: verified
     request:
-      <<: *optimize_request
+      Name: fixture
+      Text: fixture
+      IsOptimize: true
+      A0: 90.0
+      FaSheDianLLA:
+        - 110.0
+        - 19.0
+        - 0.0
+      T0: 0.0
+      X0:
+        - 6378137.0
+        - 0.0
+        - 100000.0
+        - 0.0
+        - 0.0
+        - -100.0
+        - 10000.0
+      Phicx0: 90.0
+      Psicx0: 0.0
+      Sm: 8.814
+      Dt1: 10.0
+      Phicx20: 45.0
+      Psicx20: 0.0
+      Dt2: 20.0
+      Force2: 200000.0
+      Ips2: 3000.0
+      Height4: 1.0
+      Force4: 200000.0
+      Ips4: 3000.0
+      Sa4: 1.0
+      Cons_H: 0.0
+      Cons_Lambda: 110.0
+      Cons_B: 19.0
+      Cons_V: 1.0
+      VariableX0:
+        - 45.0
+        - 0.0
+        - 20.0
+        - 1.0
       VariableLowerBound:
         - 30.0
         - -5.0
         - 10.0
         - 0.6
+      VariableUpperBound:
+        - 60.0
+        - 5.0
+        - 30.0
+        - 2.0
     expect:
       status: 200
       content_type: application/json
-      response: *static_initializer_failure
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   variable_upper_bound_phicx20:
+    state: verified
     request:
-      <<: *optimize_request
+      Name: fixture
+      Text: fixture
+      IsOptimize: true
+      A0: 90.0
+      FaSheDianLLA:
+        - 110.0
+        - 19.0
+        - 0.0
+      T0: 0.0
+      X0:
+        - 6378137.0
+        - 0.0
+        - 100000.0
+        - 0.0
+        - 0.0
+        - -100.0
+        - 10000.0
+      Phicx0: 90.0
+      Psicx0: 0.0
+      Sm: 8.814
+      Dt1: 10.0
+      Phicx20: 45.0
+      Psicx20: 0.0
+      Dt2: 20.0
+      Force2: 200000.0
+      Ips2: 3000.0
+      Height4: 1.0
+      Force4: 200000.0
+      Ips4: 3000.0
+      Sa4: 1.0
+      Cons_H: 0.0
+      Cons_Lambda: 110.0
+      Cons_B: 19.0
+      Cons_V: 1.0
+      VariableX0:
+        - 45.0
+        - 0.0
+        - 20.0
+        - 1.0
+      VariableLowerBound:
+        - 30.0
+        - -5.0
+        - 10.0
+        - 0.5
       VariableUpperBound:
         - 61.0
         - 5.0
@@ -185,10 +705,64 @@ branches:
     expect:
       status: 200
       content_type: application/json
-      response: *static_initializer_failure
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   variable_upper_bound_psicx20:
+    state: verified
     request:
-      <<: *optimize_request
+      Name: fixture
+      Text: fixture
+      IsOptimize: true
+      A0: 90.0
+      FaSheDianLLA:
+        - 110.0
+        - 19.0
+        - 0.0
+      T0: 0.0
+      X0:
+        - 6378137.0
+        - 0.0
+        - 100000.0
+        - 0.0
+        - 0.0
+        - -100.0
+        - 10000.0
+      Phicx0: 90.0
+      Psicx0: 0.0
+      Sm: 8.814
+      Dt1: 10.0
+      Phicx20: 45.0
+      Psicx20: 0.0
+      Dt2: 20.0
+      Force2: 200000.0
+      Ips2: 3000.0
+      Height4: 1.0
+      Force4: 200000.0
+      Ips4: 3000.0
+      Sa4: 1.0
+      Cons_H: 0.0
+      Cons_Lambda: 110.0
+      Cons_B: 19.0
+      Cons_V: 1.0
+      VariableX0:
+        - 45.0
+        - 0.0
+        - 20.0
+        - 1.0
+      VariableLowerBound:
+        - 30.0
+        - -5.0
+        - 10.0
+        - 0.5
       VariableUpperBound:
         - 60.0
         - 6.0
@@ -197,10 +771,64 @@ branches:
     expect:
       status: 200
       content_type: application/json
-      response: *static_initializer_failure
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   variable_upper_bound_dt2:
+    state: verified
     request:
-      <<: *optimize_request
+      Name: fixture
+      Text: fixture
+      IsOptimize: true
+      A0: 90.0
+      FaSheDianLLA:
+        - 110.0
+        - 19.0
+        - 0.0
+      T0: 0.0
+      X0:
+        - 6378137.0
+        - 0.0
+        - 100000.0
+        - 0.0
+        - 0.0
+        - -100.0
+        - 10000.0
+      Phicx0: 90.0
+      Psicx0: 0.0
+      Sm: 8.814
+      Dt1: 10.0
+      Phicx20: 45.0
+      Psicx20: 0.0
+      Dt2: 20.0
+      Force2: 200000.0
+      Ips2: 3000.0
+      Height4: 1.0
+      Force4: 200000.0
+      Ips4: 3000.0
+      Sa4: 1.0
+      Cons_H: 0.0
+      Cons_Lambda: 110.0
+      Cons_B: 19.0
+      Cons_V: 1.0
+      VariableX0:
+        - 45.0
+        - 0.0
+        - 20.0
+        - 1.0
+      VariableLowerBound:
+        - 30.0
+        - -5.0
+        - 10.0
+        - 0.5
       VariableUpperBound:
         - 60.0
         - 5.0
@@ -209,10 +837,64 @@ branches:
     expect:
       status: 200
       content_type: application/json
-      response: *static_initializer_failure
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   variable_upper_bound_height4:
+    state: verified
     request:
-      <<: *optimize_request
+      Name: fixture
+      Text: fixture
+      IsOptimize: true
+      A0: 90.0
+      FaSheDianLLA:
+        - 110.0
+        - 19.0
+        - 0.0
+      T0: 0.0
+      X0:
+        - 6378137.0
+        - 0.0
+        - 100000.0
+        - 0.0
+        - 0.0
+        - -100.0
+        - 10000.0
+      Phicx0: 90.0
+      Psicx0: 0.0
+      Sm: 8.814
+      Dt1: 10.0
+      Phicx20: 45.0
+      Psicx20: 0.0
+      Dt2: 20.0
+      Force2: 200000.0
+      Ips2: 3000.0
+      Height4: 1.0
+      Force4: 200000.0
+      Ips4: 3000.0
+      Sa4: 1.0
+      Cons_H: 0.0
+      Cons_Lambda: 110.0
+      Cons_B: 19.0
+      Cons_V: 1.0
+      VariableX0:
+        - 45.0
+        - 0.0
+        - 20.0
+        - 1.0
+      VariableLowerBound:
+        - 30.0
+        - -5.0
+        - 10.0
+        - 0.5
       VariableUpperBound:
         - 60.0
         - 5.0
@@ -221,4 +903,14 @@ branches:
     expect:
       status: 200
       content_type: application/json
-      response: *static_initializer_failure
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string

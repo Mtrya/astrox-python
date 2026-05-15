@@ -6,6 +6,7 @@ openapi_request_schema: InterfaceInput
 openapi_response_schema: string
 branches:
   finite_attitude_euler_angles:
+    state: verified
     request:
       AgVAAttitudeControlFiniteAttitude:
         CoordType: EulerAngles
@@ -13,8 +14,8 @@ branches:
         A: 0.0
         B: 0.0
         C: 0.0
-        Sequence: "313"
-    expect: &validation_problem_expect
+        Sequence: '313'
+    expect:
       status: 400
       content_type: application/problem+json
       response:
@@ -35,6 +36,7 @@ branches:
           errors:
             kind: json_object
   finite_attitude_quaternion:
+    state: verified
     request:
       AgVAAttitudeControlFiniteAttitude:
         CoordType: Quaternion
@@ -43,8 +45,28 @@ branches:
         QY: 0.0
         QZ: 0.0
         QS: 1.0
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   finite_thrust_vector_cartesian:
+    state: verified
     request:
       AgVAAttitudeControlFiniteThrustVector:
         CoordType: Cartesian
@@ -52,16 +74,56 @@ branches:
         X: 1.0
         Y: 0.0
         Z: 0.0
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   finite_thrust_vector_spherical:
+    state: verified
     request:
       AgVAAttitudeControlFiniteThrustVector:
         CoordType: Spherical
         ThrustAxesName: VNC(Earth)
         Azimuth: 0.0
         Elevation: 0.0
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   impulsive_attitude_euler_angles:
+    state: verified
     request:
       AgVAAttitudeControlImpulsiveAttitude:
         DeltaVMagnitude: 1.0
@@ -70,9 +132,29 @@ branches:
         A: 0.0
         B: 0.0
         C: 0.0
-        Sequence: "313"
-    expect: *validation_problem_expect
+        Sequence: '313'
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   impulsive_attitude_quaternion:
+    state: verified
     request:
       AgVAAttitudeControlImpulsiveAttitude:
         DeltaVMagnitude: 1.0
@@ -82,8 +164,28 @@ branches:
         QY: 0.0
         QZ: 0.0
         QS: 1.0
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   impulsive_thrust_vector_cartesian:
+    state: verified
     request:
       AgVAAttitudeControlImpulsiveThrustVector:
         CoordType: Cartesian
@@ -92,8 +194,28 @@ branches:
         X: 1.0
         Y: 0.0
         Z: 0.0
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   impulsive_thrust_vector_spherical:
+    state: verified
     request:
       AgVAAttitudeControlImpulsiveThrustVector:
         CoordType: Spherical
@@ -101,25 +223,63 @@ branches:
         Magnitude: 1.0
         Azimuth: 0.0
         Elevation: 0.0
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   finite_type_anti_velocity_vector:
+    state: verified
     request:
-      agVAMCSManeuverFinite: &finite_maneuver_request
+      agVAMCSManeuverFinite:
         AttitudeControl:
           $type: AntiVelocityVector
           AttitudeUpdate: DuringBurn
         PropagatorName: propagator
         StopConditions:
-          - &duration_stop_condition
-            $type: Duration
+          - $type: Duration
             Trip: 60.0
         PropulsionMethodValue: Constant_Thrust_Isp
         Name: finite-maneuver
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   finite_type_attitude:
+    state: verified
     request:
       agVAMCSManeuverFinite:
-        <<: *finite_maneuver_request
         AttitudeControl:
           $type: Attitude
           CoordType: Quaternion
@@ -128,19 +288,69 @@ branches:
           QY: 0.0
           QZ: 0.0
           QS: 1.0
-    expect: *validation_problem_expect
+        PropagatorName: propagator
+        StopConditions:
+          - $type: Duration
+            Trip: 60.0
+        PropulsionMethodValue: Constant_Thrust_Isp
+        Name: finite-maneuver
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   finite_type_velocity_vector:
+    state: verified
     request:
       agVAMCSManeuverFinite:
-        <<: *finite_maneuver_request
         AttitudeControl:
           $type: VelocityVector
           AttitudeUpdate: DuringBurn
-    expect: *validation_problem_expect
+        PropagatorName: propagator
+        StopConditions:
+          - $type: Duration
+            Trip: 60.0
+        PropulsionMethodValue: Constant_Thrust_Isp
+        Name: finite-maneuver
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   finite_type_thrust_vector:
+    state: verified
     request:
       agVAMCSManeuverFinite:
-        <<: *finite_maneuver_request
         AttitudeControl:
           $type: ThrustVector
           CoordType: Cartesian
@@ -148,20 +358,65 @@ branches:
           X: 1.0
           Y: 0.0
           Z: 0.0
-    expect: *validation_problem_expect
+        PropagatorName: propagator
+        StopConditions:
+          - $type: Duration
+            Trip: 60.0
+        PropulsionMethodValue: Constant_Thrust_Isp
+        Name: finite-maneuver
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   impulsive_type_anti_velocity_vector:
+    state: verified
     request:
-      agVAMCSManeuverImpulsive: &impulsive_maneuver_request
+      agVAMCSManeuverImpulsive:
         AttitudeControl:
           $type: AntiVelocityVector
           DeltaVMagnitude: 1.0
         PropulsionMethodValue: Impulsive
         Name: impulsive-maneuver
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   impulsive_type_attitude:
+    state: verified
     request:
       agVAMCSManeuverImpulsive:
-        <<: *impulsive_maneuver_request
         AttitudeControl:
           $type: Attitude
           DeltaVMagnitude: 1.0
@@ -171,19 +426,61 @@ branches:
           QY: 0.0
           QZ: 0.0
           QS: 1.0
-    expect: *validation_problem_expect
+        PropulsionMethodValue: Impulsive
+        Name: impulsive-maneuver
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   impulsive_type_velocity_vector:
+    state: verified
     request:
       agVAMCSManeuverImpulsive:
-        <<: *impulsive_maneuver_request
         AttitudeControl:
           $type: VelocityVector
           DeltaVMagnitude: 1.0
-    expect: *validation_problem_expect
+        PropulsionMethodValue: Impulsive
+        Name: impulsive-maneuver
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   impulsive_type_thrust_vector:
+    state: verified
     request:
       agVAMCSManeuverImpulsive:
-        <<: *impulsive_maneuver_request
         AttitudeControl:
           $type: ThrustVector
           CoordType: Cartesian
@@ -192,8 +489,30 @@ branches:
           X: 1.0
           Y: 0.0
           Z: 0.0
-    expect: *validation_problem_expect
+        PropulsionMethodValue: Impulsive
+        Name: impulsive-maneuver
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   stopping_condition_apoapsis:
+    state: verified
     request:
       agVAMCSPropagate:
         PropagatorName: propagator
@@ -202,25 +521,86 @@ branches:
             CentralBodyName: Earth
             Mu: 398600441800000.0
         Name: propagate
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   stopping_condition_duration:
+    state: verified
     request:
       agVAMCSPropagate:
         PropagatorName: propagator
         StopConditions:
-          - *duration_stop_condition
+          - $type: Duration
+            Trip: 60.0
         Name: propagate
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   stopping_condition_epoch:
+    state: verified
     request:
       agVAMCSPropagate:
         PropagatorName: propagator
         StopConditions:
           - $type: Epoch
-            Trip: "2024-01-01T00:10:00.000Z"
+            Trip: '2024-01-01T00:10:00.000Z'
         Name: propagate
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   stopping_condition_periapsis:
+    state: verified
     request:
       agVAMCSPropagate:
         PropagatorName: propagator
@@ -229,24 +609,64 @@ branches:
             CentralBodyName: Earth
             Mu: 398600441800000.0
         Name: propagate
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   stopping_condition_scalar:
+    state: verified
     request:
       agVAMCSPropagate:
         PropagatorName: propagator
         StopConditions:
           - $type: Scalar
             Trip: 1.0
-            UserCalcObject: &calc_scalar_duration
+            UserCalcObject:
               $type: Duration
               Name: duration
         Name: propagate
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   state_element_cartesian:
+    state: verified
     request:
       agVAMCSInitialState:
         InitialState:
-          Epoch: "2024-01-01T00:00:00Z"
+          Epoch: '2024-01-01T00:00:00Z'
           CoordSystemName: Earth Inertial
           Element:
             $type: Cartesian
@@ -257,12 +677,32 @@ branches:
             Vy: 7500.0
             Vz: 0.0
         Name: initial-state
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   state_element_keplerian:
+    state: verified
     request:
       agVAMCSInitialState:
         InitialState:
-          Epoch: "2024-01-01T00:00:00Z"
+          Epoch: '2024-01-01T00:00:00Z'
           CoordSystemName: Earth Inertial
           Element:
             $type: Keplerian
@@ -274,14 +714,34 @@ branches:
             RAAN: 0.0
             ArgOfPeriapsis: 0.0
             TrueAnomaly: 0.0
-            AnomalyType: "True"
+            AnomalyType: 'True'
         Name: initial-state
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   state_element_spherical:
+    state: verified
     request:
       agVAMCSInitialState:
         InitialState:
-          Epoch: "2024-01-01T00:00:00Z"
+          Epoch: '2024-01-01T00:00:00Z'
           CoordSystemName: Earth Inertial
           Element:
             $type: Spherical
@@ -292,8 +752,28 @@ branches:
             VelocityAzimuth: 90.0
             VelocityMagnitude: 7500.0
         Name: initial-state
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   calc_scalar_b_plane:
+    state: verified
     request:
       agVAScalarStoppingCondition:
         Trip: 1.0
@@ -303,8 +783,28 @@ branches:
           Mu: 398600441800000.0
           CentralBodyName: Earth
           Name: b-plane
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   calc_scalar_cartographic:
+    state: verified
     request:
       agVAScalarStoppingCondition:
         Trip: 1.0
@@ -313,8 +813,28 @@ branches:
           ComponentName: Latitude
           CentralBodyName: Earth
           Name: cartographic
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   calc_scalar_delta_spherical:
+    state: verified
     request:
       agVAScalarStoppingCondition:
         Trip: 1.0
@@ -324,22 +844,84 @@ branches:
           CentralBodyName: Moon
           ParentCbName: Earth
           Name: delta-spherical
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   calc_scalar_duration:
+    state: verified
     request:
       agVAScalarStoppingCondition:
         Trip: 1.0
-        UserCalcObject: *calc_scalar_duration
-    expect: *validation_problem_expect
+        UserCalcObject:
+          $type: Duration
+          Name: duration
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   calc_scalar_epoch:
+    state: verified
     request:
       agVAScalarStoppingCondition:
         Trip: 1.0
         UserCalcObject:
           $type: Epoch
           Name: epoch
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   calc_scalar_keplerian_element:
+    state: verified
     request:
       agVAScalarStoppingCondition:
         Trip: 1.0
@@ -349,8 +931,28 @@ branches:
           Mu: 398600441800000.0
           CoordSystemName: Earth Inertial
           Name: keplerian-element
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   calc_scalar_modified_keplerian_element:
+    state: verified
     request:
       agVAScalarStoppingCondition:
         Trip: 1.0
@@ -360,8 +962,28 @@ branches:
           Mu: 398600441800000.0
           CoordSystemName: Earth Inertial
           Name: modified-keplerian-element
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   calc_scalar_point_element:
+    state: verified
     request:
       agVAScalarStoppingCondition:
         Trip: 1.0
@@ -370,18 +992,60 @@ branches:
           ComponentName: X
           CoordSystemName: Earth Inertial
           Name: point-element
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   calc_scalar_relative:
+    state: verified
     request:
       agVAScalarStoppingCondition:
         Trip: 1.0
         UserCalcObject:
           $type: Relative
-          CalcObject: *calc_scalar_duration
+          CalcObject:
+            $type: Duration
+            Name: duration
           ReferenceName: reference
           Name: relative
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object
   calc_scalar_spherical_element:
+    state: verified
     request:
       agVAScalarStoppingCondition:
         Trip: 1.0
@@ -390,4 +1054,23 @@ branches:
           ComponentName: RadiusMagnitude
           CoordSystemName: Earth Inertial
           Name: spherical-element
-    expect: *validation_problem_expect
+    expect:
+      status: 400
+      content_type: application/problem+json
+      response:
+        kind: json_object
+        required_fields:
+          - type
+          - title
+          - status
+          - errors
+        fields:
+          type:
+            kind: json_string
+          title:
+            kind: json_string
+          status:
+            kind: json_number
+            const: 400
+          errors:
+            kind: json_object

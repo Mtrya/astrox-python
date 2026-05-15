@@ -6,10 +6,11 @@ openapi_request_schema: MultiSatesInput
 openapi_response_schema: MultiSatesOutput
 branches:
   nominal:
+    state: verified
     request:
-      Epoch: "2024-01-01T00:10:00.000Z"
+      Epoch: '2024-01-01T00:10:00.000Z'
       AllSateElements:
-        - OrbitEpoch: "2024-01-01T00:00:00.000Z"
+        - OrbitEpoch: '2024-01-01T00:00:00.000Z'
           SemimajorAxis: 6778137.0
           Eccentricity: 0.001
           Inclination: 28.5

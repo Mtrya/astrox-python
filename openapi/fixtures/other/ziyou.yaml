@@ -6,9 +6,10 @@ openapi_request_schema: ZiyouInput
 openapi_response_schema: ZiyouOutput
 branches:
   nominal:
+    state: verified
     request:
       Type: Target
-      Start: "2024-01-01T00:00:00Z"
+      Start: '2024-01-01T00:00:00Z'
       RV_J2000:
         - 6678137.0
         - 0.0

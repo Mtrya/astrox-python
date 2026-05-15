@@ -6,6 +6,7 @@ openapi_request_schema: GEOYMLambertInput
 openapi_response_schema: array
 branches:
   nominal:
+    state: verified
     request:
       keplerPt:
         SemimajorAxis: 42164000.0

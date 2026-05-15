@@ -6,10 +6,11 @@ openapi_request_schema: EntityPositionHPOP
 openapi_response_schema: CzmlPositionOut
 branches:
   nominal:
-    request: &hpop_common_request
-      Start: "2024-01-01T00:00:00.000Z"
-      Stop: "2024-01-01T00:10:00.000Z"
-      OrbitEpoch: "2024-01-01T00:00:00.000Z"
+    state: verified
+    request:
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T00:10:00.000Z'
+      OrbitEpoch: '2024-01-01T00:00:00.000Z'
       CoordSystem: Inertial
       CoordType: Classical
       OrbitalElements:
@@ -22,11 +23,11 @@ branches:
       HpopPropagator:
         Name: Earth_HPOP
         CentralBodyName: Earth
-        GravityModel: &hpop_twobody_gravity
+        GravityModel:
           $type: TwoBody
           Name: EarthTwoBody
           Mu: 398600441500000.0
-    expect: &czml_position_out_expect
+    expect:
       status: 200
       content_type: application/json
       response:
@@ -69,8 +70,20 @@ branches:
               referenceFrame:
                 kind: json_string
   numerical_integrator_rkf7th8th:
+    state: verified
     request:
-      <<: *hpop_common_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T00:10:00.000Z'
+      OrbitEpoch: '2024-01-01T00:00:00.000Z'
+      CoordSystem: Inertial
+      CoordType: Classical
+      OrbitalElements:
+        - 6678137.0
+        - 0.0
+        - 28.5
+        - 0.0
+        - 0.0
+        - 0.0
       HpopPropagator:
         Name: Earth_HPOP
         CentralBodyName: Earth
@@ -79,11 +92,67 @@ branches:
           Name: RKF7th8th
           InitialStep: 60.0
           MaxStep: 300.0
-        GravityModel: *hpop_twobody_gravity
-    expect: *czml_position_out_expect
+        GravityModel:
+          $type: TwoBody
+          Name: EarthTwoBody
+          Mu: 398600441500000.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Period
+          - Position
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Period:
+            kind: json_number
+          Position:
+            kind: json_object
+            required_fields:
+              - CentralBody
+              - cartesianVelocity
+              - epoch
+              - interpolationAlgorithm
+              - interpolationDegree
+              - referenceFrame
+            fields:
+              CentralBody:
+                kind: json_string
+              cartesianVelocity:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_number
+              epoch:
+                kind: json_string
+              interpolationAlgorithm:
+                kind: json_string
+              interpolationDegree:
+                kind: json_number
+              referenceFrame:
+                kind: json_string
   gravity_model_gravity_field:
+    state: verified
     request:
-      <<: *hpop_common_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T00:10:00.000Z'
+      OrbitEpoch: '2024-01-01T00:00:00.000Z'
+      CoordSystem: Inertial
+      CoordType: Classical
+      OrbitalElements:
+        - 6678137.0
+        - 0.0
+        - 28.5
+        - 0.0
+        - 0.0
+        - 0.0
       HpopPropagator:
         Name: Earth_HPOP
         CentralBodyName: Earth
@@ -93,31 +162,204 @@ branches:
           GravityFileName: EGM2008.grv
           Degree: 2
           Order: 2
-    expect: *czml_position_out_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Period
+          - Position
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Period:
+            kind: json_number
+          Position:
+            kind: json_object
+            required_fields:
+              - CentralBody
+              - cartesianVelocity
+              - epoch
+              - interpolationAlgorithm
+              - interpolationDegree
+              - referenceFrame
+            fields:
+              CentralBody:
+                kind: json_string
+              cartesianVelocity:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_number
+              epoch:
+                kind: json_string
+              interpolationAlgorithm:
+                kind: json_string
+              interpolationDegree:
+                kind: json_number
+              referenceFrame:
+                kind: json_string
   gravity_model_twobody:
-    request: *hpop_common_request
-    expect: *czml_position_out_expect
-  atmospheric_model_jacchia_roberts:
+    state: verified
     request:
-      <<: *hpop_common_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T00:10:00.000Z'
+      OrbitEpoch: '2024-01-01T00:00:00.000Z'
+      CoordSystem: Inertial
+      CoordType: Classical
+      OrbitalElements:
+        - 6678137.0
+        - 0.0
+        - 28.5
+        - 0.0
+        - 0.0
+        - 0.0
       HpopPropagator:
         Name: Earth_HPOP
         CentralBodyName: Earth
-        GravityModel: *hpop_twobody_gravity
+        GravityModel:
+          $type: TwoBody
+          Name: EarthTwoBody
+          Mu: 398600441500000.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Period
+          - Position
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Period:
+            kind: json_number
+          Position:
+            kind: json_object
+            required_fields:
+              - CentralBody
+              - cartesianVelocity
+              - epoch
+              - interpolationAlgorithm
+              - interpolationDegree
+              - referenceFrame
+            fields:
+              CentralBody:
+                kind: json_string
+              cartesianVelocity:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_number
+              epoch:
+                kind: json_string
+              interpolationAlgorithm:
+                kind: json_string
+              interpolationDegree:
+                kind: json_number
+              referenceFrame:
+                kind: json_string
+  atmospheric_model_jacchia_roberts:
+    state: verified
+    request:
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T00:10:00.000Z'
+      OrbitEpoch: '2024-01-01T00:00:00.000Z'
+      CoordSystem: Inertial
+      CoordType: Classical
+      OrbitalElements:
+        - 6678137.0
+        - 0.0
+        - 28.5
+        - 0.0
+        - 0.0
+        - 0.0
+      HpopPropagator:
+        Name: Earth_HPOP
+        CentralBodyName: Earth
+        GravityModel:
+          $type: TwoBody
+          Name: EarthTwoBody
+          Mu: 398600441500000.0
         AtmosphericModel:
           $type: JacchiaRoberts
           Name: JacchiaRoberts
           F10p7: 150.0
           F10p7Avg: 150.0
           Kp: 3.0
-    expect: *czml_position_out_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Period
+          - Position
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Period:
+            kind: json_number
+          Position:
+            kind: json_object
+            required_fields:
+              - CentralBody
+              - cartesianVelocity
+              - epoch
+              - interpolationAlgorithm
+              - interpolationDegree
+              - referenceFrame
+            fields:
+              CentralBody:
+                kind: json_string
+              cartesianVelocity:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_number
+              epoch:
+                kind: json_string
+              interpolationAlgorithm:
+                kind: json_string
+              interpolationDegree:
+                kind: json_number
+              referenceFrame:
+                kind: json_string
   srp_model_spherical:
+    state: verified
     request:
-      <<: *hpop_common_request
-      HpopPropagator: &hpop_srp_apparent_dual_cone
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T00:10:00.000Z'
+      OrbitEpoch: '2024-01-01T00:00:00.000Z'
+      CoordSystem: Inertial
+      CoordType: Classical
+      OrbitalElements:
+        - 6678137.0
+        - 0.0
+        - 28.5
+        - 0.0
+        - 0.0
+        - 0.0
+      HpopPropagator:
         Name: Earth_HPOP
         CentralBodyName: Earth
-        GravityModel: *hpop_twobody_gravity
+        GravityModel:
+          $type: TwoBody
+          Name: EarthTwoBody
+          Mu: 398600441500000.0
         SRPModel:
           $type: SRPSpherical
           Name: SRPSpherical
@@ -126,19 +368,142 @@ branches:
           EclipsingBodies:
             - Earth
             - Moon
-    expect: *czml_position_out_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Period
+          - Position
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Period:
+            kind: json_number
+          Position:
+            kind: json_object
+            required_fields:
+              - CentralBody
+              - cartesianVelocity
+              - epoch
+              - interpolationAlgorithm
+              - interpolationDegree
+              - referenceFrame
+            fields:
+              CentralBody:
+                kind: json_string
+              cartesianVelocity:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_number
+              epoch:
+                kind: json_string
+              interpolationAlgorithm:
+                kind: json_string
+              interpolationDegree:
+                kind: json_number
+              referenceFrame:
+                kind: json_string
   srp_shadow_model_dual_cone:
+    state: verified
     request:
-      <<: *hpop_common_request
-      HpopPropagator: *hpop_srp_apparent_dual_cone
-    expect: *czml_position_out_expect
-  srp_shadow_model_cylindrical:
-    request:
-      <<: *hpop_common_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T00:10:00.000Z'
+      OrbitEpoch: '2024-01-01T00:00:00.000Z'
+      CoordSystem: Inertial
+      CoordType: Classical
+      OrbitalElements:
+        - 6678137.0
+        - 0.0
+        - 28.5
+        - 0.0
+        - 0.0
+        - 0.0
       HpopPropagator:
         Name: Earth_HPOP
         CentralBodyName: Earth
-        GravityModel: *hpop_twobody_gravity
+        GravityModel:
+          $type: TwoBody
+          Name: EarthTwoBody
+          Mu: 398600441500000.0
+        SRPModel:
+          $type: SRPSpherical
+          Name: SRPSpherical
+          ShadowModel: DualCone
+          SunPosition: Apparent
+          EclipsingBodies:
+            - Earth
+            - Moon
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Period
+          - Position
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Period:
+            kind: json_number
+          Position:
+            kind: json_object
+            required_fields:
+              - CentralBody
+              - cartesianVelocity
+              - epoch
+              - interpolationAlgorithm
+              - interpolationDegree
+              - referenceFrame
+            fields:
+              CentralBody:
+                kind: json_string
+              cartesianVelocity:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_number
+              epoch:
+                kind: json_string
+              interpolationAlgorithm:
+                kind: json_string
+              interpolationDegree:
+                kind: json_number
+              referenceFrame:
+                kind: json_string
+  srp_shadow_model_cylindrical:
+    state: verified
+    request:
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T00:10:00.000Z'
+      OrbitEpoch: '2024-01-01T00:00:00.000Z'
+      CoordSystem: Inertial
+      CoordType: Classical
+      OrbitalElements:
+        - 6678137.0
+        - 0.0
+        - 28.5
+        - 0.0
+        - 0.0
+        - 0.0
+      HpopPropagator:
+        Name: Earth_HPOP
+        CentralBodyName: Earth
+        GravityModel:
+          $type: TwoBody
+          Name: EarthTwoBody
+          Mu: 398600441500000.0
         SRPModel:
           $type: SRPSpherical
           Name: SRPSpherical
@@ -147,20 +512,117 @@ branches:
           EclipsingBodies:
             - Earth
             - Moon
-    expect: *czml_position_out_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Period
+          - Position
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Period:
+            kind: json_number
+          Position:
+            kind: json_object
+            required_fields:
+              - CentralBody
+              - cartesianVelocity
+              - epoch
+              - interpolationAlgorithm
+              - interpolationDegree
+              - referenceFrame
+            fields:
+              CentralBody:
+                kind: json_string
+              cartesianVelocity:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_number
+              epoch:
+                kind: json_string
+              interpolationAlgorithm:
+                kind: json_string
+              interpolationDegree:
+                kind: json_number
+              referenceFrame:
+                kind: json_string
   srp_sun_position_true:
+    state: verified
     request:
-      <<: *hpop_common_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T00:10:00.000Z'
+      OrbitEpoch: '2024-01-01T00:00:00.000Z'
+      CoordSystem: Inertial
+      CoordType: Classical
+      OrbitalElements:
+        - 6678137.0
+        - 0.0
+        - 28.5
+        - 0.0
+        - 0.0
+        - 0.0
       HpopPropagator:
         Name: Earth_HPOP
         CentralBodyName: Earth
-        GravityModel: *hpop_twobody_gravity
+        GravityModel:
+          $type: TwoBody
+          Name: EarthTwoBody
+          Mu: 398600441500000.0
         SRPModel:
           $type: SRPSpherical
           Name: SRPSpherical
           ShadowModel: DualCone
-          SunPosition: "True"
+          SunPosition: 'True'
           EclipsingBodies:
             - Earth
             - Moon
-    expect: *czml_position_out_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Period
+          - Position
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Period:
+            kind: json_number
+          Position:
+            kind: json_object
+            required_fields:
+              - CentralBody
+              - cartesianVelocity
+              - epoch
+              - interpolationAlgorithm
+              - interpolationDegree
+              - referenceFrame
+            fields:
+              CentralBody:
+                kind: json_string
+              cartesianVelocity:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_number
+              epoch:
+                kind: json_string
+              interpolationAlgorithm:
+                kind: json_string
+              interpolationDegree:
+                kind: json_number
+              referenceFrame:
+                kind: json_string

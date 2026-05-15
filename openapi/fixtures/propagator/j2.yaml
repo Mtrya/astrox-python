@@ -6,11 +6,12 @@ openapi_request_schema: EntityPositionJ2
 openapi_response_schema: CzmlPositionOut
 branches:
   nominal:
+    state: verified
     request:
-      Start: "2024-01-01T00:00:00.000Z"
-      Stop: "2024-01-01T00:10:00.000Z"
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T00:10:00.000Z'
       Step: 300.0
-      OrbitEpoch: "2024-01-01T00:00:00.000Z"
+      OrbitEpoch: '2024-01-01T00:00:00.000Z'
       CoordSystem: Inertial
       CoordType: Classical
       J2NormalizedValue: 0.000484165143790815

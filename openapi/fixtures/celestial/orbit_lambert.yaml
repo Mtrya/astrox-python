@@ -6,6 +6,7 @@ openapi_request_schema: LambertRhGoodingInput
 openapi_response_schema: LambertRhGoodingResult
 branches:
   nominal:
+    state: verified
     request:
       RV1:
         - 1112487.4

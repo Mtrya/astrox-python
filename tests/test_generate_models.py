@@ -1,7 +1,7 @@
 from copy import deepcopy
 import unittest
 
-from scripts.generate_models import normalize_schema, rename_numbered_schemas
+from scripts.openapi_drift.generate_models import normalize_schema, rename_numbered_schemas
 
 
 class GenerateModelsTests(unittest.TestCase):

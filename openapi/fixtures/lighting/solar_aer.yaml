@@ -6,9 +6,10 @@ openapi_request_schema: SolarAERInput
 openapi_response_schema: SolarAEROut
 branches:
   nominal:
+    state: verified
     request:
-      Start: "2024-01-01T00:00:00.000Z"
-      Stop: "2024-01-01T01:00:00.000Z"
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
       TimeStepSec: 1800
       sitePosition:
         CentralBody: Earth

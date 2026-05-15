@@ -6,6 +6,7 @@ openapi_request_schema: multipart/form-data
 openapi_response_schema: ProblemDetails
 branches:
   missing_file_and_api_key:
+    state: verified
     expect:
       status: 400
       content_type: application/problem+json

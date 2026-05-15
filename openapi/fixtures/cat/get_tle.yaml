@@ -6,18 +6,19 @@ openapi_request_schema: TLE_Input
 openapi_response_schema: TleInfo2
 branches:
   nominal:
-    request: &get_tle_request
+    state: verified
+    request:
       Name: FIXTURE-LEO
-      SSC: "99001"
-      Epoch: "2021-04-30T12:00:00.000Z"
-      BStar: 0.000037381
+      SSC: '99001'
+      Epoch: '2021-04-30T12:00:00.000Z'
+      BStar: 3.7381e-05
       Sma: 6778.0
       Ecc: 0.0002714
       Inc: 51.6441
       W: 302.6679
       RAAN: 217.3237
       TA: 206.5255
-    expect: &get_tle_expect
+    expect:
       status: 200
       content_type: application/json
       response:
@@ -37,16 +38,35 @@ branches:
           TLE_Line2:
             kind: json_string
   is_mean_elements_true:
+    state: verified
     request:
-      <<: *get_tle_request
       Name: FIXTURE-MEAN
-      SSC: "99006"
+      SSC: '99006'
+      Epoch: '2021-04-30T12:00:00.000Z'
+      BStar: 1.0e-05
       Sma: 7078.0
       Ecc: 0.001
       Inc: 98.2
       W: 90.0
       RAAN: 120.0
       TA: 0.0
-      BStar: 0.00001
       IsMeanElements: true
-    expect: *get_tle_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - SAT_Name
+          - SAT_Number
+          - TLE_Line1
+          - TLE_Line2
+        fields:
+          SAT_Name:
+            kind: json_string
+          SAT_Number:
+            kind: json_string
+          TLE_Line1:
+            kind: json_string
+          TLE_Line2:
+            kind: json_string

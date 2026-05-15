@@ -6,11 +6,12 @@ openapi_request_schema: EntityPositionSGP4
 openapi_response_schema: CzmlPositionOut
 branches:
   nominal:
+    state: verified
     request:
-      Start: "2024-01-01T00:00:00.000Z"
-      Stop: "2024-01-01T00:10:00.000Z"
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T00:10:00.000Z'
       Step: 300.0
-      SatelliteNumber: "25544"
+      SatelliteNumber: '25544'
       TLEs:
         - 1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9990
         - 2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456

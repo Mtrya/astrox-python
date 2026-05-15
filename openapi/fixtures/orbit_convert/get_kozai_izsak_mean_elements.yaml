@@ -6,6 +6,7 @@ openapi_request_schema: KeplerElements
 openapi_response_schema: MeanKeplerElements
 branches:
   nominal:
+    state: verified
     request:
       SemimajorAxis: 6778137.0
       Eccentricity: 0.001

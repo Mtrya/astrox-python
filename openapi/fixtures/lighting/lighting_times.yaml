@@ -6,10 +6,10 @@ openapi_request_schema: LightingTimesInput
 openapi_response_schema: LightingTimesOut
 branches:
   nominal:
+    state: verified
     request:
-      <<: &lighting_times_common_request
-        Start: "2024-01-01T00:00:00.000Z"
-        Stop: "2024-01-01T01:00:00.000Z"
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
       Position:
         $type: SitePosition
         CentralBody: Earth
@@ -17,7 +17,7 @@ branches:
           - 120.0
           - 31.0
           - 10.0
-    expect: &site_lighting_times_expect
+    expect:
       status: 200
       content_type: application/json
       response:
@@ -33,7 +33,7 @@ branches:
             kind: json_boolean
           Message:
             kind: json_string
-          SunLight: &lighting_time_interval_section
+          SunLight:
             kind: json_object
             required_fields:
               - Intervals
@@ -45,7 +45,7 @@ branches:
               Intervals:
                 kind: json_array
                 min_length: 1
-                items: &time_interval
+                items:
                   kind: json_object
                   required_fields:
                     - Start
@@ -58,13 +58,37 @@ branches:
                       kind: json_string
                     Duration:
                       kind: json_number
-              MinDuration: *time_interval
-              MaxDuration: *time_interval
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
               MeanDuration:
                 kind: json_number
               TotalDuration:
                 kind: json_number
-          Penumbra: &lighting_time_duration_section
+          Penumbra:
             kind: json_object
             required_fields:
               - MeanDuration
@@ -74,14 +98,25 @@ branches:
                 kind: json_number
               TotalDuration:
                 kind: json_number
-          Umbra: *lighting_time_duration_section
+          Umbra:
+            kind: json_object
+            required_fields:
+              - MeanDuration
+              - TotalDuration
+            fields:
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
   position_j2:
+    state: verified
     request:
-      <<: *lighting_times_common_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
       Position:
         $type: J2
         Step: 600.0
-        OrbitEpoch: "2024-01-01T00:00:00.000Z"
+        OrbitEpoch: '2024-01-01T00:00:00.000Z'
         OrbitalElements:
           - 6778137.0
           - 0.001
@@ -89,7 +124,7 @@ branches:
           - 0.0
           - 0.0
           - 0.0
-    expect: &spacecraft_lighting_times_expect
+    expect:
       status: 200
       content_type: application/json
       response:
@@ -105,27 +140,372 @@ branches:
             kind: json_boolean
           Message:
             kind: json_string
-          SunLight: *lighting_time_interval_section
-          Penumbra: *lighting_time_interval_section
-          Umbra: *lighting_time_interval_section
+          SunLight:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Penumbra:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Umbra:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
   position_sgp4:
+    state: verified
     request:
-      Start: "2021-05-01T00:00:00.000Z"
-      Stop: "2021-05-01T01:00:00.000Z"
+      Start: '2021-05-01T00:00:00.000Z'
+      Stop: '2021-05-01T01:00:00.000Z'
       Position:
         $type: SGP4
         Step: 600.0
         TLEs:
           - 1 25544U 98067A   21120.54791667  .00001391  00000-0  33245-4 0  9993
           - 2 25544  51.6443 206.1695 0002829  89.9572  27.6891 15.48915315281553
-    expect: *spacecraft_lighting_times_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SunLight
+          - Penumbra
+          - Umbra
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          SunLight:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Penumbra:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Umbra:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
   position_two_body:
+    state: verified
     request:
-      <<: *lighting_times_common_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
       Position:
         $type: TwoBody
         Step: 600.0
-        OrbitEpoch: "2024-01-01T00:00:00.000Z"
+        OrbitEpoch: '2024-01-01T00:00:00.000Z'
         OrbitalElements:
           - 6778137.0
           - 0.001
@@ -133,20 +513,200 @@ branches:
           - 0.0
           - 0.0
           - 0.0
-    expect: *spacecraft_lighting_times_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SunLight
+          - Penumbra
+          - Umbra
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          SunLight:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Penumbra:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Umbra:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
   position_astrogator_mcs:
+    state: verified
     request:
-      Start: "2024-01-01T00:00:00.000Z"
-      Stop: "2024-01-01T00:10:00.000Z"
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T00:10:00.000Z'
       Position:
         $type: AstrogatorMCS
         ComputeCzmlPositions: true
         MainSequence:
-          - &lighting_astrogator_initial_state
-            $type: InitialState
+          - $type: InitialState
             Name: Initial
             InitialState:
-              Epoch: "2024-01-01T00:00:00Z"
+              Epoch: '2024-01-01T00:00:00Z'
               CoordSystemName: Earth Inertial
               Element:
                 $type: Cartesian
@@ -161,8 +721,7 @@ branches:
                 Trip: 600.0
             MaxPropagationTime: 900
         Propagators:
-          - &lighting_twobody_propagator
-            Name: FixturePropagator
+          - Name: FixturePropagator
             CentralBodyName: Earth
             NumericalIntegrator:
               $type: RKF7th8th
@@ -171,7 +730,7 @@ branches:
               $type: TwoBody
               Name: EarthTwoBody
               Mu: 398600441800000.0
-    expect: &sunlight_only_lighting_times_expect
+    expect:
       status: 200
       content_type: application/json
       response:
@@ -187,18 +746,91 @@ branches:
             kind: json_boolean
           Message:
             kind: json_string
-          SunLight: *lighting_time_interval_section
-          Penumbra: *lighting_time_duration_section
-          Umbra: *lighting_time_duration_section
+          SunLight:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Penumbra:
+            kind: json_object
+            required_fields:
+              - MeanDuration
+              - TotalDuration
+            fields:
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Umbra:
+            kind: json_object
+            required_fields:
+              - MeanDuration
+              - TotalDuration
+            fields:
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
   position_hpop:
+    state: verified
     request:
-      Start: "2024-01-01T00:00:00.000Z"
-      Stop: "2024-01-01T00:10:00.000Z"
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T00:10:00.000Z'
       Position:
         $type: HPOP
-        Start: "2024-01-01T00:00:00.000Z"
-        Stop: "2024-01-01T00:10:00.000Z"
-        OrbitEpoch: "2024-01-01T00:00:00.000Z"
+        Start: '2024-01-01T00:00:00.000Z'
+        Stop: '2024-01-01T00:10:00.000Z'
+        OrbitEpoch: '2024-01-01T00:00:00.000Z'
         CoordSystem: Inertial
         CoordType: Classical
         OrbitalElements:
@@ -215,15 +847,196 @@ branches:
             $type: TwoBody
             Name: EarthTwoBody
             Mu: 398600441500000.0
-    expect: *spacecraft_lighting_times_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SunLight
+          - Penumbra
+          - Umbra
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          SunLight:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Penumbra:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Umbra:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
   position_simple_ascent:
+    state: verified
     request:
-      Start: "2024-01-01T03:00:00.000Z"
-      Stop: "2024-01-01T03:02:00.000Z"
+      Start: '2024-01-01T03:00:00.000Z'
+      Stop: '2024-01-01T03:02:00.000Z'
       Position:
         $type: SimpleAscent
-        Start: "2024-01-01T03:00:00.000Z"
-        Stop: "2024-01-01T03:02:00.000Z"
+        Start: '2024-01-01T03:00:00.000Z'
+        Stop: '2024-01-01T03:02:00.000Z'
         Step: 30.0
         CentralBody: Earth
         LaunchLatitude: 40.9575
@@ -233,14 +1046,105 @@ branches:
         BurnoutLatitude: 41.3
         BurnoutLongitude: 101.0
         BurnoutAltitude: 200000.0
-    expect: *sunlight_only_lighting_times_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SunLight
+          - Penumbra
+          - Umbra
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          SunLight:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Penumbra:
+            kind: json_object
+            required_fields:
+              - MeanDuration
+              - TotalDuration
+            fields:
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Umbra:
+            kind: json_object
+            required_fields:
+              - MeanDuration
+              - TotalDuration
+            fields:
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
   position_ballistic:
+    state: verified
     request:
-      Start: "2024-01-01T12:00:00.000Z"
-      Stop: "2024-01-01T12:10:00.000Z"
+      Start: '2024-01-01T12:00:00.000Z'
+      Stop: '2024-01-01T12:10:00.000Z'
       Position:
         $type: Ballistic
-        Start: "2024-01-01T12:00:00.000Z"
+        Start: '2024-01-01T12:00:00.000Z'
         Step: 30.0
         LaunchLatitude: 28.5721
         LaunchLongitude: -80.648
@@ -250,10 +1154,192 @@ branches:
         ImpactAltitude: 0.0
         BallisticType: TimeOfFlight
         BallisticTypeValue: 600.0
-    expect: *spacecraft_lighting_times_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SunLight
+          - Penumbra
+          - Umbra
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          SunLight:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Penumbra:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Umbra:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
   position_central_body:
+    state: verified
     request:
-      <<: *lighting_times_common_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
       Position:
         $type: CentralBody
         Name: Earth
@@ -273,17 +1359,45 @@ branches:
             kind: json_boolean
           Message:
             kind: json_string
-          SunLight: *lighting_time_duration_section
-          Penumbra: *lighting_time_duration_section
-          Umbra: *lighting_time_duration_section
+          SunLight:
+            kind: json_object
+            required_fields:
+              - MeanDuration
+              - TotalDuration
+            fields:
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Penumbra:
+            kind: json_object
+            required_fields:
+              - MeanDuration
+              - TotalDuration
+            fields:
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Umbra:
+            kind: json_object
+            required_fields:
+              - MeanDuration
+              - TotalDuration
+            fields:
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
   position_czml_position:
+    state: verified
     request:
-      Start: "2024-01-01T00:00:00.000Z"
-      Stop: "2024-01-01T00:10:00.000Z"
-      Position: &lighting_czml_position
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T00:10:00.000Z'
+      Position:
         $type: CzmlPosition
         CentralBody: Earth
-        epoch: "2024-01-01T00:00:00Z"
+        epoch: '2024-01-01T00:00:00Z'
         referenceFrame: INERTIAL
         interpolationAlgorithm: LAGRANGE
         interpolationDegree: 2
@@ -309,20 +1423,230 @@ branches:
           - -1535.0523581742757
           - 7572.651025008587
           - 0.0
-    expect: *sunlight_only_lighting_times_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SunLight
+          - Penumbra
+          - Umbra
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          SunLight:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Penumbra:
+            kind: json_object
+            required_fields:
+              - MeanDuration
+              - TotalDuration
+            fields:
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Umbra:
+            kind: json_object
+            required_fields:
+              - MeanDuration
+              - TotalDuration
+            fields:
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
   position_czml_positions:
+    state: verified
     request:
-      Start: "2024-01-01T00:00:00.000Z"
-      Stop: "2024-01-01T00:10:00.000Z"
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T00:10:00.000Z'
       Position:
         $type: CzmlPositions
         CentralBody: Earth
         CzmlPositions:
-          - *lighting_czml_position
-    expect: *sunlight_only_lighting_times_expect
+          - $type: CzmlPosition
+            CentralBody: Earth
+            epoch: '2024-01-01T00:00:00Z'
+            referenceFrame: INERTIAL
+            interpolationAlgorithm: LAGRANGE
+            interpolationDegree: 2
+            cartesianVelocity:
+              - 0.0
+              - 6678137.0
+              - 0.0
+              - 0.0
+              - 0.0
+              - 7726.67
+              - 0.0
+              - 60.0
+              - 6644774.1312973
+              - 666701.233545599
+              - 0.0
+              - -771.3798654025477
+              - 7688.068833728764
+              - 0.0
+              - 120.0
+              - 6545018.875944976
+              - 1326741.0087477376
+              - 0.0
+              - -1535.0523581742757
+              - 7572.651025008587
+              - 0.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SunLight
+          - Penumbra
+          - Umbra
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          SunLight:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Penumbra:
+            kind: json_object
+            required_fields:
+              - MeanDuration
+              - TotalDuration
+            fields:
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Umbra:
+            kind: json_object
+            required_fields:
+              - MeanDuration
+              - TotalDuration
+            fields:
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
   occultation_bodies_explicit:
+    state: verified
     request:
-      <<: *lighting_times_common_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
       OccultationBodies:
         - Earth
         - Moon
@@ -333,4 +1657,94 @@ branches:
           - 120.0
           - 31.0
           - 10.0
-    expect: *site_lighting_times_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SunLight
+          - Penumbra
+          - Umbra
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          SunLight:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MinDuration
+              - MaxDuration
+              - MeanDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Start
+                    - Stop
+                    - Duration
+                  fields:
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+                    Duration:
+                      kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Penumbra:
+            kind: json_object
+            required_fields:
+              - MeanDuration
+              - TotalDuration
+            fields:
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
+          Umbra:
+            kind: json_object
+            required_fields:
+              - MeanDuration
+              - TotalDuration
+            fields:
+              MeanDuration:
+                kind: json_number
+              TotalDuration:
+                kind: json_number
