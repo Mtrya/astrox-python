@@ -80,6 +80,14 @@ Fixture files are normalized by `scripts/openapi_fixtures/normalize.py` into
 plain deterministic YAML. Do not rely on YAML anchors or aliases in checked-in
 fixtures.
 
+Existing fixture branches can be reconciled against live behavior with
+`scripts/openapi_fixtures/reconcile.py`. Dry-run mode emits JSON and Markdown
+reports without editing files. Apply mode may refresh an existing verified
+branch `expect` block or mark an existing verified branch as blocked for a
+narrow non-fixturable failure such as an empty HTTP 500. It does not create
+fixtures for newly discovered endpoints or automatically unblock previously
+blocked branches.
+
 The scheduled fixture CI should verify only wire-level behavior:
 
 - route and method still exist
