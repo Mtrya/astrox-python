@@ -21,6 +21,7 @@ from scripts.openapi_drift.drift_pipeline_report import (
 )
 from scripts.openapi_drift.generate_status import generate_status_text
 from scripts.openapi_drift.normalize import dump_fixture, normalize_fixture_data
+from scripts.openapi_drift.probe_request import probe_request_branch
 from scripts.openapi_drift.reconcile import (
     markdown_report as reconcile_markdown_report,
     reconcile_fixture_dir,
@@ -1501,6 +1502,145 @@ def test_reconcile_markdown_report_lists_changed_and_report_only_branches() -> N
     assert "`verified_expect_refreshed`: 1" in markdown
     assert "`/Example` `nominal`: verified_expect_refreshed" in markdown
     assert "`/Example` `blocked_case`: previously_blocked_now_reachable" in markdown
+
+
+def test_probe_request_dry_run_reports_verified_branch_without_writing(tmp_path: Path) -> None:
+    fixture_dir = tmp_path / "fixtures"
+    fixture_dir.mkdir()
+    fixture = valid_fixture_data()
+    fixture_path = fixture_dir / "example.yaml"
+    fixture_path.write_text(dump_fixture(fixture), encoding="utf-8")
+    before = fixture_path.read_text(encoding="utf-8")
+
+    report = probe_request_branch(
+        fixture_path=fixture_path,
+        branch_id="mode_b",
+        request_present=True,
+        request_payload={"Mode": "B"},
+        base_url="http://example.test",
+        timeout=1.0,
+        apply=False,
+        replace=False,
+        session=StubSession(StubResponse(body={"Answer": [1]})),  # type: ignore[arg-type]
+        today="2026-05-15",
+    )
+
+    assert fixture_path.read_text(encoding="utf-8") == before
+    assert report["mode"] == "dry-run"
+    assert report["classification"] == "candidate_verified"
+    assert report["action"] == "write_verified"
+    assert report["new_expect"]["response"] == {
+        "kind": "json_object",
+        "required_fields": ["Answer"],
+        "fields": {
+            "Answer": {
+                "kind": "json_array",
+                "length": 1,
+                "items": {"kind": "json_number"},
+            }
+        },
+    }
+
+
+def test_probe_request_apply_adds_verified_branch_and_regenerates_status(tmp_path: Path) -> None:
+    fixture_dir = tmp_path / "fixtures"
+    fixture_dir.mkdir()
+    openapi_path = tmp_path / "openapi.yaml"
+    status_path = fixture_dir / "STATUS.md"
+    write_minimal_openapi(openapi_path)
+    fixture_path = fixture_dir / "example.yaml"
+
+    report = probe_request_branch(
+        fixture_path=fixture_path,
+        branch_id="nominal",
+        request_present=True,
+        request_payload={"Example": "payload"},
+        base_url="http://example.test",
+        timeout=1.0,
+        apply=True,
+        replace=False,
+        openapi=openapi_path,
+        fixture_dir=fixture_dir,
+        status_output=status_path,
+        endpoint="/Example",
+        method="POST",
+        session=StubSession(StubResponse(body={"Answer": True})),  # type: ignore[arg-type]
+        today="2026-05-15",
+    )
+
+    fixture = load_fixture(fixture_path)
+    branch = fixture["branches"]["nominal"]
+    assert branch["state"] == "verified"
+    assert branch["request"] == {"Example": "payload"}
+    assert branch["expect"]["response"] == {
+        "kind": "json_object",
+        "required_fields": ["Answer"],
+        "fields": {"Answer": {"kind": "json_boolean"}},
+    }
+    assert report["mode"] == "apply"
+    assert report["status_updated"] is True
+    assert "- [x] `/Example` nominal" in status_path.read_text(encoding="utf-8")
+
+
+def test_probe_request_apply_adds_blocked_branch_for_empty_http_500(tmp_path: Path) -> None:
+    fixture_dir = tmp_path / "fixtures"
+    fixture_dir.mkdir()
+    fixture = valid_fixture_data()
+    fixture_path = fixture_dir / "example.yaml"
+    fixture_path.write_text(dump_fixture(fixture), encoding="utf-8")
+
+    report = probe_request_branch(
+        fixture_path=fixture_path,
+        branch_id="bad_case",
+        request_present=True,
+        request_payload={"Mode": "bad"},
+        base_url="http://example.test",
+        timeout=1.0,
+        apply=True,
+        replace=False,
+        fixture_dir=fixture_dir,
+        status_output=fixture_dir / "STATUS.md",
+        session=StubSession(StubResponse(status_code=500, headers={}, text="")),  # type: ignore[arg-type]
+        today="2026-05-15",
+    )
+
+    branch = load_fixture(fixture_path)["branches"]["bad_case"]
+    assert branch["state"] == "blocked"
+    assert branch["request"] == {"Mode": "bad"}
+    assert branch["blocked"] == {
+        "reason": "empty_http_500",
+        "observed_status": 500,
+        "observed_content_type": "",
+        "observed_shape": None,
+        "last_seen": "2026-05-15",
+        "note": "Candidate request returned an empty HTTP 500.",
+    }
+    assert report["classification"] == "candidate_empty_http_500"
+
+
+def test_probe_request_requires_replace_for_existing_branch(tmp_path: Path) -> None:
+    fixture_dir = tmp_path / "fixtures"
+    fixture_dir.mkdir()
+    fixture = valid_fixture_data()
+    fixture_path = fixture_dir / "example.yaml"
+    fixture_path.write_text(dump_fixture(fixture), encoding="utf-8")
+
+    try:
+        probe_request_branch(
+            fixture_path=fixture_path,
+            branch_id="nominal",
+            request_present=True,
+            request_payload={},
+            base_url="http://example.test",
+            timeout=1.0,
+            apply=False,
+            replace=False,
+            session=StubSession(StubResponse()),  # type: ignore[arg-type]
+        )
+    except ValueError as exc:
+        assert "pass --replace" in str(exc)
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
 
 
 def test_discover_resolves_refs_items_combinators_and_discriminators(tmp_path: Path) -> None:

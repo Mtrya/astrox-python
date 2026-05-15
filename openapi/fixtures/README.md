@@ -95,6 +95,13 @@ It reports uncovered contracts and can optionally probe saved blocked branch
 requests to flag branches that now look reachable, but it does not generate
 new endpoint fixtures.
 
+Candidate request payloads can be probed and written with
+`scripts/openapi_drift/probe_request.py`. The human or agent supplies the
+endpoint/branch `request`; the command performs the live request and writes
+either a verified branch with an automatically generated `expect` block or a
+blocked branch for narrow non-fixturable failures such as empty HTTP 500. It
+also normalizes the fixture and regenerates `STATUS.md` in apply mode.
+
 The unified drift workflow combines reconciliation, discovery, changed-file,
 and test reports with `scripts/openapi_drift/drift_pipeline_report.py` before
 opening a PR or creating the narrow blocked-branch issue.
