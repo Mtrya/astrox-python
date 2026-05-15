@@ -746,6 +746,61 @@ branches:
             kind: json_boolean
           Message:
             kind: json_string
+          Penumbra:
+            kind: json_object
+            required_fields:
+              - Intervals
+              - MaxDuration
+              - MeanDuration
+              - MinDuration
+              - TotalDuration
+            fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Duration
+                  - Start
+                  - Stop
+                fields:
+                  Duration:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+              MeanDuration:
+                kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Duration
+                  - Start
+                  - Stop
+                fields:
+                  Duration:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+              TotalDuration:
+                kind: json_number
           SunLight:
             kind: json_object
             required_fields:
@@ -765,25 +820,12 @@ branches:
                     - Stop
                     - Duration
                   fields:
+                    Duration:
+                      kind: json_number
                     Start:
                       kind: json_string
                     Stop:
                       kind: json_string
-                    Duration:
-                      kind: json_number
-              MinDuration:
-                kind: json_object
-                required_fields:
-                  - Start
-                  - Stop
-                  - Duration
-                fields:
-                  Start:
-                    kind: json_string
-                  Stop:
-                    kind: json_string
-                  Duration:
-                    kind: json_number
               MaxDuration:
                 kind: json_object
                 required_fields:
@@ -791,34 +833,82 @@ branches:
                   - Stop
                   - Duration
                 fields:
+                  Duration:
+                    kind: json_number
                   Start:
                     kind: json_string
                   Stop:
                     kind: json_string
+              MeanDuration:
+                kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
                   Duration:
                     kind: json_number
-              MeanDuration:
-                kind: json_number
-              TotalDuration:
-                kind: json_number
-          Penumbra:
-            kind: json_object
-            required_fields:
-              - MeanDuration
-              - TotalDuration
-            fields:
-              MeanDuration:
-                kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
               TotalDuration:
                 kind: json_number
           Umbra:
             kind: json_object
             required_fields:
+              - Intervals
+              - MaxDuration
               - MeanDuration
+              - MinDuration
               - TotalDuration
             fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Duration
+                  - Start
+                  - Stop
+                fields:
+                  Duration:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
               MeanDuration:
                 kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Duration
+                  - Start
+                  - Stop
+                fields:
+                  Duration:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
               TotalDuration:
                 kind: json_number
   position_hpop:
@@ -1359,7 +1449,7 @@ branches:
             kind: json_boolean
           Message:
             kind: json_string
-          SunLight:
+          Penumbra:
             kind: json_object
             required_fields:
               - MeanDuration
@@ -1369,7 +1459,7 @@ branches:
                 kind: json_number
               TotalDuration:
                 kind: json_number
-          Penumbra:
+          SunLight:
             kind: json_object
             required_fields:
               - MeanDuration
@@ -1382,11 +1472,56 @@ branches:
           Umbra:
             kind: json_object
             required_fields:
+              - Intervals
+              - MaxDuration
               - MeanDuration
+              - MinDuration
               - TotalDuration
             fields:
+              Intervals:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              MaxDuration:
+                kind: json_object
+                required_fields:
+                  - Duration
+                  - Start
+                  - Stop
+                fields:
+                  Duration:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
               MeanDuration:
                 kind: json_number
+              MinDuration:
+                kind: json_object
+                required_fields:
+                  - Duration
+                  - Start
+                  - Stop
+                fields:
+                  Duration:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
               TotalDuration:
                 kind: json_number
   position_czml_position:

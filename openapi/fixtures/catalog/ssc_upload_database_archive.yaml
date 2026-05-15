@@ -13,28 +13,31 @@ branches:
       response:
         kind: json_object
         required_fields:
-          - type
-          - title
-          - status
           - errors
+          - status
+          - title
+          - traceId
+          - type
         fields:
-          type:
-            kind: json_string
-          title:
-            kind: json_string
-          status:
-            kind: json_number
           errors:
             kind: json_object
             required_fields:
               - file
               - X-Api-Key
             fields:
-              file:
-                kind: json_array
-                items:
-                  kind: json_string
               X-Api-Key:
                 kind: json_array
                 items:
                   kind: json_string
+              file:
+                kind: json_array
+                items:
+                  kind: json_string
+          status:
+            kind: json_number
+          title:
+            kind: json_string
+          traceId:
+            kind: json_string
+          type:
+            kind: json_string

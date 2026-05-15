@@ -2428,6 +2428,10 @@ class IEntityPositionEntityPositionTwoBody(BaseModel):
     )
 
 
+class IFormFile(RootModel[bytes]):
+    root: bytes
+
+
 class IGravityFunctionGravityFieldFunction(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,

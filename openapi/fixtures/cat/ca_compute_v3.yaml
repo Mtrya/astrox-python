@@ -70,17 +70,27 @@ branches:
       response:
         kind: json_object
         required_fields:
-          - type
-          - title
-          - status
           - errors
+          - status
+          - title
+          - traceId
+          - type
         fields:
-          type:
-            kind: json_string
-          title:
-            kind: json_string
-          status:
-            kind: json_number
-            const: 400
           errors:
             kind: json_object
+            required_fields:
+              - Targets
+            fields:
+              Targets:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_string
+          status:
+            kind: json_number
+          title:
+            kind: json_string
+          traceId:
+            kind: json_string
+          type:
+            kind: json_string

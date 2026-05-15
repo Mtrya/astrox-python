@@ -48,18 +48,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -70,16 +58,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   entity_path_group_failure_shape:
     state: verified
     request:
@@ -170,18 +225,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -192,16 +235,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_position_twobody:
     state: verified
     request:
@@ -245,18 +355,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -267,16 +365,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3TwoBody
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3TwoBody:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3TwoBody
+            fields:
+              Facility/Phase3Site>Satellite/Phase3TwoBody:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_position_sgp4:
     state: verified
     request:
@@ -315,18 +480,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -337,16 +490,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3Sgp4
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3Sgp4:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3Sgp4
+            fields:
+              Facility/Phase3Site>Satellite/Phase3Sgp4:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_position_astrogator_mcs:
     state: verified
     request:
@@ -410,11 +630,8 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-            const: true
-          Message:
-            kind: json_string
+          CompleteChainAccess:
+            kind: json_array
           ComputedStrands:
             kind: json_array
             min_length: 1
@@ -423,12 +640,31 @@ branches:
               min_length: 1
               items:
                 kind: json_string
-          CompleteChainAccess:
-            kind: json_array
-          IndividualStrandAccess:
-            kind: json_object
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase10ChainAstrogatorMCS
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 0
+              Satellite/Phase10ChainAstrogatorMCS:
+                kind: json_array
+                min_length: 0
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase10ChainAstrogatorMCS
+            fields:
+              Facility/Phase3Site>Satellite/Phase10ChainAstrogatorMCS:
+                kind: json_array
+                min_length: 0
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
   allobjects_position_hpop:
     state: verified
     request:
@@ -482,11 +718,8 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-            const: true
-          Message:
-            kind: json_string
+          CompleteChainAccess:
+            kind: json_array
           ComputedStrands:
             kind: json_array
             min_length: 1
@@ -495,12 +728,31 @@ branches:
               min_length: 1
               items:
                 kind: json_string
-          CompleteChainAccess:
-            kind: json_array
-          IndividualStrandAccess:
-            kind: json_object
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase10ChainHPOP
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 0
+              Satellite/Phase10ChainHPOP:
+                kind: json_array
+                min_length: 0
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase10ChainHPOP
+            fields:
+              Facility/Phase3Site>Satellite/Phase10ChainHPOP:
+                kind: json_array
+                min_length: 0
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
   allobjects_position_simple_ascent:
     state: verified
     request:
@@ -546,11 +798,8 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-            const: true
-          Message:
-            kind: json_string
+          CompleteChainAccess:
+            kind: json_array
           ComputedStrands:
             kind: json_array
             min_length: 1
@@ -559,12 +808,31 @@ branches:
               min_length: 1
               items:
                 kind: json_string
-          CompleteChainAccess:
-            kind: json_array
-          IndividualStrandAccess:
-            kind: json_object
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase10ChainSimpleAscent
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 0
+              Satellite/Phase10ChainSimpleAscent:
+                kind: json_array
+                min_length: 0
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase10ChainSimpleAscent
+            fields:
+              Facility/Phase3Site>Satellite/Phase10ChainSimpleAscent:
+                kind: json_array
+                min_length: 0
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
   allobjects_position_ballistic:
     state: verified
     request:
@@ -609,11 +877,8 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-            const: true
-          Message:
-            kind: json_string
+          CompleteChainAccess:
+            kind: json_array
           ComputedStrands:
             kind: json_array
             min_length: 1
@@ -622,12 +887,31 @@ branches:
               min_length: 1
               items:
                 kind: json_string
-          CompleteChainAccess:
-            kind: json_array
-          IndividualStrandAccess:
-            kind: json_object
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase10ChainBallistic
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 0
+              Satellite/Phase10ChainBallistic:
+                kind: json_array
+                min_length: 0
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase10ChainBallistic
+            fields:
+              Facility/Phase3Site>Satellite/Phase10ChainBallistic:
+                kind: json_array
+                min_length: 0
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
   allobjects_position_central_body:
     state: verified
     request:
@@ -663,11 +947,8 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-            const: true
-          Message:
-            kind: json_string
+          CompleteChainAccess:
+            kind: json_array
           ComputedStrands:
             kind: json_array
             min_length: 1
@@ -676,12 +957,31 @@ branches:
               min_length: 1
               items:
                 kind: json_string
-          CompleteChainAccess:
-            kind: json_array
-          IndividualStrandAccess:
-            kind: json_object
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - CentralBody/Earth
+              - Facility/Phase3Site
+            fields:
+              CentralBody/Earth:
+                kind: json_array
+                min_length: 0
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 0
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>CentralBody/Earth
+            fields:
+              Facility/Phase3Site>CentralBody/Earth:
+                kind: json_array
+                min_length: 0
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
   allobjects_position_czml_position:
     state: verified
     request:
@@ -743,11 +1043,8 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-            const: true
-          Message:
-            kind: json_string
+          CompleteChainAccess:
+            kind: json_array
           ComputedStrands:
             kind: json_array
             min_length: 1
@@ -756,12 +1053,31 @@ branches:
               min_length: 1
               items:
                 kind: json_string
-          CompleteChainAccess:
-            kind: json_array
-          IndividualStrandAccess:
-            kind: json_object
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase10ChainCzmlPosition
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 0
+              Satellite/Phase10ChainCzmlPosition:
+                kind: json_array
+                min_length: 0
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase10ChainCzmlPosition
+            fields:
+              Facility/Phase3Site>Satellite/Phase10ChainCzmlPosition:
+                kind: json_array
+                min_length: 0
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
   allobjects_position_czml_positions:
     state: verified
     request:
@@ -826,11 +1142,8 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-            const: true
-          Message:
-            kind: json_string
+          CompleteChainAccess:
+            kind: json_array
           ComputedStrands:
             kind: json_array
             min_length: 1
@@ -839,12 +1152,31 @@ branches:
               min_length: 1
               items:
                 kind: json_string
-          CompleteChainAccess:
-            kind: json_array
-          IndividualStrandAccess:
-            kind: json_object
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase10ChainCzmlPositions
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 0
+              Satellite/Phase10ChainCzmlPositions:
+                kind: json_array
+                min_length: 0
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase10ChainCzmlPositions
+            fields:
+              Facility/Phase3Site>Satellite/Phase10ChainCzmlPositions:
+                kind: json_array
+                min_length: 0
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
   allobjects_orientation_vvlh:
     state: verified
     request:
@@ -890,18 +1222,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -912,16 +1232,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_orientation_lvlh:
     state: verified
     request:
@@ -967,18 +1354,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -989,16 +1364,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_orientation_vnc:
     state: verified
     request:
@@ -1044,18 +1486,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -1066,16 +1496,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_orientation_fixed_at_epoch:
     state: verified
     request:
@@ -1124,18 +1621,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -1146,16 +1631,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase10ChainFixedAtEpoch
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase10ChainFixedAtEpoch:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase10ChainFixedAtEpoch
+            fields:
+              Facility/Phase3Site>Satellite/Phase10ChainFixedAtEpoch:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_orientation_composite:
     state: verified
     request:
@@ -1205,18 +1757,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -1227,16 +1767,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase10ChainComposite
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase10ChainComposite:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase10ChainComposite
+            fields:
+              Facility/Phase3Site>Satellite/Phase10ChainComposite:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_orientation_fixed:
     state: verified
     request:
@@ -1289,18 +1896,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -1311,16 +1906,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase10ChainFixed
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase10ChainFixed:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase10ChainFixed
+            fields:
+              Facility/Phase3Site>Satellite/Phase10ChainFixed:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_orientation_aligned_and_constrained:
     state: verified
     request:
@@ -1424,18 +2086,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -1446,16 +2096,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase10ChainCzmlOrientation
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase10ChainCzmlOrientation:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase10ChainCzmlOrientation
+            fields:
+              Facility/Phase3Site>Satellite/Phase10ChainCzmlOrientation:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_sensor_conic:
     state: verified
     request:
@@ -1502,18 +2219,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -1524,16 +2229,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_sensor_rectangular:
     state: verified
     request:
@@ -1581,18 +2353,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -1603,16 +2363,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_sensor_pointing_fixed:
     state: verified
     request:
@@ -1665,18 +2492,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -1687,16 +2502,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_constraints_range:
     state: verified
     request:
@@ -1745,18 +2627,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -1767,16 +2637,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_constraints_elevation_angle:
     state: verified
     request:
@@ -1824,18 +2761,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -1846,16 +2771,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_constraints_az_el_mask:
     state: verified
     request:
@@ -1913,18 +2905,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -1935,16 +2915,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_lighting_direct_sun:
     state: verified
     request:
@@ -1989,18 +3036,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -2011,16 +3046,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_lighting_penumbra:
     state: verified
     request:
@@ -2065,18 +3167,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -2087,16 +3177,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_lighting_umbra:
     state: verified
     request:
@@ -2141,18 +3298,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -2163,16 +3308,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   allobjects_occultation_bodies_explicit:
     state: verified
     request:
@@ -2219,18 +3431,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -2241,16 +3441,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   connections_null:
     state: verified
     request:
@@ -2295,18 +3562,6 @@ branches:
           - IndividualStrandAccess
           - IndividualObjectAccess
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
-          ComputedStrands:
-            kind: json_array
-            min_length: 1
-            items:
-              kind: json_array
-              min_length: 1
-              items:
-                kind: json_string
           CompleteChainAccess:
             kind: json_array
             min_length: 1
@@ -2317,16 +3572,83 @@ branches:
                 - Stop
                 - Duration
               fields:
+                Duration:
+                  kind: json_number
                 Start:
                   kind: json_string
                 Stop:
                   kind: json_string
-                Duration:
-                  kind: json_number
-          IndividualStrandAccess:
-            kind: json_object
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
           IndividualObjectAccess:
             kind: json_object
+            required_fields:
+              - Facility/Phase3Site
+              - Satellite/Phase3To
+            fields:
+              Facility/Phase3Site:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+              Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IndividualStrandAccess:
+            kind: json_object
+            required_fields:
+              - Facility/Phase3Site>Satellite/Phase3To
+            fields:
+              Facility/Phase3Site>Satellite/Phase3To:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_object
+                  required_fields:
+                    - Duration
+                    - Start
+                    - Stop
+                  fields:
+                    Duration:
+                      kind: json_number
+                    Start:
+                      kind: json_string
+                    Stop:
+                      kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   connections_explicit_failure_shape:
     state: verified
     request:
