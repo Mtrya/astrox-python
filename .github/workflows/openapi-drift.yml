@@ -1,0 +1,174 @@
+name: OpenAPI Drift Detection
+
+on:
+  schedule:
+    - cron: "18 18 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: openapi-drift
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  drift:
+    name: Refresh OpenAPI, models, and fixture drift report
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Prepare drift report directory
+        run: mkdir -p openapi-drift-reports
+
+      - name: Fetch live OpenAPI
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: |
+          set -o pipefail
+          uv run python scripts/fetch_openapi.py \
+            --output openapi/astrox.openapi.yaml \
+            --archive-dir openapi/archive \
+            2>&1 | tee openapi-drift-reports/fetch-openapi.log
+
+      - name: Regenerate Pydantic models
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: |
+          set -o pipefail
+          uv run python scripts/generate_models.py \
+            --input openapi/astrox.openapi.yaml \
+            --output astrox/_models.py \
+            --source "${ASTROX_BASE_URL}/openapi/v1.json" \
+            --deterministic-header \
+            2>&1 | tee openapi-drift-reports/generate-models.log
+
+      - name: Verify fixtures
+        id: fixtures
+        timeout-minutes: 10
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: |
+          set +e
+          set -o pipefail
+          uv run python scripts/openapi_fixtures/verify.py \
+            2>&1 | tee openapi-drift-reports/verify-fixtures.log
+          status="${PIPESTATUS[0]}"
+          echo "status=${status}" >> "${GITHUB_OUTPUT}"
+          exit 0
+
+      - name: Run tests
+        id: pytest
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          uv run python -m pytest tests \
+            2>&1 | tee openapi-drift-reports/pytest.log
+
+      - name: Write drift summary
+        if: always()
+        run: |
+          {
+            echo "## OpenAPI drift detection"
+            echo
+            echo "- Fixture verification exit code: ${{ steps.fixtures.outputs.status }}"
+            echo "- Pytest outcome: ${{ steps.pytest.outcome }}"
+            echo
+            echo "### Changed tracked files"
+            echo
+            if [ -n "$(git status --porcelain -- openapi astrox/_models.py)" ]; then
+              git status --short -- openapi astrox/_models.py
+            else
+              echo "No tracked OpenAPI or generated-model changes."
+            fi
+          } | tee openapi-drift-reports/summary.md >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload drift reports
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: openapi-drift-reports
+          path: openapi-drift-reports/
+
+      - name: Open drift pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$(git status --porcelain -- openapi astrox/_models.py)" ]; then
+            echo "OpenAPI baseline, archive, and generated models are already up to date."
+            exit 0
+          fi
+
+          existing="$(gh pr list --state open --search 'in:title "Refresh ASTROX upstream drift data"' --json number --jq 'length')"
+          if [ "${existing}" -gt 0 ]; then
+            echo "An upstream drift refresh PR is already open."
+            exit 0
+          fi
+
+          branch="automation/openapi-drift-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "${branch}"
+          git add openapi astrox/_models.py
+          git commit -m "Refresh ASTROX upstream drift data"
+          git push --set-upstream origin "${branch}"
+
+          if [ "${{ steps.fixtures.outputs.status }}" = "0" ]; then
+            fixture_note="Fixture verification passed."
+          else
+            fixture_note="Fixture verification failed; inspect the workflow artifact and CI logs before merging."
+          fi
+
+          if [ "${{ steps.pytest.outcome }}" = "success" ]; then
+            test_note="Pytest passed in the drift workflow."
+          else
+            test_note="Pytest failed in the drift workflow; this PR needs human follow-up."
+          fi
+
+          body_file="$(mktemp)"
+          cat > "${body_file}" <<EOF
+          Automated refresh of ASTROX upstream drift data.
+
+          This PR was opened by the unified drift workflow after running:
+
+          - live OpenAPI fetch into \`openapi/astrox.openapi.yaml\` and \`openapi/archive/\`
+          - generated model refresh for \`astrox/_models.py\`
+          - live fixture verification via \`scripts/openapi_fixtures/verify.py\`
+          - pytest
+
+          ${fixture_note}
+          ${test_note}
+
+          The workflow attached raw fetch, model-generation, fixture-verification, and pytest logs as the \`openapi-drift-reports\` artifact.
+
+          This workflow does not auto-merge drift PRs.
+          EOF
+
+          gh pr create \
+            --title "Refresh ASTROX upstream drift data" \
+            --body-file "${body_file}"
+
+      - name: Fail when fixture verification fails
+        if: steps.fixtures.outputs.status != '0'
+        run: exit 1
+
+      - name: Fail when tests fail
+        if: steps.pytest.outcome != 'success'
+        run: exit 1
