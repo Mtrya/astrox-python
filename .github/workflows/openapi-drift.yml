@@ -12,6 +12,7 @@ concurrency:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 jobs:
   drift:
@@ -60,6 +61,31 @@ jobs:
             --deterministic-header \
             2>&1 | tee openapi-drift-reports/generate-models.log
 
+      - name: Reconcile existing fixtures
+        id: reconcile
+        timeout-minutes: 10
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: |
+          set -o pipefail
+          uv run python scripts/openapi_fixtures/reconcile.py \
+            --apply \
+            --json-output openapi-drift-reports/reconcile.json \
+            --markdown-output openapi-drift-reports/reconcile.md \
+            2>&1 | tee openapi-drift-reports/reconcile.log
+
+      - name: Generate discovery coverage report
+        id: discovery
+        timeout-minutes: 10
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: |
+          uv run python scripts/openapi_fixtures/discovery_report.py \
+            --probe-blocked \
+            --json-output openapi-drift-reports/discovery.json \
+            --markdown-output openapi-drift-reports/discovery.md \
+            > openapi-drift-reports/discovery.log 2>&1
+
       - name: Verify fixtures
         id: fixtures
         timeout-minutes: 10
@@ -74,6 +100,21 @@ jobs:
           echo "status=${status}" >> "${GITHUB_OUTPUT}"
           exit 0
 
+      - name: Run focused drift checks
+        id: focused
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          {
+            uv run python scripts/openapi_fixtures/normalize.py --fixture-dir openapi/fixtures --check
+            uv run python scripts/openapi_fixtures/generate_status.py \
+              --openapi openapi/astrox.openapi.yaml \
+              --fixture-dir openapi/fixtures \
+              --output openapi/fixtures/STATUS.md \
+              --check
+            uv run python -m pytest -q tests/test_openapi_fixtures.py tests/test_generate_models.py tests/test_models.py
+          } 2>&1 | tee openapi-drift-reports/focused-checks.log
+
       - name: Run tests
         id: pytest
         continue-on-error: true
@@ -82,23 +123,25 @@ jobs:
           uv run python -m pytest tests \
             2>&1 | tee openapi-drift-reports/pytest.log
 
-      - name: Write drift summary
+      - name: Build pipeline report
+        id: pipeline
         if: always()
         run: |
-          {
-            echo "## OpenAPI drift detection"
-            echo
-            echo "- Fixture verification exit code: ${{ steps.fixtures.outputs.status }}"
-            echo "- Pytest outcome: ${{ steps.pytest.outcome }}"
-            echo
-            echo "### Changed tracked files"
-            echo
-            if [ -n "$(git status --porcelain -- openapi astrox/_models.py)" ]; then
-              git status --short -- openapi astrox/_models.py
-            else
-              echo "No tracked OpenAPI or generated-model changes."
-            fi
-          } | tee openapi-drift-reports/summary.md >> "${GITHUB_STEP_SUMMARY}"
+          git status --porcelain -- openapi astrox/_models.py > openapi-drift-reports/tracked-status.txt
+          uv run python scripts/openapi_fixtures/drift_pipeline_report.py \
+            --reconcile-json openapi-drift-reports/reconcile.json \
+            --discovery-json openapi-drift-reports/discovery.json \
+            --tracked-status openapi-drift-reports/tracked-status.txt \
+            --json-output openapi-drift-reports/pipeline.json \
+            --summary-output openapi-drift-reports/summary.md \
+            --pr-body-output openapi-drift-reports/pr-body.md \
+            --issue-body-output openapi-drift-reports/issue-body.md \
+            --github-output "${GITHUB_OUTPUT}" \
+            --test-outcome fixture_verification=${{ steps.fixtures.outputs.status }} \
+            --test-outcome focused=${{ steps.focused.outcome }} \
+            --test-outcome pytest=${{ steps.pytest.outcome }} \
+            > openapi-drift-reports/pipeline.log 2>&1
+          cat openapi-drift-reports/summary.md >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Upload drift reports
         if: always()
@@ -108,62 +151,47 @@ jobs:
           path: openapi-drift-reports/
 
       - name: Open drift pull request
+        if: steps.pipeline.outputs.pr_required == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if [ -z "$(git status --porcelain -- openapi astrox/_models.py)" ]; then
-            echo "OpenAPI baseline, archive, and generated models are already up to date."
-            exit 0
-          fi
-
-          existing="$(gh pr list --state open --search 'in:title "Refresh ASTROX upstream drift data"' --json number --jq 'length')"
-          if [ "${existing}" -gt 0 ]; then
-            echo "An upstream drift refresh PR is already open."
-            exit 0
-          fi
-
-          branch="automation/openapi-drift-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          branch="automation/openapi-drift"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "${branch}"
           git add openapi astrox/_models.py
           git commit -m "Refresh ASTROX upstream drift data"
-          git push --set-upstream origin "${branch}"
+          git push --force-with-lease --set-upstream origin "${branch}"
 
-          if [ "${{ steps.fixtures.outputs.status }}" = "0" ]; then
-            fixture_note="Fixture verification passed."
+          existing="$(gh pr list --state open --head "${branch}" --json number --jq '.[0].number // ""')"
+          if [ -n "${existing}" ]; then
+            gh pr edit "${existing}" \
+              --title "${{ steps.pipeline.outputs.pr_title }}" \
+              --body-file openapi-drift-reports/pr-body.md
           else
-            fixture_note="Fixture verification failed; inspect the workflow artifact and CI logs before merging."
+            gh pr create \
+              --title "${{ steps.pipeline.outputs.pr_title }}" \
+              --body-file openapi-drift-reports/pr-body.md \
+              --head "${branch}"
           fi
 
-          if [ "${{ steps.pytest.outcome }}" = "success" ]; then
-            test_note="Pytest passed in the drift workflow."
+      - name: Create or update blocked-branch issue
+        if: steps.pipeline.outputs.issue_required == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          existing="$(gh issue list --state open --search 'in:title "${{ steps.pipeline.outputs.issue_title }}"' --json number --jq '.[0].number // ""')"
+          if [ -n "${existing}" ]; then
+            gh issue edit "${existing}" --body-file openapi-drift-reports/issue-body.md
           else
-            test_note="Pytest failed in the drift workflow; this PR needs human follow-up."
+            gh issue create \
+              --title "${{ steps.pipeline.outputs.issue_title }}" \
+              --body-file openapi-drift-reports/issue-body.md
           fi
 
-          body_file="$(mktemp)"
-          cat > "${body_file}" <<EOF
-          Automated refresh of ASTROX upstream drift data.
-
-          This PR was opened by the unified drift workflow after running:
-
-          - live OpenAPI fetch into \`openapi/astrox.openapi.yaml\` and \`openapi/archive/\`
-          - generated model refresh for \`astrox/_models.py\`
-          - live fixture verification via \`scripts/openapi_fixtures/verify.py\`
-          - pytest
-
-          ${fixture_note}
-          ${test_note}
-
-          The workflow attached raw fetch, model-generation, fixture-verification, and pytest logs as the \`openapi-drift-reports\` artifact.
-
-          This workflow does not auto-merge drift PRs.
-          EOF
-
-          gh pr create \
-            --title "Refresh ASTROX upstream drift data" \
-            --body-file "${body_file}"
+      - name: Report no drift
+        if: steps.pipeline.outputs.pr_required != 'true' && steps.pipeline.outputs.issue_required != 'true'
+        run: echo "No tracked drift and no reachable blocked branches were reported."
 
       - name: Fail when fixture verification fails
         if: steps.fixtures.outputs.status != '0'

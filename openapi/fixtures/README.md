@@ -95,6 +95,10 @@ It reports uncovered contracts and can optionally probe saved blocked branch
 requests to flag branches that now look reachable, but it does not generate
 new endpoint fixtures.
 
+The unified drift workflow combines reconciliation, discovery, changed-file,
+and test reports with `scripts/openapi_fixtures/drift_pipeline_report.py` before
+opening a PR or creating the narrow blocked-branch issue.
+
 The scheduled fixture CI should verify only wire-level behavior:
 
 - route and method still exist
