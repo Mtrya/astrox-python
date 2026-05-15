@@ -1475,6 +1475,76 @@ def test_shape_from_value_preserves_existing_required_field_order() -> None:
     }
 
 
+def test_shape_from_value_preserves_required_field_order_inside_any_of() -> None:
+    assert shape_from_value(
+        {"X": 1, "Y": 2, "Z": 3, "Vx": 4, "Vy": 5, "Vz": 6},
+        previous_shape={
+            "any_of": [
+                {"kind": "json_string"},
+                {
+                    "kind": "json_object",
+                    "required_fields": ["X", "Y", "Z", "Vx", "Vy", "Vz"],
+                    "fields": {
+                        "X": {"kind": "json_number"},
+                        "Y": {"kind": "json_number"},
+                        "Z": {"kind": "json_number"},
+                        "Vx": {"kind": "json_number"},
+                        "Vy": {"kind": "json_number"},
+                        "Vz": {"kind": "json_number"},
+                    },
+                },
+            ]
+        },
+    )["required_fields"] == ["X", "Y", "Z", "Vx", "Vy", "Vz"]
+
+
+def test_shape_from_value_preserves_array_length_hint_inside_any_of() -> None:
+    assert shape_from_value(
+        [[{"Start": "2026-05-15T00:00:00Z", "Stop": "2026-05-15T00:01:00Z"}]],
+        previous_shape={
+            "any_of": [
+                {
+                    "kind": "json_array",
+                    "min_length": 1,
+                    "items": {
+                        "kind": "json_array",
+                        "items": {
+                            "kind": "json_object",
+                            "required_fields": ["Start", "Stop"],
+                            "fields": {
+                                "Start": {"kind": "json_string"},
+                                "Stop": {"kind": "json_string"},
+                            },
+                        },
+                    },
+                },
+                {
+                    "kind": "json_array",
+                    "min_length": 1,
+                    "items": {
+                        "kind": "json_array",
+                        "items": {"kind": "json_array"},
+                    },
+                },
+            ]
+        },
+    ) == {
+        "kind": "json_array",
+        "min_length": 1,
+        "items": {
+            "kind": "json_array",
+            "items": {
+                "kind": "json_object",
+                "required_fields": ["Start", "Stop"],
+                "fields": {
+                    "Start": {"kind": "json_string"},
+                    "Stop": {"kind": "json_string"},
+                },
+            },
+        },
+    }
+
+
 def test_reconcile_reports_const_mismatch_without_broadening(tmp_path: Path) -> None:
     fixture_dir = tmp_path / "fixtures"
     fixture_dir.mkdir()

@@ -62,6 +62,61 @@ def unique_shapes(shapes: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [by_key[key] for key in sorted(by_key)]
 
 
+def shape_match_score(value: Any, previous_shape: dict[str, Any]) -> int:
+    if "any_of" in previous_shape:
+        alternatives = previous_shape.get("any_of")
+        if isinstance(alternatives, list):
+            return max(
+                (
+                    shape_match_score(value, alternative)
+                    for alternative in alternatives
+                    if isinstance(alternative, dict)
+                ),
+                default=0,
+            )
+        return 0
+
+    kind = response_kind(value)
+    if previous_shape.get("kind") != kind:
+        return 0
+
+    score = 1
+    if "const" in previous_shape and kind != "json_number":
+        score += 4 if previous_shape["const"] == value else -4
+
+    if isinstance(value, dict):
+        required = previous_shape.get("required_fields")
+        if isinstance(required, list) and set(required) == set(value):
+            score += 4
+        fields = previous_shape.get("fields")
+        if isinstance(fields, dict):
+            score += len(set(fields) & set(value))
+    elif isinstance(value, list):
+        if "length" in previous_shape or "min_length" in previous_shape:
+            score += 2
+        item_shape = previous_shape.get("items")
+        if isinstance(item_shape, dict) and value:
+            score += max(shape_match_score(item, item_shape) for item in value)
+    return score
+
+
+def matching_previous_shape(value: Any, previous_shape: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not isinstance(previous_shape, dict):
+        return None
+    alternatives = previous_shape.get("any_of")
+    if not isinstance(alternatives, list):
+        return previous_shape
+    candidates = [alternative for alternative in alternatives if isinstance(alternative, dict)]
+    if not candidates:
+        return previous_shape
+    ranked = [
+        (shape_match_score(value, candidate), json.dumps(candidate, sort_keys=True), candidate)
+        for candidate in candidates
+    ]
+    ranked.sort(key=lambda item: (-item[0], item[1]))
+    return ranked[0][2] if ranked[0][0] > 0 else previous_shape
+
+
 def array_length_shape(value: list[Any], previous_shape: dict[str, Any] | None) -> dict[str, int]:
     if isinstance(previous_shape, dict):
         if "length" in previous_shape:
@@ -129,6 +184,7 @@ def const_mismatches(
 
 def shape_from_value(value: Any, previous_shape: dict[str, Any] | None = None) -> dict[str, Any]:
     """Build a fixture-safe structural response shape from a decoded JSON value."""
+    previous_shape = matching_previous_shape(value, previous_shape)
     kind = response_kind(value)
     shape: dict[str, Any] = {"kind": kind}
     if (
