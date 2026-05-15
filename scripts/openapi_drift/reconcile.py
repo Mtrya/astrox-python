@@ -63,9 +63,26 @@ def unique_shapes(shapes: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def array_length_shape(value: list[Any], previous_shape: dict[str, Any] | None) -> dict[str, int]:
-    if isinstance(previous_shape, dict) and "length" in previous_shape:
-        return {"length": len(value)}
+    if isinstance(previous_shape, dict):
+        if "length" in previous_shape:
+            return {"length": len(value)}
+        previous_min_length = previous_shape.get("min_length")
+        if isinstance(previous_min_length, int) and len(value) >= previous_min_length:
+            return {"min_length": previous_min_length}
+        if "min_length" not in previous_shape:
+            return {}
     return {"min_length": 1 if value else 0}
+
+
+def required_fields_shape(keys: list[str], previous_shape: dict[str, Any] | None) -> list[str]:
+    previous_required = previous_shape.get("required_fields") if isinstance(previous_shape, dict) else None
+    if (
+        isinstance(previous_required, list)
+        and all(isinstance(item, str) for item in previous_required)
+        and set(previous_required) == set(keys)
+    ):
+        return previous_required
+    return keys
 
 
 def shape_from_value(value: Any, previous_shape: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -101,7 +118,7 @@ def shape_from_value(value: Any, previous_shape: dict[str, Any] | None = None) -
         if not isinstance(previous_fields, dict):
             previous_fields = {}
         keys = sorted(value)
-        shape["required_fields"] = keys
+        shape["required_fields"] = required_fields_shape(keys, previous_shape)
         shape["fields"] = {
             key: shape_from_value(
                 value[key],

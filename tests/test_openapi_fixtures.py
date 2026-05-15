@@ -1431,6 +1431,27 @@ def test_shape_from_value_preserves_existing_exact_array_length_contract() -> No
     }
 
 
+def test_shape_from_value_preserves_existing_broad_array_contract() -> None:
+    assert shape_from_value([1, 2], previous_shape={"kind": "json_array"}) == {
+        "kind": "json_array",
+        "items": {"kind": "json_number"},
+    }
+
+
+def test_shape_from_value_preserves_existing_required_field_order() -> None:
+    assert shape_from_value(
+        {"A": True, "B": True},
+        previous_shape={"kind": "json_object", "required_fields": ["B", "A"]},
+    ) == {
+        "kind": "json_object",
+        "required_fields": ["B", "A"],
+        "fields": {
+            "A": {"kind": "json_boolean"},
+            "B": {"kind": "json_boolean"},
+        },
+    }
+
+
 def test_expect_from_response_accepts_empty_204_without_content_type() -> None:
     expect, failure = expect_from_response(
         StubResponse(status_code=204, headers={}, text="")
