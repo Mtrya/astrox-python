@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 from pathlib import Path
@@ -87,18 +88,34 @@ def _require_int(value: Any, *, path: Path, field_path: str) -> int:
     return value
 
 
-def _require_json_value(value: Any, *, path: Path, field_path: str) -> None:
-    if value is None or isinstance(value, str | int | float | bool):
+def _require_json_value(value: Any, *, path: Path, field_path: str, depth: int = 0) -> None:
+    if depth > 100:
+        raise _validation_error(path, field_path, "is nested too deeply")
+    if value is None or isinstance(value, str | int | bool):
+        return
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise _validation_error(path, field_path, "must be a finite JSON number")
         return
     if isinstance(value, list):
         for index, item in enumerate(value):
-            _require_json_value(item, path=path, field_path=f"{field_path}[{index}]")
+            _require_json_value(
+                item,
+                path=path,
+                field_path=f"{field_path}[{index}]",
+                depth=depth + 1,
+            )
         return
     if isinstance(value, dict):
         for key, item in value.items():
             if not isinstance(key, str):
                 raise _validation_error(path, field_path, "must contain only string object keys")
-            _require_json_value(item, path=path, field_path=f"{field_path}.{key}")
+            _require_json_value(
+                item,
+                path=path,
+                field_path=f"{field_path}.{key}",
+                depth=depth + 1,
+            )
         return
     raise _validation_error(path, field_path, "must be JSON-compatible")
 
@@ -253,6 +270,7 @@ def _validate_request_payload(value: Any, *, method: str, path: Path, field_path
             field_path,
             "must be null or an object for GET query parameters",
         )
+    _require_json_value(value, path=path, field_path=field_path)
 
 
 def _validate_expect(value: dict[str, Any], *, path: Path, field_path: str) -> None:
@@ -264,11 +282,21 @@ def _validate_expect(value: dict[str, Any], *, path: Path, field_path: str) -> N
     if status < 100 or status > 599:
         raise _validation_error(path, f"{field_path}.status", "must be an HTTP status code")
 
-    _require_non_empty_string(
-        _required_value(value, "content_type", path=path, field_path=f"{field_path}.content_type"),
+    content_type = _required_value(
+        value,
+        "content_type",
         path=path,
         field_path=f"{field_path}.content_type",
     )
+    if status == 204:
+        if not isinstance(content_type, str):
+            raise _validation_error(path, f"{field_path}.content_type", "must be a string")
+    else:
+        _require_non_empty_string(
+            content_type,
+            path=path,
+            field_path=f"{field_path}.content_type",
+        )
     response = _require_object(
         _required_value(value, "response", path=path, field_path=f"{field_path}.response"),
         path=path,
@@ -339,6 +367,8 @@ def _validate_const(value: Any, *, kind: str, path: Path, field_path: str) -> No
     elif kind == "json_number":
         if not isinstance(value, int | float) or isinstance(value, bool):
             raise _validation_error(path, field_path, "must be a number for json_number")
+        if isinstance(value, float) and not math.isfinite(value):
+            raise _validation_error(path, field_path, "must be a finite number for json_number")
     elif kind in {"json_string", "text"} and not isinstance(value, str):
         raise _validation_error(path, field_path, f"must be a string for {kind}")
 

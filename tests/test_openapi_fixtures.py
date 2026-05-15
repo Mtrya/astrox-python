@@ -11,10 +11,12 @@ from scripts.openapi_drift.discovery_report import (
     axis_observed_values,
     discovery_fixture_report,
     markdown_report as discovery_markdown_report,
+    path_tokens,
 )
 from scripts.openapi_drift.drift_pipeline_report import (
     build_pipeline_report,
     issue_body_markdown,
+    load_json,
     parse_porcelain_status,
     pr_body_markdown,
     summary_markdown,
@@ -23,8 +25,10 @@ from scripts.openapi_drift.generate_status import generate_status_text
 from scripts.openapi_drift.normalize import dump_fixture, normalize_fixture_data
 from scripts.openapi_drift.probe_request import probe_request_branch
 from scripts.openapi_drift.reconcile import (
+    expect_from_response,
     markdown_report as reconcile_markdown_report,
     reconcile_fixture_dir,
+    shape_from_value,
 )
 from scripts.openapi_drift.shapes import ShapeMismatch, assert_shape, fingerprint_shape
 from scripts.openapi_drift.verify import (
@@ -647,6 +651,18 @@ def test_validate_fixture_accepts_text_response_shape(tmp_path: Path) -> None:
     validate_fixture(data, path=fixture_path)
 
 
+def test_validate_fixture_accepts_empty_content_type_for_204(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "no_content.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["expect"] = {
+        "status": 204,
+        "content_type": "",
+        "response": {"kind": "text", "min_length": 0},
+    }
+
+    validate_fixture(data, path=fixture_path)
+
+
 def test_validate_fixture_accepts_primitive_const_shape(tmp_path: Path) -> None:
     fixture_path = tmp_path / "failure.yaml"
     data = valid_fixture_data()
@@ -692,6 +708,39 @@ def test_validate_fixture_rejects_wrong_const_kind(tmp_path: Path) -> None:
         assert str(fixture_path) in message
         assert "branches.nominal.expect.response.const" in message
         assert "boolean" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_rejects_non_finite_json_numbers(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"]["request"] = {"Bad": float("nan")}
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "finite JSON number" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_rejects_deeply_nested_json_values(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    value: Any = "leaf"
+    for _ in range(101):
+        value = [value]
+    data["branches"]["nominal"]["request"] = value
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "nested too deeply" in message
     else:  # pragma: no cover
         raise AssertionError("expected ValueError")
 
@@ -980,6 +1029,59 @@ def test_axis_observed_values_reads_nested_array_discriminator_values() -> None:
     }
 
     assert axis_observed_values(request, axis) == ["J2", "SitePosition"]
+
+
+def test_path_tokens_handles_quoted_properties_with_dots() -> None:
+    assert path_tokens('$["my.property"][].Mode') == [
+        ("my.property", True),
+        ("Mode", False),
+    ]
+    assert axis_observed_values(
+        {"my.property": [{"Mode": "A"}]},
+        {"path": '$["my.property"][].Mode'},
+    ) == ["A"]
+
+
+def test_discover_quotes_branch_axis_paths_for_complex_property_names(tmp_path: Path) -> None:
+    spec_path = tmp_path / "openapi.yaml"
+    spec_path.write_text(
+        yaml.safe_dump(
+            {
+                "paths": {
+                    "/Example": {
+                        "post": {
+                            "requestBody": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": {"$ref": "#/components/schemas/ExampleInput"}
+                                    }
+                                }
+                            },
+                            "responses": {"200": {"content": {"application/json": {"schema": {"type": "object"}}}}},
+                        }
+                    }
+                },
+                "components": {
+                    "schemas": {
+                        "ExampleInput": {
+                            "type": "object",
+                            "properties": {
+                                "my.property": {
+                                    "type": "object",
+                                    "properties": {"Mode": {"type": "string", "enum": ["A"]}},
+                                }
+                            },
+                        }
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    endpoints = discover(load_spec(spec_path))
+
+    assert endpoints[0]["branch_axes"][0]["path"] == '$["my.property"].Mode'
 
 
 def test_discovery_report_finds_missing_endpoint_and_axis_values(tmp_path: Path) -> None:
@@ -1299,6 +1401,49 @@ def test_drift_pipeline_report_records_failed_checks_as_hard_case() -> None:
     assert "- `full`: `failure`" in summary
 
 
+def test_load_json_reports_empty_files_with_context(tmp_path: Path) -> None:
+    path = tmp_path / "empty.json"
+    path.write_text("", encoding="utf-8")
+
+    try:
+        load_json(path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(path) in message
+        assert "did not contain valid JSON" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_shape_from_value_uses_min_length_for_new_arrays() -> None:
+    assert shape_from_value([1, 2]) == {
+        "kind": "json_array",
+        "min_length": 1,
+        "items": {"kind": "json_number"},
+    }
+
+
+def test_shape_from_value_preserves_existing_exact_array_length_contract() -> None:
+    assert shape_from_value([1, 2], previous_shape={"kind": "json_array", "length": 3}) == {
+        "kind": "json_array",
+        "length": 2,
+        "items": {"kind": "json_number"},
+    }
+
+
+def test_expect_from_response_accepts_empty_204_without_content_type() -> None:
+    expect, failure = expect_from_response(
+        StubResponse(status_code=204, headers={}, text="")
+    )
+
+    assert failure is None
+    assert expect == {
+        "status": 204,
+        "content_type": "",
+        "response": {"kind": "text", "min_length": 0},
+    }
+
+
 def test_reconcile_dry_run_reports_expect_refresh_without_writing(tmp_path: Path) -> None:
     fixture_dir = tmp_path / "fixtures"
     fixture_dir.mkdir()
@@ -1328,7 +1473,7 @@ def test_reconcile_dry_run_reports_expect_refresh_without_writing(tmp_path: Path
         "fields": {
             "Answer": {
                 "kind": "json_array",
-                "length": 2,
+                "min_length": 1,
                 "items": {"kind": "json_number"},
             }
         },
@@ -1535,7 +1680,7 @@ def test_probe_request_dry_run_reports_verified_branch_without_writing(tmp_path:
         "fields": {
             "Answer": {
                 "kind": "json_array",
-                "length": 1,
+                "min_length": 1,
                 "items": {"kind": "json_number"},
             }
         },

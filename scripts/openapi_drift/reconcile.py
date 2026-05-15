@@ -62,6 +62,12 @@ def unique_shapes(shapes: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [by_key[key] for key in sorted(by_key)]
 
 
+def array_length_shape(value: list[Any], previous_shape: dict[str, Any] | None) -> dict[str, int]:
+    if isinstance(previous_shape, dict) and "length" in previous_shape:
+        return {"length": len(value)}
+    return {"min_length": 1 if value else 0}
+
+
 def shape_from_value(value: Any, previous_shape: dict[str, Any] | None = None) -> dict[str, Any]:
     """Build a fixture-safe structural response shape from a decoded JSON value."""
     kind = response_kind(value)
@@ -76,7 +82,7 @@ def shape_from_value(value: Any, previous_shape: dict[str, Any] | None = None) -
         shape["const"] = previous_shape["const"]
 
     if isinstance(value, list):
-        shape["length"] = len(value)
+        shape.update(array_length_shape(value, previous_shape))
         if value:
             previous_item_shape = None
             if isinstance(previous_shape, dict):
@@ -161,6 +167,12 @@ def expect_from_response(
     previous_expect: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
     actual_content_type = media_type(response.headers.get("content-type", ""))
+    if response.status_code == 204 and not actual_content_type and response.text == "":
+        return {
+            "status": 204,
+            "content_type": "",
+            "response": {"kind": "text", "min_length": 0},
+        }, None
     if not actual_content_type:
         return None, {
             "action": "report",

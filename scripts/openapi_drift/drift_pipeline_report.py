@@ -16,7 +16,11 @@ PR_TITLE = "Refresh ASTROX upstream drift data"
 def load_json(path: Path | None) -> dict[str, Any]:
     if path is None or not path.exists():
         return {}
-    loaded = json.loads(path.read_text(encoding="utf-8"))
+    raw = path.read_text(encoding="utf-8")
+    try:
+        loaded = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"{path} did not contain valid JSON: {exc.msg}") from exc
     if not isinstance(loaded, dict):
         raise ValueError(f"{path} did not contain a JSON object")
     return loaded

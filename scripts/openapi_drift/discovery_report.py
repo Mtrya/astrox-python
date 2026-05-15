@@ -42,19 +42,44 @@ def endpoint_fixture_index(
 
 
 def path_tokens(path: str) -> list[tuple[str, bool]]:
-    """Parse discovery JSON paths such as ``$.Items[].Position``."""
+    """Parse discovery paths such as ``$.Items[].Position`` or ``$["a.b"]``."""
     if path == "$":
         return []
-    if not path.startswith("$."):
+    if not path.startswith("$"):
         raise ValueError(f"unsupported discovery path {path!r}")
     tokens: list[tuple[str, bool]] = []
-    for raw_part in path[2:].split("."):
-        if not raw_part:
-            raise ValueError(f"unsupported discovery path {path!r}")
-        if raw_part.endswith("[]"):
-            tokens.append((raw_part[:-2], True))
+    index = 1
+    while index < len(path):
+        if path[index] == ".":
+            index += 1
+            start = index
+            while index < len(path) and path[index] not in ".[":
+                index += 1
+            raw_part = path[start:index]
+            if not raw_part:
+                raise ValueError(f"unsupported discovery path {path!r}")
+        elif path[index] == "[":
+            if index + 1 < len(path) and path[index + 1] == "]":
+                if not tokens:
+                    raise ValueError(f"unsupported discovery path {path!r}")
+                key, _ = tokens[-1]
+                tokens[-1] = (key, True)
+                index += 2
+                continue
+            decoder = json.JSONDecoder()
+            try:
+                raw_part, offset = decoder.raw_decode(path[index + 1 :])
+            except json.JSONDecodeError as exc:
+                raise ValueError(f"unsupported discovery path {path!r}") from exc
+            if not isinstance(raw_part, str):
+                raise ValueError(f"unsupported discovery path {path!r}")
+            index += offset + 1
+            if index >= len(path) or path[index] != "]":
+                raise ValueError(f"unsupported discovery path {path!r}")
+            index += 1
         else:
-            tokens.append((raw_part, False))
+            raise ValueError(f"unsupported discovery path {path!r}")
+        tokens.append((raw_part, False))
     return tokens
 
 

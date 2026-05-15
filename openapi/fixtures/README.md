@@ -2,13 +2,9 @@
 
 This directory stores observed ASTROX wire-contract fixtures.
 
-Fixtures refine `openapi/astrox.openapi.yaml` by recording the request branch
-payloads and response shapes that the live server is expected to accept and
-return. They are not semantic or numerical oracles. Normal `pytest` tests should
-cover exact values, physics checks, and SDK behavior.
+Fixtures refine `openapi/astrox.openapi.yaml` by recording the request branch payloads and response shapes that the live server is expected to accept and return. They are not semantic or numerical oracles. Normal `pytest` tests should cover exact values, physics checks, and SDK behavior.
 
-`STATUS.md` is generated from this fixture corpus and the checked-in OpenAPI
-document. Do not edit it by hand.
+`STATUS.md` is generated from this fixture corpus and the checked-in OpenAPI document. Do not edit it by hand.
 
 Add records incrementally, one endpoint file at a time, using this layout:
 
@@ -54,10 +50,8 @@ branches:
 
 Branches use explicit state:
 
-- `state: verified` records a live-verified wire contract and must include an
-  `expect` block.
-- `state: blocked` records a request branch that is known not to have usable
-  fixture evidence yet and must include a `blocked` block.
+- `state: verified` records a live-verified wire contract and must include an `expect` block.
+- `state: blocked` records a request branch that is known not to have usable fixture evidence yet and must include a `blocked` block.
 
 Blocked branches are tracked as evidence, but they are not verified coverage:
 
@@ -76,35 +70,15 @@ branches:
       note: "Valid-looking payload reaches endpoint execution but returns an empty HTTP 500."
 ```
 
-Fixture files are normalized by `scripts/openapi_drift/normalize.py` into
-plain deterministic YAML. Do not rely on YAML anchors or aliases in checked-in
-fixtures.
+Fixture files are normalized by `scripts/openapi_drift/normalize.py` into plain deterministic YAML. Do not rely on YAML anchors or aliases in checked-in fixtures.
 
-Existing fixture branches can be reconciled against live behavior with
-`scripts/openapi_drift/reconcile.py`. Dry-run mode emits JSON and Markdown
-reports without editing files. Apply mode may refresh an existing verified
-branch `expect` block or mark an existing verified branch as blocked for a
-narrow non-fixturable failure such as an empty HTTP 500. It does not create
-fixtures for newly discovered endpoints or automatically unblock previously
-blocked branches.
+Existing fixture branches can be reconciled against live behavior with `scripts/openapi_drift/reconcile.py`. Dry-run mode emits JSON and Markdown reports without editing files. Apply mode may refresh an existing verified branch `expect` block or mark an existing verified branch as blocked for a narrow non-fixturable failure such as an empty HTTP 500. It does not create fixtures for newly discovered endpoints or automatically unblock previously blocked branches.
 
-Discovery coverage can be reported with
-`scripts/openapi_drift/discovery_report.py`. It compares OpenAPI-discovered
-endpoints and branch axis values against checked-in fixture request payloads.
-It reports uncovered contracts and can optionally probe saved blocked branch
-requests to flag branches that now look reachable, but it does not generate
-new endpoint fixtures.
+Discovery coverage can be reported with `scripts/openapi_drift/discovery_report.py`. It compares OpenAPI-discovered endpoints and branch axis values against checked-in fixture request payloads. It reports uncovered contracts and can optionally probe saved blocked branch requests to flag branches that now look reachable, but it does not generate new endpoint fixtures.
 
-Candidate request payloads can be probed and written with
-`scripts/openapi_drift/probe_request.py`. The human or agent supplies the
-endpoint/branch `request`; the command performs the live request and writes
-either a verified branch with an automatically generated `expect` block or a
-blocked branch for narrow non-fixturable failures such as empty HTTP 500. It
-also normalizes the fixture and regenerates `STATUS.md` in apply mode.
+Candidate request payloads can be probed and written with `scripts/openapi_drift/probe_request.py`. The human or agent supplies the endpoint/branch `request`; the command performs the live request and writes either a verified branch with an automatically generated `expect` block or a blocked branch for narrow non-fixturable failures such as empty HTTP 500. It also normalizes the fixture and regenerates `STATUS.md` in apply mode.
 
-The unified drift workflow combines reconciliation, discovery, changed-file,
-and test reports with `scripts/openapi_drift/drift_pipeline_report.py` before
-opening a PR or creating the narrow blocked-branch issue.
+The unified drift workflow combines reconciliation, discovery, changed-file, and test reports with `scripts/openapi_drift/drift_pipeline_report.py` before opening a PR or creating the narrow blocked-branch issue.
 
 The scheduled fixture CI should verify only wire-level behavior:
 
@@ -116,7 +90,4 @@ The scheduled fixture CI should verify only wire-level behavior:
 
 It should not assert exact numerical response values.
 
-Primitive response shapes may include `const` when a stable wire value is the
-branch contract, such as `IsSuccess: false` for an observed failure-only
-payload. Do not use `const` for floating point physics values, arrays, or
-objects.
+Primitive response shapes may include `const` when a stable wire value is the branch contract, such as `IsSuccess: false` for an observed failure-only payload. Do not use `const` for floating point physics values, arrays, or objects.

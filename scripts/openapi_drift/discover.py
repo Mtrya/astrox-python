@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +15,7 @@ import yaml
 DEFAULT_OPENAPI = Path("openapi/astrox.openapi.yaml")
 HTTP_METHODS = {"get", "post", "put", "patch", "delete"}
 COMBINATORS = ("anyOf", "oneOf", "allOf")
+PATH_SAFE_PROPERTY = re.compile(r"^[A-Za-z_$][A-Za-z0-9_$]*$")
 
 
 def load_spec(path: Path) -> dict[str, Any]:
@@ -107,6 +109,12 @@ def is_discriminator_tag_enum(path: str, enum: list[Any]) -> bool:
     return path.endswith(".$type") and len(enum) == 1
 
 
+def append_path_property(path: str, key: str) -> str:
+    if PATH_SAFE_PROPERTY.match(key):
+        return f"{path}.{key}" if path != "$" else f"$.{key}"
+    return f"{path}[{json.dumps(key, ensure_ascii=False)}]"
+
+
 def dedupe_axes(axes: list[dict[str, Any]]) -> list[dict[str, Any]]:
     seen: set[str] = set()
     deduped = []
@@ -174,7 +182,7 @@ def find_branch_axes(
         properties = schema.get("properties")
         if isinstance(properties, dict):
             for key, value in properties.items():
-                next_path = f"{path}.{key}" if path != "$" else f"$.{key}"
+                next_path = append_path_property(path, key)
                 axes.extend(
                     find_branch_axes(
                         value,
