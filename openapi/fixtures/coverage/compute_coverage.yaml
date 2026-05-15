@@ -846,11 +846,18 @@ branches:
       response:
         kind: json_object
         required_fields:
+          - AssetAccessResults
+          - GlobalCoverageDatas
           - IsSuccess
           - Message
           - PercentCovered
-          - GlobalCoverageDatas
+          - SatisfactionIntervalsWithNumberOfAssets
         fields:
+          AssetAccessResults:
+            kind: json_array
+            min_length: 0
+          GlobalCoverageDatas:
+            kind: json_array
           IsSuccess:
             kind: json_boolean
             const: false
@@ -858,8 +865,28 @@ branches:
             kind: json_string
           PercentCovered:
             kind: json_number
-          GlobalCoverageDatas:
+          SatisfactionIntervalsWithNumberOfAssets:
             kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - Duration
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                fields:
+                  Duration:
+                    kind: json_number
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
   asset_position_simple_ascent_failure_shape:
     state: verified
     request:
@@ -893,11 +920,18 @@ branches:
       response:
         kind: json_object
         required_fields:
+          - AssetAccessResults
+          - GlobalCoverageDatas
           - IsSuccess
           - Message
           - PercentCovered
-          - GlobalCoverageDatas
+          - SatisfactionIntervalsWithNumberOfAssets
         fields:
+          AssetAccessResults:
+            kind: json_array
+            min_length: 0
+          GlobalCoverageDatas:
+            kind: json_array
           IsSuccess:
             kind: json_boolean
             const: false
@@ -905,8 +939,28 @@ branches:
             kind: json_string
           PercentCovered:
             kind: json_number
-          GlobalCoverageDatas:
+          SatisfactionIntervalsWithNumberOfAssets:
             kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - Duration
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                fields:
+                  Duration:
+                    kind: json_number
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
   asset_position_ballistic_failure_shape:
     state: verified
     request:
@@ -939,11 +993,18 @@ branches:
       response:
         kind: json_object
         required_fields:
+          - AssetAccessResults
+          - GlobalCoverageDatas
           - IsSuccess
           - Message
           - PercentCovered
-          - GlobalCoverageDatas
+          - SatisfactionIntervalsWithNumberOfAssets
         fields:
+          AssetAccessResults:
+            kind: json_array
+            min_length: 0
+          GlobalCoverageDatas:
+            kind: json_array
           IsSuccess:
             kind: json_boolean
             const: false
@@ -951,8 +1012,28 @@ branches:
             kind: json_string
           PercentCovered:
             kind: json_number
-          GlobalCoverageDatas:
+          SatisfactionIntervalsWithNumberOfAssets:
             kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - Duration
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                fields:
+                  Duration:
+                    kind: json_number
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
   asset_position_central_body_failure_shape:
     state: verified
     request:
@@ -976,11 +1057,35 @@ branches:
       response:
         kind: json_object
         required_fields:
+          - AccessDurationDatas
+          - AssetAccessResults
+          - GlobalCoverageDatas
           - IsSuccess
           - Message
           - PercentCovered
-          - GlobalCoverageDatas
+          - SatisfactionIntervalsWithNumberOfAssets
         fields:
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          AssetAccessResults:
+            kind: json_array
+            min_length: 0
+          GlobalCoverageDatas:
+            kind: json_array
           IsSuccess:
             kind: json_boolean
             const: false
@@ -988,8 +1093,28 @@ branches:
             kind: json_string
           PercentCovered:
             kind: json_number
-          GlobalCoverageDatas:
+          SatisfactionIntervalsWithNumberOfAssets:
             kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - Duration
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                fields:
+                  Duration:
+                    kind: json_number
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
   asset_orientation_vvlh:
     state: verified
     request:
@@ -3887,23 +4012,108 @@ branches:
       response:
         kind: json_object
         required_fields:
+          - AccessDurationDatas
+          - AssetAccessResults
+          - GapDurationDatas
+          - GlobalCoverageDatas
           - IsSuccess
           - Message
-          - AssetAccessResults
+          - PercentCovered
+          - SatisfactionIntervalsWithNumberOfAssets
         fields:
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          AssetAccessResults:
+            kind: json_array
+            min_length: 1
+            items:
+              any_of:
+                - kind: json_array
+                  min_length: 1
+                  items:
+                    kind: json_array
+                    items:
+                      kind: json_object
+                      required_fields:
+                        - Duration
+                        - NumberOfAssets
+                        - Start
+                        - Stop
+                      fields:
+                        Duration:
+                          kind: json_number
+                        NumberOfAssets:
+                          kind: json_number
+                        Start:
+                          kind: json_string
+                        Stop:
+                          kind: json_string
+                - kind: json_array
+                  min_length: 1
+                  items:
+                    kind: json_array
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+            min_length: 0
           IsSuccess:
             kind: json_boolean
             const: true
           Message:
             kind: json_string
-          AssetAccessResults:
+          PercentCovered:
+            kind: json_number
+          SatisfactionIntervalsWithNumberOfAssets:
             kind: json_array
             min_length: 1
             items:
               kind: json_array
               min_length: 1
               items:
-                kind: json_array
+                kind: json_object
+                required_fields:
+                  - Duration
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                fields:
+                  Duration:
+                    kind: json_number
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
   contain_coverage_points_true:
     state: verified
     request:
@@ -3943,15 +4153,61 @@ branches:
       response:
         kind: json_object
         required_fields:
+          - AccessDurationDatas
+          - AssetAccessResults
+          - GapDurationDatas
+          - GlobalCoverageDatas
           - IsSuccess
           - Message
+          - PercentCovered
           - Points
+          - SatisfactionIntervalsWithNumberOfAssets
         fields:
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          AssetAccessResults:
+            kind: json_array
+            min_length: 0
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+            min_length: 0
           IsSuccess:
             kind: json_boolean
             const: true
           Message:
             kind: json_string
+          PercentCovered:
+            kind: json_number
           Points:
             kind: json_object
             required_fields:
@@ -3991,6 +4247,28 @@ branches:
                 kind: json_number
               Type:
                 kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - Duration
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                fields:
+                  Duration:
+                    kind: json_number
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
   filter_type_at_least_n:
     state: verified
     request:

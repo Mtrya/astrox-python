@@ -19,44 +19,44 @@ branches:
           - Message
           - Cities
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Cities:
             kind: json_array
             min_length: 1
             items:
               kind: json_object
+              required_fields:
+                - CentralBodyName
+                - CityName
+                - CountryName
+                - Latitude
+                - Longitude
+                - Population
+                - ProvinceName
+                - ProvinceRank
+                - TypeOfCity
               fields:
+                CentralBodyName:
+                  kind: json_string
                 CityName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                TypeOfCity:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                ProvinceName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
+                  kind: json_string
                 CountryName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                ProvinceRank:
-                  kind: json_number
-                Population:
-                  kind: json_number
+                  kind: json_string
                 Latitude:
                   kind: json_number
                 Longitude:
                   kind: json_number
-                CentralBodyName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
+                Population:
+                  kind: json_number
+                ProvinceName:
+                  kind: json_string
+                ProvinceRank:
+                  kind: json_number
+                TypeOfCity:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   type_of_city_populated_place:
     state: verified
     request:
@@ -72,44 +72,44 @@ branches:
           - Message
           - Cities
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Cities:
             kind: json_array
             min_length: 1
             items:
               kind: json_object
+              required_fields:
+                - CentralBodyName
+                - CityName
+                - CountryName
+                - Latitude
+                - Longitude
+                - Population
+                - ProvinceName
+                - ProvinceRank
+                - TypeOfCity
               fields:
+                CentralBodyName:
+                  kind: json_string
                 CityName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                TypeOfCity:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                ProvinceName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
+                  kind: json_string
                 CountryName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                ProvinceRank:
-                  kind: json_number
-                Population:
-                  kind: json_number
+                  kind: json_string
                 Latitude:
                   kind: json_number
                 Longitude:
                   kind: json_number
-                CentralBodyName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
+                Population:
+                  kind: json_number
+                ProvinceName:
+                  kind: json_string
+                ProvinceRank:
+                  kind: json_number
+                TypeOfCity:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   type_of_city_administration_center:
     state: verified
     request:
@@ -125,44 +125,44 @@ branches:
           - Message
           - Cities
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Cities:
             kind: json_array
             min_length: 1
             items:
               kind: json_object
+              required_fields:
+                - CentralBodyName
+                - CityName
+                - CountryName
+                - Latitude
+                - Longitude
+                - Population
+                - ProvinceName
+                - ProvinceRank
+                - TypeOfCity
               fields:
+                CentralBodyName:
+                  kind: json_string
                 CityName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                TypeOfCity:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                ProvinceName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
+                  kind: json_string
                 CountryName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                ProvinceRank:
-                  kind: json_number
-                Population:
-                  kind: json_number
+                  kind: json_string
                 Latitude:
                   kind: json_number
                 Longitude:
                   kind: json_number
-                CentralBodyName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
+                Population:
+                  kind: json_number
+                ProvinceName:
+                  kind: json_string
+                ProvinceRank:
+                  kind: json_number
+                TypeOfCity:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   type_of_city_national_capital:
     state: verified
     request:
@@ -178,44 +178,44 @@ branches:
           - Message
           - Cities
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Cities:
             kind: json_array
             min_length: 1
             items:
               kind: json_object
+              required_fields:
+                - CentralBodyName
+                - CityName
+                - CountryName
+                - Latitude
+                - Longitude
+                - Population
+                - ProvinceName
+                - ProvinceRank
+                - TypeOfCity
               fields:
+                CentralBodyName:
+                  kind: json_string
                 CityName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                TypeOfCity:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                ProvinceName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
+                  kind: json_string
                 CountryName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                ProvinceRank:
-                  kind: json_number
-                Population:
-                  kind: json_number
+                  kind: json_string
                 Latitude:
                   kind: json_number
                 Longitude:
                   kind: json_number
-                CentralBodyName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
+                Population:
+                  kind: json_number
+                ProvinceName:
+                  kind: json_string
+                ProvinceRank:
+                  kind: json_number
+                TypeOfCity:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   type_of_city_territorial_capital:
     state: verified
     request:
@@ -230,40 +230,9 @@ branches:
           - Message
           - Cities
         fields:
+          Cities:
+            kind: json_array
           IsSuccess:
             kind: json_boolean
           Message:
             kind: json_string
-          Cities:
-            kind: json_array
-            items:
-              kind: json_object
-              fields:
-                CityName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                TypeOfCity:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                ProvinceName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                CountryName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string
-                ProvinceRank:
-                  kind: json_number
-                Population:
-                  kind: json_number
-                Latitude:
-                  kind: json_number
-                Longitude:
-                  kind: json_number
-                CentralBodyName:
-                  any_of:
-                    - kind: json_null
-                    - kind: json_string

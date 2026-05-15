@@ -19,33 +19,31 @@ branches:
           - Message
           - Facilities
         fields:
+          Facilities:
+            kind: json_array
+            items:
+              kind: json_object
+              required_fields:
+                - Altitude
+                - CentralBodyName
+                - FacilityName
+                - Latitude
+                - Longitude
+                - NetworkName
+              fields:
+                Altitude:
+                  kind: json_number
+                CentralBodyName:
+                  kind: json_string
+                FacilityName:
+                  kind: json_string
+                Latitude:
+                  kind: json_number
+                Longitude:
+                  kind: json_number
+                NetworkName:
+                  kind: json_string
           IsSuccess:
             kind: json_boolean
           Message:
             kind: json_string
-          Facilities:
-            any_of:
-              - kind: json_null
-              - kind: json_array
-                items:
-                  kind: json_object
-                  required_fields:
-                    - FacilityName
-                    - NetworkName
-                    - Latitude
-                    - Longitude
-                    - Altitude
-                    - CentralBodyName
-                  fields:
-                    FacilityName:
-                      kind: json_string
-                    NetworkName:
-                      kind: json_string
-                    Latitude:
-                      kind: json_number
-                    Longitude:
-                      kind: json_number
-                    Altitude:
-                      kind: json_number
-                    CentralBodyName:
-                      kind: json_string

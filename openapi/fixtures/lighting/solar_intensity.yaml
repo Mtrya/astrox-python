@@ -28,10 +28,6 @@ branches:
           - Message
           - Datas
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Datas:
             kind: json_array
             min_length: 1
@@ -39,27 +35,43 @@ branches:
               kind: json_object
               required_fields:
                 - $type
-                - Time
-                - Intensity
-                - PercentShadow
                 - ApparentSolarAzimuth
                 - ApparentSolarElevation
+                - ApparentSolarRange
+                - Intensity
+                - PercentShadow
+                - RelativeAngle
+                - SolarDiskHalfAngle
+                - SolarGrazingAngle
                 - TerrainElevation
+                - Time
               fields:
                 $type:
                   kind: json_string
-                Time:
-                  kind: json_string
-                Intensity:
-                  kind: json_number
-                PercentShadow:
-                  kind: json_number
                 ApparentSolarAzimuth:
                   kind: json_number
                 ApparentSolarElevation:
                   kind: json_number
+                ApparentSolarRange:
+                  kind: json_number
+                Intensity:
+                  kind: json_number
+                PercentShadow:
+                  kind: json_number
+                RelativeAngle:
+                  kind: json_number
+                SolarDiskHalfAngle:
+                  kind: json_number
+                SolarGrazingAngle:
+                  kind: json_number
                 TerrainElevation:
                   kind: json_number
+                Time:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   position_j2:
     state: verified
     request:
@@ -87,10 +99,6 @@ branches:
           - Message
           - Datas
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Datas:
             kind: json_array
             min_length: 1
@@ -98,30 +106,40 @@ branches:
               kind: json_object
               required_fields:
                 - $type
-                - Time
-                - Intensity
-                - PercentShadow
-                - CurrentCondition
-                - Obstruction
                 - ApparentSolarRange
+                - CurrentCondition
+                - Intensity
+                - Obstruction
+                - PercentShadow
                 - RelativeAngle
+                - SolarDiskHalfAngle
+                - SolarGrazingAngle
+                - Time
               fields:
                 $type:
                   kind: json_string
-                Time:
-                  kind: json_string
-                Intensity:
-                  kind: json_number
-                PercentShadow:
+                ApparentSolarRange:
                   kind: json_number
                 CurrentCondition:
                   kind: json_string
+                Intensity:
+                  kind: json_number
                 Obstruction:
                   kind: json_string
-                ApparentSolarRange:
+                PercentShadow:
                   kind: json_number
                 RelativeAngle:
                   kind: json_number
+                SolarDiskHalfAngle:
+                  kind: json_number
+                SolarGrazingAngle:
+                  kind: json_number
+                Time:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   position_sgp4:
     state: verified
     request:
@@ -144,10 +162,6 @@ branches:
           - Message
           - Datas
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Datas:
             kind: json_array
             min_length: 1
@@ -155,30 +169,40 @@ branches:
               kind: json_object
               required_fields:
                 - $type
-                - Time
-                - Intensity
-                - PercentShadow
-                - CurrentCondition
-                - Obstruction
                 - ApparentSolarRange
+                - CurrentCondition
+                - Intensity
+                - Obstruction
+                - PercentShadow
                 - RelativeAngle
+                - SolarDiskHalfAngle
+                - SolarGrazingAngle
+                - Time
               fields:
                 $type:
                   kind: json_string
-                Time:
-                  kind: json_string
-                Intensity:
-                  kind: json_number
-                PercentShadow:
+                ApparentSolarRange:
                   kind: json_number
                 CurrentCondition:
                   kind: json_string
+                Intensity:
+                  kind: json_number
                 Obstruction:
                   kind: json_string
-                ApparentSolarRange:
+                PercentShadow:
                   kind: json_number
                 RelativeAngle:
                   kind: json_number
+                SolarDiskHalfAngle:
+                  kind: json_number
+                SolarGrazingAngle:
+                  kind: json_number
+                Time:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   position_two_body:
     state: verified
     request:
@@ -206,10 +230,6 @@ branches:
           - Message
           - Datas
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Datas:
             kind: json_array
             min_length: 1
@@ -217,30 +237,40 @@ branches:
               kind: json_object
               required_fields:
                 - $type
-                - Time
-                - Intensity
-                - PercentShadow
-                - CurrentCondition
-                - Obstruction
                 - ApparentSolarRange
+                - CurrentCondition
+                - Intensity
+                - Obstruction
+                - PercentShadow
                 - RelativeAngle
+                - SolarDiskHalfAngle
+                - SolarGrazingAngle
+                - Time
               fields:
                 $type:
                   kind: json_string
-                Time:
-                  kind: json_string
-                Intensity:
-                  kind: json_number
-                PercentShadow:
+                ApparentSolarRange:
                   kind: json_number
                 CurrentCondition:
                   kind: json_string
+                Intensity:
+                  kind: json_number
                 Obstruction:
                   kind: json_string
-                ApparentSolarRange:
+                PercentShadow:
                   kind: json_number
                 RelativeAngle:
                   kind: json_number
+                SolarDiskHalfAngle:
+                  kind: json_number
+                SolarGrazingAngle:
+                  kind: json_number
+                Time:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   position_astrogator_mcs:
     state: verified
     request:
@@ -288,10 +318,6 @@ branches:
           - Message
           - Datas
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Datas:
             kind: json_array
             min_length: 1
@@ -299,30 +325,40 @@ branches:
               kind: json_object
               required_fields:
                 - $type
-                - Time
-                - Intensity
-                - PercentShadow
-                - CurrentCondition
-                - Obstruction
                 - ApparentSolarRange
+                - CurrentCondition
+                - Intensity
+                - Obstruction
+                - PercentShadow
                 - RelativeAngle
+                - SolarDiskHalfAngle
+                - SolarGrazingAngle
+                - Time
               fields:
                 $type:
                   kind: json_string
-                Time:
-                  kind: json_string
-                Intensity:
-                  kind: json_number
-                PercentShadow:
+                ApparentSolarRange:
                   kind: json_number
                 CurrentCondition:
                   kind: json_string
+                Intensity:
+                  kind: json_number
                 Obstruction:
                   kind: json_string
-                ApparentSolarRange:
+                PercentShadow:
                   kind: json_number
                 RelativeAngle:
                   kind: json_number
+                SolarDiskHalfAngle:
+                  kind: json_number
+                SolarGrazingAngle:
+                  kind: json_number
+                Time:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   position_hpop:
     state: verified
     request:
@@ -360,10 +396,6 @@ branches:
           - Message
           - Datas
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Datas:
             kind: json_array
             min_length: 1
@@ -371,30 +403,40 @@ branches:
               kind: json_object
               required_fields:
                 - $type
-                - Time
-                - Intensity
-                - PercentShadow
-                - CurrentCondition
-                - Obstruction
                 - ApparentSolarRange
+                - CurrentCondition
+                - Intensity
+                - Obstruction
+                - PercentShadow
                 - RelativeAngle
+                - SolarDiskHalfAngle
+                - SolarGrazingAngle
+                - Time
               fields:
                 $type:
                   kind: json_string
-                Time:
-                  kind: json_string
-                Intensity:
-                  kind: json_number
-                PercentShadow:
+                ApparentSolarRange:
                   kind: json_number
                 CurrentCondition:
                   kind: json_string
+                Intensity:
+                  kind: json_number
                 Obstruction:
                   kind: json_string
-                ApparentSolarRange:
+                PercentShadow:
                   kind: json_number
                 RelativeAngle:
                   kind: json_number
+                SolarDiskHalfAngle:
+                  kind: json_number
+                SolarGrazingAngle:
+                  kind: json_number
+                Time:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   position_simple_ascent:
     state: verified
     request:
@@ -424,10 +466,6 @@ branches:
           - Message
           - Datas
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Datas:
             kind: json_array
             min_length: 1
@@ -435,30 +473,40 @@ branches:
               kind: json_object
               required_fields:
                 - $type
-                - Time
-                - Intensity
-                - PercentShadow
-                - CurrentCondition
-                - Obstruction
                 - ApparentSolarRange
+                - CurrentCondition
+                - Intensity
+                - Obstruction
+                - PercentShadow
                 - RelativeAngle
+                - SolarDiskHalfAngle
+                - SolarGrazingAngle
+                - Time
               fields:
                 $type:
                   kind: json_string
-                Time:
-                  kind: json_string
-                Intensity:
-                  kind: json_number
-                PercentShadow:
+                ApparentSolarRange:
                   kind: json_number
                 CurrentCondition:
                   kind: json_string
+                Intensity:
+                  kind: json_number
                 Obstruction:
                   kind: json_string
-                ApparentSolarRange:
+                PercentShadow:
                   kind: json_number
                 RelativeAngle:
                   kind: json_number
+                SolarDiskHalfAngle:
+                  kind: json_number
+                SolarGrazingAngle:
+                  kind: json_number
+                Time:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   position_ballistic:
     state: verified
     request:
@@ -487,10 +535,6 @@ branches:
           - Message
           - Datas
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Datas:
             kind: json_array
             min_length: 1
@@ -498,30 +542,40 @@ branches:
               kind: json_object
               required_fields:
                 - $type
-                - Time
-                - Intensity
-                - PercentShadow
-                - CurrentCondition
-                - Obstruction
                 - ApparentSolarRange
+                - CurrentCondition
+                - Intensity
+                - Obstruction
+                - PercentShadow
                 - RelativeAngle
+                - SolarDiskHalfAngle
+                - SolarGrazingAngle
+                - Time
               fields:
                 $type:
                   kind: json_string
-                Time:
-                  kind: json_string
-                Intensity:
-                  kind: json_number
-                PercentShadow:
+                ApparentSolarRange:
                   kind: json_number
                 CurrentCondition:
                   kind: json_string
+                Intensity:
+                  kind: json_number
                 Obstruction:
                   kind: json_string
-                ApparentSolarRange:
+                PercentShadow:
                   kind: json_number
                 RelativeAngle:
                   kind: json_number
+                SolarDiskHalfAngle:
+                  kind: json_number
+                SolarGrazingAngle:
+                  kind: json_number
+                Time:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   position_central_body:
     state: verified
     request:
@@ -541,10 +595,6 @@ branches:
           - Message
           - Datas
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Datas:
             kind: json_array
             min_length: 1
@@ -552,30 +602,40 @@ branches:
               kind: json_object
               required_fields:
                 - $type
-                - Time
-                - Intensity
-                - PercentShadow
-                - CurrentCondition
-                - Obstruction
                 - ApparentSolarRange
+                - CurrentCondition
+                - Intensity
+                - Obstruction
+                - PercentShadow
                 - RelativeAngle
+                - SolarDiskHalfAngle
+                - SolarGrazingAngle
+                - Time
               fields:
                 $type:
                   kind: json_string
-                Time:
-                  kind: json_string
-                Intensity:
-                  kind: json_number
-                PercentShadow:
+                ApparentSolarRange:
                   kind: json_number
                 CurrentCondition:
                   kind: json_string
+                Intensity:
+                  kind: json_number
                 Obstruction:
                   kind: json_string
-                ApparentSolarRange:
+                PercentShadow:
                   kind: json_number
                 RelativeAngle:
                   kind: json_number
+                SolarDiskHalfAngle:
+                  kind: json_number
+                SolarGrazingAngle:
+                  kind: json_number
+                Time:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   position_czml_position:
     state: verified
     request:
@@ -621,10 +681,6 @@ branches:
           - Message
           - Datas
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Datas:
             kind: json_array
             min_length: 1
@@ -632,30 +688,40 @@ branches:
               kind: json_object
               required_fields:
                 - $type
-                - Time
-                - Intensity
-                - PercentShadow
-                - CurrentCondition
-                - Obstruction
                 - ApparentSolarRange
+                - CurrentCondition
+                - Intensity
+                - Obstruction
+                - PercentShadow
                 - RelativeAngle
+                - SolarDiskHalfAngle
+                - SolarGrazingAngle
+                - Time
               fields:
                 $type:
                   kind: json_string
-                Time:
-                  kind: json_string
-                Intensity:
-                  kind: json_number
-                PercentShadow:
+                ApparentSolarRange:
                   kind: json_number
                 CurrentCondition:
                   kind: json_string
+                Intensity:
+                  kind: json_number
                 Obstruction:
                   kind: json_string
-                ApparentSolarRange:
+                PercentShadow:
                   kind: json_number
                 RelativeAngle:
                   kind: json_number
+                SolarDiskHalfAngle:
+                  kind: json_number
+                SolarGrazingAngle:
+                  kind: json_number
+                Time:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   position_czml_positions:
     state: verified
     request:
@@ -704,10 +770,6 @@ branches:
           - Message
           - Datas
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Datas:
             kind: json_array
             min_length: 1
@@ -715,30 +777,40 @@ branches:
               kind: json_object
               required_fields:
                 - $type
-                - Time
-                - Intensity
-                - PercentShadow
-                - CurrentCondition
-                - Obstruction
                 - ApparentSolarRange
+                - CurrentCondition
+                - Intensity
+                - Obstruction
+                - PercentShadow
                 - RelativeAngle
+                - SolarDiskHalfAngle
+                - SolarGrazingAngle
+                - Time
               fields:
                 $type:
                   kind: json_string
-                Time:
-                  kind: json_string
-                Intensity:
-                  kind: json_number
-                PercentShadow:
+                ApparentSolarRange:
                   kind: json_number
                 CurrentCondition:
                   kind: json_string
+                Intensity:
+                  kind: json_number
                 Obstruction:
                   kind: json_string
-                ApparentSolarRange:
+                PercentShadow:
                   kind: json_number
                 RelativeAngle:
                   kind: json_number
+                SolarDiskHalfAngle:
+                  kind: json_number
+                SolarGrazingAngle:
+                  kind: json_number
+                Time:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
   occultation_bodies_explicit:
     state: verified
     request:
@@ -765,10 +837,6 @@ branches:
           - Message
           - Datas
         fields:
-          IsSuccess:
-            kind: json_boolean
-          Message:
-            kind: json_string
           Datas:
             kind: json_array
             min_length: 1
@@ -776,24 +844,40 @@ branches:
               kind: json_object
               required_fields:
                 - $type
-                - Time
-                - Intensity
-                - PercentShadow
                 - ApparentSolarAzimuth
                 - ApparentSolarElevation
+                - ApparentSolarRange
+                - Intensity
+                - PercentShadow
+                - RelativeAngle
+                - SolarDiskHalfAngle
+                - SolarGrazingAngle
                 - TerrainElevation
+                - Time
               fields:
                 $type:
                   kind: json_string
-                Time:
-                  kind: json_string
-                Intensity:
-                  kind: json_number
-                PercentShadow:
-                  kind: json_number
                 ApparentSolarAzimuth:
                   kind: json_number
                 ApparentSolarElevation:
                   kind: json_number
+                ApparentSolarRange:
+                  kind: json_number
+                Intensity:
+                  kind: json_number
+                PercentShadow:
+                  kind: json_number
+                RelativeAngle:
+                  kind: json_number
+                SolarDiskHalfAngle:
+                  kind: json_number
+                SolarGrazingAngle:
+                  kind: json_number
                 TerrainElevation:
                   kind: json_number
+                Time:
+                  kind: json_string
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string

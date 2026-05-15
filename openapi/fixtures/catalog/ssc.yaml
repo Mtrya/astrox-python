@@ -24,83 +24,74 @@ branches:
             kind: json_boolean
           Message:
             kind: json_string
+          TLEs:
+            kind: json_array
+            items:
+              kind: json_object
+              required_fields:
+                - Active
+                - Apogee
+                - CommonName
+                - Inclination
+                - InternationalDesignator
+                - LastDatabaseUpdate
+                - LaunchDateString
+                - LaunchSite
+                - Mass
+                - Mission
+                - OfficialName
+                - OrbitDescription
+                - Owner
+                - Perigee
+                - Period
+                - RevolutionNumber
+                - SatelliteNumber
+                - TLE_Line1
+                - TLE_Line2
+                - TleEpoch
+                - WriteUp
+              fields:
+                Active:
+                  kind: json_boolean
+                Apogee:
+                  kind: json_number
+                CommonName:
+                  kind: json_string
+                Inclination:
+                  kind: json_number
+                InternationalDesignator:
+                  kind: json_string
+                LastDatabaseUpdate:
+                  kind: json_string
+                LaunchDateString:
+                  kind: json_string
+                LaunchSite:
+                  kind: json_string
+                Mass:
+                  kind: json_number
+                Mission:
+                  kind: json_string
+                OfficialName:
+                  kind: json_string
+                OrbitDescription:
+                  kind: json_string
+                Owner:
+                  kind: json_string
+                Perigee:
+                  kind: json_number
+                Period:
+                  kind: json_number
+                RevolutionNumber:
+                  kind: json_number
+                SatelliteNumber:
+                  kind: json_string
+                TLE_Line1:
+                  kind: json_string
+                TLE_Line2:
+                  kind: json_string
+                TleEpoch:
+                  kind: json_string
+                WriteUp:
+                  kind: json_string
           TotalCount:
             kind: json_number
-          TLEs:
-            any_of:
-              - kind: json_null
-              - kind: json_array
-                min_length: 1
-                items:
-                  kind: json_object
-                  fields:
-                    Active:
-                      kind: json_boolean
-                    CommonName:
-                      any_of:
-                        - kind: json_null
-                        - kind: json_string
-                    OfficialName:
-                      any_of:
-                        - kind: json_null
-                        - kind: json_string
-                    SatelliteNumber:
-                      any_of:
-                        - kind: json_null
-                        - kind: json_string
-                    TleEpoch:
-                      any_of:
-                        - kind: json_null
-                        - kind: json_string
-                    RevolutionNumber:
-                      kind: json_number
-                    TLE_Line1:
-                      any_of:
-                        - kind: json_null
-                        - kind: json_string
-                    TLE_Line2:
-                      any_of:
-                        - kind: json_null
-                        - kind: json_string
-                    InternationalDesignator:
-                      any_of:
-                        - kind: json_null
-                        - kind: json_string
-                    Owner:
-                      any_of:
-                        - kind: json_null
-                        - kind: json_string
-                    Mission:
-                      any_of:
-                        - kind: json_null
-                        - kind: json_string
-                    LaunchSite:
-                      any_of:
-                        - kind: json_null
-                        - kind: json_string
-                    LaunchDateString:
-                      any_of:
-                        - kind: json_null
-                        - kind: json_string
-                    OrbitDescription:
-                      any_of:
-                        - kind: json_null
-                        - kind: json_string
-                    Mass:
-                      kind: json_number
-                    Apogee:
-                      kind: json_number
-                    Perigee:
-                      kind: json_number
-                    Period:
-                      kind: json_number
-                    Inclination:
-                      kind: json_number
-                    LastDatabaseUpdate:
-                      any_of:
-                        - kind: json_null
-                        - kind: json_string
-                    WriteUp:
-                      any_of:
-                        - kind: json_null
-                        - kind: json_string
