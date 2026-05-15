@@ -10,7 +10,7 @@ from typing import Any
 import yaml
 
 try:
-    from scripts.openapi_fixtures.verify import iter_fixture_paths, validate_fixture
+    from scripts.openapi_drift.verify import iter_fixture_paths, validate_fixture
 except ModuleNotFoundError:  # pragma: no cover - direct script execution fallback
     from verify import iter_fixture_paths, validate_fixture
 

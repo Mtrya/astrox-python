@@ -14,7 +14,7 @@ import requests
 import yaml
 
 try:
-    from scripts.openapi_fixtures.shapes import ShapeMismatch, assert_shape, fingerprint_shape
+    from scripts.openapi_drift.shapes import ShapeMismatch, assert_shape, fingerprint_shape
 except ModuleNotFoundError:  # pragma: no cover - direct script execution fallback
     from shapes import ShapeMismatch, assert_shape, fingerprint_shape
 

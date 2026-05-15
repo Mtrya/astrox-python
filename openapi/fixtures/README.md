@@ -76,12 +76,12 @@ branches:
       note: "Valid-looking payload reaches endpoint execution but returns an empty HTTP 500."
 ```
 
-Fixture files are normalized by `scripts/openapi_fixtures/normalize.py` into
+Fixture files are normalized by `scripts/openapi_drift/normalize.py` into
 plain deterministic YAML. Do not rely on YAML anchors or aliases in checked-in
 fixtures.
 
 Existing fixture branches can be reconciled against live behavior with
-`scripts/openapi_fixtures/reconcile.py`. Dry-run mode emits JSON and Markdown
+`scripts/openapi_drift/reconcile.py`. Dry-run mode emits JSON and Markdown
 reports without editing files. Apply mode may refresh an existing verified
 branch `expect` block or mark an existing verified branch as blocked for a
 narrow non-fixturable failure such as an empty HTTP 500. It does not create
@@ -89,14 +89,14 @@ fixtures for newly discovered endpoints or automatically unblock previously
 blocked branches.
 
 Discovery coverage can be reported with
-`scripts/openapi_fixtures/discovery_report.py`. It compares OpenAPI-discovered
+`scripts/openapi_drift/discovery_report.py`. It compares OpenAPI-discovered
 endpoints and branch axis values against checked-in fixture request payloads.
 It reports uncovered contracts and can optionally probe saved blocked branch
 requests to flag branches that now look reachable, but it does not generate
 new endpoint fixtures.
 
 The unified drift workflow combines reconciliation, discovery, changed-file,
-and test reports with `scripts/openapi_fixtures/drift_pipeline_report.py` before
+and test reports with `scripts/openapi_drift/drift_pipeline_report.py` before
 opening a PR or creating the narrow blocked-branch issue.
 
 The scheduled fixture CI should verify only wire-level behavior:

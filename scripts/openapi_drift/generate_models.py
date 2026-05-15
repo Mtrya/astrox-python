@@ -3,7 +3,7 @@
 Script to fetch OpenAPI spec, fix broken discriminators, and generate Pydantic models.
 
 Usage:
-    python scripts/generate_models.py
+    python scripts/openapi_drift/generate_models.py
 """
 
 import json
@@ -22,7 +22,7 @@ import yaml
 
 # Configuration
 OPENAPI_URL = "http://astrox.cn:8765/openapi/v1.json"
-OUTPUT_FILE = Path(__file__).parent.parent / "astrox" / "_models.py"
+OUTPUT_FILE = Path(__file__).parents[2] / "astrox" / "_models.py"
 
 SUFFIX_WHITELIST = {'J2', 'SGP4', 'TLE4'}
 SCHEMA_METADATA_KEYS = {

@@ -14,9 +14,9 @@ from typing import Any
 import requests
 
 try:
-    from scripts.openapi_fixtures.discover import DEFAULT_OPENAPI, discover, load_spec
-    from scripts.openapi_fixtures.reconcile import reconcile_branch
-    from scripts.openapi_fixtures.verify import (
+    from scripts.openapi_drift.discover import DEFAULT_OPENAPI, discover, load_spec
+    from scripts.openapi_drift.reconcile import reconcile_branch
+    from scripts.openapi_drift.verify import (
         DEFAULT_BASE_URL,
         DEFAULT_FIXTURE_DIR,
         iter_fixture_paths,

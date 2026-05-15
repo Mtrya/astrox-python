@@ -44,7 +44,7 @@ jobs:
           ASTROX_BASE_URL: http://astrox.cn:8765
         run: |
           set -o pipefail
-          uv run python scripts/fetch_openapi.py \
+          uv run python scripts/openapi_drift/fetch_openapi.py \
             --output openapi/astrox.openapi.yaml \
             --archive-dir openapi/archive \
             2>&1 | tee openapi-drift-reports/fetch-openapi.log
@@ -54,7 +54,7 @@ jobs:
           ASTROX_BASE_URL: http://astrox.cn:8765
         run: |
           set -o pipefail
-          uv run python scripts/generate_models.py \
+          uv run python scripts/openapi_drift/generate_models.py \
             --input openapi/astrox.openapi.yaml \
             --output astrox/_models.py \
             --source "${ASTROX_BASE_URL}/openapi/v1.json" \
@@ -68,7 +68,7 @@ jobs:
           ASTROX_BASE_URL: http://astrox.cn:8765
         run: |
           set -o pipefail
-          uv run python scripts/openapi_fixtures/reconcile.py \
+          uv run python scripts/openapi_drift/reconcile.py \
             --apply \
             --json-output openapi-drift-reports/reconcile.json \
             --markdown-output openapi-drift-reports/reconcile.md \
@@ -80,7 +80,7 @@ jobs:
         env:
           ASTROX_BASE_URL: http://astrox.cn:8765
         run: |
-          uv run python scripts/openapi_fixtures/discovery_report.py \
+          uv run python scripts/openapi_drift/discovery_report.py \
             --probe-blocked \
             --json-output openapi-drift-reports/discovery.json \
             --markdown-output openapi-drift-reports/discovery.md \
@@ -94,7 +94,7 @@ jobs:
         run: |
           set +e
           set -o pipefail
-          uv run python scripts/openapi_fixtures/verify.py \
+          uv run python scripts/openapi_drift/verify.py \
             2>&1 | tee openapi-drift-reports/verify-fixtures.log
           status="${PIPESTATUS[0]}"
           echo "status=${status}" >> "${GITHUB_OUTPUT}"
@@ -106,8 +106,8 @@ jobs:
         run: |
           set -o pipefail
           {
-            uv run python scripts/openapi_fixtures/normalize.py --fixture-dir openapi/fixtures --check
-            uv run python scripts/openapi_fixtures/generate_status.py \
+            uv run python scripts/openapi_drift/normalize.py --fixture-dir openapi/fixtures --check
+            uv run python scripts/openapi_drift/generate_status.py \
               --openapi openapi/astrox.openapi.yaml \
               --fixture-dir openapi/fixtures \
               --output openapi/fixtures/STATUS.md \
@@ -128,7 +128,7 @@ jobs:
         if: always()
         run: |
           git status --porcelain -- openapi astrox/_models.py > openapi-drift-reports/tracked-status.txt
-          uv run python scripts/openapi_fixtures/drift_pipeline_report.py \
+          uv run python scripts/openapi_drift/drift_pipeline_report.py \
             --reconcile-json openapi-drift-reports/reconcile.json \
             --discovery-json openapi-drift-reports/discovery.json \
             --tracked-status openapi-drift-reports/tracked-status.txt \

@@ -15,9 +15,9 @@ from typing import Any
 import requests
 
 try:
-    from scripts.openapi_fixtures.normalize import dump_fixture
-    from scripts.openapi_fixtures.shapes import response_kind
-    from scripts.openapi_fixtures.verify import (
+    from scripts.openapi_drift.normalize import dump_fixture
+    from scripts.openapi_drift.shapes import response_kind
+    from scripts.openapi_drift.verify import (
         DEFAULT_BASE_URL,
         DEFAULT_FIXTURE_DIR,
         iter_fixture_paths,
@@ -518,7 +518,7 @@ def reconcile_fixture_dir(
 
     if apply and changed_fixture_paths:
         try:
-            from scripts.openapi_fixtures.generate_status import generate_status_text
+            from scripts.openapi_drift.generate_status import generate_status_text
         except ModuleNotFoundError:  # pragma: no cover - direct script execution fallback
             from generate_status import generate_status_text
 
