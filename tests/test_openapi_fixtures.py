@@ -7,6 +7,8 @@ import requests
 import yaml
 
 from scripts.openapi_fixtures.discover import discover, load_spec
+from scripts.openapi_fixtures.generate_status import generate_status_text
+from scripts.openapi_fixtures.normalize import dump_fixture, normalize_fixture_data
 from scripts.openapi_fixtures.shapes import ShapeMismatch, assert_shape, fingerprint_shape
 from scripts.openapi_fixtures.verify import (
     build_report,
@@ -61,6 +63,7 @@ def valid_fixture_data() -> dict[str, Any]:
         "openapi_response_schema": "ExampleOutput",
         "branches": {
             "nominal": {
+                "state": "verified",
                 "request": {},
                 "expect": {
                     "status": 200,
@@ -394,6 +397,7 @@ def test_build_report_summarizes_failed_results_for_stdout_triage() -> None:
 
     assert report["branch_count"] == 2
     assert report["ok_count"] == 1
+    assert report["skipped_count"] == 0
     assert report["failed_count"] == 1
     assert report["failure_kinds"] == {"status_mismatch": 1}
     assert report["failed_results"] == [results[1]]
@@ -472,6 +476,70 @@ def test_validate_fixture_rejects_invalid_expect_status(tmp_path: Path) -> None:
         assert "branches.nominal.expect.status" in message
     else:  # pragma: no cover
         raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_requires_explicit_branch_state(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "bad.yaml"
+    data = valid_fixture_data()
+    del data["branches"]["nominal"]["state"]
+
+    try:
+        validate_fixture(data, path=fixture_path)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "branches.nominal.state" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
+def test_validate_fixture_accepts_blocked_branch(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "blocked.yaml"
+    data = valid_fixture_data()
+    data["branches"]["nominal"] = {
+        "state": "blocked",
+        "request": {"Example": "payload"},
+        "blocked": {
+            "reason": "empty_http_500",
+            "observed_status": 500,
+            "observed_content_type": "",
+            "observed_shape": None,
+            "last_seen": "2026-05-15",
+            "note": "Endpoint execution returns an empty HTTP 500.",
+        },
+    }
+
+    validate_fixture(data, path=fixture_path)
+
+
+def test_verify_branch_skips_blocked_branch_without_request() -> None:
+    class UnusedSession:
+        def request(self, *args: Any, **kwargs: Any) -> Any:  # pragma: no cover
+            raise AssertionError("should not request blocked branch")
+
+    result = verify_branch(
+        session=UnusedSession(),  # type: ignore[arg-type]
+        base_url="http://example.test",
+        timeout=1.0,
+        endpoint="/Example",
+        method="POST",
+        branch_id="nominal",
+        branch={
+            "state": "blocked",
+            "blocked": {
+                "reason": "empty_http_500",
+                "observed_status": 500,
+                "observed_content_type": "",
+                "observed_shape": None,
+                "last_seen": "2026-05-15",
+                "note": "",
+            },
+        },
+    )
+
+    assert result["ok"] is True
+    assert result["skipped"] is True
+    assert result["state"] == "blocked"
 
 
 def test_validate_fixture_rejects_invalid_response_shape(tmp_path: Path) -> None:
@@ -679,6 +747,30 @@ def test_validate_fixture_rejects_unknown_branch_keys(tmp_path: Path) -> None:
         raise AssertionError("expected ValueError")
 
 
+def test_normalize_fixture_data_adds_state_and_expands_shared_expect() -> None:
+    shared_expect = {
+        "status": 200,
+        "content_type": "application/json",
+        "response": {"kind": "json_object"},
+    }
+    fixture = valid_fixture_data()
+    del fixture["branches"]["nominal"]["state"]
+    fixture["branches"]["alternate"] = {
+        "request": {"Mode": "A"},
+        "expect": shared_expect,
+    }
+    fixture["branches"]["nominal"]["expect"] = shared_expect
+
+    normalized = normalize_fixture_data(fixture)
+    dumped = dump_fixture(fixture)
+
+    assert normalized["branches"]["nominal"]["state"] == "verified"
+    assert normalized["branches"]["alternate"]["state"] == "verified"
+    assert "&" not in dumped
+    assert "*" not in dumped
+    assert "state: verified" in dumped
+
+
 def test_current_fixture_files_pass_schema_validation() -> None:
     for fixture_path in iter_fixture_paths(Path("openapi/fixtures")):
         load_fixture(fixture_path)
@@ -756,6 +848,68 @@ def test_discover_lists_endpoint_branch_axes(tmp_path: Path) -> None:
             ],
         }
     ]
+
+
+def test_generate_status_reports_verified_blocked_and_uncovered(tmp_path: Path) -> None:
+    spec_path = tmp_path / "openapi.yaml"
+    spec_path.write_text(
+        yaml.safe_dump(
+            {
+                "paths": {
+                    "/Example": {
+                        "post": {
+                            "requestBody": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": {"$ref": "#/components/schemas/ExampleInput"}
+                                    }
+                                }
+                            },
+                            "responses": {"200": {"content": {"application/json": {"schema": {"type": "object"}}}}},
+                        }
+                    },
+                    "/Missing": {"get": {"responses": {"200": {"content": {"application/json": {"schema": {"type": "object"}}}}}}},
+                },
+                "components": {
+                    "schemas": {
+                        "ExampleInput": {
+                            "type": "object",
+                            "properties": {"Mode": {"type": "string", "enum": ["A", "B"]}},
+                        }
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    fixture_dir = tmp_path / "fixtures"
+    fixture_dir.mkdir()
+    fixture = valid_fixture_data()
+    fixture["endpoint"] = "/Example"
+    fixture["branches"]["blocked_case"] = {
+        "state": "blocked",
+        "request": {"Mode": "B"},
+        "blocked": {
+            "reason": "empty_http_500",
+            "observed_status": 500,
+            "observed_content_type": "",
+            "observed_shape": None,
+            "last_seen": "2026-05-15",
+            "note": "",
+        },
+    }
+    (fixture_dir / "example.yaml").write_text(dump_fixture(fixture), encoding="utf-8")
+
+    status = generate_status_text(openapi=spec_path, fixture_dir=fixture_dir)
+
+    assert "Generated by scripts/openapi_fixtures/generate_status.py" in status
+    assert "- verified fixture branches: 1" in status
+    assert "- blocked fixture branches: 1" in status
+    assert "- [x] `/Example` nominal" in status
+    assert "- [ ] `/Missing` nominal" in status
+    assert "- [!] `blocked_case` (blocked)" in status
+    assert "- [ ] `$.Mode` (enum)" in status
+    assert "  - [ ] `A`" in status
 
 
 def test_discover_resolves_refs_items_combinators_and_discriminators(tmp_path: Path) -> None:

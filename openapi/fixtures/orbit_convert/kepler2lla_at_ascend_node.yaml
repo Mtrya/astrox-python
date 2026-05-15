@@ -6,8 +6,9 @@ openapi_request_schema: KeplerElementsWithEpoch
 openapi_response_schema: array
 branches:
   nominal:
+    state: verified
     request:
-      OrbitEpoch: "2024-01-01T00:00:00.000Z"
+      OrbitEpoch: '2024-01-01T00:00:00.000Z'
       SemimajorAxis: 6778137.0
       Eccentricity: 0.001
       Inclination: 51.6

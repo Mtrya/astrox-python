@@ -6,6 +6,7 @@ openapi_request_schema: null
 openapi_response_schema: text/plain
 branches:
   nominal:
+    state: verified
     expect:
       status: 200
       content_type: text/plain

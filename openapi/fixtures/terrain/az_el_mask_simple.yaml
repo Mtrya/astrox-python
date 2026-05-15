@@ -6,6 +6,7 @@ openapi_request_schema: AzimuthElevationMaskInput
 openapi_response_schema: AzimuthElevationMaskSimpleOut
 branches:
   nominal_failure:
+    state: verified
     request:
       sitePosition:
         CentralBody: Earth

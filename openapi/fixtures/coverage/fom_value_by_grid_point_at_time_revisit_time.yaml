@@ -6,10 +6,11 @@ openapi_request_schema: FOMInput_TimeValueByGridPoint
 openapi_response_schema: ReportFOM_ValueByGridPoint
 branches:
   nominal:
+    state: verified
     request:
-      Time: "2024-01-01T00:30:00.000Z"
-      Start: "2024-01-01T00:00:00.000Z"
-      Stop: "2024-01-01T01:00:00.000Z"
+      Time: '2024-01-01T00:30:00.000Z'
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
       Step: 120.0
       Grid:
         $type: LatitudeBounds
@@ -21,13 +22,13 @@ branches:
         - Name: Satellite/CoverageProbeJ2
           Position:
             $type: J2
-            Start: "2024-01-01T00:00:00.000Z"
-            Stop: "2024-01-01T01:00:00.000Z"
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
             Step: 120.0
             CentralBody: Earth
             J2NormalizedValue: 0.000484165143790815
             RefDistance: 6378137.0
-            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
             CoordSystem: Inertial
             CoordType: Classical
             OrbitalElements:

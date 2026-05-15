@@ -6,6 +6,7 @@ openapi_request_schema: array
 openapi_response_schema: KeplerElements
 branches:
   nominal:
+    state: verified
     request:
       - 6778137.0
       - 0.0

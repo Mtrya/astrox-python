@@ -6,8 +6,9 @@ openapi_request_schema: query
 openapi_response_schema: SatelliteDatabaseOutput
 branches:
   nominal:
+    state: verified
     request:
-      sscNumber: "19467"
+      sscNumber: '19467'
     expect:
       status: 200
       content_type: application/json

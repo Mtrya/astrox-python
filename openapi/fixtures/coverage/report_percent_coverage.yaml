@@ -6,9 +6,10 @@ openapi_request_schema: CoverageInput
 openapi_response_schema: ReportPercentCoverage
 branches:
   nominal:
-    request: &percent_coverage_report_request
-      Start: "2024-01-01T00:00:00.000Z"
-      Stop: "2024-01-01T12:00:00.000Z"
+    state: verified
+    request:
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T12:00:00.000Z'
       Step: 600.0
       Grid:
         $type: LatitudeBounds
@@ -23,7 +24,7 @@ branches:
             CentralBody: Earth
             J2NormalizedValue: 0.000484165143790815
             RefDistance: 6378137.0
-            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
             CoordSystem: Inertial
             CoordType: Classical
             OrbitalElements:
@@ -33,7 +34,7 @@ branches:
               - 0.0
               - 0.0
               - 0.0
-    expect: &percent_coverage_report_success_expect
+    expect:
       status: 200
       content_type: application/json
       response:
@@ -68,17 +69,26 @@ branches:
                 PercentAccumulated:
                   kind: json_number
   asset_row_two_body:
+    state: verified
     request:
-      <<: *percent_coverage_report_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T12:00:00.000Z'
+      Step: 600.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -60.0
+        MaxLatitude: 60.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
         - Name: Satellite/CoverageReportMatrixTwoBody
           Position:
             $type: TwoBody
-            Start: "2024-01-01T00:00:00.000Z"
-            Stop: "2024-01-01T12:00:00.000Z"
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T12:00:00.000Z'
             Step: 600.0
             CentralBody: Earth
-            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
             CoordSystem: Inertial
             CoordType: Classical
             OrbitalElements:
@@ -88,4 +98,37 @@ branches:
               - 0.0
               - 0.0
               - 0.0
-    expect: *percent_coverage_report_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Epoch
+          - PercentCoverageDatas
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          Epoch:
+            kind: json_string
+          PercentCoverageDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - EpochSeconds
+                - PercentCovered
+                - PercentAccumulated
+              fields:
+                EpochSeconds:
+                  kind: json_number
+                PercentCovered:
+                  kind: json_number
+                PercentAccumulated:
+                  kind: json_number

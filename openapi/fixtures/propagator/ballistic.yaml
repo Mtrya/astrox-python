@@ -6,8 +6,9 @@ openapi_request_schema: EntityPositionBallistic
 openapi_response_schema: CzmlPositionOut
 branches:
   nominal:
-    request: &ballistic_common_request
-      Start: "2024-01-01T12:00:00.000Z"
+    state: verified
+    request:
+      Start: '2024-01-01T12:00:00.000Z'
       Step: 30.0
       LaunchLatitude: 28.5721
       LaunchLongitude: -80.648
@@ -15,7 +16,7 @@ branches:
       ImpactLatitude: 30.0
       ImpactLongitude: -70.0
       ImpactAltitude: 0.0
-    expect: &czml_position_out_expect
+    expect:
       status: 200
       content_type: application/json
       response:
@@ -58,26 +59,222 @@ branches:
               referenceFrame:
                 kind: json_string
   ballistic_type_delta_v:
+    state: verified
     request:
-      <<: *ballistic_common_request
+      Start: '2024-01-01T12:00:00.000Z'
+      Step: 30.0
+      LaunchLatitude: 28.5721
+      LaunchLongitude: -80.648
+      LaunchAltitude: 10.0
+      ImpactLatitude: 30.0
+      ImpactLongitude: -70.0
+      ImpactAltitude: 0.0
       BallisticType: DeltaV
       BallisticTypeValue: 3000.0
-    expect: *czml_position_out_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Period
+          - Position
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Period:
+            kind: json_number
+          Position:
+            kind: json_object
+            required_fields:
+              - CentralBody
+              - cartesianVelocity
+              - epoch
+              - interpolationAlgorithm
+              - interpolationDegree
+              - referenceFrame
+            fields:
+              CentralBody:
+                kind: json_string
+              cartesianVelocity:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_number
+              epoch:
+                kind: json_string
+              interpolationAlgorithm:
+                kind: json_string
+              interpolationDegree:
+                kind: json_number
+              referenceFrame:
+                kind: json_string
   ballistic_type_delta_v_min_ecc:
+    state: verified
     request:
-      <<: *ballistic_common_request
+      Start: '2024-01-01T12:00:00.000Z'
+      Step: 30.0
+      LaunchLatitude: 28.5721
+      LaunchLongitude: -80.648
+      LaunchAltitude: 10.0
+      ImpactLatitude: 30.0
+      ImpactLongitude: -70.0
+      ImpactAltitude: 0.0
       BallisticType: DeltaV_MinEcc
       BallisticTypeValue: 3000.0
-    expect: *czml_position_out_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Period
+          - Position
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Period:
+            kind: json_number
+          Position:
+            kind: json_object
+            required_fields:
+              - CentralBody
+              - cartesianVelocity
+              - epoch
+              - interpolationAlgorithm
+              - interpolationDegree
+              - referenceFrame
+            fields:
+              CentralBody:
+                kind: json_string
+              cartesianVelocity:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_number
+              epoch:
+                kind: json_string
+              interpolationAlgorithm:
+                kind: json_string
+              interpolationDegree:
+                kind: json_number
+              referenceFrame:
+                kind: json_string
   ballistic_type_apogee_alt:
+    state: verified
     request:
-      <<: *ballistic_common_request
+      Start: '2024-01-01T12:00:00.000Z'
+      Step: 30.0
+      LaunchLatitude: 28.5721
+      LaunchLongitude: -80.648
+      LaunchAltitude: 10.0
+      ImpactLatitude: 30.0
+      ImpactLongitude: -70.0
+      ImpactAltitude: 0.0
       BallisticType: ApogeeAlt
       BallisticTypeValue: 200000.0
-    expect: *czml_position_out_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Period
+          - Position
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Period:
+            kind: json_number
+          Position:
+            kind: json_object
+            required_fields:
+              - CentralBody
+              - cartesianVelocity
+              - epoch
+              - interpolationAlgorithm
+              - interpolationDegree
+              - referenceFrame
+            fields:
+              CentralBody:
+                kind: json_string
+              cartesianVelocity:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_number
+              epoch:
+                kind: json_string
+              interpolationAlgorithm:
+                kind: json_string
+              interpolationDegree:
+                kind: json_number
+              referenceFrame:
+                kind: json_string
   ballistic_type_time_of_flight:
+    state: verified
     request:
-      <<: *ballistic_common_request
+      Start: '2024-01-01T12:00:00.000Z'
+      Step: 30.0
+      LaunchLatitude: 28.5721
+      LaunchLongitude: -80.648
+      LaunchAltitude: 10.0
+      ImpactLatitude: 30.0
+      ImpactLongitude: -70.0
+      ImpactAltitude: 0.0
       BallisticType: TimeOfFlight
       BallisticTypeValue: 600.0
-    expect: *czml_position_out_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - Period
+          - Position
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          Period:
+            kind: json_number
+          Position:
+            kind: json_object
+            required_fields:
+              - CentralBody
+              - cartesianVelocity
+              - epoch
+              - interpolationAlgorithm
+              - interpolationDegree
+              - referenceFrame
+            fields:
+              CentralBody:
+                kind: json_string
+              cartesianVelocity:
+                kind: json_array
+                min_length: 1
+                items:
+                  kind: json_number
+              epoch:
+                kind: json_string
+              interpolationAlgorithm:
+                kind: json_string
+              interpolationDegree:
+                kind: json_number
+              referenceFrame:
+                kind: json_string

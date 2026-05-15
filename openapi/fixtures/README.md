@@ -7,8 +7,8 @@ payloads and response shapes that the live server is expected to accept and
 return. They are not semantic or numerical oracles. Normal `pytest` tests should
 cover exact values, physics checks, and SDK behavior.
 
-Use `STATUS.md` to track which endpoint nominal fixtures and branch-axis
-fixtures have been handled.
+`STATUS.md` is generated from this fixture corpus and the checked-in OpenAPI
+document. Do not edit it by hand.
 
 Add records incrementally, one endpoint file at a time, using this layout:
 
@@ -33,6 +33,7 @@ openapi_request_schema: KeplerElements
 openapi_response_schema: array
 branches:
   nominal:
+    state: verified
     request:
       SemimajorAxis: 6778137.0
       Eccentricity: 0.0
@@ -50,6 +51,34 @@ branches:
         items:
           kind: json_number
 ```
+
+Branches use explicit state:
+
+- `state: verified` records a live-verified wire contract and must include an
+  `expect` block.
+- `state: blocked` records a request branch that is known not to have usable
+  fixture evidence yet and must include a `blocked` block.
+
+Blocked branches are tracked as evidence, but they are not verified coverage:
+
+```yaml
+branches:
+  nominal:
+    state: blocked
+    request:
+      Example: payload
+    blocked:
+      reason: empty_http_500
+      observed_status: 500
+      observed_content_type: ""
+      observed_shape: null
+      last_seen: "2026-05-15"
+      note: "Valid-looking payload reaches endpoint execution but returns an empty HTTP 500."
+```
+
+Fixture files are normalized by `scripts/openapi_fixtures/normalize.py` into
+plain deterministic YAML. Do not rely on YAML anchors or aliases in checked-in
+fixtures.
 
 The scheduled fixture CI should verify only wire-level behavior:
 

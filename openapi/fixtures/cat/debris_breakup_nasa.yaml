@@ -6,13 +6,14 @@ openapi_request_schema: DebrisBreakupNASAIn
 openapi_response_schema: DebrisBreakupOut
 branches:
   nominal:
+    state: verified
     request:
       MotherSate:
         SAT_Name: ENVISAT
-        SAT_Number: "27386"
-        TLE_Line1: "1 27386U 02009A   21120.50000000  .00000100  00000-0  10000-3 0  9999"
-        TLE_Line2: "2 27386  98.5400 180.0000 0001200 120.0000 240.0000 14.37000000950000"
-      Epoch: "2021-04-30T06:30:00.000Z"
+        SAT_Number: '27386'
+        TLE_Line1: 1 27386U 02009A   21120.50000000  .00000100  00000-0  10000-3 0  9999
+        TLE_Line2: 2 27386  98.5400 180.0000 0001200 120.0000 240.0000 14.37000000950000
+      Epoch: '2021-04-30T06:30:00.000Z'
       SSC_Pre: DN
       MassTotal: 100.0
       MinLc: 1.0
@@ -62,11 +63,23 @@ branches:
               min_length: 1
               items:
                 kind: json_number
-          LifeYears: &number_array_shape
+          LifeYears:
             kind: json_array
             min_length: 1
             items:
               kind: json_number
-          AltitudeOfPerigee: *number_array_shape
-          AltitudeOfApogee: *number_array_shape
-          Periods: *number_array_shape
+          AltitudeOfPerigee:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_number
+          AltitudeOfApogee:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_number
+          Periods:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_number

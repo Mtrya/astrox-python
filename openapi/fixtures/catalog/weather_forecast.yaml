@@ -6,6 +6,7 @@ openapi_request_schema: none
 openapi_response_schema: array
 branches:
   nominal:
+    state: verified
     expect:
       status: 200
       content_type: application/json

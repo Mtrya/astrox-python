@@ -6,8 +6,9 @@ openapi_request_schema: SSO_Input
 openapi_response_schema: SSO_Output
 branches:
   nominal:
+    state: verified
     request:
-      OrbitEpoch: "2024-01-01T00:00:00.000Z"
+      OrbitEpoch: '2024-01-01T00:00:00.000Z'
       Altitude: 600.0
       LocalTimeOfDescendingNode: 14.5
     expect:
@@ -25,7 +26,7 @@ branches:
             kind: json_boolean
           Message:
             kind: json_string
-          Elements_TOD: &kepler_elements
+          Elements_TOD:
             kind: json_object
             required_fields:
               - SemimajorAxis
@@ -50,4 +51,28 @@ branches:
                 kind: json_number
               GravitationalParameter:
                 kind: json_number
-          Elements_Inertial: *kepler_elements
+          Elements_Inertial:
+            kind: json_object
+            required_fields:
+              - SemimajorAxis
+              - Eccentricity
+              - Inclination
+              - ArgumentOfPeriapsis
+              - RightAscensionOfAscendingNode
+              - TrueAnomaly
+              - GravitationalParameter
+            fields:
+              SemimajorAxis:
+                kind: json_number
+              Eccentricity:
+                kind: json_number
+              Inclination:
+                kind: json_number
+              ArgumentOfPeriapsis:
+                kind: json_number
+              RightAscensionOfAscendingNode:
+                kind: json_number
+              TrueAnomaly:
+                kind: json_number
+              GravitationalParameter:
+                kind: json_number

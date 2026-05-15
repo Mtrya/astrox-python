@@ -6,6 +6,7 @@ openapi_request_schema: LandingZoneInput
 openapi_response_schema: LandingZoneOuput
 branches:
   nominal:
+    state: verified
     request:
       FaSheDian:
         - 100.0

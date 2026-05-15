@@ -6,9 +6,10 @@ openapi_request_schema: CoverageInput
 openapi_response_schema: CoverageOutput
 branches:
   nominal:
-    request: &compute_coverage_base_request
-      Start: "2024-01-01T00:00:00.000Z"
-      Stop: "2024-01-01T01:00:00.000Z"
+    state: verified
+    request:
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
       Step: 120.0
       Grid:
         $type: LatitudeBounds
@@ -17,17 +18,16 @@ branches:
         Resolution: 30.0
         Height: 0.0
       Assets:
-        - &compute_coverage_j2_asset
-          Name: Satellite/CoverageProbeJ2
+        - Name: Satellite/CoverageProbeJ2
           Position:
             $type: J2
-            Start: "2024-01-01T00:00:00.000Z"
-            Stop: "2024-01-01T01:00:00.000Z"
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
             Step: 120.0
             CentralBody: Earth
             J2NormalizedValue: 0.000484165143790815
             RefDistance: 6378137.0
-            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
             CoordSystem: Inertial
             CoordType: Classical
             OrbitalElements:
@@ -37,7 +37,7 @@ branches:
               - 0.0
               - 0.0
               - 0.0
-    expect: &compute_coverage_success_expect
+    expect:
       status: 200
       content_type: application/json
       response:
@@ -84,7 +84,7 @@ branches:
           AccessDurationDatas:
             kind: json_array
             min_length: 1
-            items: &duration_distribution
+            items:
               kind: json_object
               required_fields:
                 - Duration
@@ -100,23 +100,44 @@ branches:
           GapDurationDatas:
             kind: json_array
             min_length: 1
-            items: *duration_distribution
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
           GlobalCoverageDatas:
             kind: json_array
           AssetAccessResults:
             kind: json_array
   asset_position_two_body:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
+        - Name: Satellite/CoverageProbeJ2
           Position:
             $type: TwoBody
-            Start: "2024-01-01T00:00:00.000Z"
-            Stop: "2024-01-01T01:00:00.000Z"
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
             Step: 120.0
             CentralBody: Earth
-            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
             CoordSystem: Inertial
             CoordType: Classical
             OrbitalElements:
@@ -126,28 +147,203 @@ branches:
               - 0.0
               - 0.0
               - 0.0
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_position_sgp4:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
+        - Name: Satellite/CoverageProbeJ2
           Position:
             $type: SGP4
-            Start: "2024-01-01T00:00:00.000Z"
-            Stop: "2024-01-01T01:00:00.000Z"
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
             Step: 120.0
-            SatelliteNumber: "25544"
+            SatelliteNumber: '25544'
             TLEs:
               - 1 25544U 98067A   23365.54847222  .00016717  00000+0  30473-3 0  9990
               - 2 25544  51.6416  37.6420 0005307  38.9041  74.5146 15.50009939428469
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_position_astrogator_mcs:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
-          Name: Satellite/CoverageMatrixAstrogatorMCS
+        - Name: Satellite/CoverageMatrixAstrogatorMCS
           Position:
             $type: AstrogatorMCS
             ComputeCzmlPositions: true
@@ -155,7 +351,7 @@ branches:
               - $type: InitialState
                 Name: Initial
                 InitialState:
-                  Epoch: "2024-01-01T00:00:00Z"
+                  Epoch: '2024-01-01T00:00:00Z'
                   CoordSystemName: Earth Inertial
                   Element:
                     $type: Cartesian
@@ -179,18 +375,105 @@ branches:
                   $type: TwoBody
                   Name: EarthTwoBody
                   Mu: 398600441800000.0
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_position_hpop:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
-          Name: Satellite/CoverageMatrixHPOP
+        - Name: Satellite/CoverageMatrixHPOP
           Position:
             $type: HPOP
-            Start: "2024-01-01T00:00:00.000Z"
-            Stop: "2024-01-01T00:10:00.000Z"
-            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T00:10:00.000Z'
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
             CoordSystem: Inertial
             CoordType: Classical
             OrbitalElements:
@@ -207,17 +490,104 @@ branches:
                 $type: TwoBody
                 Name: EarthTwoBody
                 Mu: 398600441500000.0
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_position_czml_position:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
-          Name: Satellite/CoverageMatrixCzmlPosition
-          Position: &coverage_czml_position
+        - Name: Satellite/CoverageMatrixCzmlPosition
+          Position:
             $type: CzmlPosition
             CentralBody: Earth
-            epoch: "2024-01-01T00:00:00Z"
+            epoch: '2024-01-01T00:00:00Z'
             referenceFrame: INERTIAL
             interpolationAlgorithm: LAGRANGE
             interpolationDegree: 2
@@ -243,25 +613,226 @@ branches:
               - -1535.0523581742757
               - 7572.651025008587
               - 0.0
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_position_czml_positions:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
-          Name: Satellite/CoverageMatrixCzmlPositions
+        - Name: Satellite/CoverageMatrixCzmlPositions
           Position:
             $type: CzmlPositions
             CentralBody: Earth
             CzmlPositions:
-              - *coverage_czml_position
-    expect: *compute_coverage_success_expect
+              - $type: CzmlPosition
+                CentralBody: Earth
+                epoch: '2024-01-01T00:00:00Z'
+                referenceFrame: INERTIAL
+                interpolationAlgorithm: LAGRANGE
+                interpolationDegree: 2
+                cartesianVelocity:
+                  - 0.0
+                  - 6678137.0
+                  - 0.0
+                  - 0.0
+                  - 0.0
+                  - 7726.67
+                  - 0.0
+                  - 60.0
+                  - 6644774.1312973
+                  - 666701.233545599
+                  - 0.0
+                  - -771.3798654025477
+                  - 7688.068833728764
+                  - 0.0
+                  - 120.0
+                  - 6545018.875944976
+                  - 1326741.0087477376
+                  - 0.0
+                  - -1535.0523581742757
+                  - 7572.651025008587
+                  - 0.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_position_site_failure_shape:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
-          Name: Facility/CoverageMatrixSite
+        - Name: Facility/CoverageMatrixSite
           Position:
             $type: SitePosition
             CentralBody: Earth
@@ -269,7 +840,7 @@ branches:
               - 120.0
               - 31.0
               - 10.0
-    expect: &compute_coverage_rejection_expect
+    expect:
       status: 200
       content_type: application/json
       response:
@@ -290,15 +861,23 @@ branches:
           GlobalCoverageDatas:
             kind: json_array
   asset_position_simple_ascent_failure_shape:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
-          Name: Satellite/CoverageMatrixSimpleAscent
+        - Name: Satellite/CoverageMatrixSimpleAscent
           Position:
             $type: SimpleAscent
-            Start: "2024-01-01T03:00:00.000Z"
-            Stop: "2024-01-01T03:02:00.000Z"
+            Start: '2024-01-01T03:00:00.000Z'
+            Stop: '2024-01-01T03:02:00.000Z'
             Step: 30.0
             CentralBody: Earth
             LaunchLatitude: 40.9575
@@ -308,16 +887,43 @@ branches:
             BurnoutLatitude: 41.3
             BurnoutLongitude: 101.0
             BurnoutAltitude: 200000.0
-    expect: *compute_coverage_rejection_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - PercentCovered
+          - GlobalCoverageDatas
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
+          PercentCovered:
+            kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
   asset_position_ballistic_failure_shape:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
-          Name: Satellite/CoverageMatrixBallistic
+        - Name: Satellite/CoverageMatrixBallistic
           Position:
             $type: Ballistic
-            Start: "2024-01-01T12:00:00.000Z"
+            Start: '2024-01-01T12:00:00.000Z'
             Step: 30.0
             LaunchLatitude: 28.5721
             LaunchLongitude: -80.648
@@ -327,72 +933,672 @@ branches:
             ImpactAltitude: 0.0
             BallisticType: TimeOfFlight
             BallisticTypeValue: 600.0
-    expect: *compute_coverage_rejection_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - PercentCovered
+          - GlobalCoverageDatas
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
+          PercentCovered:
+            kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
   asset_position_central_body_failure_shape:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
-          Name: CentralBody/EarthCoverageMatrix
+        - Name: CentralBody/EarthCoverageMatrix
           Position:
             $type: CentralBody
             Name: Earth
-    expect: *compute_coverage_rejection_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - PercentCovered
+          - GlobalCoverageDatas
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
+          PercentCovered:
+            kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
   asset_orientation_vvlh:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Orientation:
             $type: VVLH
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_orientation_lvlh:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Orientation:
             $type: LVLH
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_orientation_vnc:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Orientation:
             $type: VNC
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_orientation_fixed_at_epoch:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
-          Name: Satellite/CoverageMatrixFixedAtEpoch
+        - Name: Satellite/CoverageMatrixFixedAtEpoch
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Orientation:
             $type: FixedAtEpoch
             SourceAxesName: VNC(Earth)
             ReferenceAxesName: Earth Inertial
-            Epoch: "2024-01-01T00:00:00Z"
-    expect: *compute_coverage_success_expect
+            Epoch: '2024-01-01T00:00:00Z'
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_orientation_composite:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
-          Name: Satellite/CoverageMatrixComposite
+        - Name: Satellite/CoverageMatrixComposite
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Orientation:
             $type: Composite
             Intervals:
               - $type: VNC
-                Start: "2024-01-01T00:00:00Z"
-                Stop: "2024-01-01T00:10:00Z"
-    expect: *compute_coverage_success_expect
+                Start: '2024-01-01T00:00:00Z'
+                Stop: '2024-01-01T00:10:00Z'
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_orientation_fixed:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
-          Name: Satellite/CoverageMatrixFixed
+        - Name: Satellite/CoverageMatrixFixed
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Orientation:
             $type: Fixed
             ReferenceAxesName: Earth Inertial
@@ -402,61 +1608,529 @@ branches:
               QX: 0.0
               QY: 0.0
               QZ: 0.0
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_orientation_czml_orientation:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
-          Name: Satellite/CoverageMatrixCzmlOrientation
+        - Name: Satellite/CoverageMatrixCzmlOrientation
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Orientation:
             $type: CzmlOrientation
             CentralBody: Earth
-            epoch: "2024-01-01T00:00:00Z"
+            epoch: '2024-01-01T00:00:00Z'
             unitQuaternion:
               - 0.0
               - 0.0
               - 0.0
               - 0.0
               - 1.0
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_orientation_aligned_and_constrained_failure_shape:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
-          Name: Satellite/CoverageMatrixAlignedAndConstrained
+        - Name: Satellite/CoverageMatrixAlignedAndConstrained
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Orientation:
             $type: AlignedAndConstrained
             Principal: Earth Center
             PrincipalAxis: +Z
             Reference: Velocity
             ReferenceAxis: +X
-    expect: *compute_coverage_rejection_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - PercentCovered
+          - GlobalCoverageDatas
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
+          PercentCovered:
+            kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
   asset_sensor_conic:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Sensor:
             $type: Conic
             outerHalfAngle: 45.0
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_sensor_rectangular:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Sensor:
             $type: Rectangular
             xHalfAngle: 35.0
             yHalfAngle: 25.0
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_sensor_pointing_fixed:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Sensor:
             $type: Conic
             outerHalfAngle: 45.0
@@ -466,34 +2140,352 @@ branches:
               $type: AzEl
               Azimuth: 0.0
               Elevation: 90.0
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_constraints_range:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Constraints:
             - $type: Range
               MinimumValue: 0.0
               MaximumValue: 3000000.0
               IsMaximumEnabled: true
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_constraints_elevation_angle:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Constraints:
             - $type: ElevationAngle
               MinimumValue: -90.0
               MaximumValue: 90.0
               IsMaximumEnabled: true
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_constraints_az_el_mask:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Constraints:
             - $type: AzElMask
               MaxRange: 3000.0
@@ -529,38 +2521,465 @@ branches:
           GlobalCoverageDatas:
             kind: json_array
   asset_lighting_direct_sun:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Lighting: DirectSun
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_lighting_penumbra:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Lighting: Penumbra
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_lighting_umbra:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           Lighting: Umbra
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   asset_occultation_bodies_explicit:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
       Assets:
-        - <<: *compute_coverage_j2_asset
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
           OccultationBodies:
             - Earth
             - Moon
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   grid_cb_lat_lon_bounds:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
       Grid:
         $type: CbLatLonBounds
         CentralBodyName: Earth
@@ -570,19 +2989,223 @@ branches:
         MaxLongitude: 180.0
         Resolution: 30.0
         Height: 0.0
-    expect: *compute_coverage_success_expect
+      Assets:
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   grid_global:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
       Grid:
         $type: Global
         CentralBodyName: Earth
         Resolution: 60.0
         Height: 0.0
-    expect: *compute_coverage_success_expect
+      Assets:
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   grid_lat_lon_bounds:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
       Grid:
         $type: LatLonBounds
         CentralBodyName: Earth
@@ -592,28 +3215,372 @@ branches:
         MaxLongitude: 180.0
         Resolution: 30.0
         Height: 0.0
-    expect: *compute_coverage_success_expect
+      Assets:
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   grid_point_sensor_conic:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
+      Assets:
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
       GridPointSensor:
         $type: Conic
         innerHalfAngle: 0.0
         outerHalfAngle: 45.0
         minimumClockAngle: 0.0
         maximumClockAngle: 360.0
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   grid_point_sensor_rectangular:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
+      Assets:
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
       GridPointSensor:
         $type: Rectangular
         xHalfAngle: 45.0
         yHalfAngle: 45.0
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   grid_point_constraints_az_el_mask:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
+      Assets:
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
       GridPointConstraints:
         - $type: AzElMask
           MaxRange: 20000.0
@@ -649,25 +3616,270 @@ branches:
           GlobalCoverageDatas:
             kind: json_array
   grid_point_constraints_range:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
+      Assets:
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
       GridPointConstraints:
         - $type: Range
           MinimumValue: 0.0
           MaximumValue: 20000.0
           IsMaximumEnabled: true
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   grid_point_constraints_elevation_angle:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
+      Assets:
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
       GridPointConstraints:
         - $type: ElevationAngle
           MinimumValue: 0.0
           IsMaximumEnabled: false
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   contain_asset_access_results_true:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
+      Assets:
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
       ContainAssetAccessResults: true
     expect:
       status: 200
@@ -693,8 +3905,37 @@ branches:
               items:
                 kind: json_array
   contain_coverage_points_true:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
+      Assets:
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
       ContainCoveragePoints: true
     expect:
       status: 200
@@ -751,14 +3992,230 @@ branches:
               Type:
                 kind: json_string
   filter_type_at_least_n:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
+      Assets:
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
       FilterType: AtLeastN
       NumberOfAssets: 1
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array
   filter_type_exactly_n:
+    state: verified
     request:
-      <<: *compute_coverage_base_request
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-01T01:00:00.000Z'
+      Step: 120.0
+      Grid:
+        $type: LatitudeBounds
+        MinLatitude: -30.0
+        MaxLatitude: 30.0
+        Resolution: 30.0
+        Height: 0.0
+      Assets:
+        - Name: Satellite/CoverageProbeJ2
+          Position:
+            $type: J2
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T01:00:00.000Z'
+            Step: 120.0
+            CentralBody: Earth
+            J2NormalizedValue: 0.000484165143790815
+            RefDistance: 6378137.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            CoordSystem: Inertial
+            CoordType: Classical
+            OrbitalElements:
+              - 6978137.0
+              - 0.001
+              - 55.0
+              - 0.0
+              - 0.0
+              - 0.0
       FilterType: ExactlyN
       NumberOfAssets: 1
-    expect: *compute_coverage_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - SatisfactionIntervalsWithNumberOfAssets
+          - PercentCovered
+          - AccessDurationDatas
+          - GapDurationDatas
+          - GlobalCoverageDatas
+          - AssetAccessResults
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          SatisfactionIntervalsWithNumberOfAssets:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_object
+                required_fields:
+                  - NumberOfAssets
+                  - Start
+                  - Stop
+                  - Duration
+                fields:
+                  NumberOfAssets:
+                    kind: json_number
+                  Start:
+                    kind: json_string
+                  Stop:
+                    kind: json_string
+                  Duration:
+                    kind: json_number
+          PercentCovered:
+            kind: json_number
+          AccessDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GapDurationDatas:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Duration
+                - PercentOver
+                - PercentUnder
+              fields:
+                Duration:
+                  kind: json_number
+                PercentOver:
+                  kind: json_number
+                PercentUnder:
+                  kind: json_number
+          GlobalCoverageDatas:
+            kind: json_array
+          AssetAccessResults:
+            kind: json_array

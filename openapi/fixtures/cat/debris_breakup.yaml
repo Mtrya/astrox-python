@@ -6,22 +6,25 @@ openapi_request_schema: DebrisBreakupIn
 openapi_response_schema: DebrisBreakupOut
 branches:
   nominal:
-    request: &debris_breakup_request
-      MotherSate: &envisat_tle
+    state: verified
+    request:
+      MotherSate:
         SAT_Name: ENVISAT
-        SAT_Number: "27386"
-        TLE_Line1: "1 27386U 02009A   21120.50000000  .00000100  00000-0  10000-3 0  9999"
-        TLE_Line2: "2 27386  98.5400 180.0000 0001200 120.0000 240.0000 14.37000000950000"
-      Epoch: "2021-04-30T06:30:00.000Z"
+        SAT_Number: '27386'
+        TLE_Line1: 1 27386U 02009A   21120.50000000  .00000100  00000-0  10000-3 0  9999
+        TLE_Line2: 2 27386  98.5400 180.0000 0001200 120.0000 240.0000 14.37000000950000
+      Epoch: '2021-04-30T06:30:00.000Z'
       SSC_Pre: D2
       A2M: 0.03
       AzElVel:
-        - [0.0, 10.0, 150.0]
+        - - 0.0
+          - 10.0
+          - 150.0
       ComputeLifeOfTime: false
-    expect: &debris_breakup_expect
+    expect:
       status: 200
       content_type: application/json
-      response: &debris_breakup_response
+      response:
         kind: json_object
         required_fields:
           - IsSuccess
@@ -37,7 +40,7 @@ branches:
             kind: json_boolean
           Message:
             kind: json_string
-          DebrisTLEs: &debris_tles_shape
+          DebrisTLEs:
             kind: json_array
             min_length: 1
             items:
@@ -56,7 +59,7 @@ branches:
                   kind: json_string
                 TLE_Line2:
                   kind: json_string
-          AzElVel: &az_el_vel_shape
+          AzElVel:
             kind: json_array
             min_length: 1
             items:
@@ -64,17 +67,105 @@ branches:
               min_length: 1
               items:
                 kind: json_number
-          LifeYears: &number_array_shape
+          LifeYears:
             kind: json_array
             min_length: 1
             items:
               kind: json_number
-          AltitudeOfPerigee: *number_array_shape
-          AltitudeOfApogee: *number_array_shape
-          Periods: *number_array_shape
+          AltitudeOfPerigee:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_number
+          AltitudeOfApogee:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_number
+          Periods:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_number
   compute_life_of_time_true:
+    state: verified
     request:
-      <<: *debris_breakup_request
+      MotherSate:
+        SAT_Name: ENVISAT
+        SAT_Number: '27386'
+        TLE_Line1: 1 27386U 02009A   21120.50000000  .00000100  00000-0  10000-3 0  9999
+        TLE_Line2: 2 27386  98.5400 180.0000 0001200 120.0000 240.0000 14.37000000950000
+      Epoch: '2021-04-30T06:30:00.000Z'
       SSC_Pre: D3
+      A2M: 0.03
+      AzElVel:
+        - - 0.0
+          - 10.0
+          - 150.0
       ComputeLifeOfTime: true
-    expect: *debris_breakup_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - DebrisTLEs
+          - AzElVel
+          - LifeYears
+          - AltitudeOfPerigee
+          - AltitudeOfApogee
+          - Periods
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          DebrisTLEs:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - SAT_Name
+                - SAT_Number
+                - TLE_Line1
+                - TLE_Line2
+              fields:
+                SAT_Name:
+                  kind: json_string
+                SAT_Number:
+                  kind: json_string
+                TLE_Line1:
+                  kind: json_string
+                TLE_Line2:
+                  kind: json_string
+          AzElVel:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_number
+          LifeYears:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_number
+          AltitudeOfPerigee:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_number
+          AltitudeOfApogee:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_number
+          Periods:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_number

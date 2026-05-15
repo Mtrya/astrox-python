@@ -6,28 +6,26 @@ openapi_request_schema: ChainInput
 openapi_response_schema: ChainOutput
 branches:
   nominal:
+    state: verified
     request:
-      <<: &chain_2024_window
-        Start: "2024-01-01T00:00:00.000Z"
-        Stop: "2024-01-02T00:00:00.000Z"
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - &site_entity_path
-          $type: EntityPath
+        - $type: EntityPath
           Name: Facility/Phase3Site
-          Position: &site_position
+          Position:
             $type: SitePosition
             CentralBody: Earth
             cartographicDegrees:
               - 120.0
               - 31.0
               - 10.0
-        - &j2_entity_path
-          $type: EntityPath
+        - $type: EntityPath
           Name: Satellite/Phase3To
-          Position: &j2_position
+          Position:
             $type: J2
             Step: 120.0
-            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
             OrbitalElements:
               - 6778137.0
               - 0.001
@@ -37,7 +35,7 @@ branches:
               - 0.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: &chain_success_expect
+    expect:
       status: 200
       content_type: application/json
       response:
@@ -65,7 +63,7 @@ branches:
           CompleteChainAccess:
             kind: json_array
             min_length: 1
-            items: &time_interval
+            items:
               kind: json_object
               required_fields:
                 - Start
@@ -83,18 +81,38 @@ branches:
           IndividualObjectAccess:
             kind: json_object
   entity_path_group_failure_shape:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
         - $type: EntityPathGroup
           Name: Group/Targets
           AssignedObjects:
             - Name: Satellite/Phase3To
-              Position: *j2_position
+              Position:
+                $type: J2
+                Step: 120.0
+                OrbitEpoch: '2024-01-01T00:00:00.000Z'
+                OrbitalElements:
+                  - 6778137.0
+                  - 0.001
+                  - 51.6
+                  - 0.0
+                  - 0.0
+                  - 0.0
       StartObject: Facility/Phase3Site
       EndObject: Group/Targets
-    expect: &chain_failure_expect
+    expect:
       status: 200
       content_type: application/json
       response:
@@ -109,26 +127,102 @@ branches:
           Message:
             kind: json_string
   use_light_time_delay_true:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       UseLightTimeDelay: true
       AllObjects:
-        - *site_entity_path
-        - *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_position_twobody:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
           Name: Satellite/Phase3TwoBody
-          Position: &two_body_position
+          Position:
             $type: TwoBody
             Step: 120.0
-            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
             OrbitalElements:
               - 6778137.0
               - 0.001
@@ -138,16 +232,69 @@ branches:
               - 0.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3TwoBody
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_position_sgp4:
+    state: verified
     request:
-      Start: "2021-05-01T00:00:00.000Z"
-      Stop: "2021-05-02T00:00:00.000Z"
+      Start: '2021-05-01T00:00:00.000Z'
+      Stop: '2021-05-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
           Name: Satellite/Phase3Sgp4
-          Position: &sgp4_position
+          Position:
             $type: SGP4
             Step: 120.0
             TLEs:
@@ -155,22 +302,76 @@ branches:
               - 2 25544  51.6443 206.1695 0002829  89.9572  27.6891 15.48915315281553
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3Sgp4
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_position_astrogator_mcs:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
           Name: Satellite/Phase10ChainAstrogatorMCS
-          Position: &astrogator_mcs_position
+          Position:
             $type: AstrogatorMCS
             ComputeCzmlPositions: true
             MainSequence:
               - $type: InitialState
                 Name: Initial
                 InitialState:
-                  Epoch: "2024-01-01T00:00:00Z"
+                  Epoch: '2024-01-01T00:00:00Z'
                   CoordSystemName: Earth Inertial
                   Element:
                     $type: Cartesian
@@ -196,7 +397,7 @@ branches:
                   Mu: 398600441800000.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase10ChainAstrogatorMCS
-    expect: &chain_success_allow_empty_access_expect
+    expect:
       status: 200
       content_type: application/json
       response:
@@ -229,17 +430,27 @@ branches:
           IndividualObjectAccess:
             kind: json_object
   allobjects_position_hpop:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
           Name: Satellite/Phase10ChainHPOP
-          Position: &hpop_position
+          Position:
             $type: HPOP
-            Start: "2024-01-01T00:00:00.000Z"
-            Stop: "2024-01-01T00:10:00.000Z"
-            OrbitEpoch: "2024-01-01T00:00:00.000Z"
+            Start: '2024-01-01T00:00:00.000Z'
+            Stop: '2024-01-01T00:10:00.000Z'
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
             CoordSystem: Inertial
             CoordType: Classical
             OrbitalElements:
@@ -258,18 +469,59 @@ branches:
                 Mu: 398600441500000.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase10ChainHPOP
-    expect: *chain_success_allow_empty_access_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_position_simple_ascent:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
           Name: Satellite/Phase10ChainSimpleAscent
-          Position: &simple_ascent_position
+          Position:
             $type: SimpleAscent
-            Start: "2024-01-01T03:00:00.000Z"
-            Stop: "2024-01-01T03:02:00.000Z"
+            Start: '2024-01-01T03:00:00.000Z'
+            Stop: '2024-01-01T03:02:00.000Z'
             Step: 30.0
             CentralBody: Earth
             LaunchLatitude: 40.9575
@@ -281,17 +533,58 @@ branches:
             BurnoutAltitude: 200000.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase10ChainSimpleAscent
-    expect: *chain_success_allow_empty_access_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_position_ballistic:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
           Name: Satellite/Phase10ChainBallistic
-          Position: &ballistic_position
+          Position:
             $type: Ballistic
-            Start: "2024-01-01T12:00:00.000Z"
+            Start: '2024-01-01T12:00:00.000Z'
             Step: 30.0
             LaunchLatitude: 28.5721
             LaunchLongitude: -80.648
@@ -303,31 +596,113 @@ branches:
             BallisticTypeValue: 600.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase10ChainBallistic
-    expect: *chain_success_allow_empty_access_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_position_central_body:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
           Name: CentralBody/Earth
-          Position: &central_body_position
+          Position:
             $type: CentralBody
             Name: Earth
       StartObject: Facility/Phase3Site
       EndObject: CentralBody/Earth
-    expect: *chain_success_allow_empty_access_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_position_czml_position:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
           Name: Satellite/Phase10ChainCzmlPosition
-          Position: &czml_position
+          Position:
             $type: CzmlPosition
             CentralBody: Earth
-            epoch: "2024-01-01T00:00:00Z"
+            epoch: '2024-01-01T00:00:00Z'
             referenceFrame: INERTIAL
             interpolationAlgorithm: LAGRANGE
             interpolationDegree: 2
@@ -355,93 +730,541 @@ branches:
               - 0.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase10ChainCzmlPosition
-    expect: *chain_success_allow_empty_access_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_position_czml_positions:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
           Name: Satellite/Phase10ChainCzmlPositions
           Position:
             $type: CzmlPositions
             CentralBody: Earth
             CzmlPositions:
-              - *czml_position
+              - $type: CzmlPosition
+                CentralBody: Earth
+                epoch: '2024-01-01T00:00:00Z'
+                referenceFrame: INERTIAL
+                interpolationAlgorithm: LAGRANGE
+                interpolationDegree: 2
+                cartesianVelocity:
+                  - 0.0
+                  - 6678137.0
+                  - 0.0
+                  - 0.0
+                  - 0.0
+                  - 7726.67
+                  - 0.0
+                  - 60.0
+                  - 6644774.1312973
+                  - 666701.233545599
+                  - 0.0
+                  - -771.3798654025477
+                  - 7688.068833728764
+                  - 0.0
+                  - 120.0
+                  - 6545018.875944976
+                  - 1326741.0087477376
+                  - 0.0
+                  - -1535.0523581742757
+                  - 7572.651025008587
+                  - 0.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase10ChainCzmlPositions
-    expect: *chain_success_allow_empty_access_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: true
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_orientation_vvlh:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
-          Orientation: &orientation_vvlh
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
+          Orientation:
             $type: VVLH
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_orientation_lvlh:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
-          Orientation: &orientation_lvlh
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
+          Orientation:
             $type: LVLH
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_orientation_vnc:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
-          Orientation: &orientation_vnc
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
+          Orientation:
             $type: VNC
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_orientation_fixed_at_epoch:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
           Name: Satellite/Phase10ChainFixedAtEpoch
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
           Orientation:
             $type: FixedAtEpoch
             SourceAxesName: VNC(Earth)
             ReferenceAxesName: Earth Inertial
-            Epoch: "2024-01-01T00:00:00Z"
+            Epoch: '2024-01-01T00:00:00Z'
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase10ChainFixedAtEpoch
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_orientation_composite:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
           Name: Satellite/Phase10ChainComposite
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
           Orientation:
             $type: Composite
             Intervals:
               - $type: VNC
-                Start: "2024-01-01T00:00:00Z"
-                Stop: "2024-01-01T00:10:00Z"
+                Start: '2024-01-01T00:00:00Z'
+                Stop: '2024-01-01T00:10:00Z'
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase10ChainComposite
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_orientation_fixed:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
           Name: Satellite/Phase10ChainFixed
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
           Orientation:
             $type: Fixed
             ReferenceAxesName: Earth Inertial
@@ -453,14 +1276,79 @@ branches:
               QZ: 0.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase10ChainFixed
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_orientation_aligned_and_constrained:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
           Name: Satellite/Phase10ChainAlignedAndConstrained
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
           Orientation:
             $type: AlignedAndConstrained
             Principal: Earth Center
@@ -469,18 +1357,52 @@ branches:
             ReferenceAxis: +X
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase10ChainAlignedAndConstrained
-    expect: *chain_failure_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   allobjects_orientation_czml:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
           Name: Satellite/Phase10ChainCzmlOrientation
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
           Orientation:
             $type: CzmlOrientation
             CentralBody: Earth
-            epoch: "2024-01-01T00:00:00Z"
+            epoch: '2024-01-01T00:00:00Z'
             unitQuaternion:
               - 0.0
               - 0.0
@@ -489,39 +1411,239 @@ branches:
               - 1.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase10ChainCzmlOrientation
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_sensor_conic:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
-          Sensor: &sensor_conic
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
+          Sensor:
             $type: Conic
             outerHalfAngle: 45.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_sensor_rectangular:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
-          Sensor: &sensor_rectangular
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
+          Sensor:
             $type: Rectangular
             xHalfAngle: 35.0
             yHalfAngle: 25.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_sensor_pointing_fixed:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
-          Sensor: *sensor_conic
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
+          Sensor:
+            $type: Conic
+            outerHalfAngle: 45.0
           SensorPointing:
             $type: Fixed
             Orientation:
@@ -530,44 +1652,227 @@ branches:
               Elevation: 90.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_constraints_range:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - <<: *site_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
           Constraints:
-            - &constraint_range
-              $type: Range
+            - $type: Range
               MinimumValue: 0.0
               MaximumValue: 50000.0
               IsMaximumEnabled: true
-        - *j2_entity_path
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_constraints_elevation_angle:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - <<: *site_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
           Constraints:
-            - &constraint_elevation_angle
-              $type: ElevationAngle
+            - $type: ElevationAngle
               MinimumValue: 0.0
               IsMaximumEnabled: false
-        - *j2_entity_path
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_constraints_az_el_mask:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - <<: *site_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
           Constraints:
-            - &constraint_az_el_mask
-              $type: AzElMask
+            - $type: AzElMask
               MaxRange: 50000.0
               AzElMaskData:
                 - 0.0
@@ -580,131 +1885,684 @@ branches:
                 - 0.0
                 - 6.283185307179586
                 - 0.0
-        - *j2_entity_path
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_lighting_direct_sun:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
           Lighting: DirectSun
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_lighting_penumbra:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
           Lighting: Penumbra
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_lighting_umbra:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
           Lighting: Umbra
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   allobjects_occultation_bodies_explicit:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
-        - <<: *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
           OccultationBodies:
             - Earth
             - Moon
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   connections_null:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       Connections: null
       AllObjects:
-        - *site_entity_path
-        - *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_success_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+          - ComputedStrands
+          - CompleteChainAccess
+          - IndividualStrandAccess
+          - IndividualObjectAccess
+        fields:
+          IsSuccess:
+            kind: json_boolean
+          Message:
+            kind: json_string
+          ComputedStrands:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_array
+              min_length: 1
+              items:
+                kind: json_string
+          CompleteChainAccess:
+            kind: json_array
+            min_length: 1
+            items:
+              kind: json_object
+              required_fields:
+                - Start
+                - Stop
+                - Duration
+              fields:
+                Start:
+                  kind: json_string
+                Stop:
+                  kind: json_string
+                Duration:
+                  kind: json_number
+          IndividualStrandAccess:
+            kind: json_object
+          IndividualObjectAccess:
+            kind: json_object
   connections_explicit_failure_shape:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       Connections:
         - FromObject: Facility/Phase3Site
           ToObject: Satellite/Phase3To
           MinUses: 0
           MaxUses: 1
       AllObjects:
-        - *site_entity_path
-        - *j2_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
+        - $type: EntityPath
+          Name: Satellite/Phase3To
+          Position:
+            $type: J2
+            Step: 120.0
+            OrbitEpoch: '2024-01-01T00:00:00.000Z'
+            OrbitalElements:
+              - 6778137.0
+              - 0.001
+              - 51.6
+              - 0.0
+              - 0.0
+              - 0.0
       StartObject: Facility/Phase3Site
       EndObject: Satellite/Phase3To
-    expect: *chain_failure_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   entity_path_group_from_restriction_any_of:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
         - $type: EntityPathGroup
           Name: Group/Targets
           AssignedObjects:
             - Name: Satellite/Phase3To
-              Position: *j2_position
+              Position:
+                $type: J2
+                Step: 120.0
+                OrbitEpoch: '2024-01-01T00:00:00.000Z'
+                OrbitalElements:
+                  - 6778137.0
+                  - 0.001
+                  - 51.6
+                  - 0.0
+                  - 0.0
+                  - 0.0
           FromAccess_Restriction: AnyOf
       StartObject: Facility/Phase3Site
       EndObject: Group/Targets
-    expect: *chain_failure_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   entity_path_group_from_restriction_at_least_n:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
         - $type: EntityPathGroup
           Name: Group/Targets
           AssignedObjects:
             - Name: Satellite/Phase3To
-              Position: *j2_position
+              Position:
+                $type: J2
+                Step: 120.0
+                OrbitEpoch: '2024-01-01T00:00:00.000Z'
+                OrbitalElements:
+                  - 6778137.0
+                  - 0.001
+                  - 51.6
+                  - 0.0
+                  - 0.0
+                  - 0.0
           FromAccess_Restriction: AtLeastN
           FromAccess_Number: 1
       StartObject: Facility/Phase3Site
       EndObject: Group/Targets
-    expect: *chain_failure_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   entity_path_group_to_restriction_any_of:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
         - $type: EntityPathGroup
           Name: Group/Targets
           AssignedObjects:
             - Name: Satellite/Phase3To
-              Position: *j2_position
+              Position:
+                $type: J2
+                Step: 120.0
+                OrbitEpoch: '2024-01-01T00:00:00.000Z'
+                OrbitalElements:
+                  - 6778137.0
+                  - 0.001
+                  - 51.6
+                  - 0.0
+                  - 0.0
+                  - 0.0
           ToAccess_Restriction: AnyOf
       StartObject: Facility/Phase3Site
       EndObject: Group/Targets
-    expect: *chain_failure_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string
   entity_path_group_to_restriction_at_least_n:
+    state: verified
     request:
-      <<: *chain_2024_window
+      Start: '2024-01-01T00:00:00.000Z'
+      Stop: '2024-01-02T00:00:00.000Z'
       AllObjects:
-        - *site_entity_path
+        - $type: EntityPath
+          Name: Facility/Phase3Site
+          Position:
+            $type: SitePosition
+            CentralBody: Earth
+            cartographicDegrees:
+              - 120.0
+              - 31.0
+              - 10.0
         - $type: EntityPathGroup
           Name: Group/Targets
           AssignedObjects:
             - Name: Satellite/Phase3To
-              Position: *j2_position
+              Position:
+                $type: J2
+                Step: 120.0
+                OrbitEpoch: '2024-01-01T00:00:00.000Z'
+                OrbitalElements:
+                  - 6778137.0
+                  - 0.001
+                  - 51.6
+                  - 0.0
+                  - 0.0
+                  - 0.0
           ToAccess_Restriction: AtLeastN
           ToAccess_Number: 1
       StartObject: Facility/Phase3Site
       EndObject: Group/Targets
-    expect: *chain_failure_expect
+    expect:
+      status: 200
+      content_type: application/json
+      response:
+        kind: json_object
+        required_fields:
+          - IsSuccess
+          - Message
+        fields:
+          IsSuccess:
+            kind: json_boolean
+            const: false
+          Message:
+            kind: json_string

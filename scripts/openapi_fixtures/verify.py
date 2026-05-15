@@ -31,7 +31,10 @@ SUPPORTED_RESPONSE_KINDS = {
     "json_object",
     "text",
 }
-BRANCH_KEYS = {"request", "expect"}
+SUPPORTED_BRANCH_STATES = {"verified", "blocked"}
+BRANCH_KEYS = {"state", "request", "expect", "blocked"}
+VERIFIED_BRANCH_KEYS = {"state", "request", "expect"}
+BLOCKED_BRANCH_KEYS = {"state", "request", "blocked"}
 MISSING = object()
 
 
@@ -82,6 +85,22 @@ def _require_int(value: Any, *, path: Path, field_path: str) -> int:
     if type(value) is not int:
         raise _validation_error(path, field_path, "must be an integer")
     return value
+
+
+def _require_json_value(value: Any, *, path: Path, field_path: str) -> None:
+    if value is None or isinstance(value, str | int | float | bool):
+        return
+    if isinstance(value, list):
+        for index, item in enumerate(value):
+            _require_json_value(item, path=path, field_path=f"{field_path}[{index}]")
+        return
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if not isinstance(key, str):
+                raise _validation_error(path, field_path, "must contain only string object keys")
+            _require_json_value(item, path=path, field_path=f"{field_path}.{key}")
+        return
+    raise _validation_error(path, field_path, "must be JSON-compatible")
 
 
 def validate_fixture(fixture: dict[str, Any], *, path: Path) -> None:
@@ -138,7 +157,20 @@ def validate_fixture(fixture: dict[str, Any], *, path: Path) -> None:
 
 def _validate_branch(value: Any, *, method: str, path: Path, field_path: str) -> None:
     branch = _require_object(value, path=path, field_path=field_path)
-    unknown_keys = sorted(set(branch) - BRANCH_KEYS)
+    state = _require_non_empty_string(
+        _required_value(branch, "state", path=path, field_path=f"{field_path}.state"),
+        path=path,
+        field_path=f"{field_path}.state",
+    )
+    if state not in SUPPORTED_BRANCH_STATES:
+        raise _validation_error(
+            path,
+            f"{field_path}.state",
+            f"must be one of {sorted(SUPPORTED_BRANCH_STATES)}",
+        )
+
+    expected_keys = VERIFIED_BRANCH_KEYS if state == "verified" else BLOCKED_BRANCH_KEYS
+    unknown_keys = sorted(set(branch) - expected_keys)
     if unknown_keys:
         raise _validation_error(path, field_path, f"contains unknown keys {unknown_keys}")
     if "request" in branch:
@@ -148,12 +180,70 @@ def _validate_branch(value: Any, *, method: str, path: Path, field_path: str) ->
             path=path,
             field_path=f"{field_path}.request",
         )
+    if state == "blocked":
+        blocked = _require_object(
+            _required_value(branch, "blocked", path=path, field_path=f"{field_path}.blocked"),
+            path=path,
+            field_path=f"{field_path}.blocked",
+        )
+        _validate_blocked(blocked, path=path, field_path=f"{field_path}.blocked")
+        return
+
     expect = _require_object(
         _required_value(branch, "expect", path=path, field_path=f"{field_path}.expect"),
         path=path,
         field_path=f"{field_path}.expect",
     )
     _validate_expect(expect, path=path, field_path=f"{field_path}.expect")
+
+
+def _validate_blocked(value: dict[str, Any], *, path: Path, field_path: str) -> None:
+    _require_non_empty_string(
+        _required_value(value, "reason", path=path, field_path=f"{field_path}.reason"),
+        path=path,
+        field_path=f"{field_path}.reason",
+    )
+    observed_status = _required_value(
+        value,
+        "observed_status",
+        path=path,
+        field_path=f"{field_path}.observed_status",
+    )
+    if observed_status is not None:
+        status = _require_int(
+            observed_status,
+            path=path,
+            field_path=f"{field_path}.observed_status",
+        )
+        if status < 100 or status > 599:
+            raise _validation_error(
+                path,
+                f"{field_path}.observed_status",
+                "must be null or an HTTP status code",
+            )
+    observed_content_type = _required_value(
+        value,
+        "observed_content_type",
+        path=path,
+        field_path=f"{field_path}.observed_content_type",
+    )
+    if not isinstance(observed_content_type, str):
+        raise _validation_error(path, f"{field_path}.observed_content_type", "must be a string")
+    observed_shape = _required_value(
+        value,
+        "observed_shape",
+        path=path,
+        field_path=f"{field_path}.observed_shape",
+    )
+    _require_json_value(observed_shape, path=path, field_path=f"{field_path}.observed_shape")
+    _require_non_empty_string(
+        _required_value(value, "last_seen", path=path, field_path=f"{field_path}.last_seen"),
+        path=path,
+        field_path=f"{field_path}.last_seen",
+    )
+    note = _required_value(value, "note", path=path, field_path=f"{field_path}.note")
+    if not isinstance(note, str):
+        raise _validation_error(path, f"{field_path}.note", "must be a string")
 
 
 def _validate_request_payload(value: Any, *, method: str, path: Path, field_path: str) -> None:
@@ -361,6 +451,19 @@ def verify_branch(
     branch_id: str,
     branch: dict[str, Any],
 ) -> dict[str, Any]:
+    if branch.get("state") == "blocked":
+        blocked = branch.get("blocked", {})
+        return {
+            "endpoint": endpoint,
+            "method": method,
+            "branch": branch_id,
+            "state": "blocked",
+            "status": None,
+            "ok": True,
+            "skipped": True,
+            "blocked_reason": blocked.get("reason") if isinstance(blocked, dict) else None,
+        }
+
     expected = branch.get("expect", {})
     expected_status = expected.get("status")
     expected_response = expected.get("response")
@@ -388,6 +491,7 @@ def verify_branch(
         "endpoint": endpoint,
         "method": method,
         "branch": branch_id,
+        "state": branch.get("state", "verified"),
         "status": response.status_code,
         "ok": True,
     }
@@ -461,6 +565,7 @@ def verify_fixture(path: Path, *, session: requests.Session, base_url: str, time
 
 def build_report(*, base_url: str, fixture_count: int, results: list[dict[str, Any]]) -> dict[str, Any]:
     failed_results = [result for result in results if not result["ok"]]
+    skipped_results = [result for result in results if result.get("skipped")]
     failure_kinds: dict[str, int] = {}
     for result in failed_results:
         failure_kind = result.get("failure_kind", "unknown_failure")
@@ -471,6 +576,7 @@ def build_report(*, base_url: str, fixture_count: int, results: list[dict[str, A
         "fixture_count": fixture_count,
         "branch_count": len(results),
         "ok_count": len(results) - len(failed_results),
+        "skipped_count": len(skipped_results),
         "failed_count": len(failed_results),
         "failure_kinds": failure_kinds,
         "failed_results": failed_results,
