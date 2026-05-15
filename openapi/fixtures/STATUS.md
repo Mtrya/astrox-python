@@ -20,12 +20,16 @@ Fixture directory: `openapi/fixtures`
 - verified non-nominal fixture branches: 303
 - blocked non-nominal fixture branches: 0
 - discovered endpoints without verified/blocked nominal fixture evidence: 6
+- discovered branch axes: 1315
+- discovered branch axis values: 6850
+- covered discovered branch axis values: 392
+- uncovered discovered branch axis values: 6458
 
 Legend:
 
 - `[x]` verified by a checked-in fixture branch
 - `[!]` blocked by checked-in fixture evidence
-- `[~]` fixture file exists, but no nominal branch is recorded
+- `[~]` partially covered by checked-in fixture evidence
 - `[ ]` discovered from OpenAPI, but no checked-in fixture branch records it
 
 ## Nominal Endpoint Inventory
@@ -826,47 +830,47 @@ Fixture: `openapi/fixtures/other/ziyou.yaml`
 
 ## Discovered Branch Axis Candidates
 
-The axis/value rows below come from the checked-in OpenAPI document. They are
-candidate coverage targets only. Until Phase 4 adds explicit axis-to-fixture
-mapping, these rows must not be read as covered just because a fixture branch
-with a similar name exists.
+The axis/value rows below come from the checked-in OpenAPI document and
+are matched against checked-in branch request payloads for the same endpoint.
+Coverage here means an exact candidate value appears in fixture YAML; it
+does not imply cross-product or semantic coverage.
 
 ### `/Astrogator/RunMCS`
 
-- [ ] `$.MainSequence[]` (discriminator, property `$type`)
+- [x] `$.MainSequence[]` (discriminator, property `$type`)
+  - [x] `Follow`
+  - [x] `InitialState`
+  - [x] `ManeuverFinite`
+  - [x] `ManeuverImpulsive`
+  - [x] `Propagate`
+  - [x] `Sequence`
+  - [x] `Stop`
+  - [x] `TargetSequence`
+- [~] `$.MainSequence[].Segments[]` (discriminator, property `$type`)
   - [ ] `Follow`
-  - [ ] `InitialState`
+  - [x] `InitialState`
   - [ ] `ManeuverFinite`
   - [ ] `ManeuverImpulsive`
-  - [ ] `Propagate`
+  - [x] `Propagate`
   - [ ] `Sequence`
   - [ ] `Stop`
   - [ ] `TargetSequence`
-- [ ] `$.MainSequence[].Segments[]` (discriminator, property `$type`)
-  - [ ] `Follow`
-  - [ ] `InitialState`
-  - [ ] `ManeuverFinite`
-  - [ ] `ManeuverImpulsive`
-  - [ ] `Propagate`
-  - [ ] `Sequence`
-  - [ ] `Stop`
-  - [ ] `TargetSequence`
-- [ ] `$.MainSequence[].Results[]` (discriminator, property `$type`)
+- [~] `$.MainSequence[].Results[]` (discriminator, property `$type`)
+  - [ ] `BPlane`
+  - [x] `Cartographic`
+  - [x] `DeltaSpherical`
+  - [x] `Duration`
+  - [x] `Epoch`
+  - [x] `KeplerianElement`
+  - [x] `ModifiedKeplerianElement`
+  - [x] `PointElement`
+  - [x] `Relative`
+  - [x] `SphericalElement`
+- [~] `$.MainSequence[].Results[].CalcObject` (discriminator, property `$type`)
   - [ ] `BPlane`
   - [ ] `Cartographic`
   - [ ] `DeltaSpherical`
-  - [ ] `Duration`
-  - [ ] `Epoch`
-  - [ ] `KeplerianElement`
-  - [ ] `ModifiedKeplerianElement`
-  - [ ] `PointElement`
-  - [ ] `Relative`
-  - [ ] `SphericalElement`
-- [ ] `$.MainSequence[].Results[].CalcObject` (discriminator, property `$type`)
-  - [ ] `BPlane`
-  - [ ] `Cartographic`
-  - [ ] `DeltaSpherical`
-  - [ ] `Duration`
+  - [x] `Duration`
   - [ ] `Epoch`
   - [ ] `KeplerianElement`
   - [ ] `ModifiedKeplerianElement`
@@ -907,120 +911,120 @@ with a similar name exists.
   - [ ] `Epoch`
   - [ ] `Periapsis`
   - [ ] `Scalar`
-- [ ] `$.MainSequence[].Results[]` (discriminator, property `$type`)
+- [~] `$.MainSequence[].Results[]` (discriminator, property `$type`)
   - [ ] `BPlane`
-  - [ ] `Cartographic`
-  - [ ] `DeltaSpherical`
-  - [ ] `Duration`
-  - [ ] `Epoch`
-  - [ ] `KeplerianElement`
-  - [ ] `ModifiedKeplerianElement`
-  - [ ] `PointElement`
-  - [ ] `Relative`
-  - [ ] `SphericalElement`
-- [ ] `$.MainSequence[].AttitudeControl` (discriminator, property `$type`)
-  - [ ] `AntiVelocityVector`
-  - [ ] `Attitude`
-  - [ ] `ThrustVector`
-  - [ ] `VelocityVector`
-- [ ] `$.MainSequence[].StopConditions[]` (discriminator, property `$type`)
-  - [ ] `Apoapsis`
-  - [ ] `Duration`
-  - [ ] `Epoch`
-  - [ ] `Periapsis`
-  - [ ] `Scalar`
-- [ ] `$.MainSequence[].Results[]` (discriminator, property `$type`)
+  - [x] `Cartographic`
+  - [x] `DeltaSpherical`
+  - [x] `Duration`
+  - [x] `Epoch`
+  - [x] `KeplerianElement`
+  - [x] `ModifiedKeplerianElement`
+  - [x] `PointElement`
+  - [x] `Relative`
+  - [x] `SphericalElement`
+- [x] `$.MainSequence[].AttitudeControl` (discriminator, property `$type`)
+  - [x] `AntiVelocityVector`
+  - [x] `Attitude`
+  - [x] `ThrustVector`
+  - [x] `VelocityVector`
+- [x] `$.MainSequence[].StopConditions[]` (discriminator, property `$type`)
+  - [x] `Apoapsis`
+  - [x] `Duration`
+  - [x] `Epoch`
+  - [x] `Periapsis`
+  - [x] `Scalar`
+- [~] `$.MainSequence[].Results[]` (discriminator, property `$type`)
   - [ ] `BPlane`
-  - [ ] `Cartographic`
-  - [ ] `DeltaSpherical`
-  - [ ] `Duration`
-  - [ ] `Epoch`
-  - [ ] `KeplerianElement`
-  - [ ] `ModifiedKeplerianElement`
-  - [ ] `PointElement`
-  - [ ] `Relative`
-  - [ ] `SphericalElement`
-- [ ] `$.MainSequence[].AttitudeControl` (discriminator, property `$type`)
-  - [ ] `AntiVelocityVector`
-  - [ ] `Attitude`
-  - [ ] `ThrustVector`
-  - [ ] `VelocityVector`
-- [ ] `$.MainSequence[].Results[]` (discriminator, property `$type`)
+  - [x] `Cartographic`
+  - [x] `DeltaSpherical`
+  - [x] `Duration`
+  - [x] `Epoch`
+  - [x] `KeplerianElement`
+  - [x] `ModifiedKeplerianElement`
+  - [x] `PointElement`
+  - [x] `Relative`
+  - [x] `SphericalElement`
+- [x] `$.MainSequence[].AttitudeControl` (discriminator, property `$type`)
+  - [x] `AntiVelocityVector`
+  - [x] `Attitude`
+  - [x] `ThrustVector`
+  - [x] `VelocityVector`
+- [~] `$.MainSequence[].Results[]` (discriminator, property `$type`)
   - [ ] `BPlane`
-  - [ ] `Cartographic`
-  - [ ] `DeltaSpherical`
-  - [ ] `Duration`
-  - [ ] `Epoch`
-  - [ ] `KeplerianElement`
-  - [ ] `ModifiedKeplerianElement`
-  - [ ] `PointElement`
-  - [ ] `Relative`
-  - [ ] `SphericalElement`
-- [ ] `$.MainSequence[].InitialState.Element` (discriminator, property `$type`)
-  - [ ] `Cartesian`
-  - [ ] `Keplerian`
-  - [ ] `Spherical`
-- [ ] `$.MainSequence[].Results[]` (discriminator, property `$type`)
+  - [x] `Cartographic`
+  - [x] `DeltaSpherical`
+  - [x] `Duration`
+  - [x] `Epoch`
+  - [x] `KeplerianElement`
+  - [x] `ModifiedKeplerianElement`
+  - [x] `PointElement`
+  - [x] `Relative`
+  - [x] `SphericalElement`
+- [x] `$.MainSequence[].InitialState.Element` (discriminator, property `$type`)
+  - [x] `Cartesian`
+  - [x] `Keplerian`
+  - [x] `Spherical`
+- [~] `$.MainSequence[].Results[]` (discriminator, property `$type`)
   - [ ] `BPlane`
-  - [ ] `Cartographic`
-  - [ ] `DeltaSpherical`
-  - [ ] `Duration`
-  - [ ] `Epoch`
-  - [ ] `KeplerianElement`
-  - [ ] `ModifiedKeplerianElement`
-  - [ ] `PointElement`
-  - [ ] `Relative`
-  - [ ] `SphericalElement`
-- [ ] `$.MainSequence[].Profiles[]` (discriminator, property `$type`)
-  - [ ] `DifferentialCorrector`
-- [ ] `$.MainSequence[].Segments[]` (discriminator, property `$type`)
+  - [x] `Cartographic`
+  - [x] `DeltaSpherical`
+  - [x] `Duration`
+  - [x] `Epoch`
+  - [x] `KeplerianElement`
+  - [x] `ModifiedKeplerianElement`
+  - [x] `PointElement`
+  - [x] `Relative`
+  - [x] `SphericalElement`
+- [x] `$.MainSequence[].Profiles[]` (discriminator, property `$type`)
+  - [x] `DifferentialCorrector`
+- [~] `$.MainSequence[].Segments[]` (discriminator, property `$type`)
   - [ ] `Follow`
-  - [ ] `InitialState`
+  - [x] `InitialState`
   - [ ] `ManeuverFinite`
   - [ ] `ManeuverImpulsive`
-  - [ ] `Propagate`
+  - [x] `Propagate`
   - [ ] `Sequence`
   - [ ] `Stop`
   - [ ] `TargetSequence`
-- [ ] `$.MainSequence[].Results[]` (discriminator, property `$type`)
+- [~] `$.MainSequence[].Results[]` (discriminator, property `$type`)
   - [ ] `BPlane`
-  - [ ] `Cartographic`
-  - [ ] `DeltaSpherical`
-  - [ ] `Duration`
-  - [ ] `Epoch`
-  - [ ] `KeplerianElement`
-  - [ ] `ModifiedKeplerianElement`
-  - [ ] `PointElement`
-  - [ ] `Relative`
-  - [ ] `SphericalElement`
-- [ ] `$.MainSequence[].StopConditions[]` (discriminator, property `$type`)
-  - [ ] `Apoapsis`
-  - [ ] `Duration`
-  - [ ] `Epoch`
-  - [ ] `Periapsis`
-  - [ ] `Scalar`
-- [ ] `$.MainSequence[].Results[]` (discriminator, property `$type`)
+  - [x] `Cartographic`
+  - [x] `DeltaSpherical`
+  - [x] `Duration`
+  - [x] `Epoch`
+  - [x] `KeplerianElement`
+  - [x] `ModifiedKeplerianElement`
+  - [x] `PointElement`
+  - [x] `Relative`
+  - [x] `SphericalElement`
+- [x] `$.MainSequence[].StopConditions[]` (discriminator, property `$type`)
+  - [x] `Apoapsis`
+  - [x] `Duration`
+  - [x] `Epoch`
+  - [x] `Periapsis`
+  - [x] `Scalar`
+- [~] `$.MainSequence[].Results[]` (discriminator, property `$type`)
   - [ ] `BPlane`
-  - [ ] `Cartographic`
-  - [ ] `DeltaSpherical`
-  - [ ] `Duration`
-  - [ ] `Epoch`
-  - [ ] `KeplerianElement`
-  - [ ] `ModifiedKeplerianElement`
-  - [ ] `PointElement`
-  - [ ] `Relative`
-  - [ ] `SphericalElement`
-- [ ] `$.MainSequence[].Results[]` (discriminator, property `$type`)
+  - [x] `Cartographic`
+  - [x] `DeltaSpherical`
+  - [x] `Duration`
+  - [x] `Epoch`
+  - [x] `KeplerianElement`
+  - [x] `ModifiedKeplerianElement`
+  - [x] `PointElement`
+  - [x] `Relative`
+  - [x] `SphericalElement`
+- [~] `$.MainSequence[].Results[]` (discriminator, property `$type`)
   - [ ] `BPlane`
-  - [ ] `Cartographic`
-  - [ ] `DeltaSpherical`
-  - [ ] `Duration`
-  - [ ] `Epoch`
-  - [ ] `KeplerianElement`
-  - [ ] `ModifiedKeplerianElement`
-  - [ ] `PointElement`
-  - [ ] `Relative`
-  - [ ] `SphericalElement`
+  - [x] `Cartographic`
+  - [x] `DeltaSpherical`
+  - [x] `Duration`
+  - [x] `Epoch`
+  - [x] `KeplerianElement`
+  - [x] `ModifiedKeplerianElement`
+  - [x] `PointElement`
+  - [x] `Relative`
+  - [x] `SphericalElement`
 - [ ] `$.Entities[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Entities[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -1050,21 +1054,21 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Entities[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Entities[].Position` (discriminator, property `$type`)
-  - [ ] `AstrogatorMCS`
-  - [ ] `Ballistic`
-  - [ ] `CentralBody`
-  - [ ] `CzmlPosition`
-  - [ ] `CzmlPositions`
-  - [ ] `HPOP`
-  - [ ] `J2`
-  - [ ] `SGP4`
-  - [ ] `SimpleAscent`
-  - [ ] `SitePosition`
-  - [ ] `TwoBody`
-- [ ] `$.Entities[].Position.MainSequence[]` (discriminator, property `$type`)
+- [x] `$.Entities[].Position` (discriminator, property `$type`)
+  - [x] `AstrogatorMCS`
+  - [x] `Ballistic`
+  - [x] `CentralBody`
+  - [x] `CzmlPosition`
+  - [x] `CzmlPositions`
+  - [x] `HPOP`
+  - [x] `J2`
+  - [x] `SGP4`
+  - [x] `SimpleAscent`
+  - [x] `SitePosition`
+  - [x] `TwoBody`
+- [~] `$.Entities[].Position.MainSequence[]` (discriminator, property `$type`)
   - [ ] `Follow`
-  - [ ] `InitialState`
+  - [x] `InitialState`
   - [ ] `ManeuverFinite`
   - [ ] `ManeuverImpulsive`
   - [ ] `Propagate`
@@ -1185,8 +1189,8 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.Entities[].Position.MainSequence[].InitialState.Element` (discriminator, property `$type`)
-  - [ ] `Cartesian`
+- [~] `$.Entities[].Position.MainSequence[].InitialState.Element` (discriminator, property `$type`)
+  - [x] `Cartesian`
   - [ ] `Keplerian`
   - [ ] `Spherical`
 - [ ] `$.Entities[].Position.MainSequence[].Results[]` (discriminator, property `$type`)
@@ -1271,61 +1275,61 @@ with a similar name exists.
   - [ ] `JacchiaRoberts`
 - [ ] `$.Entities[].Position.HpopPropagator.SRPModel` (discriminator, property `$type`)
   - [ ] `SRPSpherical`
-- [ ] `$.Entities[].Orientation` (discriminator, property `$type`)
+- [x] `$.Entities[].Orientation` (discriminator, property `$type`)
+  - [x] `AlignedAndConstrained`
+  - [x] `Composite`
+  - [x] `CzmlOrientation`
+  - [x] `Fixed`
+  - [x] `FixedAtEpoch`
+  - [x] `LVLH`
+  - [x] `VNC`
+  - [x] `VVLH`
+- [~] `$.Entities[].Orientation.Intervals[]` (discriminator, property `$type`)
   - [ ] `AlignedAndConstrained`
   - [ ] `Composite`
   - [ ] `CzmlOrientation`
   - [ ] `Fixed`
   - [ ] `FixedAtEpoch`
   - [ ] `LVLH`
-  - [ ] `VNC`
+  - [x] `VNC`
   - [ ] `VVLH`
-- [ ] `$.Entities[].Orientation.Intervals[]` (discriminator, property `$type`)
-  - [ ] `AlignedAndConstrained`
-  - [ ] `Composite`
-  - [ ] `CzmlOrientation`
-  - [ ] `Fixed`
-  - [ ] `FixedAtEpoch`
-  - [ ] `LVLH`
-  - [ ] `VNC`
-  - [ ] `VVLH`
-- [ ] `$.Entities[].Orientation.FixedOrientation` (discriminator, property `$type`)
+- [~] `$.Entities[].Orientation.FixedOrientation` (discriminator, property `$type`)
   - [ ] `AzEl`
   - [ ] `EulerAngles`
-  - [ ] `Quaternion`
-- [ ] `$.Entities[].Sensor` (discriminator, property `$type`)
-  - [ ] `Conic`
-  - [ ] `Rectangular`
-- [ ] `$.Entities[].SensorPointing` (discriminator, property `$type`)
-  - [ ] `Fixed`
-- [ ] `$.Entities[].SensorPointing.Orientation` (discriminator, property `$type`)
-  - [ ] `AzEl`
+  - [x] `Quaternion`
+- [x] `$.Entities[].Sensor` (discriminator, property `$type`)
+  - [x] `Conic`
+  - [x] `Rectangular`
+- [x] `$.Entities[].SensorPointing` (discriminator, property `$type`)
+  - [x] `Fixed`
+- [~] `$.Entities[].SensorPointing.Orientation` (discriminator, property `$type`)
+  - [x] `AzEl`
   - [ ] `EulerAngles`
   - [ ] `Quaternion`
-- [ ] `$.Entities[].Constraints[]` (discriminator, property `$type`)
-  - [ ] `AzElMask`
-  - [ ] `ElevationAngle`
-  - [ ] `Range`
-- [ ] `$.Propagators[].NumericalIntegrator` (discriminator, property `$type`)
-  - [ ] `RKF7th8th`
-- [ ] `$.Propagators[].GravityModel` (discriminator, property `$type`)
-  - [ ] `GravityField`
-  - [ ] `TwoBody`
-- [ ] `$.Propagators[].AtmosphericModel` (discriminator, property `$type`)
-  - [ ] `JacchiaRoberts`
-- [ ] `$.Propagators[].SRPModel` (discriminator, property `$type`)
-  - [ ] `SRPSpherical`
-- [ ] `$.EngineModels[]` (discriminator, property `$type`)
-  - [ ] `EngineConstAcc`
-  - [ ] `EngineConstant`
+- [x] `$.Entities[].Constraints[]` (discriminator, property `$type`)
+  - [x] `AzElMask`
+  - [x] `ElevationAngle`
+  - [x] `Range`
+- [x] `$.Propagators[].NumericalIntegrator` (discriminator, property `$type`)
+  - [x] `RKF7th8th`
+- [x] `$.Propagators[].GravityModel` (discriminator, property `$type`)
+  - [x] `GravityField`
+  - [x] `TwoBody`
+- [x] `$.Propagators[].AtmosphericModel` (discriminator, property `$type`)
+  - [x] `JacchiaRoberts`
+- [x] `$.Propagators[].SRPModel` (discriminator, property `$type`)
+  - [x] `SRPSpherical`
+- [x] `$.EngineModels[]` (discriminator, property `$type`)
+  - [x] `EngineConstAcc`
+  - [x] `EngineConstant`
 
 ### `/Coverage/ComputeCoverage`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
-  - [ ] `CbLatLonBounds`
-  - [ ] `Global`
-  - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+- [x] `$.Grid` (discriminator, property `$type`)
+  - [x] `CbLatLonBounds`
+  - [x] `Global`
+  - [x] `LatLonBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -1355,24 +1359,24 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
-  - [ ] `AstrogatorMCS`
-  - [ ] `Ballistic`
-  - [ ] `CentralBody`
-  - [ ] `CzmlPosition`
-  - [ ] `CzmlPositions`
-  - [ ] `HPOP`
-  - [ ] `J2`
-  - [ ] `SGP4`
-  - [ ] `SimpleAscent`
-  - [ ] `SitePosition`
-  - [ ] `TwoBody`
-- [ ] `$.Assets[].Position.MainSequence[]` (discriminator, property `$type`)
+- [x] `$.Assets[].Position` (discriminator, property `$type`)
+  - [x] `AstrogatorMCS`
+  - [x] `Ballistic`
+  - [x] `CentralBody`
+  - [x] `CzmlPosition`
+  - [x] `CzmlPositions`
+  - [x] `HPOP`
+  - [x] `J2`
+  - [x] `SGP4`
+  - [x] `SimpleAscent`
+  - [x] `SitePosition`
+  - [x] `TwoBody`
+- [~] `$.Assets[].Position.MainSequence[]` (discriminator, property `$type`)
   - [ ] `Follow`
-  - [ ] `InitialState`
+  - [x] `InitialState`
   - [ ] `ManeuverFinite`
   - [ ] `ManeuverImpulsive`
-  - [ ] `Propagate`
+  - [x] `Propagate`
   - [ ] `Sequence`
   - [ ] `Stop`
   - [ ] `TargetSequence`
@@ -1457,9 +1461,9 @@ with a similar name exists.
   - [ ] `Attitude`
   - [ ] `ThrustVector`
   - [ ] `VelocityVector`
-- [ ] `$.Assets[].Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
+- [~] `$.Assets[].Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
   - [ ] `Apoapsis`
-  - [ ] `Duration`
+  - [x] `Duration`
   - [ ] `Epoch`
   - [ ] `Periapsis`
   - [ ] `Scalar`
@@ -1490,8 +1494,8 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.Assets[].Position.MainSequence[].InitialState.Element` (discriminator, property `$type`)
-  - [ ] `Cartesian`
+- [~] `$.Assets[].Position.MainSequence[].InitialState.Element` (discriminator, property `$type`)
+  - [x] `Cartesian`
   - [ ] `Keplerian`
   - [ ] `Spherical`
 - [ ] `$.Assets[].Position.MainSequence[].Results[]` (discriminator, property `$type`)
@@ -1527,9 +1531,9 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.Assets[].Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
+- [~] `$.Assets[].Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
   - [ ] `Apoapsis`
-  - [ ] `Duration`
+  - [x] `Duration`
   - [ ] `Epoch`
   - [ ] `Periapsis`
   - [ ] `Scalar`
@@ -1555,11 +1559,11 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.Assets[].Position.Propagators[].NumericalIntegrator` (discriminator, property `$type`)
-  - [ ] `RKF7th8th`
-- [ ] `$.Assets[].Position.Propagators[].GravityModel` (discriminator, property `$type`)
+- [x] `$.Assets[].Position.Propagators[].NumericalIntegrator` (discriminator, property `$type`)
+  - [x] `RKF7th8th`
+- [~] `$.Assets[].Position.Propagators[].GravityModel` (discriminator, property `$type`)
   - [ ] `GravityField`
-  - [ ] `TwoBody`
+  - [x] `TwoBody`
 - [ ] `$.Assets[].Position.Propagators[].AtmosphericModel` (discriminator, property `$type`)
   - [ ] `JacchiaRoberts`
 - [ ] `$.Assets[].Position.Propagators[].SRPModel` (discriminator, property `$type`)
@@ -1569,63 +1573,63 @@ with a similar name exists.
   - [ ] `EngineConstant`
 - [ ] `$.Assets[].Position.HpopPropagator.NumericalIntegrator` (discriminator, property `$type`)
   - [ ] `RKF7th8th`
-- [ ] `$.Assets[].Position.HpopPropagator.GravityModel` (discriminator, property `$type`)
+- [~] `$.Assets[].Position.HpopPropagator.GravityModel` (discriminator, property `$type`)
   - [ ] `GravityField`
-  - [ ] `TwoBody`
+  - [x] `TwoBody`
 - [ ] `$.Assets[].Position.HpopPropagator.AtmosphericModel` (discriminator, property `$type`)
   - [ ] `JacchiaRoberts`
 - [ ] `$.Assets[].Position.HpopPropagator.SRPModel` (discriminator, property `$type`)
   - [ ] `SRPSpherical`
-- [ ] `$.Assets[].Orientation` (discriminator, property `$type`)
+- [x] `$.Assets[].Orientation` (discriminator, property `$type`)
+  - [x] `AlignedAndConstrained`
+  - [x] `Composite`
+  - [x] `CzmlOrientation`
+  - [x] `Fixed`
+  - [x] `FixedAtEpoch`
+  - [x] `LVLH`
+  - [x] `VNC`
+  - [x] `VVLH`
+- [~] `$.Assets[].Orientation.Intervals[]` (discriminator, property `$type`)
   - [ ] `AlignedAndConstrained`
   - [ ] `Composite`
   - [ ] `CzmlOrientation`
   - [ ] `Fixed`
   - [ ] `FixedAtEpoch`
   - [ ] `LVLH`
-  - [ ] `VNC`
+  - [x] `VNC`
   - [ ] `VVLH`
-- [ ] `$.Assets[].Orientation.Intervals[]` (discriminator, property `$type`)
-  - [ ] `AlignedAndConstrained`
-  - [ ] `Composite`
-  - [ ] `CzmlOrientation`
-  - [ ] `Fixed`
-  - [ ] `FixedAtEpoch`
-  - [ ] `LVLH`
-  - [ ] `VNC`
-  - [ ] `VVLH`
-- [ ] `$.Assets[].Orientation.FixedOrientation` (discriminator, property `$type`)
+- [~] `$.Assets[].Orientation.FixedOrientation` (discriminator, property `$type`)
   - [ ] `AzEl`
   - [ ] `EulerAngles`
-  - [ ] `Quaternion`
-- [ ] `$.Assets[].Sensor` (discriminator, property `$type`)
-  - [ ] `Conic`
-  - [ ] `Rectangular`
-- [ ] `$.Assets[].SensorPointing` (discriminator, property `$type`)
-  - [ ] `Fixed`
-- [ ] `$.Assets[].SensorPointing.Orientation` (discriminator, property `$type`)
-  - [ ] `AzEl`
+  - [x] `Quaternion`
+- [x] `$.Assets[].Sensor` (discriminator, property `$type`)
+  - [x] `Conic`
+  - [x] `Rectangular`
+- [x] `$.Assets[].SensorPointing` (discriminator, property `$type`)
+  - [x] `Fixed`
+- [~] `$.Assets[].SensorPointing.Orientation` (discriminator, property `$type`)
+  - [x] `AzEl`
   - [ ] `EulerAngles`
   - [ ] `Quaternion`
-- [ ] `$.Assets[].Constraints[]` (discriminator, property `$type`)
-  - [ ] `AzElMask`
-  - [ ] `ElevationAngle`
-  - [ ] `Range`
-- [ ] `$.GridPointSensor` (discriminator, property `$type`)
-  - [ ] `Conic`
-  - [ ] `Rectangular`
-- [ ] `$.GridPointConstraints[]` (discriminator, property `$type`)
-  - [ ] `AzElMask`
-  - [ ] `ElevationAngle`
-  - [ ] `Range`
+- [x] `$.Assets[].Constraints[]` (discriminator, property `$type`)
+  - [x] `AzElMask`
+  - [x] `ElevationAngle`
+  - [x] `Range`
+- [x] `$.GridPointSensor` (discriminator, property `$type`)
+  - [x] `Conic`
+  - [x] `Rectangular`
+- [x] `$.GridPointConstraints[]` (discriminator, property `$type`)
+  - [x] `AzElMask`
+  - [x] `ElevationAngle`
+  - [x] `Range`
 
 ### `/Coverage/FOM/GridStats/CoverageTime`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -1655,14 +1659,14 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
@@ -1921,11 +1925,11 @@ with a similar name exists.
 
 ### `/Coverage/FOM/GridStats/NumberOfAssets`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -1955,18 +1959,18 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
-  - [ ] `TwoBody`
+  - [x] `TwoBody`
 - [ ] `$.Assets[].Position.MainSequence[]` (discriminator, property `$type`)
   - [ ] `Follow`
   - [ ] `InitialState`
@@ -2221,11 +2225,11 @@ with a similar name exists.
 
 ### `/Coverage/FOM/GridStats/ResponseTime`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -2255,14 +2259,14 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
@@ -2521,11 +2525,11 @@ with a similar name exists.
 
 ### `/Coverage/FOM/GridStats/RevisitTime`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -2555,14 +2559,14 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
@@ -2821,11 +2825,11 @@ with a similar name exists.
 
 ### `/Coverage/FOM/GridStats/SimpleCoverage`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -2855,14 +2859,14 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
@@ -3121,11 +3125,11 @@ with a similar name exists.
 
 ### `/Coverage/FOM/GridStatsOverTime/NumberOfAssets`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -3155,18 +3159,18 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
-  - [ ] `TwoBody`
+  - [x] `TwoBody`
 - [ ] `$.Assets[].Position.MainSequence[]` (discriminator, property `$type`)
   - [ ] `Follow`
   - [ ] `InitialState`
@@ -3721,11 +3725,11 @@ with a similar name exists.
 
 ### `/Coverage/FOM/GridStatsOverTime/RevisitTime`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -3755,14 +3759,14 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
@@ -4021,11 +4025,11 @@ with a similar name exists.
 
 ### `/Coverage/FOM/GridStatsOverTime/SimpleCoverage`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -4055,14 +4059,14 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
@@ -4321,11 +4325,11 @@ with a similar name exists.
 
 ### `/Coverage/FOM/ValueByGridPoint/CoverageTime`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -4355,14 +4359,14 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
@@ -4621,11 +4625,11 @@ with a similar name exists.
 
 ### `/Coverage/FOM/ValueByGridPoint/NumberOfAssets`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -4655,18 +4659,18 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
-  - [ ] `TwoBody`
+  - [x] `TwoBody`
 - [ ] `$.Assets[].Position.MainSequence[]` (discriminator, property `$type`)
   - [ ] `Follow`
   - [ ] `InitialState`
@@ -4921,11 +4925,11 @@ with a similar name exists.
 
 ### `/Coverage/FOM/ValueByGridPoint/ResponseTime`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -4955,14 +4959,14 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
@@ -5221,11 +5225,11 @@ with a similar name exists.
 
 ### `/Coverage/FOM/ValueByGridPoint/RevisitTime`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -5255,14 +5259,14 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
@@ -5521,11 +5525,11 @@ with a similar name exists.
 
 ### `/Coverage/FOM/ValueByGridPoint/SimpleCoverage`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -5555,14 +5559,14 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
@@ -5821,11 +5825,11 @@ with a similar name exists.
 
 ### `/Coverage/FOM/ValueByGridPointAtTime/NumberOfAssets`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -5855,18 +5859,18 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
-  - [ ] `TwoBody`
+  - [x] `TwoBody`
 - [ ] `$.Assets[].Position.MainSequence[]` (discriminator, property `$type`)
   - [ ] `Follow`
   - [ ] `InitialState`
@@ -6421,11 +6425,11 @@ with a similar name exists.
 
 ### `/Coverage/FOM/ValueByGridPointAtTime/RevisitTime`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -6455,14 +6459,14 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
@@ -6721,11 +6725,11 @@ with a similar name exists.
 
 ### `/Coverage/FOM/ValueByGridPointAtTime/SimpleCoverage`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -6755,14 +6759,14 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
@@ -7021,19 +7025,19 @@ with a similar name exists.
 
 ### `/Coverage/GetGridPoints`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
-  - [ ] `CbLatLonBounds`
-  - [ ] `Global`
-  - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+- [x] `$.Grid` (discriminator, property `$type`)
+  - [x] `CbLatLonBounds`
+  - [x] `Global`
+  - [x] `LatLonBounds`
+  - [x] `LatitudeBounds`
 
 ### `/Coverage/Report/CoverageByAsset`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -7063,14 +7067,14 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
@@ -7329,11 +7333,11 @@ with a similar name exists.
 
 ### `/Coverage/Report/PercentCoverage`
 
-- [ ] `$.Grid` (discriminator, property `$type`)
+- [~] `$.Grid` (discriminator, property `$type`)
   - [ ] `CbLatLonBounds`
   - [ ] `Global`
   - [ ] `LatLonBounds`
-  - [ ] `LatitudeBounds`
+  - [x] `LatitudeBounds`
 - [ ] `$.Assets[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.Assets[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -7363,18 +7367,18 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.Assets[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.Assets[].Position` (discriminator, property `$type`)
+- [~] `$.Assets[].Position` (discriminator, property `$type`)
   - [ ] `AstrogatorMCS`
   - [ ] `Ballistic`
   - [ ] `CentralBody`
   - [ ] `CzmlPosition`
   - [ ] `CzmlPositions`
   - [ ] `HPOP`
-  - [ ] `J2`
+  - [x] `J2`
   - [ ] `SGP4`
   - [ ] `SimpleAscent`
   - [ ] `SitePosition`
-  - [ ] `TwoBody`
+  - [x] `TwoBody`
 - [ ] `$.Assets[].Position.MainSequence[]` (discriminator, property `$type`)
   - [ ] `Follow`
   - [ ] `InitialState`
@@ -7629,14 +7633,14 @@ with a similar name exists.
 
 ### `/InterfaceClass`
 
-- [ ] `$.agVAMCSManeuverFinite.AttitudeControl` (discriminator, property `$type`)
-  - [ ] `AntiVelocityVector`
-  - [ ] `Attitude`
-  - [ ] `ThrustVector`
-  - [ ] `VelocityVector`
-- [ ] `$.agVAMCSManeuverFinite.StopConditions[]` (discriminator, property `$type`)
+- [x] `$.agVAMCSManeuverFinite.AttitudeControl` (discriminator, property `$type`)
+  - [x] `AntiVelocityVector`
+  - [x] `Attitude`
+  - [x] `ThrustVector`
+  - [x] `VelocityVector`
+- [~] `$.agVAMCSManeuverFinite.StopConditions[]` (discriminator, property `$type`)
   - [ ] `Apoapsis`
-  - [ ] `Duration`
+  - [x] `Duration`
   - [ ] `Epoch`
   - [ ] `Periapsis`
   - [ ] `Scalar`
@@ -7684,11 +7688,11 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.agVAMCSManeuverImpulsive.AttitudeControl` (discriminator, property `$type`)
-  - [ ] `AntiVelocityVector`
-  - [ ] `Attitude`
-  - [ ] `ThrustVector`
-  - [ ] `VelocityVector`
+- [x] `$.agVAMCSManeuverImpulsive.AttitudeControl` (discriminator, property `$type`)
+  - [x] `AntiVelocityVector`
+  - [x] `Attitude`
+  - [x] `ThrustVector`
+  - [x] `VelocityVector`
 - [ ] `$.agVAMCSManeuverImpulsive.Results[]` (discriminator, property `$type`)
   - [ ] `BPlane`
   - [ ] `Cartographic`
@@ -7700,12 +7704,12 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.agVAMCSPropagate.StopConditions[]` (discriminator, property `$type`)
-  - [ ] `Apoapsis`
-  - [ ] `Duration`
-  - [ ] `Epoch`
-  - [ ] `Periapsis`
-  - [ ] `Scalar`
+- [x] `$.agVAMCSPropagate.StopConditions[]` (discriminator, property `$type`)
+  - [x] `Apoapsis`
+  - [x] `Duration`
+  - [x] `Epoch`
+  - [x] `Periapsis`
+  - [x] `Scalar`
 - [ ] `$.agVAMCSPropagate.Results[]` (discriminator, property `$type`)
   - [ ] `BPlane`
   - [ ] `Cartographic`
@@ -7717,10 +7721,10 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.agVAMCSInitialState.InitialState.Element` (discriminator, property `$type`)
-  - [ ] `Cartesian`
-  - [ ] `Keplerian`
-  - [ ] `Spherical`
+- [x] `$.agVAMCSInitialState.InitialState.Element` (discriminator, property `$type`)
+  - [x] `Cartesian`
+  - [x] `Keplerian`
+  - [x] `Spherical`
 - [ ] `$.agVAMCSInitialState.Results[]` (discriminator, property `$type`)
   - [ ] `BPlane`
   - [ ] `Cartographic`
@@ -7732,38 +7736,38 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.agVAScalarStoppingCondition.UserCalcObject` (discriminator, property `$type`)
-  - [ ] `BPlane`
-  - [ ] `Cartographic`
-  - [ ] `DeltaSpherical`
-  - [ ] `Duration`
-  - [ ] `Epoch`
-  - [ ] `KeplerianElement`
-  - [ ] `ModifiedKeplerianElement`
-  - [ ] `PointElement`
-  - [ ] `Relative`
-  - [ ] `SphericalElement`
+- [x] `$.agVAScalarStoppingCondition.UserCalcObject` (discriminator, property `$type`)
+  - [x] `BPlane`
+  - [x] `Cartographic`
+  - [x] `DeltaSpherical`
+  - [x] `Duration`
+  - [x] `Epoch`
+  - [x] `KeplerianElement`
+  - [x] `ModifiedKeplerianElement`
+  - [x] `PointElement`
+  - [x] `Relative`
+  - [x] `SphericalElement`
 
 ### `/Lighting/LightingTimes`
 
-- [ ] `$.Position` (discriminator, property `$type`)
-  - [ ] `AstrogatorMCS`
-  - [ ] `Ballistic`
-  - [ ] `CentralBody`
-  - [ ] `CzmlPosition`
-  - [ ] `CzmlPositions`
-  - [ ] `HPOP`
-  - [ ] `J2`
-  - [ ] `SGP4`
-  - [ ] `SimpleAscent`
-  - [ ] `SitePosition`
-  - [ ] `TwoBody`
-- [ ] `$.Position.MainSequence[]` (discriminator, property `$type`)
+- [x] `$.Position` (discriminator, property `$type`)
+  - [x] `AstrogatorMCS`
+  - [x] `Ballistic`
+  - [x] `CentralBody`
+  - [x] `CzmlPosition`
+  - [x] `CzmlPositions`
+  - [x] `HPOP`
+  - [x] `J2`
+  - [x] `SGP4`
+  - [x] `SimpleAscent`
+  - [x] `SitePosition`
+  - [x] `TwoBody`
+- [~] `$.Position.MainSequence[]` (discriminator, property `$type`)
   - [ ] `Follow`
-  - [ ] `InitialState`
+  - [x] `InitialState`
   - [ ] `ManeuverFinite`
   - [ ] `ManeuverImpulsive`
-  - [ ] `Propagate`
+  - [x] `Propagate`
   - [ ] `Sequence`
   - [ ] `Stop`
   - [ ] `TargetSequence`
@@ -7848,9 +7852,9 @@ with a similar name exists.
   - [ ] `Attitude`
   - [ ] `ThrustVector`
   - [ ] `VelocityVector`
-- [ ] `$.Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
+- [~] `$.Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
   - [ ] `Apoapsis`
-  - [ ] `Duration`
+  - [x] `Duration`
   - [ ] `Epoch`
   - [ ] `Periapsis`
   - [ ] `Scalar`
@@ -7881,8 +7885,8 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.Position.MainSequence[].InitialState.Element` (discriminator, property `$type`)
-  - [ ] `Cartesian`
+- [~] `$.Position.MainSequence[].InitialState.Element` (discriminator, property `$type`)
+  - [x] `Cartesian`
   - [ ] `Keplerian`
   - [ ] `Spherical`
 - [ ] `$.Position.MainSequence[].Results[]` (discriminator, property `$type`)
@@ -7918,9 +7922,9 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
+- [~] `$.Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
   - [ ] `Apoapsis`
-  - [ ] `Duration`
+  - [x] `Duration`
   - [ ] `Epoch`
   - [ ] `Periapsis`
   - [ ] `Scalar`
@@ -8031,11 +8035,11 @@ with a similar name exists.
   - [ ] `AzElMask`
   - [ ] `ElevationAngle`
   - [ ] `Range`
-- [ ] `$.Position.Propagators[].NumericalIntegrator` (discriminator, property `$type`)
-  - [ ] `RKF7th8th`
-- [ ] `$.Position.Propagators[].GravityModel` (discriminator, property `$type`)
+- [x] `$.Position.Propagators[].NumericalIntegrator` (discriminator, property `$type`)
+  - [x] `RKF7th8th`
+- [~] `$.Position.Propagators[].GravityModel` (discriminator, property `$type`)
   - [ ] `GravityField`
-  - [ ] `TwoBody`
+  - [x] `TwoBody`
 - [ ] `$.Position.Propagators[].AtmosphericModel` (discriminator, property `$type`)
   - [ ] `JacchiaRoberts`
 - [ ] `$.Position.Propagators[].SRPModel` (discriminator, property `$type`)
@@ -8045,9 +8049,9 @@ with a similar name exists.
   - [ ] `EngineConstant`
 - [ ] `$.Position.HpopPropagator.NumericalIntegrator` (discriminator, property `$type`)
   - [ ] `RKF7th8th`
-- [ ] `$.Position.HpopPropagator.GravityModel` (discriminator, property `$type`)
+- [~] `$.Position.HpopPropagator.GravityModel` (discriminator, property `$type`)
   - [ ] `GravityField`
-  - [ ] `TwoBody`
+  - [x] `TwoBody`
 - [ ] `$.Position.HpopPropagator.AtmosphericModel` (discriminator, property `$type`)
   - [ ] `JacchiaRoberts`
 - [ ] `$.Position.HpopPropagator.SRPModel` (discriminator, property `$type`)
@@ -8055,24 +8059,24 @@ with a similar name exists.
 
 ### `/Lighting/SolarIntensity`
 
-- [ ] `$.Position` (discriminator, property `$type`)
-  - [ ] `AstrogatorMCS`
-  - [ ] `Ballistic`
-  - [ ] `CentralBody`
-  - [ ] `CzmlPosition`
-  - [ ] `CzmlPositions`
-  - [ ] `HPOP`
-  - [ ] `J2`
-  - [ ] `SGP4`
-  - [ ] `SimpleAscent`
-  - [ ] `SitePosition`
-  - [ ] `TwoBody`
-- [ ] `$.Position.MainSequence[]` (discriminator, property `$type`)
+- [x] `$.Position` (discriminator, property `$type`)
+  - [x] `AstrogatorMCS`
+  - [x] `Ballistic`
+  - [x] `CentralBody`
+  - [x] `CzmlPosition`
+  - [x] `CzmlPositions`
+  - [x] `HPOP`
+  - [x] `J2`
+  - [x] `SGP4`
+  - [x] `SimpleAscent`
+  - [x] `SitePosition`
+  - [x] `TwoBody`
+- [~] `$.Position.MainSequence[]` (discriminator, property `$type`)
   - [ ] `Follow`
-  - [ ] `InitialState`
+  - [x] `InitialState`
   - [ ] `ManeuverFinite`
   - [ ] `ManeuverImpulsive`
-  - [ ] `Propagate`
+  - [x] `Propagate`
   - [ ] `Sequence`
   - [ ] `Stop`
   - [ ] `TargetSequence`
@@ -8157,9 +8161,9 @@ with a similar name exists.
   - [ ] `Attitude`
   - [ ] `ThrustVector`
   - [ ] `VelocityVector`
-- [ ] `$.Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
+- [~] `$.Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
   - [ ] `Apoapsis`
-  - [ ] `Duration`
+  - [x] `Duration`
   - [ ] `Epoch`
   - [ ] `Periapsis`
   - [ ] `Scalar`
@@ -8190,8 +8194,8 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.Position.MainSequence[].InitialState.Element` (discriminator, property `$type`)
-  - [ ] `Cartesian`
+- [~] `$.Position.MainSequence[].InitialState.Element` (discriminator, property `$type`)
+  - [x] `Cartesian`
   - [ ] `Keplerian`
   - [ ] `Spherical`
 - [ ] `$.Position.MainSequence[].Results[]` (discriminator, property `$type`)
@@ -8227,9 +8231,9 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
+- [~] `$.Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
   - [ ] `Apoapsis`
-  - [ ] `Duration`
+  - [x] `Duration`
   - [ ] `Epoch`
   - [ ] `Periapsis`
   - [ ] `Scalar`
@@ -8340,11 +8344,11 @@ with a similar name exists.
   - [ ] `AzElMask`
   - [ ] `ElevationAngle`
   - [ ] `Range`
-- [ ] `$.Position.Propagators[].NumericalIntegrator` (discriminator, property `$type`)
-  - [ ] `RKF7th8th`
-- [ ] `$.Position.Propagators[].GravityModel` (discriminator, property `$type`)
+- [x] `$.Position.Propagators[].NumericalIntegrator` (discriminator, property `$type`)
+  - [x] `RKF7th8th`
+- [~] `$.Position.Propagators[].GravityModel` (discriminator, property `$type`)
   - [ ] `GravityField`
-  - [ ] `TwoBody`
+  - [x] `TwoBody`
 - [ ] `$.Position.Propagators[].AtmosphericModel` (discriminator, property `$type`)
   - [ ] `JacchiaRoberts`
 - [ ] `$.Position.Propagators[].SRPModel` (discriminator, property `$type`)
@@ -8354,9 +8358,9 @@ with a similar name exists.
   - [ ] `EngineConstant`
 - [ ] `$.Position.HpopPropagator.NumericalIntegrator` (discriminator, property `$type`)
   - [ ] `RKF7th8th`
-- [ ] `$.Position.HpopPropagator.GravityModel` (discriminator, property `$type`)
+- [~] `$.Position.HpopPropagator.GravityModel` (discriminator, property `$type`)
   - [ ] `GravityField`
-  - [ ] `TwoBody`
+  - [x] `TwoBody`
 - [ ] `$.Position.HpopPropagator.AtmosphericModel` (discriminator, property `$type`)
   - [ ] `JacchiaRoberts`
 - [ ] `$.Position.HpopPropagator.SRPModel` (discriminator, property `$type`)
@@ -8364,15 +8368,15 @@ with a similar name exists.
 
 ### `/Propagator/HPOP`
 
-- [ ] `$.HpopPropagator.NumericalIntegrator` (discriminator, property `$type`)
-  - [ ] `RKF7th8th`
-- [ ] `$.HpopPropagator.GravityModel` (discriminator, property `$type`)
-  - [ ] `GravityField`
-  - [ ] `TwoBody`
-- [ ] `$.HpopPropagator.AtmosphericModel` (discriminator, property `$type`)
-  - [ ] `JacchiaRoberts`
-- [ ] `$.HpopPropagator.SRPModel` (discriminator, property `$type`)
-  - [ ] `SRPSpherical`
+- [x] `$.HpopPropagator.NumericalIntegrator` (discriminator, property `$type`)
+  - [x] `RKF7th8th`
+- [x] `$.HpopPropagator.GravityModel` (discriminator, property `$type`)
+  - [x] `GravityField`
+  - [x] `TwoBody`
+- [x] `$.HpopPropagator.AtmosphericModel` (discriminator, property `$type`)
+  - [x] `JacchiaRoberts`
+- [x] `$.HpopPropagator.SRPModel` (discriminator, property `$type`)
+  - [x] `SRPSpherical`
 
 ### `/Rocket/RocketGuid`
 
@@ -8414,24 +8418,24 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.FromObjectPath.Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.FromObjectPath.Position` (discriminator, property `$type`)
-  - [ ] `AstrogatorMCS`
-  - [ ] `Ballistic`
-  - [ ] `CentralBody`
-  - [ ] `CzmlPosition`
-  - [ ] `CzmlPositions`
-  - [ ] `HPOP`
-  - [ ] `J2`
-  - [ ] `SGP4`
-  - [ ] `SimpleAscent`
-  - [ ] `SitePosition`
-  - [ ] `TwoBody`
-- [ ] `$.FromObjectPath.Position.MainSequence[]` (discriminator, property `$type`)
+- [x] `$.FromObjectPath.Position` (discriminator, property `$type`)
+  - [x] `AstrogatorMCS`
+  - [x] `Ballistic`
+  - [x] `CentralBody`
+  - [x] `CzmlPosition`
+  - [x] `CzmlPositions`
+  - [x] `HPOP`
+  - [x] `J2`
+  - [x] `SGP4`
+  - [x] `SimpleAscent`
+  - [x] `SitePosition`
+  - [x] `TwoBody`
+- [~] `$.FromObjectPath.Position.MainSequence[]` (discriminator, property `$type`)
   - [ ] `Follow`
-  - [ ] `InitialState`
+  - [x] `InitialState`
   - [ ] `ManeuverFinite`
   - [ ] `ManeuverImpulsive`
-  - [ ] `Propagate`
+  - [x] `Propagate`
   - [ ] `Sequence`
   - [ ] `Stop`
   - [ ] `TargetSequence`
@@ -8516,9 +8520,9 @@ with a similar name exists.
   - [ ] `Attitude`
   - [ ] `ThrustVector`
   - [ ] `VelocityVector`
-- [ ] `$.FromObjectPath.Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
+- [~] `$.FromObjectPath.Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
   - [ ] `Apoapsis`
-  - [ ] `Duration`
+  - [x] `Duration`
   - [ ] `Epoch`
   - [ ] `Periapsis`
   - [ ] `Scalar`
@@ -8549,8 +8553,8 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.FromObjectPath.Position.MainSequence[].InitialState.Element` (discriminator, property `$type`)
-  - [ ] `Cartesian`
+- [~] `$.FromObjectPath.Position.MainSequence[].InitialState.Element` (discriminator, property `$type`)
+  - [x] `Cartesian`
   - [ ] `Keplerian`
   - [ ] `Spherical`
 - [ ] `$.FromObjectPath.Position.MainSequence[].Results[]` (discriminator, property `$type`)
@@ -8586,9 +8590,9 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.FromObjectPath.Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
+- [~] `$.FromObjectPath.Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
   - [ ] `Apoapsis`
-  - [ ] `Duration`
+  - [x] `Duration`
   - [ ] `Epoch`
   - [ ] `Periapsis`
   - [ ] `Scalar`
@@ -8678,11 +8682,11 @@ with a similar name exists.
   - [ ] `AzElMask`
   - [ ] `ElevationAngle`
   - [ ] `Range`
-- [ ] `$.FromObjectPath.Position.Propagators[].NumericalIntegrator` (discriminator, property `$type`)
-  - [ ] `RKF7th8th`
-- [ ] `$.FromObjectPath.Position.Propagators[].GravityModel` (discriminator, property `$type`)
+- [x] `$.FromObjectPath.Position.Propagators[].NumericalIntegrator` (discriminator, property `$type`)
+  - [x] `RKF7th8th`
+- [~] `$.FromObjectPath.Position.Propagators[].GravityModel` (discriminator, property `$type`)
   - [ ] `GravityField`
-  - [ ] `TwoBody`
+  - [x] `TwoBody`
 - [ ] `$.FromObjectPath.Position.Propagators[].AtmosphericModel` (discriminator, property `$type`)
   - [ ] `JacchiaRoberts`
 - [ ] `$.FromObjectPath.Position.Propagators[].SRPModel` (discriminator, property `$type`)
@@ -8692,67 +8696,67 @@ with a similar name exists.
   - [ ] `EngineConstant`
 - [ ] `$.FromObjectPath.Position.HpopPropagator.NumericalIntegrator` (discriminator, property `$type`)
   - [ ] `RKF7th8th`
-- [ ] `$.FromObjectPath.Position.HpopPropagator.GravityModel` (discriminator, property `$type`)
+- [~] `$.FromObjectPath.Position.HpopPropagator.GravityModel` (discriminator, property `$type`)
   - [ ] `GravityField`
-  - [ ] `TwoBody`
+  - [x] `TwoBody`
 - [ ] `$.FromObjectPath.Position.HpopPropagator.AtmosphericModel` (discriminator, property `$type`)
   - [ ] `JacchiaRoberts`
 - [ ] `$.FromObjectPath.Position.HpopPropagator.SRPModel` (discriminator, property `$type`)
   - [ ] `SRPSpherical`
-- [ ] `$.FromObjectPath.Orientation` (discriminator, property `$type`)
+- [~] `$.FromObjectPath.Orientation` (discriminator, property `$type`)
   - [ ] `AlignedAndConstrained`
-  - [ ] `Composite`
+  - [x] `Composite`
   - [ ] `CzmlOrientation`
+  - [x] `Fixed`
+  - [x] `FixedAtEpoch`
+  - [x] `LVLH`
+  - [x] `VNC`
+  - [x] `VVLH`
+- [x] `$.FromObjectPath.Sensor` (discriminator, property `$type`)
+  - [x] `Conic`
+  - [x] `Rectangular`
+- [x] `$.FromObjectPath.SensorPointing` (discriminator, property `$type`)
+  - [x] `Fixed`
+- [x] `$.FromObjectPath.Constraints[]` (discriminator, property `$type`)
+  - [x] `AzElMask`
+  - [x] `ElevationAngle`
+  - [x] `Range`
+- [x] `$.ToObjectPath.Position` (discriminator, property `$type`)
+  - [x] `AstrogatorMCS`
+  - [x] `Ballistic`
+  - [x] `CentralBody`
+  - [x] `CzmlPosition`
+  - [x] `CzmlPositions`
+  - [x] `HPOP`
+  - [x] `J2`
+  - [x] `SGP4`
+  - [x] `SimpleAscent`
+  - [x] `SitePosition`
+  - [x] `TwoBody`
+- [~] `$.ToObjectPath.Orientation` (discriminator, property `$type`)
+  - [x] `AlignedAndConstrained`
+  - [ ] `Composite`
+  - [x] `CzmlOrientation`
   - [ ] `Fixed`
   - [ ] `FixedAtEpoch`
-  - [ ] `LVLH`
-  - [ ] `VNC`
-  - [ ] `VVLH`
-- [ ] `$.FromObjectPath.Sensor` (discriminator, property `$type`)
-  - [ ] `Conic`
-  - [ ] `Rectangular`
-- [ ] `$.FromObjectPath.SensorPointing` (discriminator, property `$type`)
-  - [ ] `Fixed`
-- [ ] `$.FromObjectPath.Constraints[]` (discriminator, property `$type`)
-  - [ ] `AzElMask`
-  - [ ] `ElevationAngle`
-  - [ ] `Range`
-- [ ] `$.ToObjectPath.Position` (discriminator, property `$type`)
-  - [ ] `AstrogatorMCS`
-  - [ ] `Ballistic`
-  - [ ] `CentralBody`
-  - [ ] `CzmlPosition`
-  - [ ] `CzmlPositions`
-  - [ ] `HPOP`
-  - [ ] `J2`
-  - [ ] `SGP4`
-  - [ ] `SimpleAscent`
-  - [ ] `SitePosition`
-  - [ ] `TwoBody`
-- [ ] `$.ToObjectPath.Orientation` (discriminator, property `$type`)
-  - [ ] `AlignedAndConstrained`
-  - [ ] `Composite`
-  - [ ] `CzmlOrientation`
-  - [ ] `Fixed`
-  - [ ] `FixedAtEpoch`
-  - [ ] `LVLH`
-  - [ ] `VNC`
-  - [ ] `VVLH`
-- [ ] `$.ToObjectPath.Sensor` (discriminator, property `$type`)
-  - [ ] `Conic`
-  - [ ] `Rectangular`
-- [ ] `$.ToObjectPath.SensorPointing` (discriminator, property `$type`)
-  - [ ] `Fixed`
-- [ ] `$.ToObjectPath.Constraints[]` (discriminator, property `$type`)
-  - [ ] `AzElMask`
-  - [ ] `ElevationAngle`
-  - [ ] `Range`
+  - [x] `LVLH`
+  - [x] `VNC`
+  - [x] `VVLH`
+- [x] `$.ToObjectPath.Sensor` (discriminator, property `$type`)
+  - [x] `Conic`
+  - [x] `Rectangular`
+- [x] `$.ToObjectPath.SensorPointing` (discriminator, property `$type`)
+  - [x] `Fixed`
+- [x] `$.ToObjectPath.Constraints[]` (discriminator, property `$type`)
+  - [x] `AzElMask`
+  - [x] `ElevationAngle`
+  - [x] `Range`
 
 ### `/access/ChainCompute`
 
-- [ ] `$.AllObjects[]` (discriminator, property `$type`)
-  - [ ] `EntityPath`
-  - [ ] `EntityPathGroup`
+- [x] `$.AllObjects[]` (discriminator, property `$type`)
+  - [x] `EntityPath`
+  - [x] `EntityPathGroup`
 - [ ] `$.AllObjects[].Vgt.Vectors[]` (discriminator, property `$type`)
   - [ ] `FixedInAxes`
 - [ ] `$.AllObjects[].Vgt.Vectors[].Direction` (discriminator, property `$type`)
@@ -8782,24 +8786,24 @@ with a similar name exists.
   - [ ] `Quaternion`
 - [ ] `$.AllObjects[].Vgt.Angles[]` (discriminator, property `$type`)
   - [ ] `BetweenVectors`
-- [ ] `$.AllObjects[].Position` (discriminator, property `$type`)
-  - [ ] `AstrogatorMCS`
-  - [ ] `Ballistic`
-  - [ ] `CentralBody`
-  - [ ] `CzmlPosition`
-  - [ ] `CzmlPositions`
-  - [ ] `HPOP`
-  - [ ] `J2`
-  - [ ] `SGP4`
-  - [ ] `SimpleAscent`
-  - [ ] `SitePosition`
-  - [ ] `TwoBody`
-- [ ] `$.AllObjects[].Position.MainSequence[]` (discriminator, property `$type`)
+- [x] `$.AllObjects[].Position` (discriminator, property `$type`)
+  - [x] `AstrogatorMCS`
+  - [x] `Ballistic`
+  - [x] `CentralBody`
+  - [x] `CzmlPosition`
+  - [x] `CzmlPositions`
+  - [x] `HPOP`
+  - [x] `J2`
+  - [x] `SGP4`
+  - [x] `SimpleAscent`
+  - [x] `SitePosition`
+  - [x] `TwoBody`
+- [~] `$.AllObjects[].Position.MainSequence[]` (discriminator, property `$type`)
   - [ ] `Follow`
-  - [ ] `InitialState`
+  - [x] `InitialState`
   - [ ] `ManeuverFinite`
   - [ ] `ManeuverImpulsive`
-  - [ ] `Propagate`
+  - [x] `Propagate`
   - [ ] `Sequence`
   - [ ] `Stop`
   - [ ] `TargetSequence`
@@ -8884,9 +8888,9 @@ with a similar name exists.
   - [ ] `Attitude`
   - [ ] `ThrustVector`
   - [ ] `VelocityVector`
-- [ ] `$.AllObjects[].Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
+- [~] `$.AllObjects[].Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
   - [ ] `Apoapsis`
-  - [ ] `Duration`
+  - [x] `Duration`
   - [ ] `Epoch`
   - [ ] `Periapsis`
   - [ ] `Scalar`
@@ -8917,8 +8921,8 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.AllObjects[].Position.MainSequence[].InitialState.Element` (discriminator, property `$type`)
-  - [ ] `Cartesian`
+- [~] `$.AllObjects[].Position.MainSequence[].InitialState.Element` (discriminator, property `$type`)
+  - [x] `Cartesian`
   - [ ] `Keplerian`
   - [ ] `Spherical`
 - [ ] `$.AllObjects[].Position.MainSequence[].Results[]` (discriminator, property `$type`)
@@ -8954,9 +8958,9 @@ with a similar name exists.
   - [ ] `PointElement`
   - [ ] `Relative`
   - [ ] `SphericalElement`
-- [ ] `$.AllObjects[].Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
+- [~] `$.AllObjects[].Position.MainSequence[].StopConditions[]` (discriminator, property `$type`)
   - [ ] `Apoapsis`
-  - [ ] `Duration`
+  - [x] `Duration`
   - [ ] `Epoch`
   - [ ] `Periapsis`
   - [ ] `Scalar`
@@ -9046,11 +9050,11 @@ with a similar name exists.
   - [ ] `AzElMask`
   - [ ] `ElevationAngle`
   - [ ] `Range`
-- [ ] `$.AllObjects[].Position.Propagators[].NumericalIntegrator` (discriminator, property `$type`)
-  - [ ] `RKF7th8th`
-- [ ] `$.AllObjects[].Position.Propagators[].GravityModel` (discriminator, property `$type`)
+- [x] `$.AllObjects[].Position.Propagators[].NumericalIntegrator` (discriminator, property `$type`)
+  - [x] `RKF7th8th`
+- [~] `$.AllObjects[].Position.Propagators[].GravityModel` (discriminator, property `$type`)
   - [ ] `GravityField`
-  - [ ] `TwoBody`
+  - [x] `TwoBody`
 - [ ] `$.AllObjects[].Position.Propagators[].AtmosphericModel` (discriminator, property `$type`)
   - [ ] `JacchiaRoberts`
 - [ ] `$.AllObjects[].Position.Propagators[].SRPModel` (discriminator, property `$type`)
@@ -9060,28 +9064,28 @@ with a similar name exists.
   - [ ] `EngineConstant`
 - [ ] `$.AllObjects[].Position.HpopPropagator.NumericalIntegrator` (discriminator, property `$type`)
   - [ ] `RKF7th8th`
-- [ ] `$.AllObjects[].Position.HpopPropagator.GravityModel` (discriminator, property `$type`)
+- [~] `$.AllObjects[].Position.HpopPropagator.GravityModel` (discriminator, property `$type`)
   - [ ] `GravityField`
-  - [ ] `TwoBody`
+  - [x] `TwoBody`
 - [ ] `$.AllObjects[].Position.HpopPropagator.AtmosphericModel` (discriminator, property `$type`)
   - [ ] `JacchiaRoberts`
 - [ ] `$.AllObjects[].Position.HpopPropagator.SRPModel` (discriminator, property `$type`)
   - [ ] `SRPSpherical`
-- [ ] `$.AllObjects[].Orientation` (discriminator, property `$type`)
-  - [ ] `AlignedAndConstrained`
-  - [ ] `Composite`
-  - [ ] `CzmlOrientation`
-  - [ ] `Fixed`
-  - [ ] `FixedAtEpoch`
-  - [ ] `LVLH`
-  - [ ] `VNC`
-  - [ ] `VVLH`
-- [ ] `$.AllObjects[].Sensor` (discriminator, property `$type`)
-  - [ ] `Conic`
-  - [ ] `Rectangular`
-- [ ] `$.AllObjects[].SensorPointing` (discriminator, property `$type`)
-  - [ ] `Fixed`
-- [ ] `$.AllObjects[].Constraints[]` (discriminator, property `$type`)
-  - [ ] `AzElMask`
-  - [ ] `ElevationAngle`
-  - [ ] `Range`
+- [x] `$.AllObjects[].Orientation` (discriminator, property `$type`)
+  - [x] `AlignedAndConstrained`
+  - [x] `Composite`
+  - [x] `CzmlOrientation`
+  - [x] `Fixed`
+  - [x] `FixedAtEpoch`
+  - [x] `LVLH`
+  - [x] `VNC`
+  - [x] `VVLH`
+- [x] `$.AllObjects[].Sensor` (discriminator, property `$type`)
+  - [x] `Conic`
+  - [x] `Rectangular`
+- [x] `$.AllObjects[].SensorPointing` (discriminator, property `$type`)
+  - [x] `Fixed`
+- [x] `$.AllObjects[].Constraints[]` (discriminator, property `$type`)
+  - [x] `AzElMask`
+  - [x] `ElevationAngle`
+  - [x] `Range`

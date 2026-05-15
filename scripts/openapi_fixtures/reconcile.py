@@ -15,11 +15,6 @@ from typing import Any
 import requests
 
 try:
-    from scripts.openapi_fixtures.generate_status import (
-        DEFAULT_OPENAPI,
-        DEFAULT_OUTPUT,
-        generate_status_text,
-    )
     from scripts.openapi_fixtures.normalize import dump_fixture
     from scripts.openapi_fixtures.shapes import response_kind
     from scripts.openapi_fixtures.verify import (
@@ -31,7 +26,6 @@ try:
         validate_fixture,
     )
 except ModuleNotFoundError:  # pragma: no cover - direct script execution fallback
-    from generate_status import DEFAULT_OPENAPI, DEFAULT_OUTPUT, generate_status_text
     from normalize import dump_fixture
     from shapes import response_kind
     from verify import (
@@ -45,6 +39,8 @@ except ModuleNotFoundError:  # pragma: no cover - direct script execution fallba
 
 
 JSON_MEDIA_TYPES = {"application/json"}
+DEFAULT_OPENAPI = Path("openapi/astrox.openapi.yaml")
+DEFAULT_OUTPUT = Path("openapi/fixtures/STATUS.md")
 
 
 def media_type(value: str) -> str:
@@ -521,6 +517,11 @@ def reconcile_fixture_dir(
             session.close()
 
     if apply and changed_fixture_paths:
+        try:
+            from scripts.openapi_fixtures.generate_status import generate_status_text
+        except ModuleNotFoundError:  # pragma: no cover - direct script execution fallback
+            from generate_status import generate_status_text
+
         status_text = generate_status_text(openapi=openapi, fixture_dir=fixture_dir)
         current = status_output.read_text(encoding="utf-8") if status_output.exists() else None
         if current != status_text:

@@ -88,6 +88,13 @@ narrow non-fixturable failure such as an empty HTTP 500. It does not create
 fixtures for newly discovered endpoints or automatically unblock previously
 blocked branches.
 
+Discovery coverage can be reported with
+`scripts/openapi_fixtures/discovery_report.py`. It compares OpenAPI-discovered
+endpoints and branch axis values against checked-in fixture request payloads.
+It reports uncovered contracts and can optionally probe saved blocked branch
+requests to flag branches that now look reachable, but it does not generate
+new endpoint fixtures.
+
 The scheduled fixture CI should verify only wire-level behavior:
 
 - route and method still exist

@@ -9,9 +9,15 @@ from pathlib import Path
 from typing import Any
 
 try:
+    from scripts.openapi_fixtures.discovery_report import (
+        axis_key,
+        discovery_fixture_report,
+        value_key,
+    )
     from scripts.openapi_fixtures.discover import discover, load_spec
     from scripts.openapi_fixtures.verify import iter_fixture_paths, load_fixture
 except ModuleNotFoundError:  # pragma: no cover - direct script execution fallback
+    from discovery_report import axis_key, discovery_fixture_report, value_key
     from discover import discover, load_spec
     from verify import iter_fixture_paths, load_fixture
 
@@ -31,6 +37,8 @@ def state_label(state: str) -> str:
         return "x"
     if state == "blocked":
         return "!"
+    if state == "partial":
+        return "~"
     return " "
 
 
@@ -97,6 +105,11 @@ def markdown_lines(*, openapi: Path, fixture_dir: Path) -> list[str]:
     fixtures = load_fixtures(fixture_dir)
     by_endpoint = fixture_index(fixtures)
     counts = branch_counts(fixtures)
+    discovery_report = discovery_fixture_report(openapi=openapi, fixture_dir=fixture_dir)
+    axis_reports = {
+        (axis["endpoint"], axis["axis_key"]): axis
+        for axis in discovery_report["axis_reports"]
+    }
     discovered_endpoints = {endpoint["endpoint"] for endpoint in endpoints}
     endpoints_without_nominal_evidence = [
         endpoint["endpoint"]
@@ -127,12 +140,16 @@ def markdown_lines(*, openapi: Path, fixture_dir: Path) -> list[str]:
         f"- verified non-nominal fixture branches: {counts['non_nominal_verified']}",
         f"- blocked non-nominal fixture branches: {counts['non_nominal_blocked']}",
         f"- discovered endpoints without verified/blocked nominal fixture evidence: {len(endpoints_without_nominal_evidence)}",
+        f"- discovered branch axes: {discovery_report['axis_count']}",
+        f"- discovered branch axis values: {discovery_report['axis_value_count']}",
+        f"- covered discovered branch axis values: {discovery_report['covered_axis_value_count']}",
+        f"- uncovered discovered branch axis values: {discovery_report['uncovered_axis_value_count']}",
         "",
         "Legend:",
         "",
         "- `[x]` verified by a checked-in fixture branch",
         "- `[!]` blocked by checked-in fixture evidence",
-        "- `[~]` fixture file exists, but no nominal branch is recorded",
+        "- `[~]` partially covered by checked-in fixture evidence",
         "- `[ ]` discovered from OpenAPI, but no checked-in fixture branch records it",
         "",
         "## Nominal Endpoint Inventory",
@@ -190,10 +207,10 @@ def markdown_lines(*, openapi: Path, fixture_dir: Path) -> list[str]:
         [
             "## Discovered Branch Axis Candidates",
             "",
-            "The axis/value rows below come from the checked-in OpenAPI document. They are",
-            "candidate coverage targets only. Until Phase 4 adds explicit axis-to-fixture",
-            "mapping, these rows must not be read as covered just because a fixture branch",
-            "with a similar name exists.",
+            "The axis/value rows below come from the checked-in OpenAPI document and",
+            "are matched against checked-in branch request payloads for the same endpoint.",
+            "Coverage here means an exact candidate value appears in fixture YAML; it",
+            "does not imply cross-product or semantic coverage.",
             "",
         ]
     )
@@ -203,15 +220,23 @@ def markdown_lines(*, openapi: Path, fixture_dir: Path) -> list[str]:
             continue
         lines.extend([f"### `{endpoint['endpoint']}`", ""])
         for axis in axes:
+            axis_report = axis_reports.get((endpoint["endpoint"], axis_key(axis)), {})
             axis_name = axis["path"]
             kind = axis["kind"]
             property_name = axis.get("property")
             suffix = f", property `{property_name}`" if property_name else ""
-            lines.append(f"- [ ] `{axis_name}` ({kind}{suffix})")
+            axis_label = state_label(axis_report.get("state", "uncovered"))
+            lines.append(f"- [{axis_label}] `{axis_name}` ({kind}{suffix})")
             values = axis.get("values")
             if isinstance(values, list):
+                value_reports = {
+                    value_key(value_report["value"]): value_report
+                    for value_report in axis_report.get("values", [])
+                }
                 for value in values:
-                    lines.append(f"  - [ ] `{value}`")
+                    value_report = value_reports.get(value_key(value), {})
+                    value_label = state_label(value_report.get("state", "uncovered"))
+                    lines.append(f"  - [{value_label}] `{value}`")
         lines.append("")
 
     return lines
