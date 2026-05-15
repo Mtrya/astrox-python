@@ -86,17 +86,32 @@ def normalize_branch(branch: dict[str, Any]) -> dict[str, Any]:
     return ordered_subset(normalized, BRANCH_KEYS)
 
 
-def normalize_fixture_data(fixture: dict[str, Any]) -> dict[str, Any]:
+def normalization_path(path: Path | None) -> str:
+    return str(path) if path is not None else "<fixture>"
+
+
+def require_fixture_key(
+    fixture: dict[str, Any],
+    key: str,
+    *,
+    path: Path | None = None,
+) -> Any:
+    if key not in fixture:
+        raise ValueError(f"{normalization_path(path)}: missing required key {key!r}")
+    return fixture[key]
+
+
+def normalize_fixture_data(fixture: dict[str, Any], *, path: Path | None = None) -> dict[str, Any]:
     normalized: dict[str, Any] = {}
     for key in TOP_LEVEL_KEYS:
         if key == "branches":
-            branches = fixture["branches"]
+            branches = require_fixture_key(fixture, key, path=path)
             normalized["branches"] = {
                 branch_id: normalize_branch(branch)
                 for branch_id, branch in branches.items()
             }
         else:
-            normalized[key] = plain_copy(fixture[key])
+            normalized[key] = plain_copy(require_fixture_key(fixture, key, path=path))
     return normalized
 
 
@@ -116,7 +131,7 @@ def normalize_fixture_file(path: Path, *, check: bool = False) -> bool:
     loaded = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(loaded, dict):
         raise ValueError(f"{path} did not load as an object")
-    fixture = normalize_fixture_data(loaded)
+    fixture = normalize_fixture_data(loaded, path=path)
     validate_fixture(fixture, path=path)
     normalized = dump_fixture(fixture)
     current = path.read_text(encoding="utf-8")

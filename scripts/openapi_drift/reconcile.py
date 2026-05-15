@@ -85,6 +85,48 @@ def required_fields_shape(keys: list[str], previous_shape: dict[str, Any] | None
     return keys
 
 
+def const_mismatches(
+    value: Any,
+    previous_shape: dict[str, Any] | None,
+    *,
+    path: str = "$",
+) -> list[dict[str, Any]]:
+    if not isinstance(previous_shape, dict):
+        return []
+    kind = response_kind(value)
+    mismatches: list[dict[str, Any]] = []
+    if "const" in previous_shape and kind != "json_number":
+        expected = previous_shape["const"]
+        if previous_shape.get("kind") != kind or expected != value:
+            mismatches.append({"path": path, "expected": expected, "actual": value})
+
+    if isinstance(value, dict):
+        previous_fields = previous_shape.get("fields", {})
+        if isinstance(previous_fields, dict):
+            for key in sorted(set(value) & set(previous_fields)):
+                child_shape = previous_fields.get(key)
+                child_path = f"{path}.{key}"
+                mismatches.extend(
+                    const_mismatches(
+                        value[key],
+                        child_shape if isinstance(child_shape, dict) else None,
+                        path=child_path,
+                    )
+                )
+    elif isinstance(value, list):
+        previous_item_shape = previous_shape.get("items")
+        if isinstance(previous_item_shape, dict) and "any_of" not in previous_item_shape:
+            for index, item in enumerate(value):
+                mismatches.extend(
+                    const_mismatches(
+                        item,
+                        previous_item_shape,
+                        path=f"{path}[{index}]",
+                    )
+                )
+    return mismatches
+
+
 def shape_from_value(value: Any, previous_shape: dict[str, Any] | None = None) -> dict[str, Any]:
     """Build a fixture-safe structural response shape from a decoded JSON value."""
     kind = response_kind(value)
@@ -215,6 +257,17 @@ def expect_from_response(
                 "status": response.status_code,
                 "actual_content_type": actual_content_type,
                 "error": f"response was not JSON: {exc}",
+            }
+        mismatches = const_mismatches(body, previous_response_shape)
+        if mismatches:
+            return None, {
+                "action": "report",
+                "classification": "verified_const_mismatch",
+                "changed": False,
+                "status": response.status_code,
+                "actual_content_type": actual_content_type,
+                "const_mismatches": mismatches,
+                "error": "live response changed a fixture const assertion",
             }
         response_shape = shape_from_value(body, previous_response_shape)
     elif is_text_media_type(actual_content_type):

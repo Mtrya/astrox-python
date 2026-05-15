@@ -22,7 +22,7 @@ from scripts.openapi_drift.drift_pipeline_report import (
     summary_markdown,
 )
 from scripts.openapi_drift.generate_status import generate_status_text
-from scripts.openapi_drift.normalize import dump_fixture, normalize_fixture_data
+from scripts.openapi_drift.normalize import dump_fixture, normalize_fixture_data, normalize_fixture_file
 from scripts.openapi_drift.probe_request import probe_request_branch
 from scripts.openapi_drift.reconcile import (
     expect_from_response,
@@ -870,6 +870,22 @@ def test_normalize_fixture_data_adds_state_and_expands_shared_expect() -> None:
     assert "state: verified" in dumped
 
 
+def test_normalize_fixture_file_reports_missing_key_with_path(tmp_path: Path) -> None:
+    fixture_path = tmp_path / "partial.yaml"
+    fixture = valid_fixture_data()
+    del fixture["endpoint"]
+    fixture_path.write_text(yaml.safe_dump(fixture), encoding="utf-8")
+
+    try:
+        normalize_fixture_file(fixture_path, check=True)
+    except ValueError as exc:
+        message = str(exc)
+        assert str(fixture_path) in message
+        assert "missing required key 'endpoint'" in message
+    else:  # pragma: no cover
+        raise AssertionError("expected ValueError")
+
+
 def test_current_fixture_files_pass_schema_validation() -> None:
     for fixture_path in iter_fixture_paths(Path("openapi/fixtures")):
         load_fixture(fixture_path)
@@ -1353,19 +1369,26 @@ def test_drift_pipeline_report_requires_issue_for_no_diff_unblocked_case() -> No
         "covered_axis_value_count": 0,
         "uncovered_axis_value_count": 0,
         "uncovered_axis_values": [],
-        "previously_blocked_now_reachable": [
+        "previously_blocked_now_reachable": [],
+    }
+    reconcile_report = {
+        "results": [
             {
                 "fixture": "openapi/fixtures/example.yaml",
                 "endpoint": "/Example",
                 "branch": "blocked_case",
+                "action": "report",
+                "classification": "previously_blocked_now_reachable",
                 "status": 200,
             }
         ],
+        "classification_counts": {"previously_blocked_now_reachable": 1},
+        "action_counts": {"report": 1},
     }
 
     report = build_pipeline_report(
         tracked_paths=[],
-        reconcile_report={"results": [], "classification_counts": {}, "action_counts": {}},
+        reconcile_report=reconcile_report,
         discovery_report=discovery_report,
         test_outcomes={"focused": "success"},
     )
@@ -1450,6 +1473,39 @@ def test_shape_from_value_preserves_existing_required_field_order() -> None:
             "B": {"kind": "json_boolean"},
         },
     }
+
+
+def test_reconcile_reports_const_mismatch_without_broadening(tmp_path: Path) -> None:
+    fixture_dir = tmp_path / "fixtures"
+    fixture_dir.mkdir()
+    fixture = valid_fixture_data()
+    fixture["branches"]["nominal"]["expect"]["response"] = {
+        "kind": "json_object",
+        "required_fields": ["IsSuccess"],
+        "fields": {"IsSuccess": {"kind": "json_boolean", "const": False}},
+    }
+    fixture_path = fixture_dir / "example.yaml"
+    fixture_path.write_text(dump_fixture(fixture), encoding="utf-8")
+
+    report = reconcile_fixture_dir(
+        fixture_dir=fixture_dir,
+        base_url="http://example.test",
+        timeout=1.0,
+        apply=True,
+        session=StubSession(StubResponse(body={"IsSuccess": True})),  # type: ignore[arg-type]
+        today="2026-05-15",
+    )
+
+    loaded = load_fixture(fixture_path)
+    assert loaded["branches"]["nominal"]["expect"]["response"]["fields"]["IsSuccess"] == {
+        "kind": "json_boolean",
+        "const": False,
+    }
+    assert report["changed_count"] == 0
+    result = report["results"][0]
+    assert result["action"] == "report"
+    assert result["classification"] == "verified_const_mismatch"
+    assert result["const_mismatches"] == [{"path": "$.IsSuccess", "expected": False, "actual": True}]
 
 
 def test_expect_from_response_accepts_empty_204_without_content_type() -> None:

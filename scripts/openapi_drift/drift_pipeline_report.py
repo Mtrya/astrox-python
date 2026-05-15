@@ -75,6 +75,33 @@ def reconcile_report_only_results(reconcile_report: dict[str, Any]) -> list[dict
     ]
 
 
+def blocked_now_reachable_results(
+    reconcile_report: dict[str, Any],
+    discovery_report: dict[str, Any],
+) -> list[dict[str, Any]]:
+    discovery_results = discovery_report.get("previously_blocked_now_reachable", [])
+    if not isinstance(discovery_results, list):
+        discovery_results = []
+    reconcile_results = [
+        result
+        for result in reconcile_report_only_results(reconcile_report)
+        if result.get("classification") == "previously_blocked_now_reachable"
+    ]
+    by_key = {
+        json.dumps(
+            {
+                "fixture": item.get("fixture"),
+                "endpoint": item.get("endpoint"),
+                "branch": item.get("branch"),
+            },
+            sort_keys=True,
+        ): item
+        for item in [*discovery_results, *reconcile_results]
+        if isinstance(item, dict)
+    }
+    return [by_key[key] for key in sorted(by_key)]
+
+
 def build_pipeline_report(
     *,
     tracked_paths: list[str],
@@ -82,9 +109,7 @@ def build_pipeline_report(
     discovery_report: dict[str, Any],
     test_outcomes: dict[str, str],
 ) -> dict[str, Any]:
-    blocked_now_reachable = discovery_report.get("previously_blocked_now_reachable", [])
-    if not isinstance(blocked_now_reachable, list):
-        blocked_now_reachable = []
+    blocked_now_reachable = blocked_now_reachable_results(reconcile_report, discovery_report)
     changed = bool(tracked_paths)
     pr_required = changed
     issue_required = (not pr_required) and bool(blocked_now_reachable)
