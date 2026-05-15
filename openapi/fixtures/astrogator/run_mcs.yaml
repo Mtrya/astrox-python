@@ -999,12 +999,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -1084,10 +1084,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -1126,12 +1126,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -1211,10 +1211,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -1318,12 +1318,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -1403,10 +1403,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -1445,12 +1445,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -1530,10 +1530,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -1654,12 +1654,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -1739,10 +1739,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -1781,12 +1781,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -1866,10 +1866,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -1937,12 +1937,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -2022,10 +2022,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -2064,12 +2064,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -2149,10 +2149,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -2280,12 +2280,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -2365,10 +2365,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -2407,12 +2407,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -2492,10 +2492,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -2593,12 +2593,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -2678,10 +2678,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -2720,12 +2720,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -2805,10 +2805,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -13627,12 +13627,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -13712,10 +13712,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -13754,12 +13754,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -13839,10 +13839,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -13910,12 +13910,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -13995,10 +13995,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -14037,12 +14037,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -14122,10 +14122,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -14248,12 +14248,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -14333,10 +14333,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -14375,12 +14375,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -14460,10 +14460,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -14531,12 +14531,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -14616,10 +14616,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -14658,12 +14658,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -14743,10 +14743,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -14867,12 +14867,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -14952,10 +14952,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -14994,12 +14994,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -15079,10 +15079,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -15150,12 +15150,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -15235,10 +15235,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -15277,12 +15277,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -15362,10 +15362,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -15490,12 +15490,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -15575,10 +15575,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -15617,12 +15617,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -15702,10 +15702,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -15773,12 +15773,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -15858,10 +15858,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -15900,12 +15900,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -15985,10 +15985,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -16117,12 +16117,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -16202,10 +16202,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -16244,12 +16244,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -16329,10 +16329,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -16400,12 +16400,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -16485,10 +16485,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -16527,12 +16527,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -16612,10 +16612,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -21203,12 +21203,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -21288,10 +21288,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -21330,12 +21330,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -21415,10 +21415,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -21486,12 +21486,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -21571,10 +21571,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -21613,12 +21613,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -21698,10 +21698,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -21823,12 +21823,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -21908,10 +21908,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -21950,12 +21950,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -22035,10 +22035,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -22106,12 +22106,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -22191,10 +22191,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -22233,12 +22233,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -22318,10 +22318,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -22443,12 +22443,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -22528,10 +22528,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -22570,12 +22570,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -22655,10 +22655,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -22726,12 +22726,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -22811,10 +22811,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -22853,12 +22853,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -22938,10 +22938,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -23098,12 +23098,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -23183,10 +23183,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -23225,12 +23225,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -23310,10 +23310,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -23417,12 +23417,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -23502,10 +23502,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -23544,12 +23544,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -23629,10 +23629,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -23746,12 +23746,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -23831,10 +23831,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -23873,12 +23873,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -23958,10 +23958,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -24065,12 +24065,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -24150,10 +24150,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -24192,12 +24192,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -24277,10 +24277,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -24392,12 +24392,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -24477,10 +24477,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -24519,12 +24519,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -24604,10 +24604,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -24711,12 +24711,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -24796,10 +24796,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:
@@ -24838,12 +24838,12 @@ branches:
                         Cartesian:
                           kind: json_object
                           required_fields:
-                            - X
-                            - Y
-                            - Z
                             - Vx
                             - Vy
                             - Vz
+                            - X
+                            - Y
+                            - Z
                           fields:
                             Vx:
                               kind: json_number
@@ -24923,10 +24923,10 @@ branches:
                         Spherical:
                           kind: json_object
                           required_fields:
-                            - RightAscension
                             - Declination
-                            - RadiusMagnitude
                             - HorizFPA
+                            - RadiusMagnitude
+                            - RightAscension
                             - VelocityAzimuth
                             - VelocityMagnitude
                           fields:

@@ -4043,9 +4043,9 @@ branches:
             items:
               any_of:
                 - kind: json_array
-                  min_length: 1
                   items:
                     kind: json_array
+                    min_length: 1
                     items:
                       kind: json_object
                       required_fields:
@@ -4063,9 +4063,9 @@ branches:
                         Stop:
                           kind: json_string
                 - kind: json_array
-                  min_length: 1
                   items:
                     kind: json_array
+                    min_length: 0
           GapDurationDatas:
             kind: json_array
             min_length: 1
