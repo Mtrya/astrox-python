@@ -25,12 +25,15 @@ class FakeResponse:
         *,
         text: str = "",
         reason: str = "OK",
+        content: bytes | None = None,
         json_error: Exception | None = None,
     ) -> None:
         self.status_code = status_code
         self.payload = payload if payload is not None else {"ok": True}
         self.text = text
         self.reason = reason
+        if content is not None:
+            self.content = content
         self.json_error = json_error
 
     def json(self) -> object:
@@ -170,7 +173,6 @@ def test_raw_post_uses_hidden_default_client_and_json_body(
             "json": {"Start": "2026-01-01T00:00:00Z"},
             "params": None,
             "headers": {
-                "Content-Type": "application/json",
                 "Accept": "application/json",
             },
             "timeout": 7,
@@ -198,7 +200,6 @@ def test_bound_raw_get_accepts_endpoint_without_leading_slash_and_query_params(
             "json": None,
             "params": {"city": "Beijing"},
             "headers": {
-                "Content-Type": "application/json",
                 "Accept": "application/json",
             },
             "timeout": 5,
@@ -232,7 +233,6 @@ def test_raw_request_normalizes_method_and_merges_headers(
             "json": {"Grid": {"GridType": "LatLonRegion"}},
             "params": None,
             "headers": {
-                "Content-Type": "application/json",
                 "Accept": "application/json",
                 "X-Astrox-Debug": "1",
             },
@@ -250,18 +250,20 @@ def test_raw_request_forwards_advanced_request_options(
         [FakeResponse(payload={"uploaded": True})],
     )
     client = astrox.Client(base_url="https://astrox.example")
+    files = {"archive": ("archive.zip", b"archive")}
 
     result = astrox.raw.request(
         "POST",
         "/ssc/admin/upload-database-archive",
         client=client,
-        data=b"archive",
+        files=files,
         verify=False,
     )
 
     assert result == {"uploaded": True}
+    assert session.calls[0]["headers"] == {"Accept": "application/json"}
     assert session.calls[0]["kwargs"] == {
-        "data": b"archive",
+        "files": files,
         "verify": False,
     }
 
@@ -330,6 +332,23 @@ def test_raw_204_response_returns_none() -> None:
     client._session = session
 
     assert client.raw.post("/empty", json={}) is None
+
+
+def test_raw_empty_200_response_returns_none() -> None:
+    session = RecordingSession(
+        [
+            FakeResponse(
+                status_code=200,
+                payload=None,
+                content=b"",
+                json_error=json.JSONDecodeError("empty", doc="", pos=0),
+            )
+        ]
+    )
+    client = astrox.Client(base_url="https://astrox.example")
+    client._session = session
+
+    assert client.raw.post("/empty-200", json={}) is None
 
 
 def test_http_error_400_is_not_retried() -> None:

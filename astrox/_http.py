@@ -30,7 +30,6 @@ def _join_url(base_url: str, endpoint: str) -> str:
 
 def _default_headers() -> dict[str, str]:
     return {
-        "Content-Type": "application/json",
         "Accept": "application/json",
     }
 
@@ -60,11 +59,11 @@ def _make_request(
     **request_kwargs: Any,
 ) -> Any:
     """
-    Make a JSON request to the API with retry mechanism.
+    Make an HTTP request to the API with retry mechanism.
 
     Args:
         endpoint: API endpoint (e.g., "/Coverage/ComputeCoverage")
-        json_body: Request payload (dict or Pydantic model)
+        json_body: Optional JSON request payload (dict or Pydantic model)
         method: HTTP method
         base_url: Base URL for the API
         timeout: Request timeout in seconds
@@ -129,7 +128,10 @@ def _make_request(
                 raise last_exception
 
             # Parse JSON response
-            if response.status_code == 204:
+            if (
+                response.status_code == 204
+                or getattr(response, "content", None) == b""
+            ):
                 return None
 
             try:
