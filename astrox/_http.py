@@ -38,6 +38,10 @@ def _default_headers() -> dict[str, str]:
 def _json_payload(data: Any) -> Any:
     if isinstance(data, BaseModel):
         return json.loads(data.model_dump_json(by_alias=True, exclude_none=True))
+    if isinstance(data, list):
+        return [_json_payload(item) for item in data]
+    if isinstance(data, dict):
+        return {key: _json_payload(value) for key, value in data.items()}
     return data
 
 
@@ -88,7 +92,9 @@ def _make_request(
 
     last_exception = None
 
-    for attempt in range(max_retries):
+    total_attempts = max_retries + 1
+
+    for attempt in range(total_attempts):
         try:
             response = use_session.request(
                 method.upper(),
@@ -117,7 +123,7 @@ def _make_request(
                     endpoint=endpoint,
                     response=response,
                 )
-                if attempt < max_retries - 1:
+                if attempt < total_attempts - 1:
                     time.sleep(retry_delay * (2**attempt))
                     continue
                 raise last_exception
@@ -152,7 +158,7 @@ def _make_request(
                 endpoint=endpoint,
                 timeout=timeout,
             )
-            if attempt < max_retries - 1:
+            if attempt < total_attempts - 1:
                 time.sleep(retry_delay * (2**attempt))
                 continue
             raise last_exception
@@ -162,7 +168,7 @@ def _make_request(
                 message=f"Failed to connect to API: {e}",
                 original_error=e,
             )
-            if attempt < max_retries - 1:
+            if attempt < total_attempts - 1:
                 time.sleep(retry_delay * (2**attempt))
                 continue
             raise last_exception
@@ -172,7 +178,7 @@ def _make_request(
                 message=f"Request failed: {e}",
                 original_error=e,
             )
-            if attempt < max_retries - 1:
+            if attempt < total_attempts - 1:
                 time.sleep(retry_delay * (2**attempt))
                 continue
             raise last_exception
@@ -283,6 +289,9 @@ class Client:
         json: Any = None,
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
+        timeout: float | None = None,
+        max_retries: int | None = None,
+        retry_delay: float | None = None,
         **request_kwargs: Any,
     ) -> Any:
         """Make a raw JSON request to an API endpoint."""
@@ -291,9 +300,9 @@ class Client:
             json_body=json,
             method=method,
             base_url=self.base_url,
-            timeout=self.timeout,
-            max_retries=self.max_retries,
-            retry_delay=self.retry_delay,
+            timeout=timeout if timeout is not None else self.timeout,
+            max_retries=max_retries if max_retries is not None else self.max_retries,
+            retry_delay=retry_delay if retry_delay is not None else self.retry_delay,
             session=self._session,
             params=params,
             headers=headers,
@@ -356,6 +365,9 @@ class RawClient:
         json: Any = None,
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
+        timeout: float | None = None,
+        max_retries: int | None = None,
+        retry_delay: float | None = None,
         client: Client | None = None,
         **request_kwargs: Any,
     ) -> Any:
@@ -366,6 +378,9 @@ class RawClient:
             json=json,
             params=params,
             headers=headers,
+            timeout=timeout,
+            max_retries=max_retries,
+            retry_delay=retry_delay,
             **request_kwargs,
         )
 
@@ -375,6 +390,9 @@ class RawClient:
         *,
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
+        timeout: float | None = None,
+        max_retries: int | None = None,
+        retry_delay: float | None = None,
         client: Client | None = None,
         **request_kwargs: Any,
     ) -> Any:
@@ -383,6 +401,9 @@ class RawClient:
             endpoint,
             params=params,
             headers=headers,
+            timeout=timeout,
+            max_retries=max_retries,
+            retry_delay=retry_delay,
             client=client,
             **request_kwargs,
         )
@@ -394,6 +415,9 @@ class RawClient:
         json: Any = None,
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
+        timeout: float | None = None,
+        max_retries: int | None = None,
+        retry_delay: float | None = None,
         client: Client | None = None,
         **request_kwargs: Any,
     ) -> Any:
@@ -403,6 +427,9 @@ class RawClient:
             json=json,
             params=params,
             headers=headers,
+            timeout=timeout,
+            max_retries=max_retries,
+            retry_delay=retry_delay,
             client=client,
             **request_kwargs,
         )

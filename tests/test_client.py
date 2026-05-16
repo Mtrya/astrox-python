@@ -6,10 +6,15 @@ import json
 
 import pytest
 import requests
+from pydantic import BaseModel, Field
 
 import astrox
 from astrox import exceptions
 from astrox import _http
+
+
+class NestedPayload(BaseModel):
+    wire_value: int = Field(alias="WireValue")
 
 
 class FakeResponse:
@@ -261,6 +266,64 @@ def test_raw_request_forwards_advanced_request_options(
     }
 
 
+def test_client_request_accepts_per_request_transport_overrides() -> None:
+    session = RecordingSession([FakeResponse(payload={"ok": True})])
+    client = astrox.Client(
+        base_url="https://astrox.example",
+        timeout=20,
+        max_retries=5,
+        retry_delay=10,
+    )
+    client._session = session
+
+    result = client.request(
+        "POST",
+        "/override",
+        json={},
+        timeout=2,
+        max_retries=0,
+        retry_delay=0,
+    )
+
+    assert result == {"ok": True}
+    assert len(session.calls) == 1
+    assert session.calls[0]["timeout"] == 2
+
+
+def test_raw_request_accepts_per_request_transport_overrides() -> None:
+    session = RecordingSession([FakeResponse(payload={"ok": True})])
+    client = astrox.Client(base_url="https://astrox.example", timeout=20)
+    client._session = session
+
+    result = astrox.raw.request(
+        "POST",
+        "/override",
+        client=client,
+        json={},
+        timeout=4,
+        max_retries=0,
+        retry_delay=0,
+    )
+
+    assert result == {"ok": True}
+    assert len(session.calls) == 1
+    assert session.calls[0]["timeout"] == 4
+
+
+def test_json_payload_normalizes_nested_pydantic_models() -> None:
+    payload = {
+        "items": [NestedPayload(WireValue=3)],
+        "nested": {"model": NestedPayload(WireValue=4)},
+        "plain": True,
+    }
+
+    assert _http._json_payload(payload) == {
+        "items": [{"WireValue": 3}],
+        "nested": {"model": {"WireValue": 4}},
+        "plain": True,
+    }
+
+
 def test_raw_204_response_returns_none() -> None:
     session = RecordingSession([FakeResponse(status_code=204, payload=None)])
     client = astrox.Client(base_url="https://astrox.example")
@@ -302,6 +365,19 @@ def test_http_error_500_retries_then_succeeds() -> None:
     assert len(session.calls) == 2
 
 
+def test_max_retries_zero_still_makes_one_attempt() -> None:
+    session = RecordingSession([FakeResponse(payload={"ok": True})])
+    client = astrox.Client(
+        base_url="https://astrox.example",
+        max_retries=0,
+        retry_delay=0,
+    )
+    client._session = session
+
+    assert client.post("/once", data={}) == {"ok": True}
+    assert len(session.calls) == 1
+
+
 def test_api_error_is_raised_for_unsuccessful_astrox_payload() -> None:
     session = RecordingSession(
         [FakeResponse(payload={"IsSuccess": False, "Message": "nope"})]
@@ -332,7 +408,9 @@ def test_invalid_json_response_is_api_error() -> None:
 
 
 def test_timeout_retries_and_raises_timeout_error() -> None:
-    session = RecordingSession([requests.Timeout(), requests.Timeout()])
+    session = RecordingSession(
+        [requests.Timeout(), requests.Timeout(), requests.Timeout()]
+    )
     client = astrox.Client(
         base_url="https://astrox.example",
         timeout=3,
@@ -346,12 +424,16 @@ def test_timeout_retries_and_raises_timeout_error() -> None:
 
     assert exc_info.value.endpoint == "/timeout"
     assert exc_info.value.timeout == 3
-    assert len(session.calls) == 2
+    assert len(session.calls) == 3
 
 
 def test_connection_error_retries_and_raises_connection_error() -> None:
     session = RecordingSession(
-        [requests.ConnectionError("offline"), requests.ConnectionError("offline")]
+        [
+            requests.ConnectionError("offline"),
+            requests.ConnectionError("offline"),
+            requests.ConnectionError("offline"),
+        ]
     )
     client = astrox.Client(
         base_url="https://astrox.example",
@@ -364,4 +446,4 @@ def test_connection_error_retries_and_raises_connection_error() -> None:
         client.post("/offline", data={})
 
     assert "Failed to connect to API" in str(exc_info.value)
-    assert len(session.calls) == 2
+    assert len(session.calls) == 3
