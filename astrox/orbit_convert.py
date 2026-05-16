@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from astrox._http import HTTPClient, get_session
+from astrox._http import Client, get_session
 from astrox._models import KeplerElements
 
 __all__ = [
@@ -25,7 +25,7 @@ def kepler_to_rv(
     true_anomaly: float,
     gravitational_parameter: float,
     *,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Convert Kepler elements to position/velocity vectors.
 
@@ -62,7 +62,7 @@ def kepler_to_rv(
 def rv_to_kepler(
     position_velocity: list[float],
     *,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Convert position/velocity vectors to Kepler elements.
 
@@ -92,7 +92,7 @@ def kepler_to_lla_at_ascending_node(
     gravitational_parameter: float,
     *,
     orbit_epoch: Optional[str] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Convert Kepler elements to LLA at ascending node.
 
@@ -137,7 +137,7 @@ def geo_lambert_transfer_dv(
     kepler_target: KeplerElements,
     time_of_flight: float,
     *,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Calculate Lambert transfer delta-V from GEO platform to target orbit.
 
@@ -174,7 +174,7 @@ def kozai_izsak_mean_elements(
     true_anomaly: float,
     gravitational_parameter: float,
     *,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Get mean Kepler elements via Kozai-Izsak method.
 

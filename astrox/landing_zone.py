@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from astrox._http import HTTPClient, get_session
+from astrox._http import Client, get_session
 
 __all__ = ["compute_landing_zone"]
 
@@ -14,7 +14,7 @@ def compute_landing_zone(
     luo_dian: list[float],
     zone_xys: list[float],
     *,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Compute landing zone parameters.
 

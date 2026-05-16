@@ -6,7 +6,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from astrox._http import HTTPClient, get_session
+from astrox._http import Client, get_session
 from astrox._models import EntityPositionCzml
 
 __all__ = ["convert_central_body_frame", "compute_earth_moon_libration"]
@@ -24,7 +24,7 @@ def convert_central_body_frame(
     interval: Optional[str] = None,
     cartesian: Optional[list[float]] = None,
     cartesian_velocity: Optional[list[float]] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Convert position between central body reference frames.
 
@@ -87,7 +87,7 @@ def compute_earth_moon_libration(
     interval: Optional[str] = None,
     cartesian: Optional[list[float]] = None,
     cartesian_velocity: Optional[list[float]] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Calculate Earth-Moon libration (Lagrange) points.
 

@@ -6,7 +6,7 @@ from typing import Optional, Union
 
 from pydantic import BaseModel
 
-from astrox._http import HTTPClient, get_session
+from astrox._http import Client, get_session
 from astrox._models import EntityPositionCzml, TleInfo
 
 __all__ = [
@@ -28,7 +28,7 @@ def compute_close_approach(
     tol_theta: Optional[float] = None,
     tol_dh: Optional[float] = None,
     targets: Optional[list[TleInfo]] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Compute space debris close approach / collision analysis.
 
@@ -104,7 +104,7 @@ def debris_breakup(
     mass_total: Optional[float] = None,
     min_lc: Optional[float] = None,
     compute_life_of_time: Optional[bool] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Generate space debris from satellite breakup.
 
@@ -194,7 +194,7 @@ def get_tle(
     ta: float,
     *,
     is_mean_elements: Optional[bool] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Generate two-line element set from orbital elements.
 
@@ -244,7 +244,7 @@ def compute_lifetime(
     sm: float,
     mass: float,
     *,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Calculate orbital lifetime from TLE.
 

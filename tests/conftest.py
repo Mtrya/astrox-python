@@ -2,10 +2,10 @@
 
 import pytest
 
-from astrox import HTTPClient
+from astrox import Client
 
 
 @pytest.fixture(scope="session")
 def session():
-    """Provide a shared HTTPClient session for all tests."""
-    return HTTPClient(timeout=60)
+    """Provide a shared Client session for all tests."""
+    return Client(timeout=60)

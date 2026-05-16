@@ -6,7 +6,7 @@ from typing import Optional, Union
 
 from pydantic import BaseModel
 
-from astrox._http import HTTPClient, get_session
+from astrox._http import Client, get_session
 from astrox._models import (
     CovGridLatLonBounds,
     CoverageGridGlobal,
@@ -62,7 +62,7 @@ def get_grid_points(
     ],
     *,
     text: Optional[str] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Get all grid points and cell information from grid definition.
 
@@ -109,7 +109,7 @@ def compute_coverage(
     contain_asset_access_results: Optional[bool] = None,
     contain_coverage_points: Optional[bool] = None,
     step: Optional[float] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Compute coverage for all grid points.
 
@@ -199,7 +199,7 @@ def fom_simple_coverage(
     contain_asset_access_results: Optional[bool] = None,
     contain_coverage_points: Optional[bool] = None,
     step: Optional[float] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Calculate simple binary coverage (0 or 1).
 
@@ -303,7 +303,7 @@ def fom_coverage_time(
     contain_asset_access_results: Optional[bool] = None,
     contain_coverage_points: Optional[bool] = None,
     step: Optional[float] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Calculate total coverage time for each grid point.
 
@@ -403,7 +403,7 @@ def fom_number_of_assets(
     contain_asset_access_results: Optional[bool] = None,
     contain_coverage_points: Optional[bool] = None,
     step: Optional[float] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Calculate number of assets covering each grid point.
 
@@ -508,7 +508,7 @@ def fom_response_time(
     contain_asset_access_results: Optional[bool] = None,
     contain_coverage_points: Optional[bool] = None,
     step: Optional[float] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Calculate response time (time to reach target).
 
@@ -613,7 +613,7 @@ def fom_revisit_time(
     contain_asset_access_results: Optional[bool] = None,
     contain_coverage_points: Optional[bool] = None,
     step: Optional[float] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Calculate revisit time (time between successive passes).
 
@@ -716,7 +716,7 @@ def report_coverage_by_asset(
     contain_asset_access_results: Optional[bool] = None,
     contain_coverage_points: Optional[bool] = None,
     step: Optional[float] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Get coverage percentage report for each asset.
 
@@ -804,7 +804,7 @@ def report_percent_coverage(
     contain_asset_access_results: Optional[bool] = None,
     contain_coverage_points: Optional[bool] = None,
     step: Optional[float] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Get instantaneous and cumulative coverage percentage over time.
 

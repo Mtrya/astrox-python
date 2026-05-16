@@ -6,7 +6,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from astrox._http import HTTPClient, get_session
+from astrox._http import Client, get_session
 from astrox._models import TerrainMaskConfig, EntityPositionSite
 
 __all__ = ["get_terrain_mask"]
@@ -18,7 +18,7 @@ def get_terrain_mask(
     method: str = "default",
     text: Optional[str] = None,
     terrain_mask_para: Optional[TerrainMaskConfig] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Get azimuth-elevation terrain mask for ground station.
 

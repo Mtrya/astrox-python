@@ -1,33 +1,31 @@
-"""Python client for the ASTROX Web API.
+"""Python interface for the ASTROX Web API.
 
-This package provides a functional Python interface to the ASTROX aerospace
-computation API. Functions are organized by domain (coverage, propagator, etc.)
-and can be imported directly:
+Functions are organized by domain modules and can use package-level
+configuration without requiring explicit client management:
 
     from astrox.coverage import compute_coverage
     from astrox.propagator import propagate_j2
-    from astrox.models import EntityPath, Cartesian
 
-Configuration is optional - the library works out of the box:
-
-    # Zero-config usage
-    result = compute_coverage(start="...", stop="...", grid={...}, assets=[...])
-
-    # Global configuration
-    import astrox
     astrox.configure(base_url="http://custom:8765", timeout=120)
+    result = propagate_j2(...)
 
-    # Explicit session (advanced)
-    session = astrox.HTTPClient(timeout=60)
-    result = compute_coverage(..., session=session)
+For advanced configuration, instantiate Client directly:
+
+    client = astrox.Client(timeout=60)
+    result = compute_coverage(..., session=client)
+
+Raw route access is available for advanced callers:
+
+    result = astrox.raw.post("/Propagator/J2", json={...})
 """
 
-from astrox._http import HTTPClient, configure, get_session
+from astrox._http import Client, configure, get_session, raw
 
 __version__ = "0.1.0"
 
 __all__ = [
-    "HTTPClient",
+    "Client",
     "configure",
     "get_session",
+    "raw",
 ]

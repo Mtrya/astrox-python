@@ -20,35 +20,61 @@ DEFAULT_TIMEOUT = 30.0
 DEFAULT_MAX_RETRIES = 3
 DEFAULT_RETRY_DELAY = 1.0  # seconds
 
-# ContextVar for thread-safe default session management
-_default_session: ContextVar[HTTPClient | None] = ContextVar("session", default=None)
+# ContextVar for thread-safe default client management
+_default_session: ContextVar[Client | None] = ContextVar("session", default=None)
+
+
+def _join_url(base_url: str, endpoint: str) -> str:
+    return f"{base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+
+
+def _default_headers() -> dict[str, str]:
+    return {
+        "Accept": "application/json",
+    }
+
+
+def _json_payload(data: Any) -> Any:
+    if isinstance(data, BaseModel):
+        return json.loads(data.model_dump_json(by_alias=True, exclude_none=True))
+    if isinstance(data, list):
+        return [_json_payload(item) for item in data]
+    if isinstance(data, dict):
+        return {key: _json_payload(value) for key, value in data.items()}
+    return data
 
 
 def _make_request(
     endpoint: str,
-    data: dict[str, Any] | BaseModel,
+    json_body: Any,
+    *,
+    method: str = "POST",
     base_url: str = DEFAULT_BASE_URL,
     timeout: float = DEFAULT_TIMEOUT,
     max_retries: int = DEFAULT_MAX_RETRIES,
     retry_delay: float = DEFAULT_RETRY_DELAY,
     session: requests.Session | None = None,
     params: dict[str, Any] | None = None,
-) -> dict[str, Any]:
+    headers: dict[str, str] | None = None,
+    **request_kwargs: Any,
+) -> Any:
     """
-    Make a POST request to the API with retry mechanism.
+    Make an HTTP request to the API with retry mechanism.
 
     Args:
         endpoint: API endpoint (e.g., "/Coverage/ComputeCoverage")
-        data: Request payload (dict or Pydantic model)
+        json_body: Optional JSON request payload (dict or Pydantic model)
+        method: HTTP method
         base_url: Base URL for the API
         timeout: Request timeout in seconds
         max_retries: Maximum number of retry attempts
         retry_delay: Initial delay between retries (exponential backoff)
         session: Optional requests.Session to use
         params: Optional query parameters
+        headers: Optional extra headers
 
     Returns:
-        Parsed JSON response as dict
+        Parsed JSON response
 
     Raises:
         AstroxAPIError: If IsSuccess=false in response
@@ -56,33 +82,27 @@ def _make_request(
         AstroxTimeoutError: If request times out
         AstroxConnectionError: If connection fails after all retries
     """
-    url = f"{base_url.rstrip('/')}{endpoint}"
+    url = _join_url(base_url, endpoint)
     use_session = session or requests.Session()
-
-    # Set headers
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-    }
-
-    # Convert Pydantic model to dict if needed
-    if isinstance(data, BaseModel):
-        json_data = json.loads(
-            data.model_dump_json(by_alias=True, exclude_none=True)
-        )
-    else:
-        json_data = data
+    request_headers = _default_headers()
+    if headers:
+        request_headers.update(headers)
+    json_data = _json_payload(json_body)
 
     last_exception = None
 
-    for attempt in range(max_retries):
+    total_attempts = max_retries + 1
+
+    for attempt in range(total_attempts):
         try:
-            response = use_session.post(
+            response = use_session.request(
+                method.upper(),
                 url,
                 json=json_data,
-                headers=headers,
+                headers=request_headers,
                 timeout=timeout,
                 params=params,
+                **request_kwargs,
             )
 
             # Check HTTP status
@@ -102,12 +122,18 @@ def _make_request(
                     endpoint=endpoint,
                     response=response,
                 )
-                if attempt < max_retries - 1:
+                if attempt < total_attempts - 1:
                     time.sleep(retry_delay * (2**attempt))
                     continue
                 raise last_exception
 
             # Parse JSON response
+            if (
+                response.status_code == 204
+                or getattr(response, "content", None) == b""
+            ):
+                return None
+
             try:
                 result = response.json()
             except json.JSONDecodeError as e:
@@ -134,7 +160,7 @@ def _make_request(
                 endpoint=endpoint,
                 timeout=timeout,
             )
-            if attempt < max_retries - 1:
+            if attempt < total_attempts - 1:
                 time.sleep(retry_delay * (2**attempt))
                 continue
             raise last_exception
@@ -144,7 +170,7 @@ def _make_request(
                 message=f"Failed to connect to API: {e}",
                 original_error=e,
             )
-            if attempt < max_retries - 1:
+            if attempt < total_attempts - 1:
                 time.sleep(retry_delay * (2**attempt))
                 continue
             raise last_exception
@@ -154,7 +180,7 @@ def _make_request(
                 message=f"Request failed: {e}",
                 original_error=e,
             )
-            if attempt < max_retries - 1:
+            if attempt < total_attempts - 1:
                 time.sleep(retry_delay * (2**attempt))
                 continue
             raise last_exception
@@ -200,7 +226,7 @@ def post(
     """
     result = _make_request(
         endpoint=endpoint,
-        data=data,
+        json_body=data,
         base_url=base_url,
         timeout=timeout,
         max_retries=max_retries,
@@ -220,14 +246,14 @@ def post(
         )
 
 
-class HTTPClient:
-    """HTTP client for the ASTROX API with retry mechanism.
+class Client:
+    """Client for the ASTROX API with retry mechanism.
 
     Wraps the low-level _make_request() function in a class-based interface
     with configurable connection parameters.
 
     Example:
-        >>> client = HTTPClient(timeout=60)
+        >>> client = Client(timeout=60)
         >>> result = client.post("/api/Coverage/GetGridPoints", data={...})
 
         >>> # Global configuration
@@ -255,6 +281,35 @@ class HTTPClient:
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         self._session = requests.Session()
+        self.raw = RawClient(self)
+
+    def request(
+        self,
+        method: str,
+        endpoint: str,
+        *,
+        json: Any = None,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+        timeout: float | None = None,
+        max_retries: int | None = None,
+        retry_delay: float | None = None,
+        **request_kwargs: Any,
+    ) -> Any:
+        """Make a raw JSON request to an API endpoint."""
+        return _make_request(
+            endpoint=endpoint,
+            json_body=json,
+            method=method,
+            base_url=self.base_url,
+            timeout=timeout if timeout is not None else self.timeout,
+            max_retries=max_retries if max_retries is not None else self.max_retries,
+            retry_delay=retry_delay if retry_delay is not None else self.retry_delay,
+            session=self._session,
+            params=params,
+            headers=headers,
+            **request_kwargs,
+        )
 
     def post(
         self,
@@ -281,16 +336,7 @@ class HTTPClient:
             AstroxConnectionError: If connection fails after all retries
             AstroxValidationError: If response validation fails
         """
-        result = _make_request(
-            endpoint=endpoint,
-            data=data,
-            base_url=self.base_url,
-            timeout=self.timeout,
-            max_retries=self.max_retries,
-            retry_delay=self.retry_delay,
-            session=self._session,
-            params=params,
-        )
+        result = self.request("POST", endpoint, json=data, params=params)
 
         if response_model is None:
             return result
@@ -304,11 +350,101 @@ class HTTPClient:
             )
 
 
-def get_session() -> HTTPClient:
+class RawClient:
+    """Advanced raw route access bound to a client or the default client."""
+
+    def __init__(self, client: Client | None = None) -> None:
+        self._client = client
+
+    def _target(self) -> Client:
+        return self._client or get_session()
+
+    def request(
+        self,
+        method: str,
+        endpoint: str,
+        *,
+        json: Any = None,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+        timeout: float | None = None,
+        max_retries: int | None = None,
+        retry_delay: float | None = None,
+        client: Client | None = None,
+        **request_kwargs: Any,
+    ) -> Any:
+        target = client or self._target()
+        return target.request(
+            method,
+            endpoint,
+            json=json,
+            params=params,
+            headers=headers,
+            timeout=timeout,
+            max_retries=max_retries,
+            retry_delay=retry_delay,
+            **request_kwargs,
+        )
+
+    def get(
+        self,
+        endpoint: str,
+        *,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+        timeout: float | None = None,
+        max_retries: int | None = None,
+        retry_delay: float | None = None,
+        client: Client | None = None,
+        **request_kwargs: Any,
+    ) -> Any:
+        return self.request(
+            "GET",
+            endpoint,
+            params=params,
+            headers=headers,
+            timeout=timeout,
+            max_retries=max_retries,
+            retry_delay=retry_delay,
+            client=client,
+            **request_kwargs,
+        )
+
+    def post(
+        self,
+        endpoint: str,
+        *,
+        json: Any = None,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+        timeout: float | None = None,
+        max_retries: int | None = None,
+        retry_delay: float | None = None,
+        client: Client | None = None,
+        **request_kwargs: Any,
+    ) -> Any:
+        return self.request(
+            "POST",
+            endpoint,
+            json=json,
+            params=params,
+            headers=headers,
+            timeout=timeout,
+            max_retries=max_retries,
+            retry_delay=retry_delay,
+            client=client,
+            **request_kwargs,
+        )
+
+
+raw = RawClient()
+
+
+def get_session() -> Client:
     """Get the current default session, creating one if needed.
 
     Returns:
-        HTTPClient instance (either existing default or newly created)
+        Client instance (either existing default or newly created)
 
     Example:
         >>> sess = get_session()
@@ -316,7 +452,7 @@ def get_session() -> HTTPClient:
     """
     sess = _default_session.get()
     if sess is None:
-        sess = HTTPClient()
+        sess = Client()
         _default_session.set(sess)
     return sess
 
@@ -326,7 +462,7 @@ def configure(
     timeout: float = DEFAULT_TIMEOUT,
     max_retries: int = DEFAULT_MAX_RETRIES,
     retry_delay: float = DEFAULT_RETRY_DELAY,
-) -> HTTPClient:
+) -> Client:
     """Configure the default session globally.
 
     Args:
@@ -336,7 +472,7 @@ def configure(
         retry_delay: Initial delay between retries
 
     Returns:
-        Configured HTTPClient instance
+        Configured Client instance
 
     Example:
         >>> import astrox
@@ -345,7 +481,7 @@ def configure(
         >>> from astrox.coverage import compute_coverage
         >>> result = compute_coverage(...)  # Uses configured session
     """
-    sess = HTTPClient(
+    sess = Client(
         base_url=base_url,
         timeout=timeout,
         max_retries=max_retries,

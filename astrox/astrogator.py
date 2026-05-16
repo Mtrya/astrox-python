@@ -6,7 +6,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from astrox._http import HTTPClient, get_session
+from astrox._http import Client, get_session
 from astrox._models import (
     AgVAMCSSegment,
     EntityPath,
@@ -27,7 +27,7 @@ def run_mcs(
     entities: Optional[list[EntityPath]] = None,
     propagators: Optional[list[Propagator]] = None,
     engine_models: Optional[list[IAgVAEngine]] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Run Mission Control Sequence (MCS) for trajectory design.
 

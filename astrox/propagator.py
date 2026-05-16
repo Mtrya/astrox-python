@@ -6,7 +6,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from astrox._http import HTTPClient, get_session
+from astrox._http import Client, get_session
 from astrox._models import KeplerElementsWithEpoch, Propagator
 
 __all__ = [
@@ -33,7 +33,7 @@ def propagate_two_body(
     gravitational_parameter: Optional[float] = None,
     coord_system: Optional[str] = None,
     coord_type: Optional[str] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Propagate orbit using two-body dynamics.
 
@@ -95,7 +95,7 @@ def propagate_ballistic(
     ballistic_type_value: Optional[float] = None,
     impact_altitude: Optional[float] = None,
     stop: Optional[str] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Propagate ballistic trajectory.
 
@@ -165,7 +165,7 @@ def propagate_j2(
     gravitational_parameter: Optional[float] = None,
     coord_system: Optional[str] = None,
     coord_type: Optional[str] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Propagate orbit using J2 perturbation model.
 
@@ -220,7 +220,7 @@ def propagate_sgp4(
     *,
     step: Optional[float] = None,
     satellite_number: Optional[str] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Propagate orbit using SGP4 model.
 
@@ -266,7 +266,7 @@ def propagate_simple_ascent(
     *,
     central_body: Optional[str] = None,
     step: Optional[float] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Propagate simple ascent trajectory.
 
@@ -327,7 +327,7 @@ def propagate_hpop(
     coefficient_of_srp: Optional[float] = None,
     area_mass_ratio_srp: Optional[float] = None,
     hpop_propagator: Optional[Propagator] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Propagate orbit using high-precision orbit propagator (HPOP).
 
@@ -392,7 +392,7 @@ def propagate_j2_batch(
     epoch: str,
     all_satellite_elements: list[KeplerElementsWithEpoch],
     *,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Propagate multiple satellites using J2 perturbation to same epoch.
 
@@ -425,7 +425,7 @@ def propagate_sgp4_batch(
     epoch: str,
     tles: list[str],
     *,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Propagate multiple satellites using SGP4 to same epoch.
 
@@ -453,7 +453,7 @@ def propagate_two_body_batch(
     epoch: str,
     all_satellite_elements: list[KeplerElementsWithEpoch],
     *,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Propagate multiple satellites using two-body dynamics to same epoch.
 
