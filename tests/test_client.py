@@ -119,6 +119,14 @@ def install_recording_session(
     return session
 
 
+def test_package_exports_prefer_client_and_keep_httpclient_compatibility() -> None:
+    assert "Client" in astrox.__all__
+    assert "raw" in astrox.__all__
+    assert "configure" in astrox.__all__
+    assert "HTTPClient" in astrox.__all__
+    assert astrox.HTTPClient is astrox.Client
+
+
 def test_configure_returns_canonical_client_and_preserves_httpclient_compatibility() -> None:
     assert hasattr(astrox, "Client")
 
@@ -264,7 +272,7 @@ def test_raw_204_response_returns_none() -> None:
 
 def test_http_error_400_is_not_retried() -> None:
     session = RecordingSession([FakeResponse(status_code=400, text="bad request")])
-    client = astrox.HTTPClient(base_url="https://astrox.example", retry_delay=0)
+    client = astrox.Client(base_url="https://astrox.example", retry_delay=0)
     client._session = session
 
     with pytest.raises(exceptions.AstroxHTTPError) as exc_info:
@@ -282,7 +290,7 @@ def test_http_error_500_retries_then_succeeds() -> None:
             FakeResponse(payload={"IsSuccess": True, "Data": "ok"}),
         ]
     )
-    client = astrox.HTTPClient(
+    client = astrox.Client(
         base_url="https://astrox.example",
         max_retries=2,
         retry_delay=0,
@@ -299,7 +307,7 @@ def test_api_error_is_raised_for_unsuccessful_astrox_payload() -> None:
     session = RecordingSession(
         [FakeResponse(payload={"IsSuccess": False, "Message": "nope"})]
     )
-    client = astrox.HTTPClient(base_url="https://astrox.example", retry_delay=0)
+    client = astrox.Client(base_url="https://astrox.example", retry_delay=0)
     client._session = session
 
     with pytest.raises(exceptions.AstroxAPIError) as exc_info:
@@ -317,7 +325,7 @@ def test_invalid_json_response_is_api_error() -> None:
             )
         ]
     )
-    client = astrox.HTTPClient(base_url="https://astrox.example", retry_delay=0)
+    client = astrox.Client(base_url="https://astrox.example", retry_delay=0)
     client._session = session
 
     with pytest.raises(exceptions.AstroxAPIError, match="Failed to parse JSON"):
@@ -326,7 +334,7 @@ def test_invalid_json_response_is_api_error() -> None:
 
 def test_timeout_retries_and_raises_timeout_error() -> None:
     session = RecordingSession([requests.Timeout(), requests.Timeout()])
-    client = astrox.HTTPClient(
+    client = astrox.Client(
         base_url="https://astrox.example",
         timeout=3,
         max_retries=2,
@@ -346,7 +354,7 @@ def test_connection_error_retries_and_raises_connection_error() -> None:
     session = RecordingSession(
         [requests.ConnectionError("offline"), requests.ConnectionError("offline")]
     )
-    client = astrox.HTTPClient(
+    client = astrox.Client(
         base_url="https://astrox.example",
         max_retries=2,
         retry_delay=0,
