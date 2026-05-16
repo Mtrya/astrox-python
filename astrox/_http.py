@@ -43,7 +43,7 @@ def _json_payload(data: Any) -> Any:
 
 def _make_request(
     endpoint: str,
-    data: Any,
+    json_body: Any,
     *,
     method: str = "POST",
     base_url: str = DEFAULT_BASE_URL,
@@ -60,7 +60,7 @@ def _make_request(
 
     Args:
         endpoint: API endpoint (e.g., "/Coverage/ComputeCoverage")
-        data: Request payload (dict or Pydantic model)
+        json_body: Request payload (dict or Pydantic model)
         method: HTTP method
         base_url: Base URL for the API
         timeout: Request timeout in seconds
@@ -84,7 +84,7 @@ def _make_request(
     request_headers = _default_headers()
     if headers:
         request_headers.update(headers)
-    json_data = _json_payload(data)
+    json_data = _json_payload(json_body)
 
     last_exception = None
 
@@ -123,6 +123,9 @@ def _make_request(
                 raise last_exception
 
             # Parse JSON response
+            if response.status_code == 204:
+                return None
+
             try:
                 result = response.json()
             except json.JSONDecodeError as e:
@@ -215,7 +218,7 @@ def post(
     """
     result = _make_request(
         endpoint=endpoint,
-        data=data,
+        json_body=data,
         base_url=base_url,
         timeout=timeout,
         max_retries=max_retries,
@@ -285,7 +288,7 @@ class Client:
         """Make a raw JSON request to an API endpoint."""
         return _make_request(
             endpoint=endpoint,
-            data=json,
+            json_body=json,
             method=method,
             base_url=self.base_url,
             timeout=self.timeout,
@@ -353,9 +356,11 @@ class RawClient:
         json: Any = None,
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
+        client: Client | None = None,
         **request_kwargs: Any,
     ) -> Any:
-        return self._target().request(
+        target = client or self._target()
+        return target.request(
             method,
             endpoint,
             json=json,
@@ -370,6 +375,7 @@ class RawClient:
         *,
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
+        client: Client | None = None,
         **request_kwargs: Any,
     ) -> Any:
         return self.request(
@@ -377,6 +383,7 @@ class RawClient:
             endpoint,
             params=params,
             headers=headers,
+            client=client,
             **request_kwargs,
         )
 
@@ -387,6 +394,7 @@ class RawClient:
         json: Any = None,
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
+        client: Client | None = None,
         **request_kwargs: Any,
     ) -> Any:
         return self.request(
@@ -395,6 +403,7 @@ class RawClient:
             json=json,
             params=params,
             headers=headers,
+            client=client,
             **request_kwargs,
         )
 

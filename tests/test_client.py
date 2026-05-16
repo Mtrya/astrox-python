@@ -195,6 +195,73 @@ def test_bound_raw_get_accepts_endpoint_without_leading_slash_and_query_params(
     ]
 
 
+def test_raw_request_normalizes_method_and_merges_headers(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = install_recording_session(
+        monkeypatch,
+        [FakeResponse(payload={"ok": True})],
+    )
+    client = astrox.Client(base_url="https://astrox.example", timeout=9)
+
+    result = astrox.raw.request(
+        "post",
+        "Coverage/ComputeCoverage",
+        json={"Grid": {"GridType": "LatLonRegion"}},
+        headers={"X-Astrox-Debug": "1"},
+        client=client,
+    )
+
+    assert result == {"ok": True}
+    assert session.calls == [
+        {
+            "method": "POST",
+            "url": "https://astrox.example/Coverage/ComputeCoverage",
+            "json": {"Grid": {"GridType": "LatLonRegion"}},
+            "params": None,
+            "headers": {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "X-Astrox-Debug": "1",
+            },
+            "timeout": 9,
+            "kwargs": {},
+        }
+    ]
+
+
+def test_raw_request_forwards_advanced_request_options(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = install_recording_session(
+        monkeypatch,
+        [FakeResponse(payload={"uploaded": True})],
+    )
+    client = astrox.Client(base_url="https://astrox.example")
+
+    result = astrox.raw.request(
+        "POST",
+        "/ssc/admin/upload-database-archive",
+        client=client,
+        data=b"archive",
+        verify=False,
+    )
+
+    assert result == {"uploaded": True}
+    assert session.calls[0]["kwargs"] == {
+        "data": b"archive",
+        "verify": False,
+    }
+
+
+def test_raw_204_response_returns_none() -> None:
+    session = RecordingSession([FakeResponse(status_code=204, payload=None)])
+    client = astrox.Client(base_url="https://astrox.example")
+    client._session = session
+
+    assert client.raw.post("/empty", json={}) is None
+
+
 def test_http_error_400_is_not_retried() -> None:
     session = RecordingSession([FakeResponse(status_code=400, text="bad request")])
     client = astrox.HTTPClient(base_url="https://astrox.example", retry_delay=0)
