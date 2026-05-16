@@ -22,12 +22,14 @@ Configuration is optional - the library works out of the box:
     result = compute_coverage(..., session=session)
 """
 
-from astrox._http import HTTPClient, configure, get_session
+from astrox._http import Client, HTTPClient, configure, get_session, raw
 
 __version__ = "0.1.0"
 
 __all__ = [
+    "Client",
     "HTTPClient",
     "configure",
     "get_session",
+    "raw",
 ]
