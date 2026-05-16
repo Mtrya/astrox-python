@@ -6,7 +6,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from astrox._http import HTTPClient, get_session
+from astrox._http import Client, get_session
 from astrox._models import IEntityPosition, EntityPositionSite
 
 __all__ = ["lighting_times", "solar_intensity", "solar_aer"]
@@ -20,7 +20,7 @@ def lighting_times(
     description: Optional[str] = None,
     az_el_mask_data: Optional[list[float]] = None,
     occultation_bodies: Optional[list[str]] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Calculate lighting time intervals (sunlight, penumbra, umbra).
 
@@ -68,7 +68,7 @@ def solar_intensity(
     az_el_mask_data: Optional[list[float]] = None,
     time_step_sec: Optional[float] = None,
     occultation_bodies: Optional[list[str]] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Calculate solar intensity at entity position.
 
@@ -116,7 +116,7 @@ def solar_aer(
     *,
     text: Optional[str] = None,
     time_step_sec: Optional[int] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Calculate solar azimuth, elevation, and range from ground station.
 

@@ -12,7 +12,7 @@ API: POST /api/CAT/DebrisBreakupNASA
 
 from astrox.cat import debris_breakup
 from astrox.models import TleInfo
-from astrox import HTTPClient
+from astrox import Client
 
 
 # ============================================================
@@ -41,7 +41,7 @@ def main():
     envisat_length = 10.0  # m (characteristic length)
 
     # Create HTTP session with extended timeout for NASA model
-    nasa_session = HTTPClient(timeout=120)
+    nasa_session = Client(timeout=120)
 
     # Execute - NASA Standard Breakup Model
     result = debris_breakup(

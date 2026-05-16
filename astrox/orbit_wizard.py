@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from astrox._http import HTTPClient, get_session
+from astrox._http import Client, get_session
 from astrox._models import KeplerElements
 
 __all__ = ["design_geo", "design_molniya", "design_sso", "design_walker"]
@@ -16,7 +16,7 @@ def design_geo(
     sub_satellite_point: float,
     *,
     description: Optional[str] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Generate geostationary orbit.
 
@@ -53,7 +53,7 @@ def design_molniya(
     argument_of_periapsis: float,
     *,
     description: Optional[str] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Generate Molniya orbit.
 
@@ -91,7 +91,7 @@ def design_sso(
     local_time_of_descending_node: float,
     *,
     description: Optional[str] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Generate sun-synchronous orbit.
 
@@ -131,7 +131,7 @@ def design_walker(
     inter_plane_phase_increment: Optional[int] = None,
     inter_plane_true_anomaly_increment: Optional[float] = None,
     raan_increment: Optional[float] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Generate Walker constellation.
 

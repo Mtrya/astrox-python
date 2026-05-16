@@ -408,7 +408,6 @@ class RawClient:
         )
 
 
-HTTPClient = Client
 raw = RawClient()
 
 

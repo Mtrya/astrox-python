@@ -119,15 +119,16 @@ def install_recording_session(
     return session
 
 
-def test_package_exports_prefer_client_and_keep_httpclient_compatibility() -> None:
+def test_package_exports_client_without_legacy_httpclient_alias() -> None:
     assert "Client" in astrox.__all__
     assert "raw" in astrox.__all__
     assert "configure" in astrox.__all__
-    assert "HTTPClient" in astrox.__all__
-    assert astrox.HTTPClient is astrox.Client
+    assert "HTTPClient" not in astrox.__all__
+    assert not hasattr(astrox, "HTTPClient")
+    assert not hasattr(_http, "HTTPClient")
 
 
-def test_configure_returns_canonical_client_and_preserves_httpclient_compatibility() -> None:
+def test_configure_returns_canonical_client() -> None:
     assert hasattr(astrox, "Client")
 
     configured = astrox.configure(
@@ -136,10 +137,8 @@ def test_configure_returns_canonical_client_and_preserves_httpclient_compatibili
         max_retries=2,
         retry_delay=0,
     )
-    legacy = astrox.HTTPClient(base_url="https://legacy.example")
 
     assert isinstance(configured, astrox.Client)
-    assert isinstance(legacy, astrox.Client)
     assert astrox.get_session() is configured
     assert configured.base_url == "https://astrox.example"
     assert configured.timeout == 12

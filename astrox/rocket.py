@@ -6,7 +6,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from astrox._http import HTTPClient, get_session
+from astrox._http import Client, get_session
 from astrox._models import (
     IVAMCSProfile,
     RocketGuid,
@@ -42,7 +42,7 @@ def optimize_trajectory(
     aero_params_file_name: Optional[str] = None,
     profile_optim: Optional[VAMCSProfileDEOptimizer] = None,
     mcs_profiles: Optional[list[IVAMCSProfile]] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Optimize rocket ascent trajectory using flight segment model.
 
@@ -146,7 +146,7 @@ def optimize_landing(
     ips4: Optional[float] = None,
     sa4: Optional[float] = None,
     cons_h: Optional[float] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Optimize rocket vertical landing trajectory.
 
@@ -234,7 +234,7 @@ def optimize_landing(
 def compute_guided_trajectory(
     guidance_config: RocketGuid,
     *,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Calculate rocket trajectory using guidance algorithms.
 

@@ -6,7 +6,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from astrox._http import HTTPClient, get_session
+from astrox._http import Client, get_session
 from astrox._models import EntityPath, IEntityObject, LinkConnection
 
 __all__ = ["compute_access", "compute_chain"]
@@ -22,7 +22,7 @@ def compute_access(
     out_step: Optional[float] = None,
     compute_aer: Optional[bool] = None,
     use_light_time_delay: Optional[bool] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Compute access between two objects.
 
@@ -77,7 +77,7 @@ def compute_chain(
     description: Optional[str] = None,
     connections: Optional[list[LinkConnection]] = None,
     use_light_time_delay: Optional[bool] = None,
-    session: Optional[HTTPClient] = None,
+    session: Optional[Client] = None,
 ) -> dict:
     """Compute access chain through multiple objects.
 
