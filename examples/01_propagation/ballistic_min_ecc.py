@@ -1,33 +1,27 @@
 # /// script
-# dependencies = ["astrox-client"]
+# dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""
-Ballistic propagation variation using delta-v minimum eccentricity parameter.
+"""Ballistic propagation using the delta-v minimum eccentricity branch."""
 
-API: POST /api/Propagator/Ballistic
-"""
-
-from astrox.propagator import propagate_ballistic
-from astrox.models import <models>
+from astrox import propagator
 
 
 def main():
-    # TODO: Setup for ballistic_type="DeltaV_MinEcc"
-    # Example: ballistic_type="DeltaV_MinEcc", ballistic_type_value=...
-    
-    # Execute
-    result = propagate_ballistic(
+    period_s, position = propagator.ballistic_delta_v_min_ecc(
         start="2024-01-01T12:00:00.000Z",
-        impact_latitude=0.0,
-        impact_longitude=0.0,
-        # Specify delta-v minimum eccentricity parameter
-        ballistic_type="DeltaV_MinEcc",
-        ballistic_type_value=0.0,
+        impact_latitude_deg=30.0,
+        impact_longitude_deg=-70.0,
+        launch_latitude_deg=28.5721,
+        launch_longitude_deg=-80.6480,
+        launch_altitude_m=10.0,
+        impact_altitude_m=0.0,
+        delta_v_m_s=1000.0,
+        step_s=5.0,
     )
-    
-    # Output
-    print(f"Success: {result['IsSuccess']}")
+
+    print(f"Period: {period_s:.3f} s")
+    print(f"Position epoch: {position.epoch}")
 
 
 if __name__ == "__main__":

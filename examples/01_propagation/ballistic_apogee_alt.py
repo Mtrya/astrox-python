@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["astrox", "matplotlib", "numpy"]
+# dependencies = ["astrox-python", "matplotlib", "numpy"]
 # ///
 """Example: Ballistic Trajectory Propagation (Apogee Altitude)
 
@@ -8,34 +8,32 @@ Computes a suborbital ballistic trajectory shaped by apogee altitude
 (Cape Canaveral → ~1000 km downrange in the Atlantic) and plots the
 altitude profile alongside a 3D lat/lon/alt view.
 
-API: POST /Propagator/Ballistic (ApogeeAlt type)
 """
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from astrox.propagator import propagate_ballistic
+from astrox import propagator
 
 
 def main():
-    result = propagate_ballistic(
+    period_s, position = propagator.ballistic_apogee_altitude(
         start="2024-01-01T12:00:00.000Z",
-        impact_latitude=30.0,       # Atlantic Ocean
-        impact_longitude=-70.0,
-        launch_latitude=28.5721,    # Cape Canaveral
-        launch_longitude=-80.6480,
-        launch_altitude=10.0,       # meters
-        impact_altitude=0.0,
-        ballistic_type="ApogeeAlt",
-        ballistic_type_value=200000.0,  # 200 km apogee
-        step=5.0,
+        impact_latitude_deg=30.0,
+        impact_longitude_deg=-70.0,
+        launch_latitude_deg=28.5721,
+        launch_longitude_deg=-80.6480,
+        launch_altitude_m=10.0,
+        impact_altitude_m=0.0,
+        apogee_altitude_m=200000.0,
+        step_s=5.0,
     )
 
-    print(f"Success: {result['IsSuccess']}")
-    print(f"Message: {result['Message']}")
+    print(f"Period: {period_s:.3f} s")
+    print(f"Reference frame: {position.reference_frame}")
 
     # CZML cartesianVelocity: [t, x, y, z, vx, vy, vz, ...] in ECEF (FIXED)
-    flat = result["Position"]["cartesianVelocity"]
+    flat = position.cartesian_velocity
     pts = np.array(flat).reshape(-1, 7)
     t_sec = pts[:, 0]
     x, y, z = pts[:, 1], pts[:, 2], pts[:, 3]

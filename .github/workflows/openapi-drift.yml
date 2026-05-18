@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   drift:
-    name: Refresh OpenAPI, models, and fixture drift report
+    name: Refresh OpenAPI and fixture drift report
     runs-on: ubuntu-latest
 
     steps:
@@ -48,18 +48,6 @@ jobs:
             --output openapi/astrox.openapi.yaml \
             --archive-dir openapi/archive \
             2>&1 | tee openapi-drift-reports/fetch-openapi.log
-
-      - name: Regenerate Pydantic models
-        env:
-          ASTROX_BASE_URL: http://astrox.cn:8765
-        run: |
-          set -o pipefail
-          uv run python scripts/openapi_drift/generate_models.py \
-            --input openapi/astrox.openapi.yaml \
-            --output astrox/_models.py \
-            --source "${ASTROX_BASE_URL}/openapi/v1.json" \
-            --deterministic-header \
-            2>&1 | tee openapi-drift-reports/generate-models.log
 
       - name: Reconcile existing fixtures
         id: reconcile
@@ -111,7 +99,7 @@ jobs:
               --fixture-dir openapi/fixtures \
               --output openapi/fixtures/STATUS.md \
               --check
-            uv run python -m pytest -q tests/test_openapi_fixtures.py tests/test_generate_models.py tests/test_models.py
+            uv run python -m pytest -q tests/openapi/test_fixtures.py
           } 2>&1 | tee openapi-drift-reports/focused-checks.log
 
       - name: Run tests
@@ -126,7 +114,7 @@ jobs:
         id: pipeline
         if: always()
         run: |
-          git status --porcelain -- openapi astrox/_models.py > openapi-drift-reports/tracked-status.txt
+          git status --porcelain -- openapi > openapi-drift-reports/tracked-status.txt
           uv run python scripts/openapi_drift/drift_pipeline_report.py \
             --reconcile-json openapi-drift-reports/reconcile.json \
             --discovery-json openapi-drift-reports/discovery.json \
@@ -159,7 +147,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin "${branch}:refs/remotes/origin/${branch}" || true
           git switch -c "${branch}"
-          git add openapi astrox/_models.py
+          git add openapi
           git commit -m "Refresh ASTROX upstream drift data"
           git push --force-with-lease --set-upstream origin "${branch}"
 

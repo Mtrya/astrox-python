@@ -85,7 +85,7 @@ class AstroxValidationError(AstroxError):
 
         Args:
             message: Error message
-            errors: List of validation errors from Pydantic
+            errors: List of validation errors from the response model
         """
         self.message = message
         self.errors = errors
