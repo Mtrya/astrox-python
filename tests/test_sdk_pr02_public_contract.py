@@ -130,7 +130,6 @@ def test_keplerian_constructor_returns_frozen_dataclass_with_explicit_wire_lower
         orbit.eccentricity = 0.0
 
 
-@pytest.mark.xfail(strict=True, reason="PR 02 Phases 2 and 3 add curated J2 propagation")
 def test_j2_assembles_fixture_backed_payload_and_returns_success_path_tuple() -> None:
     from astrox import orbits, propagator
 
@@ -185,7 +184,6 @@ def test_j2_assembles_fixture_backed_payload_and_returns_success_path_tuple() ->
     ]
 
 
-@pytest.mark.xfail(strict=True, reason="PR 02 Phases 2 and 3 add curated two-body propagation")
 def test_two_body_omits_server_owned_optional_knobs_when_not_provided() -> None:
     from astrox import orbits, propagator
 
@@ -216,7 +214,6 @@ def test_two_body_omits_server_owned_optional_knobs_when_not_provided() -> None:
     }
 
 
-@pytest.mark.xfail(strict=True, reason="PR 02 Phases 2 and 3 reject raw dict/list escape hatches")
 def test_curated_propagator_functions_do_not_accept_raw_dict_orbit_fragments() -> None:
     from astrox import propagator
 

@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from dataclasses import dataclass
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
-from astrox._http import Client, get_session
+from astrox._http import Client, get_session, raw
 from astrox._models import KeplerElementsWithEpoch, Propagator
+from astrox.orbits import KeplerianElements
 
 __all__ = [
+    "PropagatorPosition",
+    "j2",
     "propagate_two_body",
     "propagate_ballistic",
     "propagate_j2",
@@ -19,7 +23,112 @@ __all__ = [
     "propagate_j2_batch",
     "propagate_sgp4_batch",
     "propagate_two_body_batch",
+    "two_body",
 ]
+
+
+@dataclass(frozen=True, kw_only=True)
+class PropagatorPosition:
+    """Nested propagated position output."""
+
+    central_body: str
+    epoch: str
+    reference_frame: str
+    interpolation_algorithm: str
+    interpolation_degree: int
+    cartesian_velocity: tuple[float, ...]
+
+    @classmethod
+    def from_wire(cls, position_payload: dict[str, Any]) -> PropagatorPosition:
+        """Build from the ASTROX nested Position payload."""
+        return cls(
+            central_body=position_payload["CentralBody"],
+            epoch=position_payload["epoch"],
+            reference_frame=position_payload["referenceFrame"],
+            interpolation_algorithm=position_payload["interpolationAlgorithm"],
+            interpolation_degree=position_payload["interpolationDegree"],
+            cartesian_velocity=tuple(position_payload["cartesianVelocity"]),
+        )
+
+
+def two_body(
+    *,
+    start: str,
+    stop: str,
+    orbit_epoch: str,
+    orbit: KeplerianElements,
+    step_s: float | None = None,
+    central_body: str | None = None,
+    gravitational_parameter_m3_s2: float | None = None,
+    coord_system: str | None = None,
+) -> tuple[float, PropagatorPosition]:
+    """Propagate Classical Keplerian elements using two-body dynamics."""
+    if not isinstance(orbit, KeplerianElements):
+        raise TypeError("orbit must be a KeplerianElements instance")
+
+    payload: dict[str, Any] = {
+        "Start": start,
+        "Stop": stop,
+        "OrbitEpoch": orbit_epoch,
+        "CoordType": "Classical",
+        "OrbitalElements": orbit.to_wire(),
+    }
+    if step_s is not None:
+        payload["Step"] = step_s
+    if central_body is not None:
+        payload["CentralBody"] = central_body
+    if gravitational_parameter_m3_s2 is not None:
+        payload["GravitationalParameter"] = gravitational_parameter_m3_s2
+    if coord_system is not None:
+        payload["CoordSystem"] = coord_system
+
+    result = raw.post("/Propagator/TwoBody", json=payload)
+    if result["IsSuccess"] is not True:
+        raise ValueError(result["Message"])
+    return result["Period"], PropagatorPosition.from_wire(result["Position"])
+
+
+def j2(
+    *,
+    start: str,
+    stop: str,
+    orbit_epoch: str,
+    orbit: KeplerianElements,
+    step_s: float | None = None,
+    central_body: str | None = None,
+    gravitational_parameter_m3_s2: float | None = None,
+    coord_system: str | None = None,
+    j2_normalized_value: float | None = None,
+    ref_distance_m: float | None = None,
+) -> tuple[float, PropagatorPosition]:
+    """Propagate Classical Keplerian elements using the J2 model."""
+    if not isinstance(orbit, KeplerianElements):
+        raise TypeError("orbit must be a KeplerianElements instance")
+
+    payload: dict[str, Any] = {
+        "Start": start,
+        "Stop": stop,
+        "OrbitEpoch": orbit_epoch,
+        "CoordType": "Classical",
+        "OrbitalElements": orbit.to_wire(),
+    }
+    if step_s is not None:
+        payload["Step"] = step_s
+    if central_body is not None:
+        payload["CentralBody"] = central_body
+    if gravitational_parameter_m3_s2 is not None:
+        payload["GravitationalParameter"] = gravitational_parameter_m3_s2
+    if coord_system is not None:
+        payload["CoordSystem"] = coord_system
+    if j2_normalized_value is not None:
+        payload["J2NormalizedValue"] = j2_normalized_value
+    if ref_distance_m is not None:
+        payload["RefDistance"] = ref_distance_m
+
+    result = raw.post("/Propagator/J2", json=payload)
+    if result["IsSuccess"] is not True:
+        raise ValueError(result["Message"])
+    return result["Period"], PropagatorPosition.from_wire(result["Position"])
 
 
 def propagate_two_body(
