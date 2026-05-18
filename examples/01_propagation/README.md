@@ -1,6 +1,6 @@
 # Orbit Propagation Examples
 
-This directory contains comprehensive examples for all 9 propagation functions in the `astrox.propagator` module.
+This directory contains examples for propagation functions in the `astrox.propagator` module.
 
 ## Overview
 
@@ -10,8 +10,8 @@ Orbit propagation computes the future (or past) position and velocity of a satel
 
 ### Single Satellite Propagation
 
-#### 1. `two_body.py` - Two-Body Dynamics
-**Function:** `propagate_two_body()`
+#### 1. `two_body_classical.py` - Two-Body Dynamics
+**Function:** `two_body()`
 
 The simplest propagator using Kepler's laws. Ignores all perturbations.
 
@@ -21,11 +21,11 @@ The simplest propagator using Kepler's laws. Ignores all perturbations.
 - **Example:** ISS orbit for 1 day
 
 ```bash
-python two_body.py
+python two_body_classical.py
 ```
 
-#### 2. `j2_propagation.py` - J2 Perturbation Model
-**Function:** `propagate_j2()`
+#### 2. `j2_classical.py` - J2 Perturbation Model
+**Function:** `j2()`
 
 Includes Earth's oblateness (J2 term), the largest perturbation for most satellites.
 
@@ -35,10 +35,10 @@ Includes Earth's oblateness (J2 term), the largest perturbation for most satelli
 - **Example:** Sun-synchronous orbit for 7 days
 - **Key parameters:**
   - `j2_normalized_value`: 0.000484165143790815 (Earth)
-  - `ref_distance`: 6378137.0 m (Earth equatorial radius)
+  - `ref_distance_m`: 6378137.0 m (Earth equatorial radius)
 
 ```bash
-python j2_propagation.py
+python j2_classical.py
 ```
 
 #### 3. `sgp4_propagation.py` - SGP4 from TLE
@@ -77,8 +77,8 @@ python hpop_propagation.py
 
 ### Specialized Trajectories
 
-#### 5. `ballistic.py` - Ballistic Trajectories
-**Function:** `propagate_ballistic()`
+#### 5. `ballistic_*.py` - Ballistic Trajectories
+**Functions:** `ballistic()`, `ballistic_delta_v()`, `ballistic_delta_v_min_ecc()`, `ballistic_apogee_altitude()`, `ballistic_time_of_flight()`
 
 Suborbital trajectories from launch to impact.
 
@@ -91,7 +91,7 @@ Suborbital trajectories from launch to impact.
   - `DeltaV_MinEcc`: Minimum eccentricity trajectory
 
 ```bash
-python ballistic.py
+python ballistic_delta_v.py
 ```
 
 #### 6. `simple_ascent.py` - Launch Ascent
@@ -166,11 +166,11 @@ All examples are standalone and use zero-configuration (no explicit session need
 
 ```bash
 # Run individual examples
-python two_body.py
-python j2_propagation.py
+python two_body_classical.py
+python j2_classical.py
 python sgp4_propagation.py
 python hpop_propagation.py
-python ballistic.py
+python ballistic_delta_v.py
 python simple_ascent.py
 python batch_propagation.py
 
@@ -186,7 +186,7 @@ done
 
 Each example prints:
 - Input parameters (orbit, time span)
-- Success status
+- Period and propagated position metadata for curated propagators
 - Number of generated position points
 - Trajectory characteristics (period, altitude, etc.)
 - Key insights about the propagator
@@ -197,9 +197,9 @@ Each example prints:
 
 1. **Need high accuracy?** → Use `propagate_hpop()`
 2. **Have TLE data?** → Use `propagate_sgp4()`
-3. **Medium-term LEO/MEO?** → Use `propagate_j2()`
-4. **Quick calculation?** → Use `propagate_two_body()`
-5. **Suborbital flight?** → Use `propagate_ballistic()`
+3. **Medium-term LEO/MEO?** → Use `j2()`
+4. **Quick calculation?** → Use `two_body()`
+5. **Suborbital flight?** → Use the branch-specific ballistic functions
 6. **Launch ascent?** → Use `propagate_simple_ascent()`
 7. **Multiple satellites?** → Use batch versions
 

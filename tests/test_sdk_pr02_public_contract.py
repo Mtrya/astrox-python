@@ -83,7 +83,6 @@ def install_recording_client() -> RecordingSession:
     return session
 
 
-@pytest.mark.xfail(strict=True, reason="PR 02 later phases add astrox.orbits and curated propagator names")
 def test_pr02_public_modules_and_names_are_available() -> None:
     from astrox import orbits, propagator
 
@@ -299,3 +298,14 @@ def test_ballistic_branch_functions_make_mode_explicit_in_the_function_name(
 
 def test_generated_model_alias_layer_is_not_part_of_the_package_public_exports() -> None:
     assert "models" not in astrox.__all__
+
+
+def test_old_in_scope_propagator_names_are_not_public_apis() -> None:
+    from astrox import propagator
+
+    assert "propagate_j2" not in propagator.__all__
+    assert "propagate_two_body" not in propagator.__all__
+    assert "propagate_ballistic" not in propagator.__all__
+    assert not hasattr(propagator, "propagate_j2")
+    assert not hasattr(propagator, "propagate_two_body")
+    assert not hasattr(propagator, "propagate_ballistic")

@@ -2,13 +2,9 @@
 # dependencies = ["astrox-client"]
 # requires-python = ">=3.10"
 # ///
-"""
-J2 perturbation propagation using classical orbital elements.
+"""J2 perturbation propagation using classical orbital elements."""
 
-API: POST /api/Propagator/J2
-"""
-
-from astrox.propagator import propagate_j2
+from astrox import orbits, propagator
 
 
 # Earth gravitational parameter (m^3/s^2)
@@ -24,55 +20,33 @@ def main():
     altitude = 400000.0  # meters
     semimajor_axis = EARTH_RADIUS + altitude
 
-    # Classical orbital elements
-    # [SemiMajorAxis(m), Eccentricity, Inclination(deg), ArgOfPeriapsis(deg), RAAN(deg), TrueAnomaly(deg)]
-    orbital_elements = [
-        semimajor_axis,  # Semi-major axis (m)
-        0.0008,          # Eccentricity (nearly circular)
-        51.6,            # Inclination (deg) - ISS inclination
-        0.0,             # Argument of periapsis (deg)
-        120.0,           # RAAN (deg)
-        45.0,            # True anomaly (deg)
-    ]
-
-    # Propagate for 2 days with 60-second step
-    result = propagate_j2(
-        start="2024-01-01T00:00:00.000Z",
-        stop="2024-01-03T00:00:00.000Z",
-        j2_normalized_value=EARTH_J2,
-        ref_distance=EARTH_RADIUS,
-        orbit_epoch="2024-01-01T00:00:00.000Z",
-        orbital_elements=orbital_elements,
-        step=60.0,
-        central_body="Earth",
-        gravitational_parameter=EARTH_MU,
-        coord_system="Inertial",
-        coord_type="Classical",
+    orbit = orbits.keplerian(
+        semi_major_axis_m=semimajor_axis,
+        eccentricity=0.0008,
+        inclination_deg=51.6,
+        argument_of_periapsis_deg=0.0,
+        raan_deg=120.0,
+        true_anomaly_deg=45.0,
     )
 
-    # Output - direct field access
-    print(f"Success: {result['IsSuccess']}")
-    print(f"Message: {result['Message']}")
+    # Propagate for 2 days with 60-second step
+    period_s, position = propagator.j2(
+        start="2024-01-01T00:00:00.000Z",
+        stop="2024-01-03T00:00:00.000Z",
+        orbit_epoch="2024-01-01T00:00:00.000Z",
+        orbit=orbit,
+        step_s=60.0,
+        central_body="Earth",
+        gravitational_parameter_m3_s2=EARTH_MU,
+        coord_system="Inertial",
+        j2_normalized_value=EARTH_J2,
+        ref_distance_m=EARTH_RADIUS,
+    )
 
-    # Position data (CZML format)
-    position = result["Position"]
-    print(f"\nEpoch: {position['epoch']}")
-    print(f"Cartesian data points: {len(position['cartesian']) // 6}")
-
-    # Display first and last positions
-    cartesian = position["cartesian"]
-    print(f"\nInitial position (m):")
-    print(f"  X: {cartesian[0]:.3f}")
-    print(f"  Y: {cartesian[1]:.3f}")
-    print(f"  Z: {cartesian[2]:.3f}")
-
-    print(f"\nFinal position (m):")
-    print(f"  X: {cartesian[-6]:.3f}")
-    print(f"  Y: {cartesian[-5]:.3f}")
-    print(f"  Z: {cartesian[-4]:.3f}")
-
-    # Reference frame info
-    print(f"\nReference frame: {position['referenceFrame']}")
+    print(f"Period: {period_s:.3f} s")
+    print(f"Epoch: {position.epoch}")
+    print(f"Reference frame: {position.reference_frame}")
+    print(f"Cartesian-velocity values: {len(position.cartesian_velocity)}")
 
 
 if __name__ == "__main__":

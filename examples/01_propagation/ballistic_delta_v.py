@@ -14,7 +14,7 @@ API: POST /Propagator/Ballistic (DeltaV type)
 import matplotlib.pyplot as plt
 import numpy as np
 
-from astrox.propagator import propagate_ballistic
+from astrox import propagator
 
 
 def main():
@@ -35,25 +35,23 @@ def main():
     print()
 
     # Compute trajectory with specified delta-v type
-    result = propagate_ballistic(
+    period_s, position = propagator.ballistic_delta_v(
         start="2024-01-01T12:00:00.000Z",
-        impact_latitude=impact_lat,
-        impact_longitude=impact_lon,
-        launch_latitude=launch_lat,
-        launch_longitude=launch_lon,
-        launch_altitude=launch_alt,
-        impact_altitude=impact_alt,
-        # Specify trajectory by delta v
-        ballistic_type="DeltaV",
-        ballistic_type_value=1000,  # 1000 m/s delta-v
-        step=5.0
+        impact_latitude_deg=impact_lat,
+        impact_longitude_deg=impact_lon,
+        launch_latitude_deg=launch_lat,
+        launch_longitude_deg=launch_lon,
+        launch_altitude_m=launch_alt,
+        impact_altitude_m=impact_alt,
+        delta_v_m_s=1000,
+        step_s=5.0,
     )
 
-    print(f"Success: {result['IsSuccess']}")
-    print(f"Message: {result['Message']}")
+    print(f"Period: {period_s:.3f} s")
+    print(f"Reference frame: {position.reference_frame}")
 
     # CZML cartesianVelocity: [t, x, y, z, vx, vy, vz, ...] in ECEF (FIXED)
-    flat = result["Position"]["cartesianVelocity"]
+    flat = position.cartesian_velocity
     pts = np.array(flat).reshape(-1, 7)
     t_sec = pts[:, 0]
     x, y, z = pts[:, 1], pts[:, 2], pts[:, 3]
