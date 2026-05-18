@@ -13,6 +13,11 @@ from astrox.orbits import KeplerianElements
 
 __all__ = [
     "PropagatorPosition",
+    "ballistic",
+    "ballistic_apogee_altitude",
+    "ballistic_delta_v",
+    "ballistic_delta_v_min_ecc",
+    "ballistic_time_of_flight",
     "j2",
     "propagate_two_body",
     "propagate_ballistic",
@@ -126,6 +131,233 @@ def j2(
         payload["RefDistance"] = ref_distance_m
 
     result = raw.post("/Propagator/J2", json=payload)
+    if result["IsSuccess"] is not True:
+        raise ValueError(result["Message"])
+    return result["Period"], PropagatorPosition.from_wire(result["Position"])
+
+
+def ballistic(
+    *,
+    start: str,
+    impact_latitude_deg: float,
+    impact_longitude_deg: float,
+    stop: str | None = None,
+    step_s: float | None = None,
+    central_body: str | None = None,
+    gravitational_parameter_m3_s2: float | None = None,
+    launch_latitude_deg: float | None = None,
+    launch_longitude_deg: float | None = None,
+    launch_altitude_m: float | None = None,
+    impact_altitude_m: float | None = None,
+) -> tuple[float, PropagatorPosition]:
+    """Propagate the verified nominal ballistic trajectory shape."""
+    payload: dict[str, Any] = {
+        "Start": start,
+        "ImpactLatitude": impact_latitude_deg,
+        "ImpactLongitude": impact_longitude_deg,
+    }
+    if step_s is not None:
+        payload["Step"] = step_s
+    if central_body is not None:
+        payload["CentralBody"] = central_body
+    if gravitational_parameter_m3_s2 is not None:
+        payload["GravitationalParameter"] = gravitational_parameter_m3_s2
+    if launch_latitude_deg is not None:
+        payload["LaunchLatitude"] = launch_latitude_deg
+    if launch_longitude_deg is not None:
+        payload["LaunchLongitude"] = launch_longitude_deg
+    if launch_altitude_m is not None:
+        payload["LaunchAltitude"] = launch_altitude_m
+    if impact_altitude_m is not None:
+        payload["ImpactAltitude"] = impact_altitude_m
+    if stop is not None:
+        payload["Stop"] = stop
+
+    result = raw.post("/Propagator/Ballistic", json=payload)
+    if result["IsSuccess"] is not True:
+        raise ValueError(result["Message"])
+    return result["Period"], PropagatorPosition.from_wire(result["Position"])
+
+
+def ballistic_delta_v(
+    *,
+    start: str,
+    impact_latitude_deg: float,
+    impact_longitude_deg: float,
+    delta_v_m_s: float,
+    stop: str | None = None,
+    step_s: float | None = None,
+    central_body: str | None = None,
+    gravitational_parameter_m3_s2: float | None = None,
+    launch_latitude_deg: float | None = None,
+    launch_longitude_deg: float | None = None,
+    launch_altitude_m: float | None = None,
+    impact_altitude_m: float | None = None,
+) -> tuple[float, PropagatorPosition]:
+    """Propagate a ballistic trajectory using the DeltaV branch."""
+    payload: dict[str, Any] = {
+        "Start": start,
+        "ImpactLatitude": impact_latitude_deg,
+        "ImpactLongitude": impact_longitude_deg,
+        "BallisticType": "DeltaV",
+        "BallisticTypeValue": delta_v_m_s,
+    }
+    if step_s is not None:
+        payload["Step"] = step_s
+    if central_body is not None:
+        payload["CentralBody"] = central_body
+    if gravitational_parameter_m3_s2 is not None:
+        payload["GravitationalParameter"] = gravitational_parameter_m3_s2
+    if launch_latitude_deg is not None:
+        payload["LaunchLatitude"] = launch_latitude_deg
+    if launch_longitude_deg is not None:
+        payload["LaunchLongitude"] = launch_longitude_deg
+    if launch_altitude_m is not None:
+        payload["LaunchAltitude"] = launch_altitude_m
+    if impact_altitude_m is not None:
+        payload["ImpactAltitude"] = impact_altitude_m
+    if stop is not None:
+        payload["Stop"] = stop
+
+    result = raw.post("/Propagator/Ballistic", json=payload)
+    if result["IsSuccess"] is not True:
+        raise ValueError(result["Message"])
+    return result["Period"], PropagatorPosition.from_wire(result["Position"])
+
+
+def ballistic_delta_v_min_ecc(
+    *,
+    start: str,
+    impact_latitude_deg: float,
+    impact_longitude_deg: float,
+    delta_v_m_s: float,
+    stop: str | None = None,
+    step_s: float | None = None,
+    central_body: str | None = None,
+    gravitational_parameter_m3_s2: float | None = None,
+    launch_latitude_deg: float | None = None,
+    launch_longitude_deg: float | None = None,
+    launch_altitude_m: float | None = None,
+    impact_altitude_m: float | None = None,
+) -> tuple[float, PropagatorPosition]:
+    """Propagate a ballistic trajectory using the DeltaV_MinEcc branch."""
+    payload: dict[str, Any] = {
+        "Start": start,
+        "ImpactLatitude": impact_latitude_deg,
+        "ImpactLongitude": impact_longitude_deg,
+        "BallisticType": "DeltaV_MinEcc",
+        "BallisticTypeValue": delta_v_m_s,
+    }
+    if step_s is not None:
+        payload["Step"] = step_s
+    if central_body is not None:
+        payload["CentralBody"] = central_body
+    if gravitational_parameter_m3_s2 is not None:
+        payload["GravitationalParameter"] = gravitational_parameter_m3_s2
+    if launch_latitude_deg is not None:
+        payload["LaunchLatitude"] = launch_latitude_deg
+    if launch_longitude_deg is not None:
+        payload["LaunchLongitude"] = launch_longitude_deg
+    if launch_altitude_m is not None:
+        payload["LaunchAltitude"] = launch_altitude_m
+    if impact_altitude_m is not None:
+        payload["ImpactAltitude"] = impact_altitude_m
+    if stop is not None:
+        payload["Stop"] = stop
+
+    result = raw.post("/Propagator/Ballistic", json=payload)
+    if result["IsSuccess"] is not True:
+        raise ValueError(result["Message"])
+    return result["Period"], PropagatorPosition.from_wire(result["Position"])
+
+
+def ballistic_apogee_altitude(
+    *,
+    start: str,
+    impact_latitude_deg: float,
+    impact_longitude_deg: float,
+    apogee_altitude_m: float,
+    stop: str | None = None,
+    step_s: float | None = None,
+    central_body: str | None = None,
+    gravitational_parameter_m3_s2: float | None = None,
+    launch_latitude_deg: float | None = None,
+    launch_longitude_deg: float | None = None,
+    launch_altitude_m: float | None = None,
+    impact_altitude_m: float | None = None,
+) -> tuple[float, PropagatorPosition]:
+    """Propagate a ballistic trajectory using the ApogeeAlt branch."""
+    payload: dict[str, Any] = {
+        "Start": start,
+        "ImpactLatitude": impact_latitude_deg,
+        "ImpactLongitude": impact_longitude_deg,
+        "BallisticType": "ApogeeAlt",
+        "BallisticTypeValue": apogee_altitude_m,
+    }
+    if step_s is not None:
+        payload["Step"] = step_s
+    if central_body is not None:
+        payload["CentralBody"] = central_body
+    if gravitational_parameter_m3_s2 is not None:
+        payload["GravitationalParameter"] = gravitational_parameter_m3_s2
+    if launch_latitude_deg is not None:
+        payload["LaunchLatitude"] = launch_latitude_deg
+    if launch_longitude_deg is not None:
+        payload["LaunchLongitude"] = launch_longitude_deg
+    if launch_altitude_m is not None:
+        payload["LaunchAltitude"] = launch_altitude_m
+    if impact_altitude_m is not None:
+        payload["ImpactAltitude"] = impact_altitude_m
+    if stop is not None:
+        payload["Stop"] = stop
+
+    result = raw.post("/Propagator/Ballistic", json=payload)
+    if result["IsSuccess"] is not True:
+        raise ValueError(result["Message"])
+    return result["Period"], PropagatorPosition.from_wire(result["Position"])
+
+
+def ballistic_time_of_flight(
+    *,
+    start: str,
+    impact_latitude_deg: float,
+    impact_longitude_deg: float,
+    time_of_flight_s: float,
+    stop: str | None = None,
+    step_s: float | None = None,
+    central_body: str | None = None,
+    gravitational_parameter_m3_s2: float | None = None,
+    launch_latitude_deg: float | None = None,
+    launch_longitude_deg: float | None = None,
+    launch_altitude_m: float | None = None,
+    impact_altitude_m: float | None = None,
+) -> tuple[float, PropagatorPosition]:
+    """Propagate a ballistic trajectory using the TimeOfFlight branch."""
+    payload: dict[str, Any] = {
+        "Start": start,
+        "ImpactLatitude": impact_latitude_deg,
+        "ImpactLongitude": impact_longitude_deg,
+        "BallisticType": "TimeOfFlight",
+        "BallisticTypeValue": time_of_flight_s,
+    }
+    if step_s is not None:
+        payload["Step"] = step_s
+    if central_body is not None:
+        payload["CentralBody"] = central_body
+    if gravitational_parameter_m3_s2 is not None:
+        payload["GravitationalParameter"] = gravitational_parameter_m3_s2
+    if launch_latitude_deg is not None:
+        payload["LaunchLatitude"] = launch_latitude_deg
+    if launch_longitude_deg is not None:
+        payload["LaunchLongitude"] = launch_longitude_deg
+    if launch_altitude_m is not None:
+        payload["LaunchAltitude"] = launch_altitude_m
+    if impact_altitude_m is not None:
+        payload["ImpactAltitude"] = impact_altitude_m
+    if stop is not None:
+        payload["Stop"] = stop
+
+    result = raw.post("/Propagator/Ballistic", json=payload)
     if result["IsSuccess"] is not True:
         raise ValueError(result["Message"])
     return result["Period"], PropagatorPosition.from_wire(result["Position"])

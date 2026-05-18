@@ -228,7 +228,6 @@ def test_curated_propagator_functions_do_not_accept_raw_dict_orbit_fragments() -
         )
 
 
-@pytest.mark.xfail(strict=True, reason="PR 02 Phase 4 adds nominal ballistic propagation")
 def test_ballistic_nominal_maps_to_verified_route_without_mode_payload() -> None:
     from astrox import propagator
 
@@ -269,7 +268,6 @@ def test_ballistic_nominal_maps_to_verified_route_without_mode_payload() -> None
         ("ballistic_time_of_flight", "time_of_flight_s", 600.0, "TimeOfFlight"),
     ],
 )
-@pytest.mark.xfail(strict=True, reason="PR 02 Phase 4 adds branch-specific ballistic functions")
 def test_ballistic_branch_functions_make_mode_explicit_in_the_function_name(
     function_name: str,
     value_kwarg: str,
