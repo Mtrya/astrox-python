@@ -102,7 +102,6 @@ def test_pr02_public_modules_and_names_are_available() -> None:
     assert hasattr(propagator, "ballistic_time_of_flight")
 
 
-@pytest.mark.xfail(strict=True, reason="PR 02 Phase 2 adds the KeplerianElements dataclass")
 def test_keplerian_constructor_returns_frozen_dataclass_with_explicit_wire_lowering() -> None:
     from astrox import orbits
 

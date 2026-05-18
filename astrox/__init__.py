@@ -19,6 +19,7 @@ Raw route access is available for advanced callers:
     result = astrox.raw.post("/Propagator/J2", json={...})
 """
 
+from astrox import orbits
 from astrox._http import Client, configure, get_session, raw
 
 __version__ = "0.1.0"
@@ -27,5 +28,6 @@ __all__ = [
     "Client",
     "configure",
     "get_session",
+    "orbits",
     "raw",
 ]
