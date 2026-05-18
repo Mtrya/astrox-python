@@ -34,7 +34,3 @@ These examples call the ASTROX API through the package default client configurat
 ## Output Shape
 
 The curated propagator functions return `(period_s, position)`. `period_s` is the server period value. `position` is a `propagator.PropagatorPosition` dataclass with `central_body`, `epoch`, `reference_frame`, `interpolation_algorithm`, `interpolation_degree`, and `cartesian_velocity`.
-
-## Legacy Examples
-
-Some older examples in this directory still cover SDK surfaces outside this curated propagator interface, such as SGP4, HPOP, simple ascent, and batch propagation. Those examples are not the pattern for new curated SDK work until those areas are migrated and documented.

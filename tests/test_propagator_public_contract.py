@@ -300,12 +300,21 @@ def test_generated_model_alias_layer_is_not_part_of_the_package_public_exports()
     assert "models" not in astrox.__all__
 
 
-def test_old_in_scope_propagator_names_are_not_public_apis() -> None:
+def test_old_propagator_names_are_not_public_apis() -> None:
     from astrox import propagator
 
-    assert "propagate_j2" not in propagator.__all__
-    assert "propagate_two_body" not in propagator.__all__
-    assert "propagate_ballistic" not in propagator.__all__
-    assert not hasattr(propagator, "propagate_j2")
-    assert not hasattr(propagator, "propagate_two_body")
-    assert not hasattr(propagator, "propagate_ballistic")
+    old_names = [
+        "propagate_j2",
+        "propagate_two_body",
+        "propagate_ballistic",
+        "propagate_sgp4",
+        "propagate_simple_ascent",
+        "propagate_hpop",
+        "propagate_j2_batch",
+        "propagate_sgp4_batch",
+        "propagate_two_body_batch",
+    ]
+
+    for name in old_names:
+        assert name not in propagator.__all__
+        assert not hasattr(propagator, name)

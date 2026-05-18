@@ -254,7 +254,7 @@ class Client:
 
     Example:
         >>> client = Client(timeout=60)
-        >>> result = client.post("/api/Coverage/GetGridPoints", data={...})
+        >>> result = client.raw.post("/Propagator/J2", json={...})
 
         >>> # Global configuration
         >>> configure(base_url="http://custom:8765", timeout=120)
@@ -321,7 +321,7 @@ class Client:
         """Make POST request to API endpoint.
 
         Args:
-            endpoint: API endpoint (e.g., "/api/Coverage/GetGridPoints")
+            endpoint: API endpoint (e.g., "/Propagator/J2")
             data: Request payload (dict or Pydantic model)
             response_model: Optional Pydantic model class for response validation
             params: Optional query parameters
@@ -448,7 +448,7 @@ def get_session() -> Client:
 
     Example:
         >>> sess = get_session()
-        >>> result = sess.post("/api/Coverage/GetGridPoints", data={...})
+        >>> result = sess.raw.post("/Propagator/J2", json={...})
     """
     sess = _default_session.get()
     if sess is None:
@@ -478,8 +478,9 @@ def configure(
         >>> import astrox
         >>> astrox.configure(base_url="http://custom:8765", timeout=120)
         >>> # All subsequent calls use this configuration
-        >>> from astrox.coverage import compute_coverage
-        >>> result = compute_coverage(...)  # Uses configured session
+        >>> from astrox import orbits, propagator
+        >>> orbit = orbits.keplerian(...)
+        >>> period_s, position = propagator.j2(..., orbit=orbit)
     """
     sess = Client(
         base_url=base_url,
