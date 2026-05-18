@@ -1,5 +1,5 @@
 # /// script
-# dependencies = ["astrox-client", "matplotlib", "numpy"]
+# dependencies = ["astrox-python", "matplotlib", "numpy"]
 # requires-python = ">=3.10"
 # ///
 """Example: Ballistic Trajectory Propagation (Delta-V)

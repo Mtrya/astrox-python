@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["astrox", "matplotlib", "numpy"]
+# dependencies = ["astrox-python", "matplotlib", "numpy"]
 # ///
 """Example: Ballistic Trajectory Propagation (Apogee Altitude)
 

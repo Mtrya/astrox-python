@@ -1,5 +1,5 @@
 # /// script
-# dependencies = ["astrox-client"]
+# dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
 """J2 perturbation propagation using classical orbital elements."""
