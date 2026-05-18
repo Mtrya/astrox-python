@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 from dataclasses import FrozenInstanceError, is_dataclass
 
 import pytest
@@ -296,8 +297,13 @@ def test_ballistic_branch_functions_make_mode_explicit_in_the_function_name(
     assert session.calls[0]["json"]["BallisticTypeValue"] == value
 
 
-def test_generated_model_alias_layer_is_not_part_of_the_package_public_exports() -> None:
+def test_generated_transport_models_are_not_runtime_modules() -> None:
     assert "models" not in astrox.__all__
+    assert not hasattr(astrox, "models")
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("astrox.models")
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("astrox._models")
 
 
 def test_old_propagator_names_are_not_public_apis() -> None:

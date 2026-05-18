@@ -30,7 +30,7 @@ period_s, position = propagator.j2(
 
 ## Models And Payloads
 
-Generated Pydantic models are internal implementation details. They are not the public SDK vocabulary, and user-facing docs should not require users to understand both generated model classes and SDK-owned public objects.
+Generated transport models are not part of the SDK runtime surface. User-facing docs should require users to understand only SDK-owned public objects and ordinary Python values, not generated schema classes.
 
 Curated public constructors should return SDK-owned Python value objects, normally frozen stdlib dataclasses, when the concept deserves an object. These objects may expose explicit wire-lowering methods such as `to_wire()` for inspection and endpoint assembly, but they should not behave like generated transport schemas. Raw dictionaries belong in the raw route layer, not as a parallel documented style for curated functions.
 
@@ -56,7 +56,7 @@ Curated wrappers are not added merely because an OpenAPI endpoint exists. Raw an
 
 ## Non-Goals
 
-- Do not make generated Pydantic models the public SDK vocabulary.
+- Do not make generated transport models the public SDK vocabulary.
 - Do not require users to hand-craft JSON for ordinary documented workflows.
 - Do not expose raw dictionaries as a parallel documented style for curated endpoint functions.
 - Do not make `Client` the main beginner-facing concept.

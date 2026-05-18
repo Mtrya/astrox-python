@@ -7,7 +7,7 @@ from typing import Callable, get_type_hints
 
 import pytest
 
-from astrox import propagator
+from astrox import exceptions, propagator
 
 
 PROPAGATOR_RESPONSE = {
@@ -212,20 +212,15 @@ def test_ballistic_functions_do_not_expose_mode_arguments() -> None:
         assert "ballistic_type_value" not in parameters
 
 
-def test_ballistic_raises_value_error_for_unsuccessful_raw_response(
+def test_ballistic_propagates_api_error_for_unsuccessful_raw_response(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     def fake_post(endpoint: str, *, json: object) -> dict[str, object]:
-        return {
-            "IsSuccess": False,
-            "Message": "bad ballistic branch",
-            "Period": 0.0,
-            "Position": {},
-        }
+        raise exceptions.AstroxAPIError("bad ballistic branch", endpoint, response=None)
 
     monkeypatch.setattr(propagator.raw, "post", fake_post)
 
-    with pytest.raises(ValueError, match="bad ballistic branch"):
+    with pytest.raises(exceptions.AstroxAPIError, match="bad ballistic branch"):
         propagator.ballistic(
             start="2024-01-01T12:00:00.000Z",
             impact_latitude_deg=30.0,

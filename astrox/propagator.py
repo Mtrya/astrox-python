@@ -76,8 +76,6 @@ def two_body(
         payload["CoordSystem"] = coord_system
 
     result = raw.post("/Propagator/TwoBody", json=payload)
-    if result["IsSuccess"] is not True:
-        raise ValueError(result["Message"])
     return result["Period"], PropagatorPosition.from_wire(result["Position"])
 
 
@@ -119,8 +117,6 @@ def j2(
         payload["RefDistance"] = ref_distance_m
 
     result = raw.post("/Propagator/J2", json=payload)
-    if result["IsSuccess"] is not True:
-        raise ValueError(result["Message"])
     return result["Period"], PropagatorPosition.from_wire(result["Position"])
 
 
@@ -162,8 +158,6 @@ def ballistic(
         payload["Stop"] = stop
 
     result = raw.post("/Propagator/Ballistic", json=payload)
-    if result["IsSuccess"] is not True:
-        raise ValueError(result["Message"])
     return result["Period"], PropagatorPosition.from_wire(result["Position"])
 
 
@@ -208,8 +202,6 @@ def ballistic_delta_v(
         payload["Stop"] = stop
 
     result = raw.post("/Propagator/Ballistic", json=payload)
-    if result["IsSuccess"] is not True:
-        raise ValueError(result["Message"])
     return result["Period"], PropagatorPosition.from_wire(result["Position"])
 
 
@@ -254,8 +246,6 @@ def ballistic_delta_v_min_ecc(
         payload["Stop"] = stop
 
     result = raw.post("/Propagator/Ballistic", json=payload)
-    if result["IsSuccess"] is not True:
-        raise ValueError(result["Message"])
     return result["Period"], PropagatorPosition.from_wire(result["Position"])
 
 
@@ -300,8 +290,6 @@ def ballistic_apogee_altitude(
         payload["Stop"] = stop
 
     result = raw.post("/Propagator/Ballistic", json=payload)
-    if result["IsSuccess"] is not True:
-        raise ValueError(result["Message"])
     return result["Period"], PropagatorPosition.from_wire(result["Position"])
 
 
@@ -346,6 +334,4 @@ def ballistic_time_of_flight(
         payload["Stop"] = stop
 
     result = raw.post("/Propagator/Ballistic", json=payload)
-    if result["IsSuccess"] is not True:
-        raise ValueError(result["Message"])
     return result["Period"], PropagatorPosition.from_wire(result["Position"])

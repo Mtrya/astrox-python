@@ -41,7 +41,6 @@ def changed_categories(paths: list[str]) -> dict[str, bool]:
         "openapi_archive": any(path.startswith("openapi/archive/") for path in paths),
         "fixture_yaml": any(path.startswith("openapi/fixtures/") and path.endswith(".yaml") for path in paths),
         "fixture_status": "openapi/fixtures/STATUS.md" in paths,
-        "generated_models": "astrox/_models.py" in paths,
     }
 
 
@@ -165,7 +164,6 @@ def changed_categories_markdown(categories: dict[str, bool]) -> list[str]:
         "openapi_archive": "OpenAPI archive snapshot",
         "fixture_yaml": "fixture YAML",
         "fixture_status": "generated fixture status",
-        "generated_models": "generated models",
     }
     return [f"- {label}: {format_bool(categories[key])}" for key, label in labels.items()]
 

@@ -6,15 +6,10 @@ import json
 
 import pytest
 import requests
-from pydantic import BaseModel, Field
 
 import astrox
 from astrox import exceptions
 from astrox import _http
-
-
-class NestedPayload(BaseModel):
-    wire_value: int = Field(alias="WireValue")
 
 
 class WirePayload:
@@ -322,21 +317,7 @@ def test_raw_request_accepts_per_request_transport_overrides() -> None:
     assert session.calls[0]["timeout"] == 4
 
 
-def test_json_payload_normalizes_nested_pydantic_models() -> None:
-    payload = {
-        "items": [NestedPayload(WireValue=3)],
-        "nested": {"model": NestedPayload(WireValue=4)},
-        "plain": True,
-    }
-
-    assert _http._json_payload(payload) == {
-        "items": [{"WireValue": 3}],
-        "nested": {"model": {"WireValue": 4}},
-        "plain": True,
-    }
-
-
-def test_json_payload_accepts_model_dump_json_objects_without_base_model() -> None:
+def test_json_payload_normalizes_nested_model_dump_json_objects() -> None:
     payload = {
         "items": [WirePayload(3)],
         "nested": {"model": WirePayload(4)},
@@ -346,6 +327,20 @@ def test_json_payload_accepts_model_dump_json_objects_without_base_model() -> No
     assert _http._json_payload(payload) == {
         "items": [{"WireValue": 3}],
         "nested": {"model": {"WireValue": 4}},
+        "plain": True,
+    }
+
+
+def test_json_payload_normalizes_tuple_items() -> None:
+    payload = {
+        "items": (WirePayload(3),),
+        "nested": {"model": (WirePayload(4),)},
+        "plain": True,
+    }
+
+    assert _http._json_payload(payload) == {
+        "items": [{"WireValue": 3}],
+        "nested": {"model": [{"WireValue": 4}]},
         "plain": True,
     }
 

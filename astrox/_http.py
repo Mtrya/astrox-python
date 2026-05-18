@@ -37,7 +37,7 @@ def _json_payload(data: Any) -> Any:
     model_dump_json = getattr(data, "model_dump_json", None)
     if callable(model_dump_json):
         return json.loads(model_dump_json(by_alias=True, exclude_none=True))
-    if isinstance(data, list):
+    if isinstance(data, (list, tuple)):
         return [_json_payload(item) for item in data]
     if isinstance(data, dict):
         return {key: _json_payload(value) for key, value in data.items()}
@@ -87,7 +87,7 @@ def _make_request(
 
     Args:
         endpoint: API endpoint (e.g., "/Coverage/ComputeCoverage")
-        json_body: Optional JSON request payload (dict or Pydantic model)
+        json_body: Optional JSON request payload
         method: HTTP method
         base_url: Base URL for the API
         timeout: Request timeout in seconds
@@ -229,7 +229,7 @@ def post(
     session: requests.Session | None = None,
 ) -> T | dict[str, Any]:
     """
-    Make a POST request and optionally parse response into a Pydantic model.
+    Make a POST request and optionally parse response into a model object.
 
     Args:
         endpoint: API endpoint

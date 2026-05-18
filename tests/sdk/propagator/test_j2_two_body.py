@@ -7,7 +7,7 @@ from typing import get_type_hints
 
 import pytest
 
-from astrox import orbits, propagator
+from astrox import exceptions, orbits, propagator
 
 
 PROPAGATOR_RESPONSE = {
@@ -155,21 +155,16 @@ def test_propagator_functions_reject_raw_orbit_fragments(
         )
 
 
-def test_j2_raises_value_error_for_unsuccessful_raw_response(
+def test_j2_propagates_api_error_for_unsuccessful_raw_response(
     monkeypatch: pytest.MonkeyPatch,
     orbit: orbits.KeplerianElements,
 ) -> None:
     def fake_post(endpoint: str, *, json: object) -> dict[str, object]:
-        return {
-            "IsSuccess": False,
-            "Message": "bad orbit",
-            "Period": 0.0,
-            "Position": {},
-        }
+        raise exceptions.AstroxAPIError("bad orbit", endpoint, response=None)
 
     monkeypatch.setattr(propagator.raw, "post", fake_post)
 
-    with pytest.raises(ValueError, match="bad orbit"):
+    with pytest.raises(exceptions.AstroxAPIError, match="bad orbit"):
         propagator.j2(
             start="2024-01-01T00:00:00.000Z",
             stop="2024-01-01T00:10:00.000Z",

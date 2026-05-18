@@ -6,7 +6,7 @@ This page documents the curated ASTROX Python propagator interface for Classical
 from astrox import orbits, propagator
 ```
 
-The curated functions documented here use SDK-owned dataclasses and ordinary scalar keyword arguments. They are not generated Pydantic model constructors, and they do not ask users to hand-build ASTROX request dictionaries for ordinary use. Raw access remains available through `astrox.raw` for advanced callers who need lower-level API control.
+The curated functions documented here use SDK-owned dataclasses and ordinary scalar keyword arguments. They are not generated transport-model constructors, and they do not ask users to hand-build ASTROX request dictionaries for ordinary use. Raw access remains available through `astrox.raw` for advanced callers who need lower-level API control.
 
 These functions are documented for the SDK behaviors covered by the current test and fixture suite. They describe the Python interface, units, return values, and caveats; they are not a claim that ASTROX propagation results are numerically validated for mission use.
 
@@ -95,4 +95,4 @@ period_s, position = propagator.two_body(...)
 
 `period_s` is the server `Period` value. `position` is a frozen `propagator.PropagatorPosition` dataclass with `central_body`, `epoch`, `reference_frame`, `interpolation_algorithm`, `interpolation_degree`, and `cartesian_velocity`.
 
-When ASTROX reports an unsuccessful response, the curated function raises `ValueError` with the server message. When you need the full raw response envelope, use the lower-level `astrox.raw` API.
+When ASTROX reports an unsuccessful response, the curated function raises `astrox.exceptions.AstroxAPIError` with the server message. When you need the full raw response envelope, use the lower-level `astrox.raw` API.

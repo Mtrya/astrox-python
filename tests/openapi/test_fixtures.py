@@ -1298,7 +1298,6 @@ def test_drift_pipeline_report_requires_pr_for_tracked_changes() -> None:
     tracked_paths = parse_porcelain_status(
         " M openapi/astrox.openapi.yaml\n"
         " M openapi/fixtures/STATUS.md\n"
-        " M astrox/_models.py\n"
     )
     reconcile_report = {
         "changed_count": 2,
@@ -1354,7 +1353,6 @@ def test_drift_pipeline_report_requires_pr_for_tracked_changes() -> None:
     assert report["issue_required"] is False
     assert report["changed_categories"]["openapi_baseline"] is True
     assert report["changed_categories"]["fixture_status"] is True
-    assert report["changed_categories"]["generated_models"] is True
     assert "does not auto-merge" in body
     assert "`/New` POST" in body
     assert "`/Example` `$.Mode` (enum) value `B`" in body
