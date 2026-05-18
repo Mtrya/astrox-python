@@ -8,11 +8,10 @@ from contextvars import ContextVar
 from typing import Any, TypeVar
 
 import requests
-from pydantic import BaseModel, ValidationError
 
 from astrox import exceptions
 
-T = TypeVar("T", bound=BaseModel)
+T = TypeVar("T")
 
 # Default configuration
 DEFAULT_BASE_URL = "http://astrox.cn:8765"
@@ -35,13 +34,38 @@ def _default_headers() -> dict[str, str]:
 
 
 def _json_payload(data: Any) -> Any:
-    if isinstance(data, BaseModel):
-        return json.loads(data.model_dump_json(by_alias=True, exclude_none=True))
+    model_dump_json = getattr(data, "model_dump_json", None)
+    if callable(model_dump_json):
+        return json.loads(model_dump_json(by_alias=True, exclude_none=True))
     if isinstance(data, list):
         return [_json_payload(item) for item in data]
     if isinstance(data, dict):
         return {key: _json_payload(value) for key, value in data.items()}
     return data
+
+
+def _validation_errors(exc: Exception) -> list[Any]:
+    errors = getattr(exc, "errors", None)
+    if callable(errors):
+        return errors()
+    return []
+
+
+def _validate_response_model(response_model: type[T], result: Any) -> T:
+    model_validate = getattr(response_model, "model_validate", None)
+    if not callable(model_validate):
+        raise exceptions.AstroxValidationError(
+            message="response_model must provide model_validate()",
+            errors=[],
+        )
+
+    try:
+        return model_validate(result)
+    except Exception as exc:
+        raise exceptions.AstroxValidationError(
+            message=f"Failed to validate response: {exc}",
+            errors=_validation_errors(exc),
+        )
 
 
 def _make_request(
@@ -196,7 +220,7 @@ def _make_request(
 
 def post(
     endpoint: str,
-    data: dict[str, Any] | BaseModel,
+    data: Any,
     response_model: type[T] | None = None,
     base_url: str = DEFAULT_BASE_URL,
     timeout: float = DEFAULT_TIMEOUT,
@@ -209,8 +233,8 @@ def post(
 
     Args:
         endpoint: API endpoint
-        data: Request payload (dict or Pydantic model)
-        response_model: Optional Pydantic model class for response
+        data: Request payload
+        response_model: Optional model_validate-compatible class for response
         base_url: Base URL for the API
         timeout: Request timeout in seconds
         max_retries: Maximum number of retry attempts
@@ -218,7 +242,7 @@ def post(
         session: Optional requests.Session to use
 
     Returns:
-        Parsed response as Pydantic model if response_model provided, else dict
+        Parsed response model if response_model provided, else dict
 
     Raises:
         AstroxValidationError: If response validation fails
@@ -237,13 +261,7 @@ def post(
     if response_model is None:
         return result
 
-    try:
-        return response_model.model_validate(result)
-    except ValidationError as e:
-        raise exceptions.AstroxValidationError(
-            message=f"Failed to validate response: {e}",
-            errors=e.errors(),
-        )
+    return _validate_response_model(response_model, result)
 
 
 class Client:
@@ -314,7 +332,7 @@ class Client:
     def post(
         self,
         endpoint: str,
-        data: dict[str, Any] | BaseModel,
+        data: Any,
         response_model: type[T] | None = None,
         params: dict[str, Any] | None = None,
     ) -> T | dict[str, Any]:
@@ -322,12 +340,12 @@ class Client:
 
         Args:
             endpoint: API endpoint (e.g., "/Propagator/J2")
-            data: Request payload (dict or Pydantic model)
-            response_model: Optional Pydantic model class for response validation
+            data: Request payload
+            response_model: Optional model_validate-compatible class for response validation
             params: Optional query parameters
 
         Returns:
-            Parsed response as Pydantic model if response_model provided, else dict
+            Parsed response model if response_model provided, else dict
 
         Raises:
             AstroxAPIError: If IsSuccess=false in response
@@ -341,13 +359,7 @@ class Client:
         if response_model is None:
             return result
 
-        try:
-            return response_model.model_validate(result)
-        except ValidationError as e:
-            raise exceptions.AstroxValidationError(
-                message=f"Failed to validate response: {e}",
-                errors=e.errors(),
-            )
+        return _validate_response_model(response_model, result)
 
 
 class RawClient:

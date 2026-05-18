@@ -17,6 +17,16 @@ class NestedPayload(BaseModel):
     wire_value: int = Field(alias="WireValue")
 
 
+class WirePayload:
+    def __init__(self, value: int) -> None:
+        self.value = value
+
+    def model_dump_json(self, *, by_alias: bool, exclude_none: bool) -> str:
+        assert by_alias is True
+        assert exclude_none is True
+        return json.dumps({"WireValue": self.value})
+
+
 class FakeResponse:
     def __init__(
         self,
@@ -316,6 +326,20 @@ def test_json_payload_normalizes_nested_pydantic_models() -> None:
     payload = {
         "items": [NestedPayload(WireValue=3)],
         "nested": {"model": NestedPayload(WireValue=4)},
+        "plain": True,
+    }
+
+    assert _http._json_payload(payload) == {
+        "items": [{"WireValue": 3}],
+        "nested": {"model": {"WireValue": 4}},
+        "plain": True,
+    }
+
+
+def test_json_payload_accepts_model_dump_json_objects_without_base_model() -> None:
+    payload = {
+        "items": [WirePayload(3)],
+        "nested": {"model": WirePayload(4)},
         "plain": True,
     }
 
