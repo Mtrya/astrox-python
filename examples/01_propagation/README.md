@@ -20,13 +20,14 @@ The user-facing guide is [docs/sdk/propagator.md](../../docs/sdk/propagator.md).
 | `ballistic_apogee_alt.py` | Ballistic `ApogeeAlt` branch |
 | `ballistic_time_of_flight.py` | Ballistic `TimeOfFlight` branch |
 
-Run an example from this directory:
+Install the development environment once, then run examples from the repository root:
 
 ```bash
-python propagator_reference.py
-python j2_classical.py
-python two_body_classical.py
-python ballistic_delta_v.py
+uv sync --group dev
+uv run python examples/01_propagation/propagator_reference.py
+uv run python examples/01_propagation/j2_classical.py
+uv run python examples/01_propagation/two_body_classical.py
+uv run python examples/01_propagation/ballistic_delta_v.py
 ```
 
 These examples call the ASTROX API through the package default client configuration. Running them end to end requires access to a compatible ASTROX server.

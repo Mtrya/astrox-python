@@ -29,6 +29,30 @@ jobs:
       - name: Install dependencies
         run: uv sync --group dev
 
+      - name: Build package
+        run: uv build --no-build-isolation
+
+      - name: Verify built package import
+        run: |
+          WHEEL="$(pwd)/$(find dist -name 'astrox_python-*.whl' -print -quit)"
+          cd /tmp
+          uv run --no-project --with "$WHEEL" python - <<'PY'
+          from astrox import orbits, propagator
+
+          orbit = orbits.keplerian(
+              semi_major_axis_m=7000000.0,
+              eccentricity=0.001,
+              inclination_deg=98.0,
+              raan_deg=20.0,
+              argument_of_periapsis_deg=30.0,
+              true_anomaly_deg=40.0,
+          )
+
+          assert orbit.to_wire()[0] == 7000000.0
+          assert hasattr(propagator, "j2")
+          assert hasattr(propagator, "two_body")
+          PY
+
       - name: Run pytest
         run: uv run python -m pytest tests
 
