@@ -1,4 +1,4 @@
-"""PR 02 public contract tests for the reference propagator slice."""
+"""Public contract tests for the curated propagator slice."""
 
 from __future__ import annotations
 
@@ -83,7 +83,7 @@ def install_recording_client() -> RecordingSession:
     return session
 
 
-def test_pr02_public_modules_and_names_are_available() -> None:
+def test_public_modules_and_names_are_available() -> None:
     from astrox import orbits, propagator
 
     assert "orbits" in astrox.__all__

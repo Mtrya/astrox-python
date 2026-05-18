@@ -1,4 +1,4 @@
-"""Focused tests for PR 02 J2 and two-body propagator functions."""
+"""Focused tests for curated J2 and two-body propagator functions."""
 
 from __future__ import annotations
 

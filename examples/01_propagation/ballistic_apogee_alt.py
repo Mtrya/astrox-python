@@ -8,7 +8,6 @@ Computes a suborbital ballistic trajectory shaped by apogee altitude
 (Cape Canaveral → ~1000 km downrange in the Atlantic) and plots the
 altitude profile alongside a 3D lat/lon/alt view.
 
-API: POST /Propagator/Ballistic (ApogeeAlt type)
 """
 
 import matplotlib.pyplot as plt

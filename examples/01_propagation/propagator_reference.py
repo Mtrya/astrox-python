@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""PR 02 reference propagator slice using the curated public SDK style."""
+"""Reference propagator examples using the curated public SDK style."""
 
 from astrox import orbits, propagator
 

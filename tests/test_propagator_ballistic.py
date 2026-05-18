@@ -1,4 +1,4 @@
-"""Focused tests for PR 02 ballistic propagator functions."""
+"""Focused tests for curated ballistic propagator functions."""
 
 from __future__ import annotations
 

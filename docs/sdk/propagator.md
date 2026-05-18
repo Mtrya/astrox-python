@@ -1,18 +1,14 @@
-# Propagator SDK Reference Slice
+# Propagator
 
-This page documents the first curated ASTROX Python SDK slice. It covers the public orbit value object and the fixture-backed propagator functions added for PR 02. The intended import style is:
+This page documents the curated ASTROX Python propagator interface for Classical Keplerian orbits, J2 and two-body propagation, and ballistic trajectories. The intended import style is:
 
 ```python
 from astrox import orbits, propagator
 ```
 
-The curated functions documented here use SDK-owned dataclasses and ordinary scalar keyword arguments. They are not generated Pydantic model constructors, and they do not ask users to hand-build ASTROX wire dictionaries for ordinary use. Raw route access remains available through `astrox.raw` for advanced callers who need the transport envelope or an endpoint branch that has not yet been curated.
+The curated functions documented here use SDK-owned dataclasses and ordinary scalar keyword arguments. They are not generated Pydantic model constructors, and they do not ask users to hand-build ASTROX request dictionaries for ordinary use. Raw access remains available through `astrox.raw` for advanced callers who need lower-level API control.
 
-## Evidence Level
-
-This slice is fixture-backed for wire shape. The checked fixtures cover `/Propagator/J2`, `/Propagator/TwoBody`, and `/Propagator/Ballistic` nominal behavior plus the verified ballistic branch modes `DeltaV`, `DeltaV_MinEcc`, `ApogeeAlt`, and `TimeOfFlight`. Unit tests prove the curated functions assemble those payload shapes and can construct the documented success-path return values from server-shaped responses.
-
-This is not semantic or physics validation. The docs and examples do not claim that the returned trajectory is numerically correct for mission use; they only document the public SDK boundary and the verified request/response shape.
+These functions are documented for the SDK behaviors covered by the current test and fixture suite. They describe the Python interface, units, return values, and caveats; they are not a claim that ASTROX propagation results are numerically validated for mission use.
 
 ## Orbit Input
 
@@ -29,9 +25,9 @@ orbit = orbits.keplerian(
 )
 ```
 
-`orbits.keplerian(...)` returns a frozen `orbits.KeplerianElements` dataclass. The six public fields are `semi_major_axis_m`, `eccentricity`, `inclination_deg`, `argument_of_periapsis_deg`, `raan_deg`, and `true_anomaly_deg`. The orbit epoch is intentionally separate because the ASTROX propagator endpoints receive `OrbitEpoch` separately from the `OrbitalElements` list.
+`orbits.keplerian(...)` returns a frozen `orbits.KeplerianElements` dataclass. The six public fields are `semi_major_axis_m`, `eccentricity`, `inclination_deg`, `argument_of_periapsis_deg`, `raan_deg`, and `true_anomaly_deg`. The orbit epoch is intentionally separate because propagation calls receive `orbit_epoch` separately from the orbital element values.
 
-Use `orbit.to_wire()` only when you need to inspect the ASTROX request fragment. It lowers the object to the exact Classical `OrbitalElements` order used by the wire API: semi-major axis in meters, eccentricity, inclination in degrees, argument of periapsis in degrees, RAAN in degrees, and true anomaly in degrees.
+Use `orbit.to_wire()` only when you need to inspect the ASTROX request fragment. It lowers the object to the Classical element order used by ASTROX: semi-major axis in meters, eccentricity, inclination in degrees, argument of periapsis in degrees, RAAN in degrees, and true anomaly in degrees.
 
 ## J2 And Two-Body
 
@@ -41,7 +37,7 @@ Required arguments for both functions are `start`, `stop`, `orbit_epoch`, and `o
 
 Optional arguments shared by both functions are `step_s`, `central_body`, `gravitational_parameter_m3_s2`, and `coord_system`. `propagator.j2(...)` also accepts `j2_normalized_value` and `ref_distance_m`. Optional arguments are omitted from the request unless supplied, so the server keeps ownership of its defaults.
 
-The SDK adds `CoordType: "Classical"` from the orbit object and sends `OrbitalElements` from `orbit.to_wire()`.
+The SDK derives the Classical coordinate type from the orbit object and sends the ordered orbital elements from `orbit.to_wire()`.
 
 ```python
 period_s, position = propagator.j2(
@@ -57,19 +53,19 @@ period_s, position = propagator.j2(
 )
 ```
 
-See `examples/01_propagation/j2_classical.py`, `examples/01_propagation/two_body_classical.py`, and `examples/01_propagation/pr02_reference_slice.py` for runnable source examples.
+See `examples/01_propagation/j2_classical.py`, `examples/01_propagation/two_body_classical.py`, and `examples/01_propagation/propagator_reference.py` for runnable source examples.
 
 ## Ballistic Branches
 
-`/Propagator/Ballistic` has one nominal curated function and four branch-specific functions. The branch-specific functions are separate because the branch changes the meaning and unit of the value argument.
+Ballistic propagation has one nominal curated function and four value-specific functions. The value-specific functions are separate because each one gives a different meaning and unit to its extra argument.
 
-| Function | Extra required value | ASTROX branch |
-| --- | --- | --- |
-| `propagator.ballistic(...)` | none | nominal, no `BallisticType` |
-| `propagator.ballistic_delta_v(...)` | `delta_v_m_s` | `DeltaV` |
-| `propagator.ballistic_delta_v_min_ecc(...)` | `delta_v_m_s` | `DeltaV_MinEcc` |
-| `propagator.ballistic_apogee_altitude(...)` | `apogee_altitude_m` | `ApogeeAlt` |
-| `propagator.ballistic_time_of_flight(...)` | `time_of_flight_s` | `TimeOfFlight` |
+| Function | Extra required value |
+| --- | --- |
+| `propagator.ballistic(...)` | none |
+| `propagator.ballistic_delta_v(...)` | `delta_v_m_s` |
+| `propagator.ballistic_delta_v_min_ecc(...)` | `delta_v_m_s` |
+| `propagator.ballistic_apogee_altitude(...)` | `apogee_altitude_m` |
+| `propagator.ballistic_time_of_flight(...)` | `time_of_flight_s` |
 
 All five functions require `start`, `impact_latitude_deg`, and `impact_longitude_deg`. Optional shared arguments are `stop`, `step_s`, `central_body`, `gravitational_parameter_m3_s2`, `launch_latitude_deg`, `launch_longitude_deg`, `launch_altitude_m`, and `impact_altitude_m`. Optional arguments are omitted unless supplied.
 
@@ -87,11 +83,11 @@ period_s, position = propagator.ballistic_delta_v(
 )
 ```
 
-See `examples/01_propagation/ballistic_delta_v.py`, `examples/01_propagation/ballistic_min_ecc.py`, `examples/01_propagation/ballistic_apogee_alt.py`, `examples/01_propagation/ballistic_time_of_flight.py`, and `examples/01_propagation/pr02_reference_slice.py` for runnable source examples.
+See `examples/01_propagation/ballistic_delta_v.py`, `examples/01_propagation/ballistic_min_ecc.py`, `examples/01_propagation/ballistic_apogee_alt.py`, `examples/01_propagation/ballistic_time_of_flight.py`, and `examples/01_propagation/propagator_reference.py` for runnable source examples.
 
 ## Return Value
 
-The curated PR 02 propagator functions return a success-path tuple:
+The curated propagator functions return a success-path tuple:
 
 ```python
 period_s, position = propagator.two_body(...)
@@ -99,4 +95,4 @@ period_s, position = propagator.two_body(...)
 
 `period_s` is the server `Period` value. `position` is a frozen `propagator.PropagatorPosition` dataclass with `central_body`, `epoch`, `reference_frame`, `interpolation_algorithm`, `interpolation_degree`, and `cartesian_velocity`.
 
-When ASTROX returns `IsSuccess` as false, the curated function raises `ValueError` with the server `Message`. When you need the full raw response envelope, call the raw route layer directly, for example `astrox.raw.post("/Propagator/J2", json=payload)`.
+When ASTROX reports an unsuccessful response, the curated function raises `ValueError` with the server message. When you need the full raw response envelope, use the lower-level `astrox.raw` API.

@@ -8,7 +8,6 @@ Computes a suborbital ballistic trajectory shaped by delta-v (velocity impulse)
 (Cape Canaveral → ~1000 km downrange in the Atlantic) and plots the
 altitude profile alongside a 3D lat/lon/alt view.
 
-API: POST /Propagator/Ballistic (DeltaV type)
 """
 
 import matplotlib.pyplot as plt
