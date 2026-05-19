@@ -300,7 +300,9 @@ def merge_recommendation(report: dict[str, Any]) -> tuple[str, list[str]]:
     reachable_count = report["discovery"]["previously_blocked_now_reachable_count"]
     if reachable_count:
         reasons.append(
-            f"{format_count('previously blocked fixture branch', reachable_count)} now returns a response"
+        reasons.append(
+            f"{format_count('previously blocked fixture branch', reachable_count)} now {'returns' if reachable_count == 1 else 'return'} a response"
+        )
         )
 
     if reasons:
