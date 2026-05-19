@@ -175,7 +175,10 @@ def format_bool(value: bool) -> str:
 
 def format_count(noun: str, count: int) -> str:
     suffix = "" if count == 1 else "s"
-    return f"{count} {noun}{suffix}"
+    words = noun.split()
+    if words:
+        words[-1] = words[-1] + suffix
+    return f"{count} {' '.join(words)}"
 
 
 def changed_categories_markdown(categories: dict[str, bool]) -> list[str]:
