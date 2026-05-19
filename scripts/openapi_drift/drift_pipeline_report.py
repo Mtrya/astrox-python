@@ -48,6 +48,21 @@ def test_failed(outcomes: dict[str, str]) -> bool:
     return any(value not in {"0", "success", "skipped", ""} for value in outcomes.values())
 
 
+DRIFT_CHECK_LABELS = {
+    "fixture_verification": "fixture replay (`verify.py`)",
+    "focused": "drift consistency checks (`normalize.py`, `generate_status.py --check`, fixture tests)",
+    "pytest": "full test suite inside drift workflow (`pytest tests`)",
+}
+
+CLASSIFICATION_LABELS = {
+    "previously_blocked_now_reachable": "previously blocked fixture branch now returns a response",
+    "verified_expect_refreshed": "verified fixture expectation refreshed",
+    "verified_now_empty_http_500": "verified fixture now returns empty HTTP 500",
+    "verified_unchanged": "verified fixture unchanged",
+    "workflow_test_failure": "drift workflow check failure",
+}
+
+
 def top_items(items: list[Any], *, limit: int = 20) -> list[Any]:
     return items[:limit]
 
@@ -117,7 +132,7 @@ def build_pipeline_report(
         hard_cases.append(
             {
                 "classification": "workflow_test_failure",
-                "error": "one or more workflow checks failed; inspect report artifacts",
+                "error": "one or more drift workflow checks failed; inspect report artifacts",
             }
         )
 
@@ -158,14 +173,39 @@ def format_bool(value: bool) -> str:
     return "yes" if value else "no"
 
 
+def format_count(noun: str, count: int) -> str:
+    suffix = "" if count == 1 else "s"
+    return f"{count} {noun}{suffix}"
+
+
 def changed_categories_markdown(categories: dict[str, bool]) -> list[str]:
     labels = {
-        "openapi_baseline": "OpenAPI baseline",
-        "openapi_archive": "OpenAPI archive snapshot",
-        "fixture_yaml": "fixture YAML",
-        "fixture_status": "generated fixture status",
+        "openapi_baseline": "OpenAPI description",
+        "openapi_archive": "dated OpenAPI archive copy",
+        "fixture_yaml": "fixture files",
+        "fixture_status": "fixture coverage tracker",
     }
     return [f"- {label}: {format_bool(categories[key])}" for key, label in labels.items()]
+
+
+def human_classification(name: str) -> str:
+    return CLASSIFICATION_LABELS.get(name, name.replace("_", " "))
+
+
+def classification_counts_markdown(counts: dict[str, int]) -> list[str]:
+    if not counts:
+        return ["- none recorded"]
+    lines = []
+    for name, count in sorted(counts.items()):
+        lines.append(f"- {human_classification(name)}: {count}")
+    return lines
+
+
+def check_outcome_line(name: str, outcome: str) -> str:
+    label = DRIFT_CHECK_LABELS.get(name)
+    if label is not None:
+        return f"- {label}: `{outcome}`"
+    return f"- `{name}`: `{outcome}`"
 
 
 def endpoint_line(item: dict[str, Any]) -> str:
@@ -186,7 +226,7 @@ def axis_value_line(item: dict[str, Any]) -> str:
 def changed_branch_line(item: dict[str, Any]) -> str:
     return (
         f"- `{item.get('endpoint')}` `{item.get('branch')}`: "
-        f"{item.get('classification')} ({item.get('fixture')})"
+        f"{human_classification(str(item.get('classification', 'unknown')))} ({item.get('fixture')})"
     )
 
 
@@ -215,7 +255,7 @@ def summary_markdown(report: dict[str, Any]) -> str:
     ]
     if report["test_outcomes"]:
         lines.extend(
-            f"- `{name}`: `{outcome}`"
+            check_outcome_line(name, outcome)
             for name, outcome in sorted(report["test_outcomes"].items())
         )
     else:
@@ -242,21 +282,67 @@ def summary_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def merge_recommendation(report: dict[str, Any]) -> tuple[str, list[str]]:
+    reasons = []
+    categories = report["changed_categories"]
+    if report["test_failed"]:
+        reasons.append("one or more drift workflow checks failed")
+    if report["unresolved_hard_cases"]:
+        reasons.append("the drift workflow reported cases that need human review")
+    if categories["fixture_yaml"]:
+        reasons.append("fixture files changed")
+    if categories["fixture_status"]:
+        reasons.append("the fixture coverage tracker changed")
+    if report["reconcile"]["changed_count"]:
+        reasons.append(
+            f"{format_count('existing fixture branch', report['reconcile']['changed_count'])} changed"
+        )
+    reachable_count = report["discovery"]["previously_blocked_now_reachable_count"]
+    if reachable_count:
+        reasons.append(
+            f"{format_count('previously blocked fixture branch', reachable_count)} now returns a response"
+        )
+
+    if reasons:
+        return "Do not auto-merge yet.", reasons
+
+    return (
+        "Ready to merge after normal PR CI is green.",
+        [
+            "the changed files are limited to the OpenAPI description and its dated archive copy",
+            "all existing fixture records replayed without requiring fixture updates",
+            "the drift workflow checks passed",
+        ],
+    )
+
+
 def pr_body_markdown(report: dict[str, Any]) -> str:
+    recommendation, recommendation_reasons = merge_recommendation(report)
     lines = [
         "Automated refresh of ASTROX upstream drift data.",
         "",
-        "This PR was opened by the unified drift workflow. It does not auto-merge.",
+        "This PR was opened by the scheduled OpenAPI drift workflow. It does not auto-merge.",
         "",
-        "## Drift Summary",
+        "## Merge Recommendation",
+        "",
+        f"**{recommendation}**",
+        "",
+        "Reasons:",
+        *[f"- {reason}" for reason in recommendation_reasons],
+        "",
+        "Because this PR is created by GitHub Actions, normal PR CI may not appear automatically. If no PR CI check is shown, run CI manually on this branch before merging.",
+        "",
+        "## What Changed",
         "",
         *changed_categories_markdown(report["changed_categories"]),
         "",
-        "## Fixture Reconciliation",
+        "## Existing Fixture Results",
         "",
-        f"- changed branches: {report['reconcile']['changed_count']}",
-        f"- changed fixture files: {len(report['reconcile']['changed_fixture_paths'])}",
-        f"- classifications: `{json.dumps(report['reconcile']['classification_counts'], sort_keys=True)}`",
+        f"- existing fixture branches changed: {report['reconcile']['changed_count']}",
+        f"- fixture files changed: {len(report['reconcile']['changed_fixture_paths'])}",
+        "",
+        "Fixture replay outcomes:",
+        *classification_counts_markdown(report["reconcile"]["classification_counts"]),
     ]
 
     changed_results = top_items(report["reconcile"]["changed_results"])
@@ -267,10 +353,12 @@ def pr_body_markdown(report: dict[str, Any]) -> str:
     lines.extend(
         [
             "",
-            "## New Or Uncovered Contracts",
+            "## Newly Seen Or Still Uncovered API Surface",
             "",
-            f"- missing endpoint fixtures: {report['discovery']['missing_endpoint_count']}",
-            f"- uncovered discovered branch axis values: {report['discovery']['uncovered_axis_value_count']}",
+            "These items are discovery backlog, not merge blockers for this OpenAPI refresh unless they also changed existing fixture files.",
+            "",
+            f"- endpoints without fixture coverage: {report['discovery']['missing_endpoint_count']}",
+            f"- uncovered request/response variants: {report['discovery']['uncovered_axis_value_count']}",
         ]
     )
     missing = top_items(report["discovery"]["missing_endpoints"])
@@ -284,27 +372,38 @@ def pr_body_markdown(report: dict[str, Any]) -> str:
         lines.extend(axis_value_line(item) for item in uncovered)
 
     reachable = report["discovery"]["previously_blocked_now_reachable"]
-    lines.extend(["", "## Previously Blocked Now Reachable", ""])
+    lines.extend(["", "## Previously Blocked Fixture Cases", ""])
     if reachable:
+        lines.append("These need human fixture review before being promoted to verified coverage.")
+        lines.append("")
         lines.extend(blocked_reachable_line(item) for item in reachable)
     else:
         lines.append("- none reported")
 
-    lines.extend(["", "## Checks", ""])
+    lines.extend(
+        [
+            "",
+            "## Drift Workflow Checks",
+            "",
+            "These ran inside the scheduled/manual drift workflow before this PR body was written. They are separate from later `pull_request` CI or manually dispatched CI on this branch.",
+            "",
+        ]
+    )
     if report["test_outcomes"]:
         lines.extend(
-            f"- `{name}`: `{outcome}`"
+            check_outcome_line(name, outcome)
             for name, outcome in sorted(report["test_outcomes"].items())
         )
     else:
         lines.append("- none recorded")
 
     hard_cases = report["unresolved_hard_cases"]
-    lines.extend(["", "## Unresolved Hard Cases", ""])
+    lines.extend(["", "## Human Review Needed", ""])
     if hard_cases:
         for item in top_items(hard_cases):
             description = item.get("error") or item.get("classification")
-            lines.append(f"- `{item.get('classification', 'unknown')}`: {description}")
+            classification = human_classification(str(item.get("classification", "unknown")))
+            lines.append(f"- {classification}: {description}")
     else:
         lines.append("- none reported")
 
