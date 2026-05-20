@@ -18,7 +18,7 @@ dev = [
     "pytest>=9.0.3",
     "pyyaml>=6.0.3",
     "matplotlib>=3.10.9",
-    "brahe>=1.5.1",
+    "brahe>=1.5.2",
     "skyfield>=1.54",
     "hatchling>=1.28.0",
 ]
