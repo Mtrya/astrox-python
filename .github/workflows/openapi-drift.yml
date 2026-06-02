@@ -140,11 +140,16 @@ jobs:
       - name: Open drift pull request
         if: steps.pipeline.outputs.pr_required == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.ASTROX_AUTOMATION_TOKEN }}
         run: |
           branch="automation/openapi-drift"
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "ASTROX_AUTOMATION_TOKEN is required to create drift PRs that trigger CI."
+            exit 1
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git fetch origin "${branch}:refs/remotes/origin/${branch}" || true
           git switch -c "${branch}"
           git add openapi
@@ -166,8 +171,12 @@ jobs:
       - name: Create or update blocked-branch issue
         if: steps.pipeline.outputs.issue_required == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.ASTROX_AUTOMATION_TOKEN }}
         run: |
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "ASTROX_AUTOMATION_TOKEN is required to create drift issues."
+            exit 1
+          fi
           existing="$(gh issue list --state open --search 'in:title "${{ steps.pipeline.outputs.issue_title }}"' --json number --jq '.[0].number // ""')"
           if [ -n "${existing}" ]; then
             gh issue edit "${existing}" --body-file openapi-drift-reports/issue-body.md
