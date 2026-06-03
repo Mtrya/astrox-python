@@ -71,13 +71,13 @@ jobs:
         id: example_syntax
         if: steps.install.outcome == 'success'
         continue-on-error: true
-        run: uv run python -m py_compile examples/01_propagation/*.py tests/validation/sdk_contract/check_all.py tests/validation/sdk_contract/propagator/*.py tests/validation/cross_validation/check_all.py tests/validation/cross_validation/propagator/*.py
+        run: uv run python -m py_compile examples/01_propagation/*.py tests/validation/sdk_contract/propagator/test_*.py tests/validation/cross_validation/propagator/test_*.py
 
       - name: Run pytest
         id: pytest
         if: steps.install.outcome == 'success'
         continue-on-error: true
-        run: uv run python -m pytest tests
+        run: uv run python -m pytest tests --ignore=tests/validation
 
       - name: Check live OpenAPI and direct endpoint route
         id: live_smoke
@@ -87,21 +87,13 @@ jobs:
           ASTROX_BASE_URL: http://astrox.cn:8765
         run: uv run python scripts/live_smoke.py
 
-      - name: Check live SDK contract snapshots
-        id: sdk_contract
+      - name: Run live validation pytest
+        id: validation_pytest
         if: steps.install.outcome == 'success'
         continue-on-error: true
         env:
           ASTROX_BASE_URL: http://astrox.cn:8765
-        run: uv run python tests/validation/sdk_contract/check_all.py
-
-      - name: Check live cross-validation
-        id: cross_validation
-        if: steps.install.outcome == 'success'
-        continue-on-error: true
-        env:
-          ASTROX_BASE_URL: http://astrox.cn:8765
-        run: uv run python tests/validation/cross_validation/check_all.py
+        run: uv run python -m pytest tests/validation
 
       - name: Build health result
         id: health
@@ -115,8 +107,7 @@ jobs:
             "${{ steps.example_syntax.outcome }}" \
             "${{ steps.pytest.outcome }}" \
             "${{ steps.live_smoke.outcome }}" \
-            "${{ steps.sdk_contract.outcome }}" \
-            "${{ steps.cross_validation.outcome }}"
+            "${{ steps.validation_pytest.outcome }}"
           do
             if [ "${outcome}" != "success" ]; then
               failed=true
@@ -133,8 +124,7 @@ jobs:
             echo "- propagation example syntax: ${{ steps.example_syntax.outcome }}"
             echo "- pytest: ${{ steps.pytest.outcome }}"
             echo "- live smoke: ${{ steps.live_smoke.outcome }}"
-            echo "- live SDK contract snapshots: ${{ steps.sdk_contract.outcome }}"
-            echo "- live cross-validation: ${{ steps.cross_validation.outcome }}"
+            echo "- live validation pytest: ${{ steps.validation_pytest.outcome }}"
             echo
             echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           } > sdk-health-issue.md

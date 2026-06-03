@@ -11,20 +11,27 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from astrox import propagator
-from tests.validation._support import ContractCase, main
-from tests.validation.sdk_contract.propagator import _common
+from tests.validation._support import (
+    ContractCase,
+    check_snapshot,
+    configure_astrox_from_env,
+    main,
+)
+
+
+SNAPSHOT_PATH = Path(__file__).with_name("ballistic.snap.json")
 
 
 def _base_inputs() -> dict[str, float | str]:
     return {
-        "start": _common.BALLISTIC_START,
-        "step_s": _common.BALLISTIC_STEP_S,
-        "launch_latitude_deg": _common.BALLISTIC_LAUNCH_LATITUDE_DEG,
-        "launch_longitude_deg": _common.BALLISTIC_LAUNCH_LONGITUDE_DEG,
-        "launch_altitude_m": _common.BALLISTIC_LAUNCH_ALTITUDE_M,
-        "impact_latitude_deg": _common.BALLISTIC_IMPACT_LATITUDE_DEG,
-        "impact_longitude_deg": _common.BALLISTIC_IMPACT_LONGITUDE_DEG,
-        "impact_altitude_m": _common.BALLISTIC_IMPACT_ALTITUDE_M,
+        "start": "2024-01-01T12:00:00.000Z",
+        "step_s": 30.0,
+        "launch_latitude_deg": 28.5721,
+        "launch_longitude_deg": -80.648,
+        "launch_altitude_m": 10.0,
+        "impact_latitude_deg": 30.0,
+        "impact_longitude_deg": -70.0,
+        "impact_altitude_m": 0.0,
     }
 
 
@@ -83,5 +90,10 @@ CASES = [
 ]
 
 
+def test_ballistic_sdk_contract() -> None:
+    configure_astrox_from_env()
+    check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
+
+
 if __name__ == "__main__":
-    raise SystemExit(main(cases=CASES, snapshot_path=Path(__file__).with_suffix(".snap.json")))
+    raise SystemExit(main(cases=CASES, snapshot_path=SNAPSHOT_PATH))

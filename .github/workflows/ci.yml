@@ -54,10 +54,10 @@ jobs:
           PY
 
       - name: Check propagation example syntax
-        run: uv run python -m py_compile examples/01_propagation/*.py tests/validation/sdk_contract/check_all.py tests/validation/sdk_contract/propagator/*.py tests/validation/cross_validation/check_all.py tests/validation/cross_validation/propagator/*.py
+        run: uv run python -m py_compile examples/01_propagation/*.py tests/validation/sdk_contract/propagator/test_*.py tests/validation/cross_validation/propagator/test_*.py
 
       - name: Run pytest
-        run: uv run python -m pytest tests
+        run: uv run python -m pytest tests --ignore=tests/validation
 
   live-smoke:
     name: Live smoke
