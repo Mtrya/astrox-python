@@ -8,21 +8,14 @@ from typing import get_type_hints
 import pytest
 
 from astrox import exceptions, orbits, propagator
-
-
-PROPAGATOR_RESPONSE = {
-    "IsSuccess": True,
-    "Message": "",
-    "Period": 600.0,
-    "Position": {
-        "CentralBody": "Earth",
-        "cartesianVelocity": [0.0, 1.0, 2.0, 3.0],
-        "epoch": "2024-01-01T00:00:00.000Z",
-        "interpolationAlgorithm": "Lagrange",
-        "interpolationDegree": 5,
-        "referenceFrame": "Inertial",
-    },
-}
+from tests.sdk.propagator.helpers import (
+    J2_REQUEST,
+    REPRESENTATIVE_PROPAGATOR_RESPONSE,
+    REPRESENTATIVE_RETURN_SNAPSHOT,
+    TWO_BODY_REQUEST,
+    assert_canonical_equal,
+    return_snapshot,
+)
 
 
 @pytest.fixture
@@ -38,7 +31,9 @@ def orbit() -> orbits.KeplerianElements:
 
 
 def test_propagator_position_constructs_from_nested_position_wire_payload() -> None:
-    position = propagator.PropagatorPosition.from_wire(PROPAGATOR_RESPONSE["Position"])
+    position = propagator.PropagatorPosition.from_wire(
+        REPRESENTATIVE_PROPAGATOR_RESPONSE["Position"],
+    )
 
     assert is_dataclass(position)
     assert [field.name for field in fields(propagator.PropagatorPosition)] == [
@@ -49,18 +44,16 @@ def test_propagator_position_constructs_from_nested_position_wire_payload() -> N
         "interpolation_degree",
         "cartesian_velocity",
     ]
-    assert position.central_body == "Earth"
-    assert position.epoch == "2024-01-01T00:00:00.000Z"
-    assert position.reference_frame == "Inertial"
-    assert position.interpolation_algorithm == "Lagrange"
-    assert position.interpolation_degree == 5
-    assert position.cartesian_velocity == (0.0, 1.0, 2.0, 3.0)
+    assert_canonical_equal(
+        return_snapshot(600.0, position)["position"],
+        REPRESENTATIVE_RETURN_SNAPSHOT["position"],
+    )
 
     with pytest.raises(FrozenInstanceError):
         position.central_body = "Mars"
 
 
-def test_j2_calls_raw_route_with_fixture_backed_payload(
+def test_j2_calls_raw_route_with_representative_payload(
     monkeypatch: pytest.MonkeyPatch,
     orbit: orbits.KeplerianElements,
 ) -> None:
@@ -68,7 +61,7 @@ def test_j2_calls_raw_route_with_fixture_backed_payload(
 
     def fake_post(endpoint: str, *, json: object) -> dict[str, object]:
         calls.append({"endpoint": endpoint, "json": json})
-        return PROPAGATOR_RESPONSE
+        return REPRESENTATIVE_PROPAGATOR_RESPONSE
 
     monkeypatch.setattr(propagator.raw, "post", fake_post)
 
@@ -84,28 +77,15 @@ def test_j2_calls_raw_route_with_fixture_backed_payload(
         ref_distance_m=6378137.0,
     )
 
-    assert period_s == 600.0
-    assert isinstance(position, propagator.PropagatorPosition)
-    assert calls == [
-        {
-            "endpoint": "/Propagator/J2",
-            "json": {
-                "Start": "2024-01-01T00:00:00.000Z",
-                "Stop": "2024-01-01T00:10:00.000Z",
-                "Step": 300.0,
-                "OrbitEpoch": "2024-01-01T00:00:00.000Z",
-                "CoordSystem": "Inertial",
-                "CoordType": "Classical",
-                "J2NormalizedValue": 0.000484165143790815,
-                "RefDistance": 6378137.0,
-                "GravitationalParameter": 398600441500000.0,
-                "OrbitalElements": orbit.to_wire(),
-            },
-        }
-    ]
+    assert_canonical_equal(
+        return_snapshot(period_s, position),
+        REPRESENTATIVE_RETURN_SNAPSHOT,
+    )
+    assert calls[0]["endpoint"] == "/Propagator/J2"
+    assert_canonical_equal(calls[0]["json"], J2_REQUEST)
 
 
-def test_two_body_calls_raw_route_and_includes_only_supplied_options(
+def test_two_body_calls_raw_route_with_representative_payload(
     monkeypatch: pytest.MonkeyPatch,
     orbit: orbits.KeplerianElements,
 ) -> None:
@@ -113,31 +93,67 @@ def test_two_body_calls_raw_route_and_includes_only_supplied_options(
 
     def fake_post(endpoint: str, *, json: object) -> dict[str, object]:
         calls.append({"endpoint": endpoint, "json": json})
-        return PROPAGATOR_RESPONSE
+        return REPRESENTATIVE_PROPAGATOR_RESPONSE
 
     monkeypatch.setattr(propagator.raw, "post", fake_post)
 
-    propagator.two_body(
+    period_s, position = propagator.two_body(
         start="2024-01-01T00:00:00.000Z",
         stop="2024-01-01T00:10:00.000Z",
         orbit_epoch="2024-01-01T00:00:00.000Z",
         orbit=orbit,
+        step_s=300.0,
+        coord_system="Inertial",
         gravitational_parameter_m3_s2=398600441500000.0,
     )
 
-    assert calls == [
-        {
-            "endpoint": "/Propagator/TwoBody",
-            "json": {
-                "Start": "2024-01-01T00:00:00.000Z",
-                "Stop": "2024-01-01T00:10:00.000Z",
-                "OrbitEpoch": "2024-01-01T00:00:00.000Z",
-                "CoordType": "Classical",
-                "GravitationalParameter": 398600441500000.0,
-                "OrbitalElements": orbit.to_wire(),
-            },
-        }
-    ]
+    assert_canonical_equal(
+        return_snapshot(period_s, position),
+        REPRESENTATIVE_RETURN_SNAPSHOT,
+    )
+    assert calls[0]["endpoint"] == "/Propagator/TwoBody"
+    assert_canonical_equal(calls[0]["json"], TWO_BODY_REQUEST)
+
+
+@pytest.mark.parametrize(
+    "field_path",
+    [
+        ("Period",),
+        ("Position",),
+        ("Position", "CentralBody"),
+        ("Position", "cartesianVelocity"),
+        ("Position", "epoch"),
+        ("Position", "interpolationAlgorithm"),
+        ("Position", "interpolationDegree"),
+        ("Position", "referenceFrame"),
+    ],
+)
+def test_propagator_response_parser_fails_loudly_for_missing_required_fields(
+    monkeypatch: pytest.MonkeyPatch,
+    orbit: orbits.KeplerianElements,
+    field_path: tuple[str, ...],
+) -> None:
+    response = {
+        **REPRESENTATIVE_PROPAGATOR_RESPONSE,
+        "Position": dict(REPRESENTATIVE_PROPAGATOR_RESPONSE["Position"]),
+    }
+    current = response
+    for field in field_path[:-1]:
+        current = current[field]
+    del current[field_path[-1]]
+
+    def fake_post(endpoint: str, *, json: object) -> dict[str, object]:
+        return response
+
+    monkeypatch.setattr(propagator.raw, "post", fake_post)
+
+    with pytest.raises(KeyError):
+        propagator.j2(
+            start="2024-01-01T00:00:00.000Z",
+            stop="2024-01-01T00:10:00.000Z",
+            orbit_epoch="2024-01-01T00:00:00.000Z",
+            orbit=orbit,
+        )
 
 
 @pytest.mark.parametrize("function_name", ["j2", "two_body"])

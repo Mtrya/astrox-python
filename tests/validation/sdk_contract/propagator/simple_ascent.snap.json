@@ -1,0 +1,49 @@
+{
+  "cases": [
+    {
+      "description": "Simple ascent from launch point to burnout point using explicit scalar inputs.",
+      "id": "launch_to_burnout",
+      "return": [
+        6000,
+        {
+          "cartesian_velocity": {
+            "first": [
+              0,
+              -861891.7480606205,
+              4746828.084184833,
+              4159515.49325214,
+              -0.013491659797160159,
+              0.0743046789478286,
+              0.06554990314544953,
+              30,
+              -863920.4756529034,
+              4757174.545666544
+            ],
+            "last": [
+              -228.6837955684034,
+              -2399.510681374756,
+              -1434.4002304445135,
+              120,
+              -944298.4851584923,
+              4857994.564108374,
+              4319510.886301977,
+              -5906.956145820662,
+              -3977.642294296004,
+              3182.173922019213
+            ],
+            "length": 35
+          },
+          "central_body": "Earth",
+          "epoch": "2024-01-01T03:00:00.000Z",
+          "interpolation_algorithm": "LAGRANGE",
+          "interpolation_degree": 5,
+          "reference_frame": "FIXED"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-06-03T17:33:11Z"
+  }
+}

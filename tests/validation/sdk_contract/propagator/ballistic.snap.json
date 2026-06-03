@@ -1,0 +1,213 @@
+{
+  "cases": [
+    {
+      "description": "Nominal ballistic trajectory without an explicit branch discriminator.",
+      "id": "nominal",
+      "return": [
+        6000,
+        {
+          "cartesian_velocity": {
+            "first": [
+              0,
+              910920.2717446222,
+              -5531176.889920627,
+              3032341.571587951,
+              2016.1819787541262,
+              -5620.038377262996,
+              3462.223890208724,
+              30,
+              970419.4459664853,
+              -5696170.982255595
+            ],
+            "last": [
+              -961.8735976276905,
+              5843.957427479987,
+              -3375.2650707793396,
+              2738.9247544955488,
+              1890774.1961671663,
+              -5194852.582626073,
+              3170368.4345295746,
+              -979.8117902886195,
+              5915.725320509755,
+              -3418.432844043754
+            ],
+            "length": 651
+          },
+          "central_body": "Earth",
+          "epoch": "2024-01-01T12:00:00.000Z",
+          "interpolation_algorithm": "LAGRANGE",
+          "interpolation_degree": 5,
+          "reference_frame": "FIXED"
+        }
+      ]
+    },
+    {
+      "description": "Ballistic trajectory branch constrained by launch delta-v.",
+      "id": "delta_v",
+      "return": [
+        6000,
+        {
+          "cartesian_velocity": {
+            "first": [
+              0,
+              910920.2717446222,
+              -5531176.889920627,
+              3032341.571587951,
+              2298.772817223295,
+              -1413.738920409388,
+              1463.009294761219,
+              30,
+              979157.8892289575,
+              -5569949.47401831
+            ],
+            "last": [
+              1328.4977298899225,
+              2398.290699386801,
+              -825.5921538228655,
+              539.8957505880245,
+              1890774.978549547,
+              -5194862.024190488,
+              3170373.73538364,
+              1254.8714788722964,
+              2629.1308096504486,
+              -969.9882590073437
+            ],
+            "length": 133
+          },
+          "central_body": "Earth",
+          "epoch": "2024-01-01T12:00:00.000Z",
+          "interpolation_algorithm": "LAGRANGE",
+          "interpolation_degree": 5,
+          "reference_frame": "FIXED"
+        }
+      ]
+    },
+    {
+      "description": "Ballistic trajectory branch constrained by launch delta-v with minimum eccentricity.",
+      "id": "delta_v_min_ecc",
+      "return": [
+        6000,
+        {
+          "cartesian_velocity": {
+            "first": [
+              0,
+              910920.2717446222,
+              -5531176.889920627,
+              3032341.571587951,
+              2298.772817223295,
+              -1413.738920409388,
+              1463.009294761219,
+              30,
+              979157.8892289575,
+              -5569949.47401831
+            ],
+            "last": [
+              1328.4977298899225,
+              2398.290699386801,
+              -825.5921538228655,
+              539.8957505880245,
+              1890774.978549547,
+              -5194862.024190488,
+              3170373.73538364,
+              1254.8714788722964,
+              2629.1308096504486,
+              -969.9882590073437
+            ],
+            "length": 133
+          },
+          "central_body": "Earth",
+          "epoch": "2024-01-01T12:00:00.000Z",
+          "interpolation_algorithm": "LAGRANGE",
+          "interpolation_degree": 5,
+          "reference_frame": "FIXED"
+        }
+      ]
+    },
+    {
+      "description": "Ballistic trajectory branch constrained by apogee altitude.",
+      "id": "apogee_altitude",
+      "return": [
+        6000,
+        {
+          "cartesian_velocity": {
+            "first": [
+              0,
+              910920.2717446222,
+              -5531176.889920627,
+              3032341.571587951,
+              2605.9024244657494,
+              -940.3273105878668,
+              1323.5260902563907,
+              30,
+              988399.4202120249,
+              -5555762.890130799
+            ],
+            "last": [
+              1797.6043401595357,
+              2245.251767994036,
+              -601.2809793604508,
+              443.83729854092616,
+              1890775.1281550047,
+              -5194861.969702083,
+              3170373.735369087,
+              1737.988031132311,
+              2428.3159659677003,
+              -716.827350803353
+            ],
+            "length": 112
+          },
+          "central_body": "Earth",
+          "epoch": "2024-01-01T12:00:00.000Z",
+          "interpolation_algorithm": "LAGRANGE",
+          "interpolation_degree": 5,
+          "reference_frame": "FIXED"
+        }
+      ]
+    },
+    {
+      "description": "Ballistic trajectory branch constrained by time of flight.",
+      "id": "time_of_flight",
+      "return": [
+        6000,
+        {
+          "cartesian_velocity": {
+            "first": [
+              0,
+              910920.2717446222,
+              -5531176.889920627,
+              3032341.571587951,
+              2168.772799370037,
+              -1677.5204282959087,
+              1553.4756623669432,
+              30,
+              975242.2322593918,
+              -5577857.0475447895
+            ],
+            "last": [
+              1093.3950502584007,
+              2534.4188380839187,
+              -968.7519198567626,
+              600,
+              1890775.1284307693,
+              -5194861.969092265,
+              3170373.7351298817,
+              1020.1084186528486,
+              2766.7592076669152,
+              -1113.4887771398376
+            ],
+            "length": 147
+          },
+          "central_body": "Earth",
+          "epoch": "2024-01-01T12:00:00.000Z",
+          "interpolation_algorithm": "LAGRANGE",
+          "interpolation_degree": 5,
+          "reference_frame": "FIXED"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-06-03T17:33:10Z"
+  }
+}

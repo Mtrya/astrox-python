@@ -67,11 +67,17 @@ jobs:
           assert hasattr(propagator, "two_body")
           PY
 
+      - name: Check propagation example syntax
+        id: example_syntax
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        run: uv run python -m py_compile examples/01_propagation/*.py tests/validation/sdk_contract/propagator/test_*.py tests/validation/cross_validation/propagator/test_*.py
+
       - name: Run pytest
         id: pytest
         if: steps.install.outcome == 'success'
         continue-on-error: true
-        run: uv run python -m pytest tests
+        run: uv run python -m pytest tests --ignore=tests/validation
 
       - name: Check live OpenAPI and direct endpoint route
         id: live_smoke
@@ -80,6 +86,14 @@ jobs:
         env:
           ASTROX_BASE_URL: http://astrox.cn:8765
         run: uv run python scripts/live_smoke.py
+
+      - name: Run live validation pytest
+        id: validation_pytest
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: uv run python -m pytest tests/validation
 
       - name: Build health result
         id: health
@@ -90,8 +104,10 @@ jobs:
             "${{ steps.install.outcome }}" \
             "${{ steps.build.outcome }}" \
             "${{ steps.import_check.outcome }}" \
+            "${{ steps.example_syntax.outcome }}" \
             "${{ steps.pytest.outcome }}" \
-            "${{ steps.live_smoke.outcome }}"
+            "${{ steps.live_smoke.outcome }}" \
+            "${{ steps.validation_pytest.outcome }}"
           do
             if [ "${outcome}" != "success" ]; then
               failed=true
@@ -105,8 +121,10 @@ jobs:
             echo "- install dependencies: ${{ steps.install.outcome }}"
             echo "- build package: ${{ steps.build.outcome }}"
             echo "- verify built package import: ${{ steps.import_check.outcome }}"
+            echo "- propagation example syntax: ${{ steps.example_syntax.outcome }}"
             echo "- pytest: ${{ steps.pytest.outcome }}"
             echo "- live smoke: ${{ steps.live_smoke.outcome }}"
+            echo "- live validation pytest: ${{ steps.validation_pytest.outcome }}"
             echo
             echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           } > sdk-health-issue.md

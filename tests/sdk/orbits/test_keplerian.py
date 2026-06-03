@@ -7,6 +7,7 @@ from dataclasses import FrozenInstanceError, fields, is_dataclass
 import pytest
 
 from astrox import orbits
+from tests.sdk.helpers import assert_canonical_equal
 
 
 def test_keplerian_constructor_returns_frozen_dataclass() -> None:
@@ -53,14 +54,17 @@ def test_keplerian_to_wire_matches_fixture_classical_order() -> None:
         true_anomaly_deg=0.0,
     )
 
-    assert orbit.to_wire() == [
-        6778137.0,
-        0.001,
-        28.5,
-        0.0,
-        0.0,
-        0.0,
-    ]
+    assert_canonical_equal(
+        orbit.to_wire(),
+        [
+            6778137.0,
+            0.001,
+            28.5,
+            0.0,
+            0.0,
+            0.0,
+        ],
+    )
 
 
 def test_keplerian_is_not_sequence_like() -> None:

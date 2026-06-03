@@ -8,61 +8,31 @@ from typing import Callable, get_type_hints
 import pytest
 
 from astrox import exceptions, propagator
-
-
-PROPAGATOR_RESPONSE = {
-    "IsSuccess": True,
-    "Message": "",
-    "Period": 600.0,
-    "Position": {
-        "CentralBody": "Earth",
-        "cartesianVelocity": [0.0, 1.0, 2.0, 3.0],
-        "epoch": "2024-01-01T12:00:00.000Z",
-        "interpolationAlgorithm": "Lagrange",
-        "interpolationDegree": 5,
-        "referenceFrame": "Fixed",
-    },
-}
-
-
-NOMINAL_PAYLOAD = {
-    "Start": "2024-01-01T12:00:00.000Z",
-    "Step": 30.0,
-    "LaunchLatitude": 28.5721,
-    "LaunchLongitude": -80.648,
-    "LaunchAltitude": 10.0,
-    "ImpactLatitude": 30.0,
-    "ImpactLongitude": -70.0,
-    "ImpactAltitude": 0.0,
-}
-
-
-def record_raw_post(monkeypatch: pytest.MonkeyPatch) -> list[dict[str, object]]:
-    calls: list[dict[str, object]] = []
-
-    def fake_post(endpoint: str, *, json: object) -> dict[str, object]:
-        calls.append({"endpoint": endpoint, "json": json})
-        return PROPAGATOR_RESPONSE
-
-    monkeypatch.setattr(propagator.raw, "post", fake_post)
-    return calls
+from tests.sdk.propagator.helpers import (
+    BALLISTIC_BRANCH_REQUESTS,
+    BALLISTIC_NOMINAL_REQUEST,
+    REPRESENTATIVE_FIXED_PROPAGATOR_RESPONSE,
+    REPRESENTATIVE_FIXED_RETURN_SNAPSHOT,
+    assert_canonical_equal,
+    record_raw_post,
+    return_snapshot,
+)
 
 
 def assert_success_path_return(
     period_s: float,
     position: propagator.PropagatorPosition,
 ) -> None:
-    assert period_s == 600.0
-    assert isinstance(position, propagator.PropagatorPosition)
-    assert position.central_body == "Earth"
-    assert position.reference_frame == "Fixed"
-    assert position.cartesian_velocity == (0.0, 1.0, 2.0, 3.0)
+    assert_canonical_equal(
+        return_snapshot(period_s, position),
+        REPRESENTATIVE_FIXED_RETURN_SNAPSHOT,
+    )
 
 
-def test_ballistic_nominal_matches_verified_fixture_payload(
+def test_ballistic_nominal_emits_representative_payload(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    calls = record_raw_post(monkeypatch)
+    calls = record_raw_post(monkeypatch, REPRESENTATIVE_FIXED_PROPAGATOR_RESPONSE)
 
     period_s, position = propagator.ballistic(
         start="2024-01-01T12:00:00.000Z",
@@ -76,12 +46,8 @@ def test_ballistic_nominal_matches_verified_fixture_payload(
     )
 
     assert_success_path_return(period_s, position)
-    assert calls == [
-        {
-            "endpoint": "/Propagator/Ballistic",
-            "json": NOMINAL_PAYLOAD,
-        }
-    ]
+    assert calls[0]["endpoint"] == "/Propagator/Ballistic"
+    assert_canonical_equal(calls[0]["json"], BALLISTIC_NOMINAL_REQUEST)
 
 
 @pytest.mark.parametrize(
@@ -108,14 +74,14 @@ def test_ballistic_nominal_matches_verified_fixture_payload(
         ),
     ],
 )
-def test_ballistic_branch_functions_match_verified_fixture_payloads(
+def test_ballistic_branch_functions_emit_representative_payloads(
     monkeypatch: pytest.MonkeyPatch,
     function: Callable[..., tuple[float, propagator.PropagatorPosition]],
     value_kwarg: str,
     value: float,
     wire_type: str,
 ) -> None:
-    calls = record_raw_post(monkeypatch)
+    calls = record_raw_post(monkeypatch, REPRESENTATIVE_FIXED_PROPAGATOR_RESPONSE)
 
     period_s, position = function(
         start="2024-01-01T12:00:00.000Z",
@@ -130,22 +96,17 @@ def test_ballistic_branch_functions_match_verified_fixture_payloads(
     )
 
     assert_success_path_return(period_s, position)
-    assert calls == [
-        {
-            "endpoint": "/Propagator/Ballistic",
-            "json": {
-                **NOMINAL_PAYLOAD,
-                "BallisticType": wire_type,
-                "BallisticTypeValue": value,
-            },
-        }
-    ]
+    assert calls[0]["endpoint"] == "/Propagator/Ballistic"
+    assert_canonical_equal(
+        calls[0]["json"],
+        BALLISTIC_BRANCH_REQUESTS[wire_type],
+    )
 
 
 def test_ballistic_omits_server_owned_optional_knobs_when_not_provided(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    calls = record_raw_post(monkeypatch)
+    calls = record_raw_post(monkeypatch, REPRESENTATIVE_FIXED_PROPAGATOR_RESPONSE)
 
     propagator.ballistic(
         start="2024-01-01T12:00:00.000Z",
@@ -153,22 +114,21 @@ def test_ballistic_omits_server_owned_optional_knobs_when_not_provided(
         impact_longitude_deg=-70.0,
     )
 
-    assert calls == [
+    assert calls[0]["endpoint"] == "/Propagator/Ballistic"
+    assert_canonical_equal(
+        calls[0]["json"],
         {
-            "endpoint": "/Propagator/Ballistic",
-            "json": {
-                "Start": "2024-01-01T12:00:00.000Z",
-                "ImpactLatitude": 30.0,
-                "ImpactLongitude": -70.0,
-            },
-        }
-    ]
+            "Start": "2024-01-01T12:00:00.000Z",
+            "ImpactLatitude": 30.0,
+            "ImpactLongitude": -70.0,
+        },
+    )
 
 
 def test_ballistic_delta_v_includes_only_explicit_supplied_options(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    calls = record_raw_post(monkeypatch)
+    calls = record_raw_post(monkeypatch, REPRESENTATIVE_FIXED_PROPAGATOR_RESPONSE)
 
     propagator.ballistic_delta_v(
         start="2024-01-01T12:00:00.000Z",
@@ -179,20 +139,19 @@ def test_ballistic_delta_v_includes_only_explicit_supplied_options(
         gravitational_parameter_m3_s2=398600441500000.0,
     )
 
-    assert calls == [
+    assert calls[0]["endpoint"] == "/Propagator/Ballistic"
+    assert_canonical_equal(
+        calls[0]["json"],
         {
-            "endpoint": "/Propagator/Ballistic",
-            "json": {
-                "Start": "2024-01-01T12:00:00.000Z",
-                "ImpactLatitude": 30.0,
-                "ImpactLongitude": -70.0,
-                "BallisticType": "DeltaV",
-                "BallisticTypeValue": 3000.0,
-                "CentralBody": "Earth",
-                "GravitationalParameter": 398600441500000.0,
-            },
-        }
-    ]
+            "Start": "2024-01-01T12:00:00.000Z",
+            "ImpactLatitude": 30.0,
+            "ImpactLongitude": -70.0,
+            "BallisticType": "DeltaV",
+            "BallisticTypeValue": 3000.0,
+            "CentralBody": "Earth",
+            "GravitationalParameter": 398600441500000.0,
+        },
+    )
 
 
 def test_ballistic_functions_do_not_expose_mode_arguments() -> None:

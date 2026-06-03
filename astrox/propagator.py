@@ -16,6 +16,8 @@ __all__ = [
     "ballistic_delta_v_min_ecc",
     "ballistic_time_of_flight",
     "j2",
+    "sgp4",
+    "simple_ascent",
     "two_body",
 ]
 
@@ -42,6 +44,10 @@ class PropagatorPosition:
             interpolation_degree=position_payload["interpolationDegree"],
             cartesian_velocity=tuple(position_payload["cartesianVelocity"]),
         )
+
+
+def _success_path(result: dict[str, Any]) -> tuple[float, PropagatorPosition]:
+    return result["Period"], PropagatorPosition.from_wire(result["Position"])
 
 
 def two_body(
@@ -76,7 +82,7 @@ def two_body(
         payload["CoordSystem"] = coord_system
 
     result = raw.post("/Propagator/TwoBody", json=payload)
-    return result["Period"], PropagatorPosition.from_wire(result["Position"])
+    return _success_path(result)
 
 
 def j2(
@@ -117,7 +123,72 @@ def j2(
         payload["RefDistance"] = ref_distance_m
 
     result = raw.post("/Propagator/J2", json=payload)
-    return result["Period"], PropagatorPosition.from_wire(result["Position"])
+    return _success_path(result)
+
+
+def sgp4(
+    *,
+    start: str,
+    stop: str,
+    tle_lines: tuple[str, str] | list[str],
+    step_s: float | None = None,
+    satellite_number: str | None = None,
+) -> tuple[float, PropagatorPosition]:
+    """Propagate a satellite from two-line element data using SGP4."""
+    if (
+        not isinstance(tle_lines, (list, tuple))
+        or len(tle_lines) != 2
+        or not all(isinstance(line, str) for line in tle_lines)
+    ):
+        raise TypeError("tle_lines must be a two-item sequence of TLE strings")
+
+    payload: dict[str, Any] = {
+        "Start": start,
+        "Stop": stop,
+        "TLEs": list(tle_lines),
+    }
+    if step_s is not None:
+        payload["Step"] = step_s
+    if satellite_number is not None:
+        payload["SatelliteNumber"] = satellite_number
+
+    result = raw.post("/Propagator/sgp4", json=payload)
+    return _success_path(result)
+
+
+def simple_ascent(
+    *,
+    start: str,
+    stop: str,
+    launch_latitude_deg: float,
+    launch_longitude_deg: float,
+    launch_altitude_m: float,
+    burnout_velocity_m_s: float,
+    burnout_latitude_deg: float,
+    burnout_longitude_deg: float,
+    burnout_altitude_m: float,
+    step_s: float | None = None,
+    central_body: str | None = None,
+) -> tuple[float, PropagatorPosition]:
+    """Propagate a simple ascent from launch point to burnout point."""
+    payload: dict[str, Any] = {
+        "Start": start,
+        "Stop": stop,
+        "LaunchLatitude": launch_latitude_deg,
+        "LaunchLongitude": launch_longitude_deg,
+        "LaunchAltitude": launch_altitude_m,
+        "BurnoutVelocity": burnout_velocity_m_s,
+        "BurnoutLatitude": burnout_latitude_deg,
+        "BurnoutLongitude": burnout_longitude_deg,
+        "BurnoutAltitude": burnout_altitude_m,
+    }
+    if step_s is not None:
+        payload["Step"] = step_s
+    if central_body is not None:
+        payload["CentralBody"] = central_body
+
+    result = raw.post("/Propagator/SimpleAscent", json=payload)
+    return _success_path(result)
 
 
 def ballistic(
@@ -158,7 +229,7 @@ def ballistic(
         payload["Stop"] = stop
 
     result = raw.post("/Propagator/Ballistic", json=payload)
-    return result["Period"], PropagatorPosition.from_wire(result["Position"])
+    return _success_path(result)
 
 
 def ballistic_delta_v(
@@ -202,7 +273,7 @@ def ballistic_delta_v(
         payload["Stop"] = stop
 
     result = raw.post("/Propagator/Ballistic", json=payload)
-    return result["Period"], PropagatorPosition.from_wire(result["Position"])
+    return _success_path(result)
 
 
 def ballistic_delta_v_min_ecc(
@@ -246,7 +317,7 @@ def ballistic_delta_v_min_ecc(
         payload["Stop"] = stop
 
     result = raw.post("/Propagator/Ballistic", json=payload)
-    return result["Period"], PropagatorPosition.from_wire(result["Position"])
+    return _success_path(result)
 
 
 def ballistic_apogee_altitude(
@@ -290,7 +361,7 @@ def ballistic_apogee_altitude(
         payload["Stop"] = stop
 
     result = raw.post("/Propagator/Ballistic", json=payload)
-    return result["Period"], PropagatorPosition.from_wire(result["Position"])
+    return _success_path(result)
 
 
 def ballistic_time_of_flight(
@@ -334,4 +405,4 @@ def ballistic_time_of_flight(
         payload["Stop"] = stop
 
     result = raw.post("/Propagator/Ballistic", json=payload)
-    return result["Period"], PropagatorPosition.from_wire(result["Position"])
+    return _success_path(result)

@@ -1,0 +1,49 @@
+{
+  "cases": [
+    {
+      "description": "Short J2 propagation from a low Earth orbit using explicit Earth constants.",
+      "id": "sso",
+      "return": [
+        5553.624273342147,
+        {
+          "cartesian_velocity": {
+            "first": [
+              0,
+              6771358.863,
+              1.987566935248853e-06,
+              1.0791607959062649e-06,
+              -2.5613053756147924e-09,
+              6746.002784609132,
+              3662.7806616802945,
+              300,
+              6382467.683104103,
+              1988040.9309642052
+            ],
+            "last": [
+              -2562.575602178257,
+              6358.84152880295,
+              3451.9716049957055,
+              600,
+              5260582.061845675,
+              3747927.613248816,
+              2037410.3580742376,
+              -4830.07198274374,
+              5242.16622097625,
+              2844.0112311747594
+            ],
+            "length": 21
+          },
+          "central_body": "Earth",
+          "epoch": "2024-01-01T00:00:00.000Z",
+          "interpolation_algorithm": "LAGRANGE",
+          "interpolation_degree": 5,
+          "reference_frame": "INERTIAL"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-06-03T17:33:09Z"
+  }
+}
