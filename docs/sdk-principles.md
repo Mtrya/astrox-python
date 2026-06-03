@@ -44,15 +44,15 @@ The SDK should perform near-zero semantic preprocessing or postprocessing. It ma
 
 Curated constructors are strict about wire shape and light about physics semantics. They should catch missing required fields, invalid option names, wrong container shapes, and mutually exclusive choices. They should not become an astrodynamics validation library unless server behavior and documented contract evidence justify that validation.
 
-Raw route calls return raw JSON-like API responses. Curated endpoint functions should return Pythonic success-path values when fixture-backed response construction is stable enough. Curated response parsing must be explicit and backed by tests proving that server responses can construct the SDK-owned value object. Curated functions may temporarily return raw JSON-like responses only when a surface is not mature enough for success-path values, and that maturity caveat should be explicit.
+Raw route calls return raw JSON-like API responses. Curated endpoint functions should return Pythonic success-path values when validation-backed response construction is stable enough. Curated response parsing must be explicit and backed by tests proving that server responses can construct the SDK-owned value object. Curated functions may temporarily return raw JSON-like responses only when a surface is not mature enough for success-path values, and that maturity caveat should be explicit.
 
 ## Coverage And Honesty
 
-Public SDK surfaces must be backed by verified evidence for the behavior they advertise. A function does not need coverage for every OpenAPI branch cross-product, but every documented parameter value, branch mode, constructor, and response parser must be supported by fixture or validation evidence.
+Public SDK surfaces must be backed by verified evidence for the behavior they advertise. A function does not need coverage for every OpenAPI branch cross-product, but every documented parameter value, branch mode, constructor, and response parser must be supported by behavior tests or validation evidence.
 
 Endpoint names should use Python and domain language rather than mechanically mirror OpenAPI operation names, but every public endpoint function must have a clear backing route or operation. Default to one curated public function per endpoint. Split one endpoint into multiple public functions only when a verified endpoint-level branch axis changes the meaning, units, or requiredness of public parameters enough that one function would become unclear.
 
-Curated wrappers are not added merely because an OpenAPI endpoint exists. Raw and fixture-verified access can exist before a polished SDK abstraction is ready.
+Curated wrappers are not added merely because an OpenAPI endpoint exists. Raw access can exist before a polished SDK abstraction is ready.
 
 ## Non-Goals
 

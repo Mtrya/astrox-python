@@ -14,7 +14,6 @@ import yaml
 PR_TITLE = "Refresh ASTROX upstream drift data"
 EXPECTED_DRIFT_PATHS = {
     "openapi/astrox.openapi.yaml",
-    "openapi/fixtures/STATUS.md",
 }
 EXPECTED_DRIFT_PREFIXES = ("openapi/archive/",)
 
@@ -64,7 +63,6 @@ def changed_categories(paths: list[str]) -> dict[str, bool]:
     return {
         "openapi_baseline": "openapi/astrox.openapi.yaml" in paths,
         "openapi_archive": any(path.startswith("openapi/archive/") for path in paths),
-        "fixture_status": "openapi/fixtures/STATUS.md" in paths,
     }
 
 
@@ -105,7 +103,6 @@ def changed_categories_markdown(categories: dict[str, bool]) -> list[str]:
     labels = {
         "openapi_baseline": "OpenAPI description",
         "openapi_archive": "dated OpenAPI archive copy",
-        "fixture_status": "fixture coverage tracker",
     }
     return [f"- {label}: {format_bool(categories[key])}" for key, label in labels.items()]
 
@@ -158,13 +155,6 @@ def pr_body_markdown(report: dict[str, Any]) -> str:
         "Changed files:",
         *tracked_paths_markdown(report["tracked_paths"]),
     ]
-    if report["changed_categories"]["fixture_status"]:
-        lines.extend(
-            [
-                "",
-                "`openapi/fixtures/STATUS.md` is regenerated while the fixture inventory remains in the repository. It is transitional reference state, not a drift gate.",
-            ]
-        )
     lines.extend(
         [
             "",
