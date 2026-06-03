@@ -40,8 +40,11 @@ def iter_oracle_paths(oracle_root: Path = DEFAULT_ORACLE_ROOT) -> list[Path]:
 
 
 def load_oracle(path: Path) -> dict[str, Any]:
-    with path.open("r", encoding="utf-8") as stream:
-        data = yaml.safe_load(stream)
+    try:
+        with path.open("r", encoding="utf-8") as stream:
+            data = yaml.safe_load(stream)
+    except (OSError, yaml.YAMLError) as exc:
+        raise FixtureError(f"{path}: {exc}") from exc
     if not isinstance(data, dict):
         raise FixtureError(f"{path}: oracle fixture must be a mapping")
     return data
@@ -199,7 +202,10 @@ def _contract_samples(
 
 
 def _load_contract_return(contract_path: Path, case_id: str) -> Any:
-    contract = load_fixture(contract_path)
+    try:
+        contract = load_fixture(contract_path)
+    except (OSError, yaml.YAMLError) as exc:
+        raise FixtureError(f"{contract_path}: {exc}") from exc
     cases = contract.get("cases")
     if not isinstance(cases, list):
         raise FixtureError(f"{contract_path}: cases must be a list")
