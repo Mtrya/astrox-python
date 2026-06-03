@@ -62,6 +62,7 @@ jobs:
       - name: Build drift report
         id: pipeline
         run: |
+          set -o pipefail
           git status --porcelain -- openapi > openapi-drift-reports/tracked-status.txt
           uv run python scripts/openapi_drift/drift_pipeline_report.py \
             --previous-openapi openapi-drift-reports/previous-openapi.yaml \

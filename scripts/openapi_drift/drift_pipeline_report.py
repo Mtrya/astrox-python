@@ -88,11 +88,7 @@ def build_pipeline_report(
         "openapi": {
             "previous_version": previous_openapi_version,
             "current_version": current_openapi_version,
-            "version_changed": (
-                previous_openapi_version is not None
-                and current_openapi_version is not None
-                and previous_openapi_version != current_openapi_version
-            ),
+            "version_changed": previous_openapi_version != current_openapi_version,
         },
     }
 
