@@ -12,25 +12,16 @@ if str(REPO_ROOT) not in sys.path:
 
 from astrox import propagator
 from tests.validation._support import ContractCase, main
-
-
-START = "2024-01-01T00:00:00.000Z"
-STOP = "2024-01-01T00:10:00.000Z"
-STEP_S = 300.0
-SATELLITE_NUMBER = "25544"
-TLE_LINES = (
-    "1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9995",
-    "2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456",
-)
+from tests.validation.sdk_contract.propagator import _common
 
 
 def iss_tle() -> tuple[float, propagator.PropagatorPosition]:
     return propagator.sgp4(
-        start=START,
-        stop=STOP,
-        step_s=STEP_S,
-        satellite_number=SATELLITE_NUMBER,
-        tle_lines=TLE_LINES,
+        start=_common.SGP4_START,
+        stop=_common.SGP4_STOP,
+        step_s=_common.SGP4_STEP_S,
+        satellite_number=_common.SGP4_SATELLITE_NUMBER,
+        tle_lines=_common.SGP4_TLE_LINES,
     )
 
 

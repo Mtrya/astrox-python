@@ -71,7 +71,7 @@ jobs:
         id: example_syntax
         if: steps.install.outcome == 'success'
         continue-on-error: true
-        run: uv run python -m py_compile examples/01_propagation/*.py
+        run: uv run python -m py_compile examples/01_propagation/*.py tests/validation/sdk_contract/check_all.py tests/validation/sdk_contract/propagator/*.py
 
       - name: Check SDK oracle fixtures
         id: sdk_oracles
@@ -99,7 +99,7 @@ jobs:
         continue-on-error: true
         env:
           ASTROX_BASE_URL: http://astrox.cn:8765
-        run: uv run python scripts/sdk_contract/check.py
+        run: uv run python tests/validation/sdk_contract/check_all.py
 
       - name: Build health result
         id: health

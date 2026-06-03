@@ -10,6 +10,12 @@ Run one contract family directly:
 ASTROX_BASE_URL=http://astrox.cn:8765 uv run python tests/validation/sdk_contract/propagator/sgp4.py --check
 ```
 
+Run all SDK contract scripts:
+
+```bash
+ASTROX_BASE_URL=http://astrox.cn:8765 uv run python tests/validation/sdk_contract/check_all.py
+```
+
 Refresh a snapshot only when intentionally accepting the current live ASTROX return as the maintained SDK contract:
 
 ```bash

@@ -54,7 +54,7 @@ jobs:
           PY
 
       - name: Check propagation example syntax
-        run: uv run python -m py_compile examples/01_propagation/*.py
+        run: uv run python -m py_compile examples/01_propagation/*.py tests/validation/sdk_contract/check_all.py tests/validation/sdk_contract/propagator/*.py
 
       - name: Check SDK oracle fixtures
         run: uv run python scripts/sdk_oracles/check.py

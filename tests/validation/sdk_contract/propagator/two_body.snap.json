@@ -1,0 +1,49 @@
+{
+  "cases": [
+    {
+      "description": "Short two-body propagation from a low Earth orbit using explicit Earth constants.",
+      "id": "sso",
+      "return": [
+        5553.624273342147,
+        {
+          "cartesian_velocity": {
+            "first": [
+              0,
+              6771358.863,
+              0,
+              0,
+              0,
+              6746.002784609132,
+              3662.7806616802945,
+              300,
+              6383922.316239741,
+              1985053.8791317265
+            ],
+            "last": [
+              -2557.9205349733734,
+              6360.039119154182,
+              3453.219489668187,
+              600,
+              5266066.608240681,
+              3743000.763876929,
+              2032283.5984980017,
+              -4822.397208867318,
+              5246.680561472801,
+              2848.715115033852
+            ],
+            "length": 21
+          },
+          "central_body": "Earth",
+          "epoch": "2024-01-01T00:00:00.000Z",
+          "interpolation_algorithm": "LAGRANGE",
+          "interpolation_degree": 5,
+          "reference_frame": "INERTIAL"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-06-03T17:33:10Z"
+  }
+}
