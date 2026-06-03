@@ -29,7 +29,7 @@ def assert_success_path_return(
     )
 
 
-def test_ballistic_nominal_matches_verified_fixture_payload(
+def test_ballistic_nominal_emits_representative_payload(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls = record_raw_post(monkeypatch, REPRESENTATIVE_FIXED_PROPAGATOR_RESPONSE)
@@ -74,7 +74,7 @@ def test_ballistic_nominal_matches_verified_fixture_payload(
         ),
     ],
 )
-def test_ballistic_branch_functions_match_verified_fixture_payloads(
+def test_ballistic_branch_functions_emit_representative_payloads(
     monkeypatch: pytest.MonkeyPatch,
     function: Callable[..., tuple[float, propagator.PropagatorPosition]],
     value_kwarg: str,

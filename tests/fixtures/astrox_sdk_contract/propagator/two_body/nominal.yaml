@@ -1,0 +1,59 @@
+area: propagator
+function: astrox.propagator.two_body
+scenario: nominal
+compare:
+  mode: approximate_json
+  abs_tol: 1.0e-09
+  rel_tol: 1.0e-09
+cases:
+- id: sso
+  description: Short two-body propagation from a low Earth orbit using explicit Earth constants.
+  inputs:
+    start: '2024-01-01T00:00:00.000Z'
+    stop: '2024-01-01T00:10:00.000Z'
+    step_s: 300.0
+    orbit_epoch: '2024-01-01T00:00:00.000Z'
+    coord_system: Inertial
+    gravitational_parameter_m3_s2: 398600441500000.0
+    orbit:
+      constructor: astrox.orbits.keplerian
+      kwargs:
+        semi_major_axis_m: 6778137.0
+        eccentricity: 0.001
+        inclination_deg: 28.5
+        argument_of_periapsis_deg: 0.0
+        raan_deg: 0.0
+        true_anomaly_deg: 0.0
+  expected:
+    refreshed_at: '2026-06-03T14:13:09Z'
+    return:
+    - 5553.624273342147
+    - cartesian_velocity:
+        length: 21
+        first:
+        - 0
+        - 6771358.863
+        - 0
+        - 0
+        - 0
+        - 6746.002784609132
+        - 3662.7806616802945
+        - 300
+        - 6383922.316239741
+        - 1985053.8791317265
+        last:
+        - -2557.9205349733734
+        - 6360.039119154182
+        - 3453.219489668187
+        - 600
+        - 5266066.608240681
+        - 3743000.763876929
+        - 2032283.5984980017
+        - -4822.397208867318
+        - 5246.680561472801
+        - 2848.715115033852
+      central_body: Earth
+      epoch: '2024-01-01T00:00:00.000Z'
+      interpolation_algorithm: LAGRANGE
+      interpolation_degree: 5
+      reference_frame: INERTIAL

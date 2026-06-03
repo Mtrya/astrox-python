@@ -18,7 +18,7 @@ from tests.sdk.propagator.helpers import (
 )
 
 
-def test_sgp4_matches_verified_fixture_payload(
+def test_sgp4_emits_representative_payload(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls = record_raw_post(monkeypatch)
@@ -61,7 +61,7 @@ def test_sgp4_omits_server_owned_optional_knobs_when_not_provided(
     )
 
 
-def test_simple_ascent_matches_verified_fixture_payload(
+def test_simple_ascent_emits_representative_payload(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls = record_raw_post(monkeypatch)

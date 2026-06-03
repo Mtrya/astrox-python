@@ -1,4 +1,4 @@
-"""Shared assertions for propagator SDK contract tests."""
+"""Shared samples and assertions for propagator behavior tests."""
 
 from __future__ import annotations
 

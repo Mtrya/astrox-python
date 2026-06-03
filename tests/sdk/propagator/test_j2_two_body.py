@@ -53,7 +53,7 @@ def test_propagator_position_constructs_from_nested_position_wire_payload() -> N
         position.central_body = "Mars"
 
 
-def test_j2_calls_raw_route_with_fixture_backed_payload(
+def test_j2_calls_raw_route_with_representative_payload(
     monkeypatch: pytest.MonkeyPatch,
     orbit: orbits.KeplerianElements,
 ) -> None:
@@ -85,7 +85,7 @@ def test_j2_calls_raw_route_with_fixture_backed_payload(
     assert_canonical_equal(calls[0]["json"], J2_REQUEST)
 
 
-def test_two_body_calls_raw_route_with_fixture_backed_payload(
+def test_two_body_calls_raw_route_with_representative_payload(
     monkeypatch: pytest.MonkeyPatch,
     orbit: orbits.KeplerianElements,
 ) -> None:

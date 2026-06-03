@@ -81,6 +81,14 @@ jobs:
           ASTROX_BASE_URL: http://astrox.cn:8765
         run: uv run python scripts/live_smoke.py
 
+      - name: Check live SDK contract snapshots
+        id: sdk_contract
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: uv run python scripts/sdk_contract/check.py
+
       - name: Build health result
         id: health
         if: always()
@@ -91,7 +99,8 @@ jobs:
             "${{ steps.build.outcome }}" \
             "${{ steps.import_check.outcome }}" \
             "${{ steps.pytest.outcome }}" \
-            "${{ steps.live_smoke.outcome }}"
+            "${{ steps.live_smoke.outcome }}" \
+            "${{ steps.sdk_contract.outcome }}"
           do
             if [ "${outcome}" != "success" ]; then
               failed=true
@@ -107,6 +116,7 @@ jobs:
             echo "- verify built package import: ${{ steps.import_check.outcome }}"
             echo "- pytest: ${{ steps.pytest.outcome }}"
             echo "- live smoke: ${{ steps.live_smoke.outcome }}"
+            echo "- live SDK contract snapshots: ${{ steps.sdk_contract.outcome }}"
             echo
             echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           } > sdk-health-issue.md

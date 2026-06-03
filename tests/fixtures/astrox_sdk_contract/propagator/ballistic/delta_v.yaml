@@ -1,0 +1,53 @@
+area: propagator
+function: astrox.propagator.ballistic_delta_v
+scenario: delta_v
+compare:
+  mode: approximate_json
+  abs_tol: 1.0e-09
+  rel_tol: 1.0e-09
+cases:
+- id: delta_v
+  description: Ballistic trajectory branch constrained by launch delta-v.
+  inputs:
+    start: '2024-01-01T12:00:00.000Z'
+    step_s: 30.0
+    launch_latitude_deg: 28.5721
+    launch_longitude_deg: -80.648
+    launch_altitude_m: 10.0
+    impact_latitude_deg: 30.0
+    impact_longitude_deg: -70.0
+    impact_altitude_m: 0.0
+    delta_v_m_s: 3000.0
+  expected:
+    refreshed_at: '2026-06-03T14:13:10Z'
+    return:
+    - 6000
+    - cartesian_velocity:
+        length: 133
+        first:
+        - 0
+        - 910920.2717446227
+        - -5531176.8899206305
+        - 3032341.5715879533
+        - 2298.7728970660137
+        - -1413.738747759681
+        - 1463.0093224362554
+        - 30
+        - 979157.8917158388
+        - -5569949.468769019
+        last:
+        - 1328.4978051837206
+        - 2398.2909264230757
+        - -825.5923503304999
+        - 539.8957085744956
+        - 1890774.9785503214
+        - -5194862.024190165
+        - 3170373.735383684
+        - 1254.8716505219581
+        - 2629.1307121401733
+        - -969.9882696300309
+      central_body: Earth
+      epoch: '2024-01-01T12:00:00.000Z'
+      interpolation_algorithm: LAGRANGE
+      interpolation_degree: 5
+      reference_frame: FIXED

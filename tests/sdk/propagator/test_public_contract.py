@@ -138,7 +138,7 @@ def test_keplerian_constructor_returns_frozen_dataclass_with_explicit_wire_lower
         orbit.eccentricity = 0.0
 
 
-def test_j2_assembles_fixture_backed_payload_and_returns_success_path_tuple() -> None:
+def test_j2_assembles_representative_payload_and_returns_success_path_tuple() -> None:
     from astrox import orbits, propagator
 
     session = install_recording_client()
