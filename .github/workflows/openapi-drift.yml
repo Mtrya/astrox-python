@@ -50,15 +50,6 @@ jobs:
             --archive-dir openapi/archive \
             2>&1 | tee openapi-drift-reports/fetch-openapi.log
 
-      - name: Regenerate fixture status inventory
-        run: |
-          set -o pipefail
-          uv run python scripts/openapi_drift/generate_status.py \
-            --openapi openapi/astrox.openapi.yaml \
-            --fixture-dir openapi/fixtures \
-            --output openapi/fixtures/STATUS.md \
-            2>&1 | tee openapi-drift-reports/generate-status.log
-
       - name: Build drift report
         id: pipeline
         run: |
@@ -97,7 +88,7 @@ jobs:
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git fetch origin "${branch}:refs/remotes/origin/${branch}" || true
           git switch -c "${branch}"
-          git add openapi/astrox.openapi.yaml openapi/archive openapi/fixtures/STATUS.md
+          git add openapi/astrox.openapi.yaml openapi/archive
           git commit -m "Refresh ASTROX upstream drift data"
           git push --force-with-lease --set-upstream origin "${branch}"
 
