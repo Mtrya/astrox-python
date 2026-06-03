@@ -39,3 +39,5 @@ These examples call the ASTROX API through the package default client configurat
 ## Output Shape
 
 The curated propagator functions return `(period_s, position)`. `period_s` is the server period value. `position` is a `propagator.PropagatorPosition` dataclass with `central_body`, `epoch`, `reference_frame`, `interpolation_algorithm`, `interpolation_degree`, and `cartesian_velocity`.
+
+For SGP4 examples, ASTROX reports `position.reference_frame` as `INERTIAL`. Compare those coordinates as GCRF/GCRS-style inertial states, not raw TEME states from low-level SGP4 libraries.

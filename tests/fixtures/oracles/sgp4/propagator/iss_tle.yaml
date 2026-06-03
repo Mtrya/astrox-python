@@ -1,8 +1,8 @@
 area: propagator
 source:
-  name: sgp4
-  version: '2.25'
-scope: SGP4 period from TLE mean motion and first two propagated Cartesian state samples for one ISS TLE case. Frame conventions are not certified by this fixture.
+  name: skyfield
+  version: '1.54'
+scope: SGP4 period and first two GCRS Cartesian state samples for one ISS TLE case. This calibrates ASTROX reference_frame=INERTIAL as GCRF/GCRS-like for this case, not raw TEME.
 cases:
 - id: iss_tle
   kind: sgp4_state_samples
@@ -11,29 +11,29 @@ cases:
     case: iss_tle
   tolerance:
     period_abs_s: 1.0e-09
-    position_abs_m: 50000.0
-    velocity_abs_m_s: 50.0
+    position_abs_m: 0.02
+    velocity_abs_m_s: 2.0e-05
   oracle:
     period_s: 5578.082396699645
     samples:
     - offset_s: 0.0
       position_m:
-      - 6380433.761940508
-      - -2346452.1434558146
-      - 1082.5454228944025
+      - 6367734.32305353
+      - -2380661.2220777776
+      - -13622.064612639613
       velocity_m_s:
-      - 1631.705399411041
-      - 4462.598665155027
-      - 6009.167319749336
+      - 1669.5776049498695
+      - 4453.97464105254
+      - 6005.161259397161
     - offset_s: 300.0
       position_m:
-      - 6499244.040010267
-      - -900135.7550434575
-      - 1769498.2356356108
+      - 6498410.017085208
+      - -934945.2269248704
+      - 1754447.5334221972
       velocity_m_s:
-      - -847.4505112048902
-      - 5087.4923961699915
-      - 5667.337432813644
+      - -806.9758071523105
+      - 5092.153438048114
+      - 5669.058849354532
   notes:
-  - Oracle state samples were generated with sgp4.api.Satrec.twoline2rv and sgp4.api.jday for 2024-01-01T00:00:00Z and 2024-01-01T00:05:00Z.
-  - Tolerances are intentionally loose because this fixture checks broad SGP4 agreement for one TLE, not full frame-transformation parity.
+  - Oracle state samples were generated with skyfield.api.EarthSatellite.at(...) and load.timescale(builtin=True) for 2024-01-01T00:00:00Z and 2024-01-01T00:05:00Z.
+  - Direct sgp4.api.Satrec TEME output differs from ASTROX by tens of kilometers for this case; applying Skyfield's satellite-to-GCRS transform reduces the checked ASTROX snapshot error below 0.01 m and 0.00001 m/s.

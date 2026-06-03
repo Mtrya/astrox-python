@@ -76,7 +76,7 @@ period_s, position = propagator.sgp4(
 
 See `examples/01_propagation/sgp4_tle.py` and `examples/01_propagation/propagator_reference.py` for runnable source examples.
 
-When comparing SGP4 results with another tool, match the TLE, epoch, time scale, reference frame, and units. Different tools can expose SGP4 states through different frame conventions, so a useful comparison should state those assumptions and the intended tolerance.
+When comparing SGP4 results with another tool, match the TLE, epoch, time scale, reference frame, and units. ASTROX reports this SGP4 output as `INERTIAL`; for the checked ISS TLE sample, that frame matches Skyfield's GCRS/GCRF-style state, not raw TEME output from a low-level SGP4 propagator. If another tool starts from TEME, transform the state to GCRF/GCRS before comparing coordinates.
 
 ## Simple Ascent
 
@@ -141,6 +141,8 @@ period_s, position = propagator.two_body(...)
 ```
 
 `period_s` is the server `Period` value. `position` is a frozen `propagator.PropagatorPosition` dataclass with `central_body`, `epoch`, `reference_frame`, `interpolation_algorithm`, `interpolation_degree`, and `cartesian_velocity`.
+
+For SGP4 results, `position.reference_frame == "INERTIAL"` should be interpreted as GCRF/GCRS-style inertial coordinates for external comparisons.
 
 When ASTROX reports an unsuccessful response, the curated function raises `astrox.exceptions.AstroxAPIError` with the server message. When you need the full raw response envelope, use the lower-level `astrox.raw` API.
 

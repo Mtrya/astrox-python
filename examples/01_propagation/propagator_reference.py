@@ -76,7 +76,7 @@ def main() -> None:
         tle_lines=ISS_TLE,
     )
     print(f"SGP4 period: {sgp4_period_s:.3f} s")
-    print(f"SGP4 frame: {sgp4_position.reference_frame}")
+    print(f"SGP4 frame: {sgp4_position.reference_frame} (GCRF/GCRS-style inertial)")
 
     simple_ascent_period_s, simple_ascent_position = propagator.simple_ascent(
         start="2024-01-01T03:00:00.000Z",

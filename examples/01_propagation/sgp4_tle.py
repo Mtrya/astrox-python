@@ -24,7 +24,7 @@ def main() -> None:
 
     print(f"Period: {period_s:.3f} s")
     print(f"Position epoch: {position.epoch}")
-    print(f"Reference frame: {position.reference_frame}")
+    print(f"Reference frame: {position.reference_frame} (GCRF/GCRS-style inertial)")
 
 
 if __name__ == "__main__":
