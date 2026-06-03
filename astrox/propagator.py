@@ -130,11 +130,18 @@ def sgp4(
     *,
     start: str,
     stop: str,
-    tle_lines: tuple[str, str],
+    tle_lines: tuple[str, str] | list[str],
     step_s: float | None = None,
     satellite_number: str | None = None,
 ) -> tuple[float, PropagatorPosition]:
     """Propagate a satellite from two-line element data using SGP4."""
+    if (
+        not isinstance(tle_lines, (list, tuple))
+        or len(tle_lines) != 2
+        or not all(isinstance(line, str) for line in tle_lines)
+    ):
+        raise TypeError("tle_lines must be a two-item sequence of TLE strings")
+
     payload: dict[str, Any] = {
         "Start": start,
         "Stop": stop,

@@ -8,7 +8,7 @@ from astrox import orbits, propagator
 
 The curated functions documented here use SDK-owned dataclasses and ordinary scalar keyword arguments. They are not generated transport-model constructors, and they do not ask users to hand-build ASTROX request dictionaries for ordinary use. Raw access remains available through `astrox.raw` for advanced callers who need lower-level API control.
 
-These functions are documented for the SDK behaviors covered by the current test and fixture suite. They describe the Python interface, units, return values, and caveats; they are not a claim that ASTROX propagation results are numerically validated for mission use.
+These functions describe the Python interface, units, and return values.
 
 ## Orbit Input
 
@@ -59,7 +59,7 @@ See `examples/01_propagation/j2_classical.py`, `examples/01_propagation/two_body
 
 `propagator.sgp4(...)` propagates a satellite from two-line element data and returns `(period_s, position)`.
 
-Required arguments are `start`, `stop`, and `tle_lines`. `tle_lines` is a two-item tuple containing TLE line 1 and TLE line 2. Optional arguments are `step_s` and `satellite_number`; both are omitted unless supplied, so the server keeps ownership of its defaults.
+Required arguments are `start`, `stop`, and `tle_lines`. `tle_lines` is a two-item sequence containing TLE line 1 and TLE line 2. Optional arguments are `step_s` and `satellite_number`; both are omitted unless supplied, so the server keeps ownership of its defaults.
 
 ```python
 period_s, position = propagator.sgp4(

@@ -61,6 +61,46 @@ def test_sgp4_omits_server_owned_optional_knobs_when_not_provided(
     )
 
 
+def test_sgp4_accepts_two_item_tle_list(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(monkeypatch)
+
+    propagator.sgp4(
+        start=SGP4_REQUEST["Start"],
+        stop=SGP4_REQUEST["Stop"],
+        tle_lines=SGP4_REQUEST["TLEs"],
+    )
+
+    assert calls[0]["endpoint"] == "/Propagator/sgp4"
+    assert_canonical_equal(
+        calls[0]["json"],
+        {
+            "Start": SGP4_REQUEST["Start"],
+            "Stop": SGP4_REQUEST["Stop"],
+            "TLEs": SGP4_REQUEST["TLEs"],
+        },
+    )
+
+
+@pytest.mark.parametrize(
+    "tle_lines",
+    [
+        (SGP4_REQUEST["TLEs"][0],),
+        tuple(SGP4_REQUEST["TLEs"] + ["extra"]),
+        "not-a-tle-pair",
+        (SGP4_REQUEST["TLEs"][0], 123),
+    ],
+)
+def test_sgp4_rejects_malformed_tle_lines(tle_lines: object) -> None:
+    with pytest.raises(TypeError, match="tle_lines must be a two-item sequence"):
+        propagator.sgp4(
+            start=SGP4_REQUEST["Start"],
+            stop=SGP4_REQUEST["Stop"],
+            tle_lines=tle_lines,
+        )
+
+
 def test_simple_ascent_emits_representative_payload(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -120,6 +160,67 @@ def test_simple_ascent_omits_server_owned_optional_knobs_when_not_provided(
             "BurnoutAltitude": SIMPLE_ASCENT_REQUEST["BurnoutAltitude"],
         },
     )
+
+
+@pytest.mark.parametrize(
+    ("function_name", "field_path"),
+    [
+        ("sgp4", ("Period",)),
+        ("sgp4", ("Position",)),
+        ("sgp4", ("Position", "CentralBody")),
+        ("sgp4", ("Position", "cartesianVelocity")),
+        ("sgp4", ("Position", "epoch")),
+        ("sgp4", ("Position", "interpolationAlgorithm")),
+        ("sgp4", ("Position", "interpolationDegree")),
+        ("sgp4", ("Position", "referenceFrame")),
+        ("simple_ascent", ("Period",)),
+        ("simple_ascent", ("Position",)),
+        ("simple_ascent", ("Position", "CentralBody")),
+        ("simple_ascent", ("Position", "cartesianVelocity")),
+        ("simple_ascent", ("Position", "epoch")),
+        ("simple_ascent", ("Position", "interpolationAlgorithm")),
+        ("simple_ascent", ("Position", "interpolationDegree")),
+        ("simple_ascent", ("Position", "referenceFrame")),
+    ],
+)
+def test_new_single_result_propagator_parsers_fail_loudly_for_missing_required_fields(
+    monkeypatch: pytest.MonkeyPatch,
+    function_name: str,
+    field_path: tuple[str, ...],
+) -> None:
+    response = {
+        **REPRESENTATIVE_PROPAGATOR_RESPONSE,
+        "Position": dict(REPRESENTATIVE_PROPAGATOR_RESPONSE["Position"]),
+    }
+    current = response
+    for field in field_path[:-1]:
+        current = current[field]
+    del current[field_path[-1]]
+
+    def fake_post(endpoint: str, *, json: object) -> dict[str, object]:
+        return response
+
+    monkeypatch.setattr(propagator.raw, "post", fake_post)
+
+    with pytest.raises(KeyError):
+        if function_name == "sgp4":
+            propagator.sgp4(
+                start=SGP4_REQUEST["Start"],
+                stop=SGP4_REQUEST["Stop"],
+                tle_lines=tuple(SGP4_REQUEST["TLEs"]),
+            )
+        else:
+            propagator.simple_ascent(
+                start=SIMPLE_ASCENT_REQUEST["Start"],
+                stop=SIMPLE_ASCENT_REQUEST["Stop"],
+                launch_latitude_deg=SIMPLE_ASCENT_REQUEST["LaunchLatitude"],
+                launch_longitude_deg=SIMPLE_ASCENT_REQUEST["LaunchLongitude"],
+                launch_altitude_m=SIMPLE_ASCENT_REQUEST["LaunchAltitude"],
+                burnout_velocity_m_s=SIMPLE_ASCENT_REQUEST["BurnoutVelocity"],
+                burnout_latitude_deg=SIMPLE_ASCENT_REQUEST["BurnoutLatitude"],
+                burnout_longitude_deg=SIMPLE_ASCENT_REQUEST["BurnoutLongitude"],
+                burnout_altitude_m=SIMPLE_ASCENT_REQUEST["BurnoutAltitude"],
+            )
 
 
 @pytest.mark.parametrize("function_name", ["sgp4", "simple_ascent"])
