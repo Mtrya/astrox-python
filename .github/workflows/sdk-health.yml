@@ -1,0 +1,132 @@
+name: Scheduled SDK Health
+
+on:
+  schedule:
+    - cron: "30 20 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: scheduled-sdk-health
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  sdk-health:
+    name: Scheduled SDK health
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        id: install
+        continue-on-error: true
+        run: uv sync --group dev
+
+      - name: Build package
+        id: build
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        run: uv build --no-build-isolation
+
+      - name: Verify built package import
+        id: import_check
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        run: |
+          WHEEL="$(pwd)/$(find dist -name 'astrox_python-*.whl' -print -quit)"
+          cd /tmp
+          uv run --no-project --with "$WHEEL" python - <<'PY'
+          from astrox import orbits, propagator
+
+          orbit = orbits.keplerian(
+              semi_major_axis_m=7000000.0,
+              eccentricity=0.001,
+              inclination_deg=98.0,
+              raan_deg=20.0,
+              argument_of_periapsis_deg=30.0,
+              true_anomaly_deg=40.0,
+          )
+
+          assert orbit.to_wire()[0] == 7000000.0
+          assert hasattr(propagator, "j2")
+          assert hasattr(propagator, "two_body")
+          PY
+
+      - name: Run pytest
+        id: pytest
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        run: uv run python -m pytest tests
+
+      - name: Check live OpenAPI and direct endpoint route
+        id: live_smoke
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: uv run python scripts/live_smoke.py
+
+      - name: Build health result
+        id: health
+        if: always()
+        run: |
+          failed=false
+          for outcome in \
+            "${{ steps.install.outcome }}" \
+            "${{ steps.build.outcome }}" \
+            "${{ steps.import_check.outcome }}" \
+            "${{ steps.pytest.outcome }}" \
+            "${{ steps.live_smoke.outcome }}"
+          do
+            if [ "${outcome}" != "success" ]; then
+              failed=true
+            fi
+          done
+
+          echo "failed=${failed}" >> "${GITHUB_OUTPUT}"
+          {
+            echo "# Scheduled SDK Health"
+            echo
+            echo "- install dependencies: ${{ steps.install.outcome }}"
+            echo "- build package: ${{ steps.build.outcome }}"
+            echo "- verify built package import: ${{ steps.import_check.outcome }}"
+            echo "- pytest: ${{ steps.pytest.outcome }}"
+            echo "- live smoke: ${{ steps.live_smoke.outcome }}"
+            echo
+            echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          } > sdk-health-issue.md
+          cat sdk-health-issue.md >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Create or update SDK health issue
+        if: steps.health.outputs.failed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="Scheduled SDK health failure"
+          existing="$(gh issue list --state open --search "${title} in:title" --json number --jq '.[0].number // ""')"
+          if [ -n "${existing}" ]; then
+            gh issue edit "${existing}" --body-file sdk-health-issue.md
+          else
+            gh issue create \
+              --title "${title}" \
+              --body-file sdk-health-issue.md
+          fi
+
+      - name: Fail when SDK health fails
+        if: steps.health.outputs.failed == 'true'
+        run: exit 1

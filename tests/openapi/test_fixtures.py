@@ -15,7 +15,6 @@ from scripts.openapi_drift.discovery_report import (
 )
 from scripts.openapi_drift.drift_pipeline_report import (
     build_pipeline_report,
-    issue_body_markdown,
     load_json,
     parse_porcelain_status,
     pr_body_markdown,
@@ -1294,132 +1293,55 @@ def test_discovery_report_markdown_summarizes_uncovered_contracts(tmp_path: Path
     assert "`/Example` `$.Mode` (enum) value `A`" in markdown
 
 
-def test_drift_pipeline_report_requires_pr_for_tracked_changes() -> None:
+def test_drift_pipeline_report_requires_pr_for_expected_tracked_changes() -> None:
     tracked_paths = parse_porcelain_status(
         " M openapi/astrox.openapi.yaml\n"
         " M openapi/fixtures/STATUS.md\n"
     )
-    reconcile_report = {
-        "changed_count": 2,
-        "changed_fixture_paths": ["openapi/fixtures/example.yaml"],
-        "classification_counts": {"verified_expect_refreshed": 1, "verified_now_empty_http_500": 1},
-        "action_counts": {"refresh_expect": 1, "mark_blocked": 1},
-        "results": [
-            {
-                "fixture": "openapi/fixtures/example.yaml",
-                "endpoint": "/Example",
-                "branch": "nominal",
-                "action": "refresh_expect",
-                "classification": "verified_expect_refreshed",
-                "changed": True,
-            }
-        ],
-    }
-    discovery_report = {
-        "missing_endpoint_count": 1,
-        "missing_endpoints": [
-            {
-                "endpoint": "/New",
-                "method": "POST",
-                "request_schema": "NewInput",
-                "response_schema": "NewOutput",
-            }
-        ],
-        "axis_count": 1,
-        "axis_value_count": 2,
-        "covered_axis_value_count": 1,
-        "uncovered_axis_value_count": 1,
-        "uncovered_axis_values": [
-            {
-                "endpoint": "/Example",
-                "axis_path": "$.Mode",
-                "axis_kind": "enum",
-                "axis_property": None,
-                "value": "B",
-            }
-        ],
-        "previously_blocked_now_reachable": [],
-    }
 
     report = build_pipeline_report(
         tracked_paths=tracked_paths,
-        reconcile_report=reconcile_report,
-        discovery_report=discovery_report,
-        test_outcomes={"focused": "success", "full": "success"},
+        previous_openapi_version="2026-05-18",
+        current_openapi_version="2026-06-02",
     )
     body = pr_body_markdown(report)
 
     assert report["pr_required"] is True
-    assert report["issue_required"] is False
+    assert report["refresh_valid"] is True
     assert report["changed_categories"]["openapi_baseline"] is True
     assert report["changed_categories"]["fixture_status"] is True
-    assert "does not auto-merge" in body
-    assert "`/New` POST" in body
-    assert "`/Example` `$.Mode` (enum) value `B`" in body
+    assert report["unexpected_paths"] == []
+    assert "previous version" in body
+    assert "fixture inventory remains in the repository" in body
 
 
-def test_drift_pipeline_report_requires_issue_for_no_diff_unblocked_case() -> None:
-    discovery_report = {
-        "missing_endpoint_count": 0,
-        "missing_endpoints": [],
-        "axis_count": 0,
-        "axis_value_count": 0,
-        "covered_axis_value_count": 0,
-        "uncovered_axis_value_count": 0,
-        "uncovered_axis_values": [],
-        "previously_blocked_now_reachable": [],
-    }
-    reconcile_report = {
-        "results": [
-            {
-                "fixture": "openapi/fixtures/example.yaml",
-                "endpoint": "/Example",
-                "branch": "blocked_case",
-                "action": "report",
-                "classification": "previously_blocked_now_reachable",
-                "status": 200,
-            }
-        ],
-        "classification_counts": {"previously_blocked_now_reachable": 1},
-        "action_counts": {"report": 1},
-    }
-
+def test_drift_pipeline_report_no_pr_for_no_diff() -> None:
     report = build_pipeline_report(
         tracked_paths=[],
-        reconcile_report=reconcile_report,
-        discovery_report=discovery_report,
-        test_outcomes={"focused": "success"},
-    )
-    body = issue_body_markdown(report)
-
-    assert report["pr_required"] is False
-    assert report["issue_required"] is True
-    assert report["issue_title"] == "ASTROX fixture blocked branches now reachable"
-    assert "`/Example` `blocked_case`" in body
-    assert "no blocked branch was automatically unblocked" in body
-
-
-def test_drift_pipeline_report_records_failed_checks_as_hard_case() -> None:
-    report = build_pipeline_report(
-        tracked_paths=["openapi/fixtures/STATUS.md"],
-        reconcile_report={"results": [], "classification_counts": {}, "action_counts": {}},
-        discovery_report={
-            "missing_endpoint_count": 0,
-            "missing_endpoints": [],
-            "axis_count": 0,
-            "axis_value_count": 0,
-            "covered_axis_value_count": 0,
-            "uncovered_axis_value_count": 0,
-            "uncovered_axis_values": [],
-            "previously_blocked_now_reachable": [],
-        },
-        test_outcomes={"full": "failure"},
+        previous_openapi_version="2026-06-02",
+        current_openapi_version="2026-06-02",
     )
     summary = summary_markdown(report)
 
-    assert report["test_failed"] is True
-    assert report["unresolved_hard_cases"][0]["classification"] == "workflow_test_failure"
-    assert "- `full`: `failure`" in summary
+    assert report["pr_required"] is False
+    assert report["tracked_diff_expected"] is False
+    assert report["refresh_valid"] is True
+    assert report["changed_categories"]["openapi_baseline"] is False
+    assert "PR required: no" in summary
+
+
+def test_drift_pipeline_report_rejects_unexpected_tracked_paths() -> None:
+    report = build_pipeline_report(
+        tracked_paths=["openapi/fixtures/example.yaml"],
+        previous_openapi_version="2026-05-18",
+        current_openapi_version="2026-06-02",
+    )
+    summary = summary_markdown(report)
+
+    assert report["pr_required"] is False
+    assert report["refresh_valid"] is False
+    assert report["unexpected_paths"] == ["openapi/fixtures/example.yaml"]
+    assert "Unexpected Files" in summary
 
 
 def test_load_json_reports_empty_files_with_context(tmp_path: Path) -> None:
