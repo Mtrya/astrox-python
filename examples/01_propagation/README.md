@@ -29,6 +29,8 @@ uv sync --group dev
 uv run python examples/01_propagation/propagator_reference.py
 uv run python examples/01_propagation/j2_classical.py
 uv run python examples/01_propagation/two_body_classical.py
+uv run python examples/01_propagation/sgp4_tle.py
+uv run python examples/01_propagation/simple_ascent.py
 uv run python examples/01_propagation/ballistic_delta_v.py
 ```
 

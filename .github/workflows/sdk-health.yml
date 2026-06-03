@@ -67,6 +67,18 @@ jobs:
           assert hasattr(propagator, "two_body")
           PY
 
+      - name: Check propagation example syntax
+        id: example_syntax
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        run: uv run python -m py_compile examples/01_propagation/*.py
+
+      - name: Check SDK oracle fixtures
+        id: sdk_oracles
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        run: uv run python scripts/sdk_oracles/check.py
+
       - name: Run pytest
         id: pytest
         if: steps.install.outcome == 'success'
@@ -98,6 +110,8 @@ jobs:
             "${{ steps.install.outcome }}" \
             "${{ steps.build.outcome }}" \
             "${{ steps.import_check.outcome }}" \
+            "${{ steps.example_syntax.outcome }}" \
+            "${{ steps.sdk_oracles.outcome }}" \
             "${{ steps.pytest.outcome }}" \
             "${{ steps.live_smoke.outcome }}" \
             "${{ steps.sdk_contract.outcome }}"
@@ -114,6 +128,8 @@ jobs:
             echo "- install dependencies: ${{ steps.install.outcome }}"
             echo "- build package: ${{ steps.build.outcome }}"
             echo "- verify built package import: ${{ steps.import_check.outcome }}"
+            echo "- propagation example syntax: ${{ steps.example_syntax.outcome }}"
+            echo "- SDK oracle fixtures: ${{ steps.sdk_oracles.outcome }}"
             echo "- pytest: ${{ steps.pytest.outcome }}"
             echo "- live smoke: ${{ steps.live_smoke.outcome }}"
             echo "- live SDK contract snapshots: ${{ steps.sdk_contract.outcome }}"

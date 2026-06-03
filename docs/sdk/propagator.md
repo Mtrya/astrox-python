@@ -76,6 +76,8 @@ period_s, position = propagator.sgp4(
 
 See `examples/01_propagation/sgp4_tle.py` and `examples/01_propagation/propagator_reference.py` for runnable source examples.
 
+When comparing SGP4 results with another tool, match the TLE, epoch, time scale, reference frame, and units. Different tools can expose SGP4 states through different frame conventions, so a useful comparison should state those assumptions and the intended tolerance.
+
 ## Simple Ascent
 
 `propagator.simple_ascent(...)` propagates a simple ascent curve from a launch point to a burnout point and returns `(period_s, position)`.

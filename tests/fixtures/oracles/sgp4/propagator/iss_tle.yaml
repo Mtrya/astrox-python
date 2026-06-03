@@ -1,0 +1,39 @@
+area: propagator
+source:
+  name: sgp4
+  version: '2.25'
+scope: SGP4 period from TLE mean motion and first two propagated Cartesian state samples for one ISS TLE case. Frame conventions are not certified by this fixture.
+cases:
+- id: iss_tle
+  kind: sgp4_state_samples
+  astrox_contract:
+    path: propagator/sgp4/nominal.yaml
+    case: iss_tle
+  tolerance:
+    period_abs_s: 1.0e-09
+    position_abs_m: 50000.0
+    velocity_abs_m_s: 50.0
+  oracle:
+    period_s: 5578.082396699645
+    samples:
+    - offset_s: 0.0
+      position_m:
+      - 6380433.761940508
+      - -2346452.1434558146
+      - 1082.5454228944025
+      velocity_m_s:
+      - 1631.705399411041
+      - 4462.598665155027
+      - 6009.167319749336
+    - offset_s: 300.0
+      position_m:
+      - 6499244.040010267
+      - -900135.7550434575
+      - 1769498.2356356108
+      velocity_m_s:
+      - -847.4505112048902
+      - 5087.4923961699915
+      - 5667.337432813644
+  notes:
+  - Oracle state samples were generated with sgp4.api.Satrec.twoline2rv and sgp4.api.jday for 2024-01-01T00:00:00Z and 2024-01-01T00:05:00Z.
+  - Tolerances are intentionally loose because this fixture checks broad SGP4 agreement for one TLE, not full frame-transformation parity.
