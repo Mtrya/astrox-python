@@ -4,7 +4,9 @@ This directory stores observed ASTROX wire-contract fixtures.
 
 Fixtures refine `openapi/astrox.openapi.yaml` by recording the request branch payloads and response shapes that the live server is expected to accept and return. They are not semantic or numerical oracles. Normal `pytest` tests should cover exact values, physics checks, and SDK behavior.
 
-`STATUS.md` is generated from this fixture corpus and the checked-in OpenAPI document. Do not edit it by hand.
+Fixtures are reference-only discovery evidence during the transition to stronger tests. They are no longer replayed by the scheduled OpenAPI drift workflow. Useful fixture coverage should graduate into tests that protect supported SDK behavior; fixture records and fixture-specific inventory can be retired once that coverage exists elsewhere.
+
+`STATUS.md` is generated from this fixture corpus and the checked-in OpenAPI document. Do not edit it by hand. It is transitional fixture inventory, not a long-term drift gate.
 
 Add records incrementally, one endpoint file at a time, using this layout:
 
@@ -78,9 +80,9 @@ Discovery coverage can be reported with `scripts/openapi_drift/discovery_report.
 
 Candidate request payloads can be probed and written with `scripts/openapi_drift/probe_request.py`. The human or agent supplies the endpoint/branch `request`; the command performs the live request and writes either a verified branch with an automatically generated `expect` block or a blocked branch for narrow non-fixturable failures such as empty HTTP 500. It also normalizes the fixture and regenerates `STATUS.md` in apply mode.
 
-The unified drift workflow combines reconciliation, discovery, changed-file, and test reports with `scripts/openapi_drift/drift_pipeline_report.py` before opening a PR or creating the narrow blocked-branch issue.
+The OpenAPI drift workflow no longer runs fixture reconciliation, discovery coverage reporting, fixture replay, or pytest. It only refreshes deterministic OpenAPI drift artifacts and opens or updates an automated refresh PR. Normal PR CI and the scheduled SDK health workflow own test execution.
 
-The scheduled fixture CI should verify only wire-level behavior:
+Manual fixture verification should verify only wire-level behavior:
 
 - route and method still exist
 - branch payload is accepted or rejected as expected
