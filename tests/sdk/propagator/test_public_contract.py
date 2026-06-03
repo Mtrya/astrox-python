@@ -9,6 +9,12 @@ import pytest
 
 import astrox
 from astrox import _http
+from tests.sdk.propagator.helpers import (
+    BALLISTIC_NOMINAL_REQUEST,
+    SGP4_REQUEST,
+    SIMPLE_ASCENT_REQUEST,
+    assert_canonical_equal,
+)
 
 
 PROPAGATOR_RESPONSE = {
@@ -100,6 +106,8 @@ def test_public_modules_and_names_are_available() -> None:
     assert hasattr(propagator, "ballistic_delta_v_min_ecc")
     assert hasattr(propagator, "ballistic_apogee_altitude")
     assert hasattr(propagator, "ballistic_time_of_flight")
+    assert hasattr(propagator, "sgp4")
+    assert hasattr(propagator, "simple_ascent")
 
 
 def test_keplerian_constructor_returns_frozen_dataclass_with_explicit_wire_lowering() -> None:
@@ -205,13 +213,16 @@ def test_two_body_omits_server_owned_optional_knobs_when_not_provided() -> None:
     )
 
     assert session.calls[0]["url"] == "https://astrox.example/Propagator/TwoBody"
-    assert session.calls[0]["json"] == {
-        "Start": "2024-01-01T00:00:00.000Z",
-        "Stop": "2024-01-01T00:10:00.000Z",
-        "OrbitEpoch": "2024-01-01T00:00:00.000Z",
-        "CoordType": "Classical",
-        "OrbitalElements": orbit.to_wire(),
-    }
+    assert_canonical_equal(
+        session.calls[0]["json"],
+        {
+            "Start": "2024-01-01T00:00:00.000Z",
+            "Stop": "2024-01-01T00:10:00.000Z",
+            "OrbitEpoch": "2024-01-01T00:00:00.000Z",
+            "CoordType": "Classical",
+            "OrbitalElements": orbit.to_wire(),
+        },
+    )
 
 
 def test_curated_propagator_functions_do_not_accept_raw_dict_orbit_fragments() -> None:
@@ -247,16 +258,10 @@ def test_ballistic_nominal_maps_to_verified_route_without_mode_payload() -> None
     assert period_s == 600.0
     assert isinstance(position, propagator.PropagatorPosition)
     assert session.calls[0]["url"] == "https://astrox.example/Propagator/Ballistic"
-    assert session.calls[0]["json"] == {
-        "Start": "2024-01-01T12:00:00.000Z",
-        "Step": 30.0,
-        "LaunchLatitude": 28.5721,
-        "LaunchLongitude": -80.648,
-        "LaunchAltitude": 10.0,
-        "ImpactLatitude": 30.0,
-        "ImpactLongitude": -70.0,
-        "ImpactAltitude": 0.0,
-    }
+    assert_canonical_equal(
+        session.calls[0]["json"],
+        BALLISTIC_NOMINAL_REQUEST,
+    )
 
 
 @pytest.mark.parametrize(
@@ -324,3 +329,35 @@ def test_old_propagator_names_are_not_public_apis() -> None:
     for name in old_names:
         assert name not in propagator.__all__
         assert not hasattr(propagator, name)
+
+
+def test_new_single_result_propagators_use_configured_client_routes() -> None:
+    from astrox import propagator
+
+    session = install_recording_client()
+    propagator.sgp4(
+        start=SGP4_REQUEST["Start"],
+        stop=SGP4_REQUEST["Stop"],
+        step_s=SGP4_REQUEST["Step"],
+        satellite_number=SGP4_REQUEST["SatelliteNumber"],
+        tle_lines=tuple(SGP4_REQUEST["TLEs"]),
+    )
+
+    propagator.simple_ascent(
+        start=SIMPLE_ASCENT_REQUEST["Start"],
+        stop=SIMPLE_ASCENT_REQUEST["Stop"],
+        step_s=SIMPLE_ASCENT_REQUEST["Step"],
+        central_body=SIMPLE_ASCENT_REQUEST["CentralBody"],
+        launch_latitude_deg=SIMPLE_ASCENT_REQUEST["LaunchLatitude"],
+        launch_longitude_deg=SIMPLE_ASCENT_REQUEST["LaunchLongitude"],
+        launch_altitude_m=SIMPLE_ASCENT_REQUEST["LaunchAltitude"],
+        burnout_velocity_m_s=SIMPLE_ASCENT_REQUEST["BurnoutVelocity"],
+        burnout_latitude_deg=SIMPLE_ASCENT_REQUEST["BurnoutLatitude"],
+        burnout_longitude_deg=SIMPLE_ASCENT_REQUEST["BurnoutLongitude"],
+        burnout_altitude_m=SIMPLE_ASCENT_REQUEST["BurnoutAltitude"],
+    )
+
+    assert session.calls[0]["url"] == "https://astrox.example/Propagator/sgp4"
+    assert_canonical_equal(session.calls[0]["json"], SGP4_REQUEST)
+    assert session.calls[1]["url"] == "https://astrox.example/Propagator/SimpleAscent"
+    assert_canonical_equal(session.calls[1]["json"], SIMPLE_ASCENT_REQUEST)

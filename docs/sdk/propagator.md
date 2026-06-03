@@ -1,6 +1,6 @@
 # Propagator
 
-This page documents the curated ASTROX Python propagator interface for Classical Keplerian orbits, J2 and two-body propagation, and ballistic trajectories. The intended import style is:
+This page documents the curated ASTROX Python propagator interface for Classical Keplerian orbits, J2 and two-body propagation, SGP4 propagation from TLE data, simple ascent propagation, and ballistic trajectories. The intended import style is:
 
 ```python
 from astrox import orbits, propagator
@@ -55,6 +55,51 @@ period_s, position = propagator.j2(
 
 See `examples/01_propagation/j2_classical.py`, `examples/01_propagation/two_body_classical.py`, and `examples/01_propagation/propagator_reference.py` for runnable source examples.
 
+## SGP4
+
+`propagator.sgp4(...)` propagates a satellite from two-line element data and returns `(period_s, position)`.
+
+Required arguments are `start`, `stop`, and `tle_lines`. `tle_lines` is a two-item tuple containing TLE line 1 and TLE line 2. Optional arguments are `step_s` and `satellite_number`; both are omitted unless supplied, so the server keeps ownership of its defaults.
+
+```python
+period_s, position = propagator.sgp4(
+    start="2024-01-01T00:00:00.000Z",
+    stop="2024-01-01T00:10:00.000Z",
+    step_s=300.0,
+    satellite_number="25544",
+    tle_lines=(
+        "1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9990",
+        "2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456",
+    ),
+)
+```
+
+See `examples/01_propagation/sgp4_tle.py` and `examples/01_propagation/propagator_reference.py` for runnable source examples.
+
+## Simple Ascent
+
+`propagator.simple_ascent(...)` propagates a simple ascent curve from a launch point to a burnout point and returns `(period_s, position)`.
+
+Required arguments are `start`, `stop`, `launch_latitude_deg`, `launch_longitude_deg`, `launch_altitude_m`, `burnout_velocity_m_s`, `burnout_latitude_deg`, `burnout_longitude_deg`, and `burnout_altitude_m`. Optional arguments are `step_s` and `central_body`; both are omitted unless supplied.
+
+```python
+period_s, position = propagator.simple_ascent(
+    start="2024-01-01T03:00:00.000Z",
+    stop="2024-01-01T03:02:00.000Z",
+    step_s=30.0,
+    central_body="Earth",
+    launch_latitude_deg=40.9575,
+    launch_longitude_deg=100.2912,
+    launch_altitude_m=1000.0,
+    burnout_velocity_m_s=7800.0,
+    burnout_latitude_deg=41.3,
+    burnout_longitude_deg=101.0,
+    burnout_altitude_m=200000.0,
+)
+```
+
+See `examples/01_propagation/simple_ascent.py` and `examples/01_propagation/propagator_reference.py` for runnable source examples.
+
 ## Ballistic Branches
 
 Ballistic propagation has one nominal curated function and four value-specific functions. The value-specific functions are separate because each one gives a different meaning and unit to its extra argument.
@@ -96,3 +141,7 @@ period_s, position = propagator.two_body(...)
 `period_s` is the server `Period` value. `position` is a frozen `propagator.PropagatorPosition` dataclass with `central_body`, `epoch`, `reference_frame`, `interpolation_algorithm`, `interpolation_degree`, and `cartesian_velocity`.
 
 When ASTROX reports an unsuccessful response, the curated function raises `astrox.exceptions.AstroxAPIError` with the server message. When you need the full raw response envelope, use the lower-level `astrox.raw` API.
+
+## Unpromoted Propagator Routes
+
+`/Propagator/MultiJ2`, `/Propagator/MultiTwoBody`, `/Propagator/MultiSgp4`, and `/Propagator/HPOP` remain available through raw access but are not documented as curated public SDK functions yet. The multi-propagator routes return batch orbital-element results rather than `PropagatorPosition`, and HPOP needs explicit configuration constructors for its nested gravity, integrator, atmosphere, solar-radiation-pressure, and shadow-model options before it can be promoted honestly.
