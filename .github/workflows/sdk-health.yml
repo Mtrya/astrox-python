@@ -71,13 +71,7 @@ jobs:
         id: example_syntax
         if: steps.install.outcome == 'success'
         continue-on-error: true
-        run: uv run python -m py_compile examples/01_propagation/*.py tests/validation/sdk_contract/check_all.py tests/validation/sdk_contract/propagator/*.py
-
-      - name: Check SDK oracle fixtures
-        id: sdk_oracles
-        if: steps.install.outcome == 'success'
-        continue-on-error: true
-        run: uv run python scripts/sdk_oracles/check.py
+        run: uv run python -m py_compile examples/01_propagation/*.py tests/validation/sdk_contract/check_all.py tests/validation/sdk_contract/propagator/*.py tests/validation/cross_validation/check_all.py tests/validation/cross_validation/propagator/*.py
 
       - name: Run pytest
         id: pytest
@@ -101,6 +95,14 @@ jobs:
           ASTROX_BASE_URL: http://astrox.cn:8765
         run: uv run python tests/validation/sdk_contract/check_all.py
 
+      - name: Check live cross-validation
+        id: cross_validation
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: uv run python tests/validation/cross_validation/check_all.py
+
       - name: Build health result
         id: health
         if: always()
@@ -111,10 +113,10 @@ jobs:
             "${{ steps.build.outcome }}" \
             "${{ steps.import_check.outcome }}" \
             "${{ steps.example_syntax.outcome }}" \
-            "${{ steps.sdk_oracles.outcome }}" \
             "${{ steps.pytest.outcome }}" \
             "${{ steps.live_smoke.outcome }}" \
-            "${{ steps.sdk_contract.outcome }}"
+            "${{ steps.sdk_contract.outcome }}" \
+            "${{ steps.cross_validation.outcome }}"
           do
             if [ "${outcome}" != "success" ]; then
               failed=true
@@ -129,10 +131,10 @@ jobs:
             echo "- build package: ${{ steps.build.outcome }}"
             echo "- verify built package import: ${{ steps.import_check.outcome }}"
             echo "- propagation example syntax: ${{ steps.example_syntax.outcome }}"
-            echo "- SDK oracle fixtures: ${{ steps.sdk_oracles.outcome }}"
             echo "- pytest: ${{ steps.pytest.outcome }}"
             echo "- live smoke: ${{ steps.live_smoke.outcome }}"
             echo "- live SDK contract snapshots: ${{ steps.sdk_contract.outcome }}"
+            echo "- live cross-validation: ${{ steps.cross_validation.outcome }}"
             echo
             echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           } > sdk-health-issue.md

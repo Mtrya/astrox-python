@@ -16,6 +16,12 @@ Run all SDK contract scripts:
 ASTROX_BASE_URL=http://astrox.cn:8765 uv run python tests/validation/sdk_contract/check_all.py
 ```
 
+Run all live cross-validation scripts:
+
+```bash
+ASTROX_BASE_URL=http://astrox.cn:8765 uv run python tests/validation/cross_validation/check_all.py
+```
+
 Refresh a snapshot only when intentionally accepting the current live ASTROX return as the maintained SDK contract:
 
 ```bash

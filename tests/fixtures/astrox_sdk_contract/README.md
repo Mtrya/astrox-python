@@ -36,4 +36,4 @@ Only explicit whitelisted SDK constructors are allowed. Nested constructor graph
 
 Returned values are normalized before storage. Tuples become lists, dataclasses become mappings, and arrays are sampled recursively: arrays with length `<= 20` are stored fully, while arrays with length `> 20` are stored as `length`, `first`, and `last`, with ten samples on each side. Comparison can be exact JSON or approximate JSON with explicit numeric tolerances.
 
-Independent oracle fixtures are separate from this directory. Add oracle data when a credible lightweight external source exists or when public docs make semantic claims that need independent support.
+Independent cross-validation is separate from this directory. Add runnable cross-validation scripts when a credible lightweight external source exists or when public docs make semantic claims that need independent support.
