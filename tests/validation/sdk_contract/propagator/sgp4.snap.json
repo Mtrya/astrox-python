@@ -1,0 +1,38 @@
+{
+  "cases": [
+    {
+      "description": "Short ISS TLE propagation through the public SGP4 SDK function.",
+      "id": "iss_tle",
+      "return": [
+        5578.082396699645,
+        {
+          "cartesian_velocity": [
+            0,
+            6367734.323053387,
+            -2380661.222077813,
+            -13622.064678647566,
+            1669.5776049548865,
+            4453.974640898744,
+            6005.161259509859,
+            300,
+            6498410.017086549,
+            -934945.2269701471,
+            1754447.5333930915,
+            -806.975807147532,
+            5092.153437903071,
+            5669.058849485528
+          ],
+          "central_body": "Earth",
+          "epoch": "2024-01-01T00:00:00.000Z",
+          "interpolation_algorithm": "LAGRANGE",
+          "interpolation_degree": 5,
+          "reference_frame": "INERTIAL"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-06-03T17:26:49Z"
+  }
+}
