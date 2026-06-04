@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -16,6 +17,9 @@ __all__ = [
     "ballistic_delta_v_min_ecc",
     "ballistic_time_of_flight",
     "j2",
+    "multi_j2",
+    "multi_sgp4",
+    "multi_two_body",
     "sgp4",
     "simple_ascent",
     "two_body",
@@ -48,6 +52,82 @@ class PropagatorPosition:
 
 def _success_path(result: dict[str, Any]) -> tuple[float, PropagatorPosition]:
     return result["Period"], PropagatorPosition.from_wire(result["Position"])
+
+
+def _keplerian_from_elements_object(payload: dict[str, Any]) -> KeplerianElements:
+    return KeplerianElements(
+        semi_major_axis_m=payload["SemimajorAxis"],
+        eccentricity=payload["Eccentricity"],
+        inclination_deg=payload["Inclination"],
+        argument_of_periapsis_deg=payload["ArgumentOfPeriapsis"],
+        raan_deg=payload["RightAscensionOfAscendingNode"],
+        true_anomaly_deg=payload["TrueAnomaly"],
+    )
+
+
+def _batch_success_path(result: dict[str, Any]) -> tuple[KeplerianElements, ...]:
+    return tuple(
+        _keplerian_from_elements_object(item)
+        for item in result["AllElementsAtEpoch"]
+    )
+
+
+def _state_item_to_wire(
+    item: Sequence[object],
+    *,
+    gravitational_parameter_m3_s2: float | None,
+) -> dict[str, Any]:
+    if not isinstance(item, (list, tuple)) or len(item) != 2:
+        raise TypeError("states items must be two-item sequences of orbit epoch and KeplerianElements")
+    orbit_epoch, orbit = item
+    if not isinstance(orbit_epoch, str):
+        raise TypeError("states item orbit epoch must be a string")
+    if not isinstance(orbit, KeplerianElements):
+        raise TypeError("states item orbit must be a KeplerianElements instance")
+
+    payload: dict[str, Any] = {
+        "OrbitEpoch": orbit_epoch,
+        "SemimajorAxis": orbit.semi_major_axis_m,
+        "Eccentricity": orbit.eccentricity,
+        "Inclination": orbit.inclination_deg,
+        "ArgumentOfPeriapsis": orbit.argument_of_periapsis_deg,
+        "RightAscensionOfAscendingNode": orbit.raan_deg,
+        "TrueAnomaly": orbit.true_anomaly_deg,
+    }
+    if gravitational_parameter_m3_s2 is not None:
+        payload["GravitationalParameter"] = gravitational_parameter_m3_s2
+    return payload
+
+
+def _states_to_wire(
+    states: Sequence[Sequence[object]],
+    *,
+    gravitational_parameter_m3_s2: float | None = None,
+) -> list[dict[str, Any]]:
+    if not isinstance(states, Sequence) or isinstance(states, (str, bytes)):
+        raise TypeError("states must be a sequence of two-item state sequences")
+    return [
+        _state_item_to_wire(
+            item,
+            gravitational_parameter_m3_s2=gravitational_parameter_m3_s2,
+        )
+        for item in states
+    ]
+
+
+def _tle_set_to_wire(item: Sequence[object]) -> str:
+    if not isinstance(item, (list, tuple)) or len(item) != 2:
+        raise TypeError("tle_sets items must be two-item sequences of TLE strings")
+    line1, line2 = item
+    if not isinstance(line1, str) or not isinstance(line2, str):
+        raise TypeError("tle_sets items must contain TLE strings")
+    return f"{line1}\n{line2}"
+
+
+def _tle_sets_to_wire(tle_sets: Sequence[Sequence[object]]) -> list[str]:
+    if not isinstance(tle_sets, Sequence) or isinstance(tle_sets, (str, bytes)):
+        raise TypeError("tle_sets must be a sequence of two-item TLE string sequences")
+    return [_tle_set_to_wire(item) for item in tle_sets]
 
 
 def two_body(
@@ -124,6 +204,82 @@ def j2(
 
     result = raw.post("/Propagator/J2", json=payload)
     return _success_path(result)
+
+
+def multi_two_body(
+    *,
+    epoch: str,
+    states: Sequence[tuple[str, KeplerianElements] | list[object]],
+    gravitational_parameter_m3_s2: float | None = None,
+) -> tuple[KeplerianElements, ...]:
+    """Propagate multiple Classical states to one target epoch using two-body dynamics.
+
+    ASTROX raw batch responses include ``GravitationalParameter`` on each returned
+    element. The curated return intentionally omits it because live behavior shows
+    that field is not a reliable echo of the propagation parameter used for the
+    result; use ``astrox.raw`` for the full raw envelope.
+    """
+    payload = {
+        "Epoch": epoch,
+        "AllSateElements": _states_to_wire(
+            states,
+            gravitational_parameter_m3_s2=gravitational_parameter_m3_s2,
+        ),
+    }
+
+    result = raw.post("/Propagator/MultiTwoBody", json=payload)
+    return _batch_success_path(result)
+
+
+def multi_j2(
+    *,
+    epoch: str,
+    states: Sequence[tuple[str, KeplerianElements] | list[object]],
+    gravitational_parameter_m3_s2: float | None = None,
+) -> tuple[KeplerianElements, ...]:
+    """Propagate multiple Classical states to one target epoch using ASTROX J2.
+
+    The batch ASTROX route owns its J2 constants; the curated SDK does not expose
+    J2 constants for this function because live behavior does not show those
+    inputs affecting the endpoint. ASTROX raw batch responses include
+    ``GravitationalParameter`` on each returned element. The curated return
+    intentionally omits it because live behavior shows that field is not a
+    reliable echo of the propagation parameter used for the result; use
+    ``astrox.raw`` for the full raw envelope.
+    """
+    payload = {
+        "Epoch": epoch,
+        "AllSateElements": _states_to_wire(
+            states,
+            gravitational_parameter_m3_s2=gravitational_parameter_m3_s2,
+        ),
+    }
+
+    result = raw.post("/Propagator/MultiJ2", json=payload)
+    return _batch_success_path(result)
+
+
+def multi_sgp4(
+    *,
+    epoch: str,
+    tle_sets: Sequence[tuple[str, str] | list[str]],
+) -> tuple[KeplerianElements, ...]:
+    """Propagate multiple TLEs to one target epoch using SGP4.
+
+    Each public ``tle_sets`` item is a two-line TLE sequence. The SDK lowers it
+    to the ASTROX batch route's newline-joined string format. ASTROX raw batch
+    responses include ``GravitationalParameter`` on each returned element. The
+    curated return intentionally omits it because live behavior shows that field
+    is not a reliable echo of the propagation parameter used for the result; use
+    ``astrox.raw`` for the full raw envelope.
+    """
+    payload = {
+        "Epoch": epoch,
+        "TLEs": _tle_sets_to_wire(tle_sets),
+    }
+
+    result = raw.post("/Propagator/MultiSgp4", json=payload)
+    return _batch_success_path(result)
 
 
 def sgp4(

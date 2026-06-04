@@ -108,6 +108,9 @@ def test_public_modules_and_names_are_available() -> None:
     assert hasattr(propagator, "ballistic_time_of_flight")
     assert hasattr(propagator, "sgp4")
     assert hasattr(propagator, "simple_ascent")
+    assert hasattr(propagator, "multi_two_body")
+    assert hasattr(propagator, "multi_j2")
+    assert hasattr(propagator, "multi_sgp4")
 
 
 def test_keplerian_constructor_returns_frozen_dataclass_with_explicit_wire_lowering() -> None:

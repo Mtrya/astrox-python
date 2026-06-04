@@ -1,0 +1,35 @@
+{
+  "cases": [
+    {
+      "description": "Two TLE sets propagated to one target epoch.",
+      "id": "two_tle_sets",
+      "return": [
+        {
+          "argument_of_periapsis_deg": 85.40587230554769,
+          "eccentricity": 0.0014291119145652426,
+          "inclination_deg": 51.60211120107987,
+          "raan_deg": 339.582513707792,
+          "semi_major_axis_m": 6799823.463851162,
+          "true_anomaly_deg": -46.78323651287317
+        },
+        {
+          "argument_of_periapsis_deg": 85.40587230554769,
+          "eccentricity": 0.0014291119145652426,
+          "inclination_deg": 51.60211120107987,
+          "raan_deg": 339.582513707792,
+          "semi_major_axis_m": 6799823.463851162,
+          "true_anomaly_deg": -46.78323651287317
+        }
+      ]
+    },
+    {
+      "description": "Server-supported empty batch returns an empty tuple.",
+      "id": "empty",
+      "return": []
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-06-04T07:10:37Z"
+  }
+}

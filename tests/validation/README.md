@@ -34,6 +34,12 @@ Run the live SGP4 cross-validation test:
 ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation/cross_validation/propagator/test_sgp4_skyfield.py
 ```
 
+Run the live propagator cross-validation tests:
+
+```bash
+ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation/cross_validation/propagator
+```
+
 Refresh a snapshot only when intentionally accepting the current live ASTROX return as the maintained SDK contract:
 
 ```bash
