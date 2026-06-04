@@ -8,7 +8,7 @@ This document defines the durable boundary for repository automation. The workfl
 | --- | --- | --- |
 | CI | `.github/workflows/ci.yml` | Runs package build/import checks, pytest, and live smoke on PRs, pushes to `main`, and manual dispatch. |
 | OpenAPI drift | `.github/workflows/openapi-drift.yml` | Fetches the live OpenAPI document, updates deterministic drift artifacts, opens or updates a refresh PR, and enables native GitHub auto-merge. |
-| Scheduled SDK health | `.github/workflows/sdk-health.yml` | Runs CI-like SDK health checks on a schedule/manual dispatch and creates or updates one issue on failure. |
+| Scheduled SDK health | `.github/workflows/sdk-health.yml` | Runs CI-like SDK health checks on a schedule/manual dispatch, runs nonblocking calibration diagnostics, and creates or updates one issue on blocking failure. |
 | GMAT validation image | `.github/workflows/gmat-validation-image.yml` | Publishes the pinned GMAT runtime image used by scheduled validation. |
 
 ## OpenAPI Drift
@@ -53,7 +53,9 @@ Scheduled SDK health also runs live validation tests under `tests/validation/`. 
 
 When scheduled validation depends on a prepared external tool, SDK health prepares that tool before running validation. GMAT-backed validation uses the pinned `ghcr.io/<owner>/astrox-gmat-validation:gmat-r2026a` image, runs the image self-check, and only then exposes `GMAT_VALIDATION_IMAGE` to validation scripts. A preparation failure is reported separately from validation pytest failure.
 
-On failure, the workflow creates or updates one open issue. On success, it does not automatically close that issue. Human review decides whether a previous health issue was transient, resolved, duplicate, or no longer relevant.
+Calibration tests use the `calibration` pytest marker. They are unresolved live comparisons that should remain visible while they are being understood, but they are not a blocking SDK health signal. Scheduled SDK health runs blocking validation with calibration tests excluded, then runs calibration tests separately as a nonblocking diagnostic step.
+
+On blocking failure, the workflow creates or updates one open issue. On success, it does not automatically close that issue. Human review decides whether a previous health issue was transient, resolved, duplicate, or no longer relevant.
 
 ## GMAT Validation Image
 

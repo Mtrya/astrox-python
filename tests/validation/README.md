@@ -9,7 +9,7 @@ SDK contract scripts live under `sdk_contract/`. Each script constructs public S
 Run all live validation tests:
 
 ```bash
-ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation
+ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation -m "not calibration"
 ```
 
 Run one SDK contract family through pytest:
@@ -38,4 +38,14 @@ Run the full live propagator cross-validation tests:
 
 ```bash
 ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation/cross_validation/propagator
+```
+
+## Calibration
+
+Calibration tests use the `calibration` pytest marker. They are live investigations for unresolved external-tool mismatches that should remain visible but should not block scheduled SDK health. Scheduled SDK health runs blocking validation with `-m "not calibration"` and runs calibration separately with `--runxfail` as a nonblocking diagnostic step.
+
+Run calibration diagnostics:
+
+```bash
+ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation -m calibration --runxfail
 ```

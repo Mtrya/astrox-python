@@ -25,3 +25,8 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["astrox"]
+
+[tool.pytest.ini_options]
+markers = [
+    "calibration: nonblocking live investigations that document unresolved external-tool mismatches",
+]

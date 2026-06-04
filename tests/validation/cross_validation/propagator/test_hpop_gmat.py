@@ -49,6 +49,7 @@ class HpopGmatCase:
     gmat_force_model: dict[str, Any]
     orbit: orbits.KeplerianElements | None = None
     spacecraft: dict[str, float] | None = None
+    sample_offsets_s: tuple[float, ...] = SAMPLE_OFFSETS_S
 
 
 class CrossValidationError(Exception):
@@ -75,6 +76,10 @@ def leo_sunlit_orbit() -> orbits.KeplerianElements:
         raan_deg=0.0,
         true_anomaly_deg=90.0,
     )
+
+
+def leo_shadow_transition_orbit() -> orbits.KeplerianElements:
+    return leo_orbit()
 
 
 def case_orbit(case: HpopGmatCase) -> orbits.KeplerianElements:
@@ -106,6 +111,63 @@ def astrox_degree_zero_gravity_config() -> propagator.HpopConfig:
             eop_file_path="EOP-v1.1.txt",
         ),
     )
+
+
+def astrox_srp_third_body_config() -> propagator.HpopConfig:
+    return propagator.hpop_config(
+        central_body="Earth",
+        integrator=hpop_integrator(),
+        gravity=propagator.hpop_gravity_field(
+            gravity_file_name=ASTROX_GRAVITY_FILE,
+            degree=0,
+            order=0,
+            use_secular_variations=False,
+            solid_tide_type="Permanent tide only",
+            eop_file_path="EOP-v1.1.txt",
+        ),
+        srp=propagator.hpop_srp_spherical(
+            shadow_model="DualCone",
+            sun_position="Apparent",
+            eclipsing_bodies=["Earth", "Moon"],
+        ),
+        third_bodies=[
+            propagator.hpop_third_body(
+                "Sun",
+                mode_type="PointMass",
+                ephem_source="DeFile",
+                grav_source="DeFile",
+            ),
+            propagator.hpop_third_body(
+                "Moon",
+                mode_type="PointMass",
+                ephem_source="DeFile",
+                grav_source="DeFile",
+            ),
+        ],
+    )
+
+
+def gmat_srp_third_body_force_model() -> dict[str, Any]:
+    return {
+        "gravity": {"type": "point_mass"},
+        "atmosphere": None,
+        "srp": {
+            "model": "spherical",
+            "flux_w_m2": 1367.0,
+            "nominal_sun_km": 149597870.691,
+            "extra_shadow_bodies": ["Moon"],
+        },
+        "third_bodies": ["Sun", "Moon"],
+    }
+
+
+def srp_spacecraft() -> dict[str, float]:
+    return {
+        "coefficient_of_drag": 2.2,
+        "area_mass_ratio_drag_m2_kg": 0.0,
+        "coefficient_of_srp": 1.0,
+        "area_mass_ratio_srp_m2_kg": 0.02,
+    }
 
 
 CASES = [
@@ -169,56 +231,37 @@ CASES = [
             "against GMAT spherical SRP and Earth/Sun/Luna point-mass propagation."
         ),
         orbit=leo_sunlit_orbit(),
-        astrox_config=propagator.hpop_config(
-            central_body="Earth",
-            integrator=hpop_integrator(),
-            gravity=propagator.hpop_gravity_field(
-                gravity_file_name=ASTROX_GRAVITY_FILE,
-                degree=0,
-                order=0,
-                use_secular_variations=False,
-                solid_tide_type="Permanent tide only",
-                eop_file_path="EOP-v1.1.txt",
-            ),
-            srp=propagator.hpop_srp_spherical(
-                shadow_model="DualCone",
-                sun_position="Apparent",
-                eclipsing_bodies=["Earth", "Moon"],
-            ),
-            third_bodies=[
-                propagator.hpop_third_body(
-                    "Sun",
-                    mode_type="PointMass",
-                    ephem_source="DeFile",
-                    grav_source="DeFile",
-                ),
-                propagator.hpop_third_body(
-                    "Moon",
-                    mode_type="PointMass",
-                    ephem_source="DeFile",
-                    grav_source="DeFile",
-                ),
-            ],
-        ),
-        gmat_force_model={
-            "gravity": {"type": "point_mass"},
-            "atmosphere": None,
-            "srp": {
-                "model": "spherical",
-                "flux_w_m2": 1367.0,
-                "nominal_sun_km": 149597870.691,
-                "extra_shadow_bodies": ["Moon"],
-            },
-            "third_bodies": ["Sun", "Moon"],
-        },
-        spacecraft={
-            "coefficient_of_drag": 2.2,
-            "area_mass_ratio_drag_m2_kg": 0.0,
-            "coefficient_of_srp": 1.0,
-            "area_mass_ratio_srp_m2_kg": 0.02,
-        },
+        astrox_config=astrox_srp_third_body_config(),
+        gmat_force_model=gmat_srp_third_body_force_model(),
+        spacecraft=srp_spacecraft(),
     ),
 ]
+
+
+SHADOW_CALIBRATION_CASE = HpopGmatCase(
+    id="shadow_transition_third_body_srp",
+    description=(
+        "ASTROX HPOP SRP near Earth-shadow transition against GMAT spherical SRP; "
+        "sunlit geometry matches tightly, but this geometry currently exposes a shadow-model residual."
+    ),
+    orbit=leo_shadow_transition_orbit(),
+    astrox_config=astrox_srp_third_body_config(),
+    gmat_force_model=gmat_srp_third_body_force_model(),
+    spacecraft=srp_spacecraft(),
+    sample_offsets_s=(
+        0.0,
+        60.0,
+        120.0,
+        180.0,
+        240.0,
+        300.0,
+        360.0,
+        420.0,
+        480.0,
+        540.0,
+        600.0,
+    ),
+)
 
 
 def astrox_hpop_samples(case: HpopGmatCase) -> dict[float, StateSample]:
@@ -250,7 +293,7 @@ def gmat_hpop_samples(case: HpopGmatCase) -> dict[float, StateSample]:
         "epoch_utc": START,
         "start_utc": START,
         "stop_utc": STOP,
-        "sample_offsets_s": list(SAMPLE_OFFSETS_S),
+        "sample_offsets_s": list(case.sample_offsets_s),
         "coordinate_system": "EarthMJ2000Eq",
         "initial_state": {
             "type": "classical",
@@ -312,7 +355,7 @@ def compare_samples(
     gmat_samples: dict[float, StateSample],
 ) -> None:
     failures: list[str] = []
-    for offset_s in SAMPLE_OFFSETS_S:
+    for offset_s in case.sample_offsets_s:
         astrox_sample = sample_at(astrox_samples, offset_s)
         gmat_sample = sample_at(gmat_samples, offset_s)
         if astrox_sample is None:
@@ -380,6 +423,27 @@ def test_hpop_matches_gmat_representative_cases() -> None:
             failures.append(f"{case.description}\n{exc}")
     if failures:
         raise CrossValidationError("\n\n".join(failures))
+
+
+@pytest.mark.calibration
+@pytest.mark.xfail(
+    reason="ASTROX and GMAT currently differ near an HPOP SRP shadow transition; run with --runxfail for residual diagnostics.",
+    strict=False,
+)
+def test_hpop_srp_shadow_transition_calibration() -> None:
+    configure_astrox_from_env()
+    try:
+        require_gmat_image()
+    except LiveConfigError:
+        if is_external_validation_strict():
+            raise
+        pytest.skip(f"{GMAT_VALIDATION_IMAGE_ENV} is required for GMAT-backed validation")
+
+    compare_samples(
+        SHADOW_CALIBRATION_CASE,
+        astrox_hpop_samples(SHADOW_CALIBRATION_CASE),
+        gmat_hpop_samples(SHADOW_CALIBRATION_CASE),
+    )
 
 
 def main() -> int:

@@ -108,7 +108,15 @@ jobs:
         continue-on-error: true
         env:
           ASTROX_BASE_URL: http://astrox.cn:8765
-        run: uv run python -m pytest tests/validation
+        run: uv run python -m pytest tests/validation -m "not calibration"
+
+      - name: Run calibration pytest
+        id: calibration_pytest
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: uv run python -m pytest tests/validation -m calibration --runxfail
 
       - name: Build health result
         id: health
@@ -142,6 +150,7 @@ jobs:
             echo "- live smoke: ${{ steps.live_smoke.outcome }}"
             echo "- GMAT preparation: ${{ steps.prepare_gmat.outcome }}"
             echo "- live validation pytest: ${{ steps.validation_pytest.outcome }}"
+            echo "- calibration pytest (nonblocking): ${{ steps.calibration_pytest.outcome }}"
             echo
             echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           } > sdk-health-issue.md
