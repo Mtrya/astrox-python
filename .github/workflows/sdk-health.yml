@@ -94,9 +94,10 @@ jobs:
         id: prepare_gmat
         if: steps.install.outcome == 'success'
         continue-on-error: true
-        env:
-          GMAT_VALIDATION_IMAGE: ghcr.io/${{ github.repository_owner }}/astrox-gmat-validation:gmat-r2026a
+        shell: bash
         run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          GMAT_VALIDATION_IMAGE="ghcr.io/${owner}/astrox-gmat-validation:gmat-r2026a"
           docker pull "${GMAT_VALIDATION_IMAGE}"
           docker run --rm --network none "${GMAT_VALIDATION_IMAGE}" python3 /opt/gmat-validation/self_check.py
           {
