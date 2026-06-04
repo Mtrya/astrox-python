@@ -14,6 +14,9 @@ from tests.sdk.helpers import assert_canonical_equal, canonical_bytes
 __all__ = [
     "BALLISTIC_BRANCH_REQUESTS",
     "BALLISTIC_NOMINAL_REQUEST",
+    "HPOP_CARTESIAN_REQUEST",
+    "HPOP_CLASSICAL_REQUEST",
+    "HPOP_CONFIG_REQUEST",
     "J2_REQUEST",
     "REPRESENTATIVE_FIXED_PROPAGATOR_RESPONSE",
     "REPRESENTATIVE_FIXED_RETURN_SNAPSHOT",
@@ -154,6 +157,97 @@ SIMPLE_ASCENT_REQUEST: dict[str, Any] = {
     "BurnoutLatitude": 41.3,
     "BurnoutLongitude": 101.0,
     "BurnoutAltitude": 200000.0,
+}
+
+HPOP_CONFIG_REQUEST: dict[str, Any] = {
+    "Name": "Earth HPOP explicit",
+    "Description": "Representative HPOP configuration",
+    "UserComment": "behavior test",
+    "CentralBodyName": "Earth",
+    "NumericalIntegrator": {
+        "$type": "RKF7th8th",
+        "Name": "tight-rkf",
+        "Description": "tight integrator",
+        "UserComment": "integrator comment",
+        "UseFixedStep": False,
+        "InitialStep": 30.0,
+        "MaxStep": 120.0,
+        "MinStep": 0.001,
+        "MaxAbsErr": 1e-10,
+        "MaxRelErr": 1e-12,
+        "MaxIterations": 50,
+    },
+    "GravityModel": {
+        "$type": "GravityField",
+        "Name": "egm",
+        "Description": "gravity field",
+        "UserComment": "gravity comment",
+        "GravityFileName": "EGM2008.grv",
+        "Degree": 21,
+        "Order": 21,
+        "UseSecularVariations": False,
+        "SolidTideType": "Permanent tide only",
+        "EOPfilePath": "EOP-v1.1.txt",
+    },
+    "AtmosphericModel": {
+        "$type": "JacchiaRoberts",
+        "Name": "jr",
+        "Description": "atmosphere",
+        "UserComment": "atmosphere comment",
+        "DragModelType": "Spherical",
+        "AtmosDataSource": "Constant Values",
+        "F10p7": 150.0,
+        "F10p7Avg": 150.0,
+        "Kp": 3.0,
+    },
+    "SRPModel": {
+        "$type": "SRPSpherical",
+        "Name": "srp",
+        "Description": "srp model",
+        "UserComment": "srp comment",
+        "ShadowModel": "DualCone",
+        "SunPosition": "Apparent",
+        "EclipsingBodies": ["Earth", "Moon"],
+    },
+    "ThirdBodyForce": [
+        {
+            "ThirdBodyName": "Sun",
+            "Name": "sun",
+            "Description": "solar gravity",
+            "UserComment": "third body comment",
+            "ModeType": "PointMass",
+            "EphemSource": "DeFile",
+            "GravSource": "DeFile",
+            "Mu": 132712440041939380000.0,
+        },
+        {
+            "ThirdBodyName": "Moon",
+        },
+    ],
+}
+
+HPOP_CLASSICAL_REQUEST: dict[str, Any] = {
+    "Start": "2024-01-01T00:00:00.000Z",
+    "Stop": "2024-01-01T00:10:00.000Z",
+    "OrbitEpoch": "2024-01-01T00:00:00.000Z",
+    "CoordType": "Classical",
+    "CoordSystem": "GCRF",
+    "CoordEpoch": "2000-01-01T11:58:55.816Z",
+    "GravitationalParameter": 398600441500000.0,
+    "CoefficientOfDrag": 2.2,
+    "AreaMassRatioDrag": 0.02,
+    "CoefficientOfSRP": 1.0,
+    "AreaMassRatioSRP": 0.02,
+    "OrbitalElements": [6778137.0, 0.001, 28.5, 0.0, 0.0, 0.0],
+    "HpopPropagator": HPOP_CONFIG_REQUEST,
+}
+
+HPOP_CARTESIAN_REQUEST: dict[str, Any] = {
+    "Start": "2024-01-01T00:00:00.000Z",
+    "Stop": "2024-01-01T00:10:00.000Z",
+    "OrbitEpoch": "2024-01-01T00:00:00.000Z",
+    "CoordType": "Cartesian",
+    "OrbitalElements": [7000000.0, 1000.0, 2000.0, -1.0, 7500.0, 10.0],
 }
 
 

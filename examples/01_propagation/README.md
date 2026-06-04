@@ -6,18 +6,19 @@ This directory contains runnable propagation examples. The curated propagator ex
 from astrox import orbits, propagator
 ```
 
-The user-facing guide is [docs/sdk/propagator.md](../../docs/sdk/propagator.md). It documents arguments, units, return values, and caveats for `orbits.keplerian(...)`, `propagator.j2(...)`, `propagator.two_body(...)`, `propagator.multi_j2(...)`, `propagator.multi_two_body(...)`, `propagator.sgp4(...)`, `propagator.multi_sgp4(...)`, `propagator.simple_ascent(...)`, and the curated ballistic functions.
+The user-facing guide is [docs/sdk/propagator.md](../../docs/sdk/propagator.md). It documents arguments, units, return values, and caveats for `orbits.keplerian(...)`, `orbits.cartesian_state(...)`, `propagator.j2(...)`, `propagator.two_body(...)`, `propagator.multi_j2(...)`, `propagator.multi_two_body(...)`, `propagator.sgp4(...)`, `propagator.multi_sgp4(...)`, `propagator.simple_ascent(...)`, `propagator.hpop(...)`, and the curated ballistic functions.
 
 ## Curated Propagator Examples
 
 | Example | Public API shown |
 | --- | --- |
-| `propagator_reference.py` | One compact pass through `orbits.keplerian(...)`, `propagator.j2(...)`, `propagator.two_body(...)`, `propagator.ballistic_delta_v(...)`, `propagator.sgp4(...)`, and `propagator.simple_ascent(...)` |
+| `propagator_reference.py` | One compact pass through `orbits.keplerian(...)`, `propagator.j2(...)`, `propagator.two_body(...)`, `propagator.hpop(...)`, `propagator.ballistic_delta_v(...)`, `propagator.sgp4(...)`, and `propagator.simple_ascent(...)` |
 | `j2_classical.py` | J2 propagation from Classical Keplerian elements |
 | `two_body_classical.py` | Two-body propagation from Classical Keplerian elements |
 | `batch_propagators.py` | Batch J2, two-body, and SGP4 propagation to one target epoch |
 | `sgp4_tle.py` | SGP4 propagation from two-line element data |
 | `simple_ascent.py` | Simple ascent propagation from launch point to burnout point |
+| `hpop.py` | HPOP propagation from Classical and Cartesian states |
 | `ballistic_delta_v.py` | Ballistic `DeltaV` branch |
 | `ballistic_min_ecc.py` | Ballistic `DeltaV_MinEcc` branch |
 | `ballistic_apogee_alt.py` | Ballistic `ApogeeAlt` branch |
@@ -33,6 +34,7 @@ uv run python examples/01_propagation/two_body_classical.py
 uv run python examples/01_propagation/batch_propagators.py
 uv run python examples/01_propagation/sgp4_tle.py
 uv run python examples/01_propagation/simple_ascent.py
+uv run python examples/01_propagation/hpop.py
 uv run python examples/01_propagation/ballistic_delta_v.py
 ```
 

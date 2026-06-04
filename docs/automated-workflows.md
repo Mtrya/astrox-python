@@ -8,7 +8,8 @@ This document defines the durable boundary for repository automation. The workfl
 | --- | --- | --- |
 | CI | `.github/workflows/ci.yml` | Runs package build/import checks, pytest, and live smoke on PRs, pushes to `main`, and manual dispatch. |
 | OpenAPI drift | `.github/workflows/openapi-drift.yml` | Fetches the live OpenAPI document, updates deterministic drift artifacts, opens or updates a refresh PR, and enables native GitHub auto-merge. |
-| Scheduled SDK health | `.github/workflows/sdk-health.yml` | Runs CI-like SDK health checks on a schedule/manual dispatch and creates or updates one issue on failure. |
+| Scheduled SDK health | `.github/workflows/sdk-health.yml` | Runs CI-like SDK health checks on a schedule/manual dispatch, runs nonblocking calibration diagnostics, and creates or updates one issue on blocking failure. |
+| GMAT validation image | `.github/workflows/gmat-validation-image.yml` | Publishes the pinned GMAT runtime image used by scheduled validation. |
 
 ## OpenAPI Drift
 
@@ -40,6 +41,7 @@ CI is the merge gate for human and automated PRs. It owns:
 - built-package import verification
 - pytest
 - live smoke
+- syntax checks for validation scripts and support files
 
 Do not duplicate those checks inside the OpenAPI drift workflow. If an automated drift PR breaks supported SDK behavior, required CI checks should fail and keep the PR open.
 
@@ -49,7 +51,17 @@ Scheduled SDK health exists for live regressions that are not accompanied by an 
 
 Scheduled SDK health also runs live validation tests under `tests/validation/`. SDK contract validation protects promoted public SDK calls against ASTROX return drift, and cross-validation scripts compare selected behavior with independent tools when that comparison is lightweight and credible enough for scheduled execution.
 
-On failure, the workflow creates or updates one open issue. On success, it does not automatically close that issue. Human review decides whether a previous health issue was transient, resolved, duplicate, or no longer relevant.
+When scheduled validation depends on a prepared external tool, SDK health prepares that tool before running validation. GMAT-backed validation uses the pinned `ghcr.io/<owner>/astrox-gmat-validation:gmat-r2026a` image, runs the image self-check, and only then exposes `GMAT_VALIDATION_IMAGE` to validation scripts. A preparation failure is reported separately from validation pytest failure.
+
+Calibration tests use the `calibration` pytest marker. They are unresolved live comparisons that should remain visible while they are being understood, but they are not a blocking SDK health signal. Scheduled SDK health runs blocking validation with calibration tests excluded, then runs calibration tests separately as a nonblocking diagnostic step.
+
+On blocking failure, the workflow creates or updates one open issue. On success, it does not automatically close that issue. Human review decides whether a previous health issue was transient, resolved, duplicate, or no longer relevant.
+
+## GMAT Validation Image
+
+The GMAT validation image workflow publishes the reproducible external-tool runtime used by scheduled SDK health. It builds from tracked container files, downloads the official pinned GMAT R2026a Linux artifact, verifies the checksum, runs a minimal GMAT propagation self-check, and publishes the stable `gmat-r2026a` tag to GHCR.
+
+The image workflow runs on manual dispatch and on `main` changes to the container files or workflow. It does not publish images from pull requests.
 
 ## Validation Policy
 

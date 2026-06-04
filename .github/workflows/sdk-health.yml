@@ -12,6 +12,7 @@ concurrency:
 permissions:
   contents: read
   issues: write
+  packages: read
 
 jobs:
   sdk-health:
@@ -65,13 +66,15 @@ jobs:
           assert orbit.to_wire()[0] == 7000000.0
           assert hasattr(propagator, "j2")
           assert hasattr(propagator, "two_body")
+          assert hasattr(propagator, "hpop")
+          assert hasattr(orbits, "cartesian_state")
           PY
 
       - name: Check propagation example syntax
         id: example_syntax
         if: steps.install.outcome == 'success'
         continue-on-error: true
-        run: uv run python -m py_compile examples/01_propagation/*.py tests/validation/sdk_contract/propagator/test_*.py tests/validation/cross_validation/propagator/test_*.py
+        run: uv run python -m py_compile examples/01_propagation/*.py tests/validation/_support/*.py tests/validation/_external/gmat/*.py tests/validation/sdk_contract/propagator/test_*.py tests/validation/cross_validation/propagator/test_*.py .github/containers/gmat-validation/self_check.py
 
       - name: Run pytest
         id: pytest
@@ -87,13 +90,35 @@ jobs:
           ASTROX_BASE_URL: http://astrox.cn:8765
         run: uv run python scripts/live_smoke.py
 
+      - name: Prepare GMAT
+        id: prepare_gmat
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        env:
+          GMAT_VALIDATION_IMAGE: ghcr.io/${{ github.repository_owner }}/astrox-gmat-validation:gmat-r2026a
+        run: |
+          docker pull "${GMAT_VALIDATION_IMAGE}"
+          docker run --rm --network none "${GMAT_VALIDATION_IMAGE}" python3 /opt/gmat-validation/self_check.py
+          {
+            echo "GMAT_VALIDATION_IMAGE=${GMAT_VALIDATION_IMAGE}"
+            echo "ASTROX_EXTERNAL_VALIDATION=strict"
+          } >> "${GITHUB_ENV}"
+
       - name: Run live validation pytest
         id: validation_pytest
         if: steps.install.outcome == 'success'
         continue-on-error: true
         env:
           ASTROX_BASE_URL: http://astrox.cn:8765
-        run: uv run python -m pytest tests/validation
+        run: uv run python -m pytest tests/validation -m "not calibration"
+
+      - name: Run calibration pytest
+        id: calibration_pytest
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: uv run python -m pytest tests/validation -m calibration --runxfail
 
       - name: Build health result
         id: health
@@ -107,6 +132,7 @@ jobs:
             "${{ steps.example_syntax.outcome }}" \
             "${{ steps.pytest.outcome }}" \
             "${{ steps.live_smoke.outcome }}" \
+            "${{ steps.prepare_gmat.outcome }}" \
             "${{ steps.validation_pytest.outcome }}"
           do
             if [ "${outcome}" != "success" ]; then
@@ -124,7 +150,9 @@ jobs:
             echo "- propagation example syntax: ${{ steps.example_syntax.outcome }}"
             echo "- pytest: ${{ steps.pytest.outcome }}"
             echo "- live smoke: ${{ steps.live_smoke.outcome }}"
+            echo "- GMAT preparation: ${{ steps.prepare_gmat.outcome }}"
             echo "- live validation pytest: ${{ steps.validation_pytest.outcome }}"
+            echo "- calibration pytest (nonblocking): ${{ steps.calibration_pytest.outcome }}"
             echo
             echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           } > sdk-health-issue.md

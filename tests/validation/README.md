@@ -9,7 +9,7 @@ SDK contract scripts live under `sdk_contract/`. Each script constructs public S
 Run all live validation tests:
 
 ```bash
-ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation
+ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation -m "not calibration"
 ```
 
 Run one SDK contract family through pytest:
@@ -38,4 +38,22 @@ Run the full live propagator cross-validation tests:
 
 ```bash
 ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation/cross_validation/propagator
+```
+
+GMAT-backed validation runs through a prepared Docker image. Scheduled SDK health pulls `ghcr.io/<owner>/astrox-gmat-validation:gmat-r2026a`, self-checks it, and sets `ASTROX_EXTERNAL_VALIDATION=strict` before running validation.
+
+Run the HPOP GMAT-backed validation with an already prepared image:
+
+```bash
+ASTROX_BASE_URL=http://astrox.cn:8765 GMAT_VALIDATION_IMAGE=ghcr.io/<owner>/astrox-gmat-validation:gmat-r2026a ASTROX_EXTERNAL_VALIDATION=strict uv run python -m pytest tests/validation/cross_validation/propagator/test_hpop_gmat.py -m "not calibration"
+```
+
+## Calibration
+
+Calibration tests use the `calibration` pytest marker. They are live investigations for unresolved external-tool mismatches that should remain visible but should not block scheduled SDK health. Scheduled SDK health runs blocking validation with `-m "not calibration"` and runs calibration separately with `--runxfail` as a nonblocking diagnostic step.
+
+Run calibration diagnostics:
+
+```bash
+ASTROX_BASE_URL=http://astrox.cn:8765 GMAT_VALIDATION_IMAGE=ghcr.io/<owner>/astrox-gmat-validation:gmat-r2026a ASTROX_EXTERNAL_VALIDATION=strict uv run python -m pytest tests/validation -m calibration --runxfail
 ```

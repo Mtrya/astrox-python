@@ -11,6 +11,7 @@ import astrox
 from astrox import _http
 from tests.sdk.propagator.helpers import (
     BALLISTIC_NOMINAL_REQUEST,
+    HPOP_CLASSICAL_REQUEST,
     SGP4_REQUEST,
     SIMPLE_ASCENT_REQUEST,
     assert_canonical_equal,
@@ -97,7 +98,15 @@ def test_public_modules_and_names_are_available() -> None:
     assert "propagator" in astrox.__all__
 
     assert hasattr(orbits, "KeplerianElements")
+    assert hasattr(orbits, "CartesianState")
     assert hasattr(orbits, "keplerian")
+    assert hasattr(orbits, "cartesian_state")
+    assert hasattr(propagator, "HpopConfig")
+    assert hasattr(propagator, "HpopIntegrator")
+    assert hasattr(propagator, "HpopGravity")
+    assert hasattr(propagator, "HpopAtmosphere")
+    assert hasattr(propagator, "HpopSrp")
+    assert hasattr(propagator, "HpopThirdBody")
     assert hasattr(propagator, "PropagatorPosition")
     assert hasattr(propagator, "j2")
     assert hasattr(propagator, "two_body")
@@ -111,6 +120,14 @@ def test_public_modules_and_names_are_available() -> None:
     assert hasattr(propagator, "multi_two_body")
     assert hasattr(propagator, "multi_j2")
     assert hasattr(propagator, "multi_sgp4")
+    assert hasattr(propagator, "hpop")
+    assert hasattr(propagator, "hpop_config")
+    assert hasattr(propagator, "hpop_rkf78")
+    assert hasattr(propagator, "hpop_two_body_gravity")
+    assert hasattr(propagator, "hpop_gravity_field")
+    assert hasattr(propagator, "hpop_jacchia_roberts")
+    assert hasattr(propagator, "hpop_srp_spherical")
+    assert hasattr(propagator, "hpop_third_body")
 
 
 def test_keplerian_constructor_returns_frozen_dataclass_with_explicit_wire_lowering() -> None:
@@ -139,6 +156,26 @@ def test_keplerian_constructor_returns_frozen_dataclass_with_explicit_wire_lower
 
     with pytest.raises(FrozenInstanceError):
         orbit.eccentricity = 0.0
+
+
+def test_cartesian_state_constructor_returns_frozen_dataclass_with_explicit_wire_lowering() -> None:
+    from astrox import orbits
+
+    state = orbits.cartesian_state(
+        x_m=7000000.0,
+        y_m=1000.0,
+        z_m=2000.0,
+        vx_m_s=-1.0,
+        vy_m_s=7500.0,
+        vz_m_s=10.0,
+    )
+
+    assert is_dataclass(state)
+    assert isinstance(state, orbits.CartesianState)
+    assert state.to_wire() == [7000000.0, 1000.0, 2000.0, -1.0, 7500.0, 10.0]
+
+    with pytest.raises(FrozenInstanceError):
+        state.x_m = 0.0
 
 
 def test_j2_assembles_representative_payload_and_returns_success_path_tuple() -> None:
@@ -335,7 +372,7 @@ def test_old_propagator_names_are_not_public_apis() -> None:
 
 
 def test_new_single_result_propagators_use_configured_client_routes() -> None:
-    from astrox import propagator
+    from astrox import orbits, propagator
 
     session = install_recording_client()
     propagator.sgp4(
@@ -360,7 +397,33 @@ def test_new_single_result_propagators_use_configured_client_routes() -> None:
         burnout_altitude_m=SIMPLE_ASCENT_REQUEST["BurnoutAltitude"],
     )
 
+    orbit = orbits.keplerian(
+        semi_major_axis_m=6778137.0,
+        eccentricity=0.001,
+        inclination_deg=28.5,
+        argument_of_periapsis_deg=0.0,
+        raan_deg=0.0,
+        true_anomaly_deg=0.0,
+    )
+
+    propagator.hpop(
+        start=HPOP_CLASSICAL_REQUEST["Start"],
+        stop=HPOP_CLASSICAL_REQUEST["Stop"],
+        orbit_epoch=HPOP_CLASSICAL_REQUEST["OrbitEpoch"],
+        orbit=orbit,
+        config=HPOP_CLASSICAL_REQUEST["HpopPropagator"],
+        coord_system=HPOP_CLASSICAL_REQUEST["CoordSystem"],
+        coord_epoch=HPOP_CLASSICAL_REQUEST["CoordEpoch"],
+        gravitational_parameter_m3_s2=HPOP_CLASSICAL_REQUEST["GravitationalParameter"],
+        coefficient_of_drag=HPOP_CLASSICAL_REQUEST["CoefficientOfDrag"],
+        area_mass_ratio_drag_m2_kg=HPOP_CLASSICAL_REQUEST["AreaMassRatioDrag"],
+        coefficient_of_srp=HPOP_CLASSICAL_REQUEST["CoefficientOfSRP"],
+        area_mass_ratio_srp_m2_kg=HPOP_CLASSICAL_REQUEST["AreaMassRatioSRP"],
+    )
+
     assert session.calls[0]["url"] == "https://astrox.example/Propagator/sgp4"
     assert_canonical_equal(session.calls[0]["json"], SGP4_REQUEST)
     assert session.calls[1]["url"] == "https://astrox.example/Propagator/SimpleAscent"
     assert_canonical_equal(session.calls[1]["json"], SIMPLE_ASCENT_REQUEST)
+    assert session.calls[2]["url"] == "https://astrox.example/Propagator/HPOP"
+    assert_canonical_equal(session.calls[2]["json"], HPOP_CLASSICAL_REQUEST)
