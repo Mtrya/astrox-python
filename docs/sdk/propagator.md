@@ -1,6 +1,6 @@
 # Propagator
 
-This page documents the curated ASTROX Python propagator interface for Classical Keplerian orbits, J2 and two-body propagation, batch propagation, SGP4 propagation from TLE data, simple ascent propagation, and ballistic trajectories. The intended import style is:
+This page documents the curated ASTROX Python propagator interface for Classical Keplerian orbits, J2 and two-body propagation, batch propagation, SGP4 propagation from TLE data, simple ascent propagation, HPOP high-precision propagation, and ballistic trajectories. The intended import style is:
 
 ```python
 from astrox import orbits, propagator
@@ -28,6 +28,19 @@ orbit = orbits.keplerian(
 `orbits.keplerian(...)` returns a frozen `orbits.KeplerianElements` dataclass. The six public fields are `semi_major_axis_m`, `eccentricity`, `inclination_deg`, `argument_of_periapsis_deg`, `raan_deg`, and `true_anomaly_deg`. The orbit epoch is intentionally separate because propagation calls receive `orbit_epoch` separately from the orbital element values.
 
 Use `orbit.to_wire()` only when you need to inspect the ASTROX request fragment. It lowers the object to the Classical element order used by ASTROX: semi-major axis in meters, eccentricity, inclination in degrees, argument of periapsis in degrees, RAAN in degrees, and true anomaly in degrees.
+
+HPOP can also start from Cartesian position and velocity with `orbits.cartesian_state(...)`:
+
+```python
+state = orbits.cartesian_state(
+    x_m=7000000.0,
+    y_m=1000.0,
+    z_m=2000.0,
+    vx_m_s=-1.0,
+    vy_m_s=7500.0,
+    vz_m_s=10.0,
+)
+```
 
 ## J2 And Two-Body
 
@@ -148,6 +161,65 @@ period_s, position = propagator.simple_ascent(
 ```
 
 See `examples/01_propagation/simple_ascent.py` and `examples/01_propagation/propagator_reference.py` for runnable source examples.
+
+## HPOP
+
+`propagator.hpop(...)` runs ASTROX high-precision orbit propagation and returns `(period_s, position)`.
+
+Required arguments are `start`, `stop`, `orbit_epoch`, and exactly one of `orbit` or `state`. Pass `orbit=orbits.keplerian(...)` for Classical Keplerian input, or `state=orbits.cartesian_state(...)` for Cartesian position and velocity input. Optional top-level arguments are `config`, `coord_system`, `coord_epoch`, `gravitational_parameter_m3_s2`, `coefficient_of_drag`, `area_mass_ratio_drag_m2_kg`, `coefficient_of_srp`, and `area_mass_ratio_srp_m2_kg`.
+
+Build HPOP force and integrator configuration with the curated helper constructors: `propagator.hpop_config(...)`, `propagator.hpop_rkf78(...)`, `propagator.hpop_two_body_gravity(...)`, `propagator.hpop_gravity_field(...)`, `propagator.hpop_jacchia_roberts(...)`, `propagator.hpop_srp_spherical(...)`, and `propagator.hpop_third_body(...)`. The SDK sends only supplied fields, so ASTROX keeps ownership of omitted defaults.
+
+```python
+hpop_config = propagator.hpop_config(
+    central_body="Earth",
+    integrator=propagator.hpop_rkf78(
+        use_fixed_step=True,
+        initial_step_s=60.0,
+        max_step_s=60.0,
+        min_step_s=0.001,
+        max_abs_error=1e-10,
+        max_rel_error=1e-12,
+        max_iterations=50,
+    ),
+    gravity=propagator.hpop_gravity_field(
+        gravity_file_name="EGM2008.grv",
+        degree=4,
+        order=4,
+        use_secular_variations=False,
+        solid_tide_type="Permanent tide only",
+        eop_file_path="EOP-v1.1.txt",
+    ),
+)
+
+period_s, position = propagator.hpop(
+    start="2024-01-01T00:00:00.000Z",
+    stop="2024-01-01T00:10:00.000Z",
+    orbit_epoch="2024-01-01T00:00:00.000Z",
+    orbit=orbit,
+    coord_system="Inertial",
+    gravitational_parameter_m3_s2=398600441500000.0,
+    config=hpop_config,
+)
+```
+
+Cartesian HPOP uses the same function with `state=` instead of `orbit=`:
+
+```python
+period_s, position = propagator.hpop(
+    start="2024-01-01T00:00:00.000Z",
+    stop="2024-01-01T00:10:00.000Z",
+    orbit_epoch="2024-01-01T00:00:00.000Z",
+    state=state,
+    coord_system="Inertial",
+    config=propagator.hpop_config(
+        central_body="Earth",
+        gravity=propagator.hpop_two_body_gravity(),
+    ),
+)
+```
+
+See `examples/01_propagation/hpop.py` for a runnable source example.
 
 ## Ballistic Branches
 

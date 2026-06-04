@@ -54,6 +54,37 @@ def main() -> None:
     print(f"Two-body period: {two_body_period_s:.3f} s")
     print(f"Two-body frame: {two_body_position.reference_frame}")
 
+    hpop_period_s, hpop_position = propagator.hpop(
+        start="2024-01-01T00:00:00.000Z",
+        stop="2024-01-01T00:10:00.000Z",
+        orbit_epoch="2024-01-01T00:00:00.000Z",
+        orbit=orbit,
+        coord_system="Inertial",
+        gravitational_parameter_m3_s2=EARTH_MU_M3_S2,
+        config=propagator.hpop_config(
+            central_body="Earth",
+            integrator=propagator.hpop_rkf78(
+                use_fixed_step=True,
+                initial_step_s=60.0,
+                max_step_s=60.0,
+                min_step_s=0.001,
+                max_abs_error=1e-10,
+                max_rel_error=1e-12,
+                max_iterations=50,
+            ),
+            gravity=propagator.hpop_gravity_field(
+                gravity_file_name="EGM2008.grv",
+                degree=4,
+                order=4,
+                use_secular_variations=False,
+                solid_tide_type="Permanent tide only",
+                eop_file_path="EOP-v1.1.txt",
+            ),
+        ),
+    )
+    print(f"HPOP period: {hpop_period_s:.3f} s")
+    print(f"HPOP frame: {hpop_position.reference_frame}")
+
     ballistic_period_s, ballistic_position = propagator.ballistic_delta_v(
         start="2024-01-01T12:00:00.000Z",
         impact_latitude_deg=30.0,

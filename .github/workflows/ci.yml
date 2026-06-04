@@ -51,6 +51,8 @@ jobs:
           assert orbit.to_wire()[0] == 7000000.0
           assert hasattr(propagator, "j2")
           assert hasattr(propagator, "two_body")
+          assert hasattr(propagator, "hpop")
+          assert hasattr(orbits, "cartesian_state")
           PY
 
       - name: Check propagation example syntax
