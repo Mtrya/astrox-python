@@ -76,8 +76,10 @@ def orbit_b() -> orbits.KeplerianElements:
 
 def record_batch_post(
     monkeypatch: pytest.MonkeyPatch,
-    response: dict[str, object] = REPRESENTATIVE_BATCH_RESPONSE,
+    response: dict[str, object] | None = None,
 ) -> list[dict[str, object]]:
+    if response is None:
+        response = REPRESENTATIVE_BATCH_RESPONSE
     calls: list[dict[str, object]] = []
 
     def fake_post(endpoint: str, *, json: object) -> dict[str, object]:
