@@ -193,7 +193,7 @@ def compare_multi_two_body() -> None:
         states=cases,
     )
     failures: list[str] = []
-    for index, ((orbit_epoch, orbit), actual_element) in enumerate(zip(cases, actual)):
+    for index, ((orbit_epoch, orbit), actual_element) in enumerate(zip(cases, actual, strict=True)):
         expected = brahe_elements_at(orbit_epoch, orbit, TARGET)
         failures.extend(compare_elements(f"multi_two_body[{index}]", expected, actual_element))
     if failures:

@@ -234,7 +234,7 @@ def compare_multi_j2() -> None:
         states=[(START, orbit) for _, orbit in cases],
     )
     failures: list[str] = []
-    for index, ((label, orbit), actual_element) in enumerate(zip(cases, actual)):
+    for index, ((label, orbit), actual_element) in enumerate(zip(cases, actual, strict=True)):
         expected = astrox_like_j2_elements(orbit, 600.0)
         failures.extend(compare_elements(f"multi_j2[{index}] {label}", expected, actual_element))
     if failures:

@@ -101,7 +101,7 @@ def compare() -> None:
         skyfield_elements(HUBBLE_TLE, "20580"),
     ]
     failures: list[str] = []
-    for index, (expected_element, actual_element) in enumerate(zip(expected, actual)):
+    for index, (expected_element, actual_element) in enumerate(zip(expected, actual, strict=True)):
         failures.extend(compare_elements(f"multi_sgp4[{index}]", expected_element, actual_element))
     if failures:
         raise CrossValidationError("\n".join(failures))
