@@ -1,0 +1,172 @@
+{
+  "cases": [
+    {
+      "description": "Classical HPOP propagation with explicit two-body gravity config.",
+      "id": "classical_two_body",
+      "return": [
+        6000,
+        {
+          "cartesian_velocity": {
+            "first": [
+              0,
+              6771358.863,
+              0,
+              0,
+              0,
+              6746.002784609132,
+              3662.7806616802945,
+              60,
+              6771358.863,
+              404760.16707654786
+            ],
+            "last": [
+              0,
+              6746.002784609132,
+              3662.7806616802945,
+              600,
+              6771358.863,
+              4047601.670765478,
+              2197668.3970081764,
+              0,
+              6746.002784609132,
+              3662.7806616802945
+            ],
+            "length": 77
+          },
+          "central_body": "Earth",
+          "epoch": "2024-01-01T00:00:00.000Z",
+          "interpolation_algorithm": "LAGRANGE",
+          "interpolation_degree": 5,
+          "reference_frame": "INERTIAL"
+        }
+      ]
+    },
+    {
+      "description": "Cartesian HPOP propagation with explicit two-body gravity config.",
+      "id": "cartesian_two_body",
+      "return": [
+        6000,
+        {
+          "cartesian_velocity": {
+            "first": [
+              0,
+              7000000,
+              1000,
+              2000,
+              -1,
+              7500,
+              10,
+              60,
+              6999940,
+              450999.99999999994
+            ],
+            "last": [
+              -1,
+              7500,
+              10,
+              600,
+              6999400,
+              4500999.999999999,
+              8000,
+              -1,
+              7500,
+              10
+            ],
+            "length": 77
+          },
+          "central_body": "Earth",
+          "epoch": "2024-01-01T00:00:00.000Z",
+          "interpolation_algorithm": "LAGRANGE",
+          "interpolation_degree": 5,
+          "reference_frame": "INERTIAL"
+        }
+      ]
+    },
+    {
+      "description": "Classical HPOP propagation with gravity-field config and explicit RKF78 knobs.",
+      "id": "gravity_field_integrator",
+      "return": [
+        6000,
+        {
+          "cartesian_velocity": {
+            "first": [
+              0,
+              6771358.863,
+              0,
+              0,
+              0,
+              6746.002784609132,
+              3662.7806616802945,
+              30,
+              6767441.608056271,
+              202341.06462089162
+            ],
+            "last": [
+              -4269.262286812847,
+              5606.887991225137,
+              3042.4829678392657,
+              600,
+              5263931.43565157,
+              3742554.721254881,
+              2031547.4854444081,
+              -4829.144254961769,
+              5244.4361644766805,
+              2845.1512113045615
+            ],
+            "length": 63
+          },
+          "central_body": "Earth",
+          "epoch": "2024-01-01T00:00:00.000Z",
+          "interpolation_algorithm": "LAGRANGE",
+          "interpolation_degree": 5,
+          "reference_frame": "INERTIAL"
+        }
+      ]
+    },
+    {
+      "description": "Classical HPOP propagation exercising gravity field, Jacchia-Roberts, SRP spherical, third-body, and spacecraft scalar branches.",
+      "id": "full_branch_surface",
+      "return": [
+        6000,
+        {
+          "cartesian_velocity": {
+            "first": [
+              0,
+              6771358.863,
+              0,
+              0,
+              0,
+              6746.002784609132,
+              3662.7806616802945,
+              30,
+              6767441.608294012,
+              202341.0616111827
+            ],
+            "last": [
+              -4297.00421236234,
+              5590.498669371612,
+              3033.5595946169537,
+              600,
+              5263931.695717846,
+              3742553.6909321155,
+              2031546.8775983125,
+              -4829.143298504593,
+              5244.433066953986,
+              2845.1493838149454
+            ],
+            "length": 63
+          },
+          "central_body": "Earth",
+          "epoch": "2024-01-01T00:00:00.000Z",
+          "interpolation_algorithm": "LAGRANGE",
+          "interpolation_degree": 5,
+          "reference_frame": "INERTIAL"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-06-04T12:01:29Z"
+  }
+}
