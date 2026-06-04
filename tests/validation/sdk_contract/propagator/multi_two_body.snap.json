@@ -1,0 +1,35 @@
+{
+  "cases": [
+    {
+      "description": "Two Classical states with different source epochs propagated to one target epoch.",
+      "id": "two_states",
+      "return": [
+        {
+          "argument_of_periapsis_deg": 6.120428252986268e-12,
+          "eccentricity": 0.0009999999999998834,
+          "inclination_deg": 28.500000000000004,
+          "raan_deg": 4.406217909864944e-15,
+          "semi_major_axis_m": 6778137.000000002,
+          "true_anomaly_deg": 38.965539811114695
+        },
+        {
+          "argument_of_periapsis_deg": 10.000000000007235,
+          "eccentricity": 0.0019999999999997966,
+          "inclination_deg": 51.60000000000001,
+          "raan_deg": 119.99999999999999,
+          "semi_major_axis_m": 7078136.999999996,
+          "true_anomaly_deg": 30.609650658358948
+        }
+      ]
+    },
+    {
+      "description": "Server-supported empty batch returns an empty tuple.",
+      "id": "empty",
+      "return": []
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-06-04T07:10:38Z"
+  }
+}
