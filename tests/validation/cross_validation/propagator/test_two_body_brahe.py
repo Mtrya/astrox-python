@@ -143,11 +143,11 @@ def brahe_elements_at(
         inclination_deg=float(elements[2]),
         raan_deg=float(elements[3] % 360.0),
         argument_of_periapsis_deg=float(elements[4] % 360.0),
-        true_anomaly_deg=true_to_meanless_true(elements),
+        true_anomaly_deg=_true_anomaly_from_brahe_elements_deg(elements),
     )
 
 
-def true_to_meanless_true(elements: np.ndarray) -> float:
+def _true_anomaly_from_brahe_elements_deg(elements: np.ndarray) -> float:
     return mean_to_true_deg(float(elements[5]), float(elements[1]))
 
 

@@ -13,12 +13,12 @@
           "true_anomaly_deg": -46.78323651287317
         },
         {
-          "argument_of_periapsis_deg": 85.40587230554769,
-          "eccentricity": 0.0014291119145652426,
-          "inclination_deg": 51.60211120107987,
-          "raan_deg": 339.582513707792,
-          "semi_major_axis_m": 6799823.463851162,
-          "true_anomaly_deg": -46.78323651287317
+          "argument_of_periapsis_deg": 62.311426201121556,
+          "eccentricity": 0.001655243441415374,
+          "inclination_deg": 28.44277165475881,
+          "raan_deg": 347.4855501507016,
+          "semi_major_axis_m": 6921235.199711193,
+          "true_anomaly_deg": -24.78053604179615
         }
       ]
     },
@@ -30,6 +30,6 @@
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-06-04T07:10:37Z"
+    "refreshed_at": "2026-06-04T07:42:07Z"
   }
 }

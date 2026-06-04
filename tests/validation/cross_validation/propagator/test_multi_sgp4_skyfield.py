@@ -26,9 +26,13 @@ INCLINATION_ABS_DEG = 1.0e-6
 ANGLE_ABS_DEG = 1.0e-4
 TARGET = "2024-01-01T00:10:00.000Z"
 SATELLITE_NUMBER = "25544"
-TLE_LINES = (
+ISS_TLE = (
     "1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9995",
     "2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456",
+)
+HUBBLE_TLE = (
+    "1 20580U 90037B   24001.00000000  .00000200  00000-0  10270-3 0  9998",
+    "2 20580  28.4696 347.5666 0002829  78.7776 281.3137 15.09293543345678",
 )
 
 
@@ -60,12 +64,15 @@ def mean_to_true_deg(mean_anomaly_deg: float, eccentricity: float) -> float:
     return math.degrees(true_anomaly) % 360.0
 
 
-def skyfield_elements() -> ElementSample:
+def skyfield_elements(
+    tle_lines: tuple[str, str],
+    satellite_number: str,
+) -> ElementSample:
     timescale = load.timescale(builtin=True)
     satellite = EarthSatellite(
-        TLE_LINES[0],
-        TLE_LINES[1],
-        SATELLITE_NUMBER,
+        tle_lines[0],
+        tle_lines[1],
+        satellite_number,
         timescale,
     )
     state = satellite.at(timescale.utc(2024, 1, 1, 0, 10, 0))
@@ -85,14 +92,17 @@ def compare() -> None:
     actual = propagator.multi_sgp4(
         epoch=TARGET,
         tle_sets=[
-            TLE_LINES,
-            TLE_LINES,
+            ISS_TLE,
+            HUBBLE_TLE,
         ],
     )
-    expected = skyfield_elements()
+    expected = [
+        skyfield_elements(ISS_TLE, SATELLITE_NUMBER),
+        skyfield_elements(HUBBLE_TLE, "20580"),
+    ]
     failures: list[str] = []
-    for index, element in enumerate(actual):
-        failures.extend(compare_elements(f"multi_sgp4[{index}]", expected, element))
+    for index, (expected_element, actual_element) in enumerate(zip(expected, actual)):
+        failures.extend(compare_elements(f"multi_sgp4[{index}]", expected_element, actual_element))
     if failures:
         raise CrossValidationError("\n".join(failures))
 

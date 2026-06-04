@@ -209,7 +209,7 @@ def j2(
 def multi_two_body(
     *,
     epoch: str,
-    states: Sequence[tuple[str, KeplerianElements] | list[object]],
+    states: Sequence[tuple[str, KeplerianElements]],
     gravitational_parameter_m3_s2: float | None = None,
 ) -> tuple[KeplerianElements, ...]:
     """Propagate multiple Classical states to one target epoch using two-body dynamics.
@@ -234,7 +234,7 @@ def multi_two_body(
 def multi_j2(
     *,
     epoch: str,
-    states: Sequence[tuple[str, KeplerianElements] | list[object]],
+    states: Sequence[tuple[str, KeplerianElements]],
     gravitational_parameter_m3_s2: float | None = None,
 ) -> tuple[KeplerianElements, ...]:
     """Propagate multiple Classical states to one target epoch using ASTROX J2.
@@ -262,7 +262,7 @@ def multi_j2(
 def multi_sgp4(
     *,
     epoch: str,
-    tle_sets: Sequence[tuple[str, str] | list[str]],
+    tle_sets: Sequence[tuple[str, str]],
 ) -> tuple[KeplerianElements, ...]:
     """Propagate multiple TLEs to one target epoch using SGP4.
 
