@@ -50,3 +50,8 @@ def test_run_json_tool_reports_invalid_json_stdout() -> None:
     message = str(exc_info.value)
     assert "invalid JSON stdout" in message
     assert "not json" in message
+
+
+def test_run_json_tool_rejects_empty_command() -> None:
+    with pytest.raises(ExternalToolError, match="command must not be empty"):
+        run_json_tool([], {})

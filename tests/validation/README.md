@@ -55,5 +55,5 @@ Calibration tests use the `calibration` pytest marker. They are live investigati
 Run calibration diagnostics:
 
 ```bash
-ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation -m calibration --runxfail
+ASTROX_BASE_URL=http://astrox.cn:8765 GMAT_VALIDATION_IMAGE=ghcr.io/<owner>/astrox-gmat-validation:gmat-r2026a ASTROX_EXTERNAL_VALIDATION=strict uv run python -m pytest tests/validation -m calibration --runxfail
 ```

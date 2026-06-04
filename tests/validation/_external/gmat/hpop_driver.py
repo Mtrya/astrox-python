@@ -256,7 +256,10 @@ def _read_numeric_rows(path: Path) -> list[list[float]]:
 
 def _gmat_epoch(value: str) -> str:
     text = value.removesuffix("Z")
-    parsed = datetime.strptime(text, "%Y-%m-%dT%H:%M:%S.%f")
+    try:
+        parsed = datetime.strptime(text, "%Y-%m-%dT%H:%M:%S.%f")
+    except ValueError:
+        parsed = datetime.strptime(text, "%Y-%m-%dT%H:%M:%S")
     return parsed.strftime("%d %b %Y %H:%M:%S.") + f"{parsed.microsecond // 1000:03d}"
 
 

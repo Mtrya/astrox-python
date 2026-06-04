@@ -9,6 +9,8 @@ ENV PATH="/opt/gmat/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/opt/gmat/bin:/opt/gmat/lib:${LD_LIBRARY_PATH}"
 ENV PYTHONPATH="/opt/gmat/bin:${PYTHONPATH}"
 
+RUN useradd --create-home --shell /usr/sbin/nologin gmat
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
@@ -41,8 +43,12 @@ RUN mkdir -p "${GMAT_ROOT}" /opt/gmat-validation \
     && tar -xzf /tmp/gmat.tar.gz -C "${GMAT_ROOT}" --strip-components=2 \
     && rm /tmp/gmat.tar.gz
 
-COPY self_check.py /opt/gmat-validation/self_check.py
+COPY --chown=gmat:gmat self_check.py /opt/gmat-validation/self_check.py
 
+RUN chown -R gmat:gmat "${GMAT_ROOT}" /opt/gmat-validation
+
+USER gmat
+WORKDIR /opt/gmat-validation
 RUN python3 /opt/gmat-validation/self_check.py
 
 CMD ["python3", "/opt/gmat-validation/self_check.py"]

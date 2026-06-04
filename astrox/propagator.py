@@ -82,11 +82,22 @@ def _include_if_supplied(payload: dict[str, Any], wire_key: str, value: Any) -> 
 
 
 def _sequence_to_list(value: Sequence[str], *, parameter: str) -> list[str]:
-    if isinstance(value, (str, bytes)):
+    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence):
         raise TypeError(f"{parameter} must be a sequence of strings")
-    if not all(isinstance(item, str) for item in value):
+    items = list(value)
+    if not all(isinstance(item, str) for item in items):
         raise TypeError(f"{parameter} must be a sequence of strings")
-    return list(value)
+    return items
+
+
+def _mapping_fragment_to_dict(
+    value: Mapping[str, Any],
+    *,
+    parameter: str,
+) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        raise TypeError(f"{parameter} must be a mapping fragment")
+    return dict(value)
 
 
 def _mapping_sequence_to_list(
@@ -94,11 +105,12 @@ def _mapping_sequence_to_list(
     *,
     parameter: str,
 ) -> list[dict[str, Any]]:
-    if isinstance(value, (str, bytes)):
+    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence):
         raise TypeError(f"{parameter} must be a sequence of mapping fragments")
-    if not all(isinstance(item, Mapping) for item in value):
+    items = list(value)
+    if not all(isinstance(item, Mapping) for item in items):
         raise TypeError(f"{parameter} must be a sequence of mapping fragments")
-    return [dict(item) for item in value]
+    return [dict(item) for item in items]
 
 
 def _keplerian_from_elements_object(payload: dict[str, Any]) -> KeplerianElements:
@@ -342,13 +354,25 @@ def hpop_config(
     _include_if_supplied(payload, "UserComment", user_comment)
     _include_if_supplied(payload, "CentralBodyName", central_body)
     if integrator is not None:
-        payload["NumericalIntegrator"] = dict(integrator)
+        payload["NumericalIntegrator"] = _mapping_fragment_to_dict(
+            integrator,
+            parameter="integrator",
+        )
     if gravity is not None:
-        payload["GravityModel"] = dict(gravity)
+        payload["GravityModel"] = _mapping_fragment_to_dict(
+            gravity,
+            parameter="gravity",
+        )
     if atmosphere is not None:
-        payload["AtmosphericModel"] = dict(atmosphere)
+        payload["AtmosphericModel"] = _mapping_fragment_to_dict(
+            atmosphere,
+            parameter="atmosphere",
+        )
     if srp is not None:
-        payload["SRPModel"] = dict(srp)
+        payload["SRPModel"] = _mapping_fragment_to_dict(
+            srp,
+            parameter="srp",
+        )
     if third_bodies is not None:
         payload["ThirdBodyForce"] = _mapping_sequence_to_list(
             third_bodies,

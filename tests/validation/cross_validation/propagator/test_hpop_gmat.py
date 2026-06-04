@@ -27,6 +27,8 @@ from tests.validation._support.gmat import (
 
 START = "2024-01-01T00:00:00.000Z"
 STOP = "2024-01-01T00:10:00.000Z"
+# The GMAT comparison cases use fixed-step ASTROX HPOP settings so these offsets
+# are present exactly in the ASTROX cartesianVelocity samples.
 SAMPLE_OFFSETS_S = (0.0, 300.0, 600.0)
 EARTH_MU = 398600441500000.0
 ASTROX_GRAVITY_FILE = "EGM2008.grv"

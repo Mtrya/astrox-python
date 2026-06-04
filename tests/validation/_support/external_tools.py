@@ -23,7 +23,10 @@ def run_json_tool(
     timeout_s: float = 300.0,
 ) -> Any:
     """Run a subprocess that accepts one JSON value and emits one JSON value."""
-    command_text = _format_command(command)
+    command_parts = [os.fspath(part) for part in command]
+    if not command_parts:
+        raise ExternalToolError("external tool command must not be empty")
+    command_text = _format_command(command_parts)
     input_bytes = json.dumps(
         payload,
         sort_keys=True,
@@ -36,7 +39,7 @@ def run_json_tool(
 
     try:
         completed = subprocess.run(
-            [os.fspath(part) for part in command],
+            command_parts,
             input=input_bytes,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

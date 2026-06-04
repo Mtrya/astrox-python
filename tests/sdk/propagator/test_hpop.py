@@ -142,6 +142,35 @@ def test_hpop_constructors_omit_unsupplied_optional_values(
     assert_canonical_equal(fragment, expected)
 
 
+@pytest.mark.parametrize(
+    ("kwargs", "parameter"),
+    [
+        ({"integrator": ["not", "mapping"]}, "integrator"),
+        ({"gravity": ["not", "mapping"]}, "gravity"),
+        ({"atmosphere": ["not", "mapping"]}, "atmosphere"),
+        ({"srp": ["not", "mapping"]}, "srp"),
+    ],
+)
+def test_hpop_config_rejects_non_mapping_subfragments(
+    kwargs: dict[str, object],
+    parameter: str,
+) -> None:
+    with pytest.raises(TypeError, match=f"{parameter} must be a mapping fragment"):
+        propagator.hpop_config(**kwargs)
+
+
+def test_hpop_sequence_fragments_reject_one_shot_iterators() -> None:
+    with pytest.raises(TypeError, match="eclipsing_bodies must be a sequence"):
+        propagator.hpop_srp_spherical(
+            eclipsing_bodies=(body for body in ["Earth", "Moon"]),
+        )
+
+    with pytest.raises(TypeError, match="third_bodies must be a sequence"):
+        propagator.hpop_config(
+            third_bodies=(propagator.hpop_third_body("Sun") for _ in range(1)),
+        )
+
+
 def test_hpop_calls_raw_route_with_classical_payload(
     monkeypatch: pytest.MonkeyPatch,
     orbit: orbits.KeplerianElements,
