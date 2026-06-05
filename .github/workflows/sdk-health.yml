@@ -116,16 +116,30 @@ jobs:
       - name: Run calibration pytest
         id: calibration_pytest
         if: steps.install.outcome == 'success'
-        continue-on-error: true
         env:
           ASTROX_BASE_URL: http://astrox.cn:8765
-        run: uv run python -m pytest tests/validation -m calibration --runxfail
+        run: |
+          set +e
+          uv run python -m pytest tests/validation -m calibration --runxfail
+          status="$?"
+          echo "exit_code=${status}" >> "${GITHUB_OUTPUT}"
+          if [ "${status}" -ne 0 ]; then
+            echo "::notice::Calibration diagnostics exited ${status}; this is nonblocking."
+          fi
+          exit 0
 
       - name: Build health result
         id: health
         if: always()
         run: |
           failed=false
+          calibration_exit_code="${{ steps.calibration_pytest.outputs.exit_code }}"
+          if [ -n "${calibration_exit_code}" ]; then
+            calibration_result="exit code ${calibration_exit_code}"
+          else
+            calibration_result="${{ steps.calibration_pytest.outcome }}"
+          fi
+
           for outcome in \
             "${{ steps.install.outcome }}" \
             "${{ steps.build.outcome }}" \
@@ -153,7 +167,7 @@ jobs:
             echo "- live smoke: ${{ steps.live_smoke.outcome }}"
             echo "- GMAT preparation: ${{ steps.prepare_gmat.outcome }}"
             echo "- live validation pytest: ${{ steps.validation_pytest.outcome }}"
-            echo "- calibration pytest (nonblocking): ${{ steps.calibration_pytest.outcome }}"
+            echo "- calibration pytest (nonblocking): ${calibration_result}"
             echo
             echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           } > sdk-health-issue.md
