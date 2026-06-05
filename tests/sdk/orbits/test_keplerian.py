@@ -148,3 +148,55 @@ def test_cartesian_state_requires_named_scalar_arguments() -> None:
 
     with pytest.raises(TypeError):
         orbits.CartesianState(7000000.0, 1000.0, 2000.0, -1.0, 7500.0, 10.0)
+
+
+def test_mean_keplerian_elements_is_frozen_return_dataclass() -> None:
+    elements = orbits.MeanKeplerianElements(
+        semi_major_axis_m=6778120.0,
+        eccentricity=0.0009,
+        inclination_deg=28.499,
+        argument_of_perigee_deg=0.1,
+        raan_deg=15.25,
+        mean_anomaly_deg=44.75,
+        argument_of_latitude_deg=44.85,
+        longitude_of_perigee_deg=15.35,
+        mean_longitude_deg=60.1,
+    )
+
+    assert is_dataclass(elements)
+    assert [field.name for field in fields(orbits.MeanKeplerianElements)] == [
+        "semi_major_axis_m",
+        "eccentricity",
+        "inclination_deg",
+        "argument_of_perigee_deg",
+        "raan_deg",
+        "mean_anomaly_deg",
+        "argument_of_latitude_deg",
+        "longitude_of_perigee_deg",
+        "mean_longitude_deg",
+    ]
+
+    with pytest.raises(FrozenInstanceError):
+        elements.mean_anomaly_deg = 0.0
+
+
+def test_orbits_public_exports_include_promoted_surface() -> None:
+    assert set(orbits.__all__) >= {
+        "CartesianState",
+        "KeplerianElements",
+        "MeanKeplerianElements",
+        "cartesian_state",
+        "cartesian_to_keplerian",
+        "geo",
+        "geo_ym_lambert_delta_v",
+        "keplerian",
+        "keplerian_to_cartesian",
+        "kozai_izsak_mean_elements",
+        "lambert_delta_v",
+        "lla_at_ascending_node",
+        "molniya",
+        "sso",
+        "walker_custom",
+        "walker_delta",
+        "walker_star",
+    }

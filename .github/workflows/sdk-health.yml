@@ -70,11 +70,11 @@ jobs:
           assert hasattr(orbits, "cartesian_state")
           PY
 
-      - name: Check propagation example syntax
+      - name: Check example and validation syntax
         id: example_syntax
         if: steps.install.outcome == 'success'
         continue-on-error: true
-        run: uv run python -m py_compile examples/01_propagation/*.py tests/validation/_support/*.py tests/validation/_external/gmat/*.py tests/validation/sdk_contract/propagator/test_*.py tests/validation/cross_validation/propagator/test_*.py .github/containers/gmat-validation/self_check.py
+        run: uv run python -m py_compile examples/01_propagation/*.py examples/02_orbits/*.py tests/validation/_support/*.py tests/validation/_external/gmat/*.py tests/validation/sdk_contract/propagator/test_*.py tests/validation/sdk_contract/orbits/test_*.py tests/validation/cross_validation/propagator/test_*.py tests/validation/cross_validation/orbits/test_*.py .github/containers/gmat-validation/self_check.py
 
       - name: Run pytest
         id: pytest
@@ -162,7 +162,7 @@ jobs:
             echo "- install dependencies: ${{ steps.install.outcome }}"
             echo "- build package: ${{ steps.build.outcome }}"
             echo "- verify built package import: ${{ steps.import_check.outcome }}"
-            echo "- propagation example syntax: ${{ steps.example_syntax.outcome }}"
+            echo "- example and validation syntax: ${{ steps.example_syntax.outcome }}"
             echo "- pytest: ${{ steps.pytest.outcome }}"
             echo "- live smoke: ${{ steps.live_smoke.outcome }}"
             echo "- GMAT preparation: ${{ steps.prepare_gmat.outcome }}"
