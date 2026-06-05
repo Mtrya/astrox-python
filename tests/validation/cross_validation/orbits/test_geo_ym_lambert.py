@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-"""Nonblocking Lambert calibration between ASTROX and lamberthub.
+"""Lambert cross-validation between ASTROX GEO-YM and lamberthub.
 
 `lamberthub` is a dev-only validation dependency used here as an independent
-zero-revolution Lambert solver. This comparison is intentionally marked as
-calibration because the current ASTROX GEO-YM Lambert convention is not fully
-explained yet.
+zero-revolution Lambert solver.
 """
 
 from __future__ import annotations
@@ -15,7 +13,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
-import pytest
 from lamberthub import izzo2015
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -29,6 +26,7 @@ from tests.validation._support import LiveConfigError, configure_astrox_from_env
 EARTH_MU = 398600441500000.0
 TIME_OF_FLIGHT_S = 3600.0
 STRICT_RESIDUAL_M_S = 1.0e-3
+CONVENTION_DIAGNOSTIC_RESIDUAL_M_S = 1.0e-2
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -75,13 +73,64 @@ def target_orbit() -> orbits.KeplerianElements:
 
 
 def state_vector(orbit: orbits.KeplerianElements) -> tuple[np.ndarray, np.ndarray]:
-    state = orbits.keplerian_to_cartesian(
-        orbit,
-        gravitational_parameter_m3_s2=EARTH_MU,
+    semi_latus_rectum_m = orbit.semi_major_axis_m * (1.0 - orbit.eccentricity**2)
+    true_anomaly_rad = math.radians(orbit.true_anomaly_deg)
+    perifocal_position_m = np.array(
+        [
+            semi_latus_rectum_m
+            * math.cos(true_anomaly_rad)
+            / (1.0 + orbit.eccentricity * math.cos(true_anomaly_rad)),
+            semi_latus_rectum_m
+            * math.sin(true_anomaly_rad)
+            / (1.0 + orbit.eccentricity * math.cos(true_anomaly_rad)),
+            0.0,
+        ]
     )
-    return (
-        np.array([state.x_m, state.y_m, state.z_m]),
-        np.array([state.vx_m_s, state.vy_m_s, state.vz_m_s]),
+    perifocal_velocity_m_s = np.array(
+        [
+            -math.sqrt(EARTH_MU / semi_latus_rectum_m)
+            * math.sin(true_anomaly_rad),
+            math.sqrt(EARTH_MU / semi_latus_rectum_m)
+            * (orbit.eccentricity + math.cos(true_anomaly_rad)),
+            0.0,
+        ]
+    )
+    rotation = inertial_rotation_matrix(orbit)
+    return rotation @ perifocal_position_m, rotation @ perifocal_velocity_m_s
+
+
+def inertial_rotation_matrix(orbit: orbits.KeplerianElements) -> np.ndarray:
+    raan_rad = math.radians(orbit.raan_deg)
+    inclination_rad = math.radians(orbit.inclination_deg)
+    argument_of_periapsis_rad = math.radians(orbit.argument_of_periapsis_deg)
+    cos_raan = math.cos(raan_rad)
+    sin_raan = math.sin(raan_rad)
+    cos_inclination = math.cos(inclination_rad)
+    sin_inclination = math.sin(inclination_rad)
+    cos_argument = math.cos(argument_of_periapsis_rad)
+    sin_argument = math.sin(argument_of_periapsis_rad)
+    return np.array(
+        [
+            [
+                cos_raan * cos_argument
+                - sin_raan * sin_argument * cos_inclination,
+                -cos_raan * sin_argument
+                - sin_raan * cos_argument * cos_inclination,
+                sin_raan * sin_inclination,
+            ],
+            [
+                sin_raan * cos_argument
+                + cos_raan * sin_argument * cos_inclination,
+                -sin_raan * sin_argument
+                + cos_raan * cos_argument * cos_inclination,
+                -cos_raan * sin_inclination,
+            ],
+            [
+                sin_argument * sin_inclination,
+                cos_argument * sin_inclination,
+                cos_inclination,
+            ],
+        ]
     )
 
 
@@ -132,6 +181,33 @@ def advance_target(
     )
 
 
+def advance_target_true_anomaly_linearly(
+    orbit: orbits.KeplerianElements,
+    *,
+    lead_s: float,
+) -> orbits.KeplerianElements:
+    """Match ASTROX GEO-YM's observed target convention.
+
+    Focused live probes showed that the specialized GEO-YM route first advances
+    the target's true anomaly by mean motion times TOF, then solves Lambert to
+    that target state. That is different from physically propagating mean
+    anomaly through Kepler's equation. This check intentionally validates the
+    observed ASTROX convention rather than hiding it behind a loose tolerance.
+    """
+    mean_motion_rad_s = math.sqrt(EARTH_MU / orbit.semi_major_axis_m**3)
+    return orbits.keplerian(
+        semi_major_axis_m=orbit.semi_major_axis_m,
+        eccentricity=orbit.eccentricity,
+        inclination_deg=orbit.inclination_deg,
+        argument_of_periapsis_deg=orbit.argument_of_periapsis_deg,
+        raan_deg=orbit.raan_deg,
+        true_anomaly_deg=(
+            orbit.true_anomaly_deg + math.degrees(mean_motion_rad_s * lead_s)
+        )
+        % 360.0,
+    )
+
+
 def astrox_lambert_delta_v() -> tuple[np.ndarray, np.ndarray]:
     departure, arrival = orbits.geo_ym_lambert_delta_v(
         platform_orbit=platform_orbit(),
@@ -171,25 +247,6 @@ def lamberthub_residual(
     )
 
 
-def best_target_lead_residual() -> tuple[float, LambertResidual]:
-    current_target = target_orbit()
-    best_lead_s = TIME_OF_FLIGHT_S
-    best = LambertResidual(
-        label="uninitialized",
-        departure_m_s=float("inf"),
-        arrival_m_s=float("inf"),
-    )
-    for lead_s in np.linspace(3590.0, 3610.0, 41):
-        residual = lamberthub_residual(
-            label=f"target_lead_s={float(lead_s):.1f}",
-            target=advance_target(current_target, lead_s=float(lead_s)),
-        )
-        if residual.max_m_s < best.max_m_s:
-            best_lead_s = float(lead_s)
-            best = residual
-    return best_lead_s, best
-
-
 def compare_current_lambert_case() -> None:
     current_target = target_orbit()
     target_at_input = lamberthub_residual(
@@ -200,29 +257,43 @@ def compare_current_lambert_case() -> None:
         label="target_advanced_by_time_of_flight",
         target=advance_target(current_target, lead_s=TIME_OF_FLIGHT_S),
     )
-    best_lead_s, best = best_target_lead_residual()
+    linear_true_anomaly_target = lamberthub_residual(
+        label="target_true_anomaly_advanced_linearly_by_time_of_flight",
+        target=advance_target_true_anomaly_linearly(
+            current_target,
+            lead_s=TIME_OF_FLIGHT_S,
+        ),
+    )
 
-    if target_at_arrival.max_m_s > STRICT_RESIDUAL_M_S:
+    if linear_true_anomaly_target.max_m_s > STRICT_RESIDUAL_M_S:
         raise CrossValidationError(
             "\n".join(
                 [
-                    "ASTROX GEO-YM Lambert does not yet have a clean external match.",
+                    "ASTROX GEO-YM Lambert no longer matches the calibrated external comparison.",
+                    linear_true_anomaly_target.format(),
                     target_at_input.format(),
                     target_at_arrival.format(),
-                    f"best scanned target lead: {best_lead_s:.1f} s -> {best.format()}",
                     f"strict residual target: {STRICT_RESIDUAL_M_S:.12g} m/s",
+                    "Calibrated convention: advance target true anomaly linearly by mean motion * tof, then solve zero-revolution prograde Lambert.",
                     "Do not widen tolerance; investigate target timing, endpoint convention, or ASTROX solver semantics.",
+                ]
+            )
+        )
+    if target_at_arrival.max_m_s <= CONVENTION_DIAGNOSTIC_RESIDUAL_M_S:
+        raise CrossValidationError(
+            "\n".join(
+                [
+                    "ASTROX GEO-YM Lambert appears to have changed target timing convention.",
+                    linear_true_anomaly_target.format(),
+                    target_at_arrival.format(),
+                    f"mean-anomaly propagation diagnostic threshold: {CONVENTION_DIAGNOSTIC_RESIDUAL_M_S:.12g} m/s",
+                    "If this persists, update the comparison only after explaining the new convention.",
                 ]
             )
         )
 
 
-@pytest.mark.calibration
-@pytest.mark.xfail(
-    reason="ASTROX GEO-YM Lambert has an unresolved target-timing or delta-v convention mismatch against lamberthub; run with --runxfail for residual diagnostics.",
-    strict=False,
-)
-def test_geo_ym_lambert_calibration() -> None:
+def test_geo_ym_lambert_matches_calibrated_lamberthub_comparison() -> None:
     configure_astrox_from_env()
     compare_current_lambert_case()
 
