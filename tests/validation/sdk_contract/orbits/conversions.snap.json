@@ -1,0 +1,88 @@
+{
+  "cases": [
+    {
+      "description": "Classical Keplerian elements converted to Cartesian position and velocity with explicit Earth mu.",
+      "id": "keplerian_to_cartesian",
+      "return": {
+        "vx_m_s": -6472.840331401898,
+        "vy_m_s": 3206.06796249413,
+        "vz_m_s": 2591.0487757590076,
+        "x_m": 3536889.5761382813,
+        "y_m": 5305259.458024034,
+        "z_m": 2285340.035972383
+      }
+    },
+    {
+      "description": "Cartesian position and velocity converted to Classical Keplerian elements.",
+      "id": "cartesian_to_keplerian",
+      "return": {
+        "argument_of_periapsis_deg": 30.787459733359025,
+        "eccentricity": 0.10238567050181675,
+        "inclination_deg": 29.424694383891133,
+        "raan_deg": 324.87293867577694,
+        "semi_major_axis_m": 8255499.551558232,
+        "true_anomaly_deg": 32.769936354157544
+      }
+    },
+    {
+      "description": "Ascending-node location returned as longitude, latitude, and height.",
+      "id": "lla_at_ascending_node",
+      "return": [
+        -105.15333778142664,
+        0.12978702091154762,
+        393221.9718537973
+      ]
+    },
+    {
+      "description": "Osculating Classical elements converted to Kozai-Izsak mean elements.",
+      "id": "kozai_izsak_mean_elements",
+      "return": {
+        "argument_of_latitude_deg": 45.02995431842596,
+        "argument_of_perigee_deg": -61.37334512137375,
+        "eccentricity": 0.0008505459879297754,
+        "inclination_deg": 28.50000865975484,
+        "longitude_of_perigee_deg": 313.5906419225741,
+        "mean_anomaly_deg": 106.30978427778946,
+        "mean_longitude_deg": 59.90042620036354,
+        "raan_deg": 14.963987043947839,
+        "semi_major_axis_m": 6778136.237827691
+      }
+    },
+    {
+      "description": "GEO-YM Lambert delta-v with explicit platform gravitational parameter.",
+      "id": "lambert_delta_v_with_platform_mu",
+      "return": [
+        [
+          -16587.159134912006,
+          -13658.736708339453,
+          191.07418360208843
+        ],
+        [
+          -18497.8122440489,
+          -10928.222668015485,
+          145.7721915230352
+        ]
+      ]
+    },
+    {
+      "description": "GEO-YM Lambert delta-v with server-owned platform gravitational parameter.",
+      "id": "lambert_delta_v_server_default_mu",
+      "return": [
+        [
+          -16587.1591340256,
+          -13658.736709083283,
+          191.07418359829273
+        ],
+        [
+          -18497.8122440489,
+          -10928.222668015485,
+          145.7721915230352
+        ]
+      ]
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-06-05T17:07:08Z"
+  }
+}

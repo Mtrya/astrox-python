@@ -55,8 +55,8 @@ jobs:
           assert hasattr(orbits, "cartesian_state")
           PY
 
-      - name: Check propagation example syntax
-        run: uv run python -m py_compile examples/01_propagation/*.py tests/validation/_support/*.py tests/validation/_external/gmat/*.py tests/validation/sdk_contract/propagator/test_*.py tests/validation/cross_validation/propagator/test_*.py .github/containers/gmat-validation/self_check.py
+      - name: Check example and validation syntax
+        run: uv run python -m py_compile examples/01_propagation/*.py examples/02_orbits/*.py tests/validation/_support/*.py tests/validation/_external/gmat/*.py tests/validation/sdk_contract/propagator/test_*.py tests/validation/sdk_contract/orbits/test_*.py tests/validation/cross_validation/propagator/test_*.py .github/containers/gmat-validation/self_check.py
 
       - name: Run pytest
         run: uv run python -m pytest tests --ignore=tests/validation
