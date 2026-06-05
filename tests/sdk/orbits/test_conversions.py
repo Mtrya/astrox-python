@@ -153,6 +153,83 @@ def test_geo_ym_lambert_delta_v_omits_platform_mu_when_not_supplied(
     )
 
 
+def test_lambert_delta_v_emits_single_case_payload_and_returns_vector_pair(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(
+        monkeypatch,
+        {
+            "IsSuccess": True,
+            "Message": "",
+            "DV1": [1.0, 2.0, 3.0],
+            "DV2": [-1.0, -2.0, -3.0],
+        },
+    )
+    arrival_state = orbits.cartesian_state(
+        x_m=-4963330.5,
+        y_m=4154175.2,
+        z_m=1301603.0,
+        vx_m_s=-5569.688,
+        vy_m_s=-5716.8755,
+        vz_m_s=323.9083,
+    )
+
+    delta_v = orbits.lambert_delta_v(
+        departure_state=sample_cartesian_state(),
+        arrival_state=arrival_state,
+        time_of_flight_s=817.4257,
+        gravitational_parameter_m3_s2=EARTH_MU,
+    )
+
+    assert calls[0]["endpoint"] == "/orbit/lambert"
+    assert_canonical_equal(
+        calls[0]["json"],
+        {
+            "RV1": REPRESENTATIVE_CARTESIAN_RESPONSE,
+            "RV2": [
+                -4963330.5,
+                4154175.2,
+                1301603.0,
+                -5569.688,
+                -5716.8755,
+                323.9083,
+            ],
+            "Gm": EARTH_MU,
+            "TOF": [817.4257],
+        },
+    )
+    assert delta_v == ((1.0, 2.0, 3.0), (-1.0, -2.0, -3.0))
+
+
+def test_lambert_delta_v_omits_mu_when_not_supplied(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(
+        monkeypatch,
+        {
+            "IsSuccess": True,
+            "Message": "",
+            "DV1": [1.0, 2.0, 3.0],
+            "DV2": [-1.0, -2.0, -3.0],
+        },
+    )
+
+    orbits.lambert_delta_v(
+        departure_state=sample_cartesian_state(),
+        arrival_state=sample_cartesian_state(),
+        time_of_flight_s=817.4257,
+    )
+
+    assert_canonical_equal(
+        calls[0]["json"],
+        {
+            "RV1": REPRESENTATIVE_CARTESIAN_RESPONSE,
+            "RV2": REPRESENTATIVE_CARTESIAN_RESPONSE,
+            "TOF": [817.4257],
+        },
+    )
+
+
 @pytest.mark.parametrize(
     ("function_name", "kwargs"),
     [
@@ -177,6 +254,22 @@ def test_geo_ym_lambert_delta_v_omits_platform_mu_when_not_supplied(
                 "platform_orbit": sample_orbit(),
                 "target_orbit": [1, 0, 0, 0, 0, 0],
                 "time_of_flight_s": 3600.0,
+            },
+        ),
+        (
+            "lambert_delta_v",
+            {
+                "departure_state": [1, 2, 3, 4, 5, 6],
+                "arrival_state": sample_cartesian_state(),
+                "time_of_flight_s": 817.4257,
+            },
+        ),
+        (
+            "lambert_delta_v",
+            {
+                "departure_state": sample_cartesian_state(),
+                "arrival_state": [1, 2, 3, 4, 5, 6],
+                "time_of_flight_s": 817.4257,
             },
         ),
     ],
@@ -249,6 +342,15 @@ def test_mean_elements_parser_fails_loudly_for_missing_fields(
                 "time_of_flight_s": 3600.0,
             },
         ),
+        (
+            "lambert_delta_v",
+            {"DV1": [1.0, 2.0], "DV2": [-1.0, -2.0, -3.0]},
+            {
+                "departure_state": sample_cartesian_state(),
+                "arrival_state": sample_cartesian_state(),
+                "time_of_flight_s": 817.4257,
+            },
+        ),
     ],
 )
 def test_array_response_parsers_fail_loudly_for_short_arrays(
@@ -276,12 +378,32 @@ def test_conversion_functions_propagate_api_errors(
         orbits.keplerian_to_cartesian(sample_orbit())
 
 
+def test_lambert_delta_v_parser_fails_loudly_for_missing_fields(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    record_raw_post(
+        monkeypatch,
+        {"IsSuccess": True, "Message": "", "DV1": [1.0, 2.0, 3.0]},
+    )
+
+    with pytest.raises(KeyError):
+        orbits.lambert_delta_v(
+            departure_state=sample_cartesian_state(),
+            arrival_state=sample_cartesian_state(),
+            time_of_flight_s=817.4257,
+        )
+
+
 def test_conversion_return_type_hints_are_curated_values() -> None:
     assert get_type_hints(orbits.keplerian_to_cartesian)["return"] == orbits.CartesianState
     assert get_type_hints(orbits.cartesian_to_keplerian)["return"] == orbits.KeplerianElements
     assert get_type_hints(orbits.lla_at_ascending_node)["return"] == tuple[float, float, float]
     assert get_type_hints(orbits.kozai_izsak_mean_elements)["return"] == orbits.MeanKeplerianElements
     assert get_type_hints(orbits.geo_ym_lambert_delta_v)["return"] == tuple[
+        tuple[float, float, float],
+        tuple[float, float, float],
+    ]
+    assert get_type_hints(orbits.lambert_delta_v)["return"] == tuple[
         tuple[float, float, float],
         tuple[float, float, float],
     ]

@@ -19,6 +19,7 @@ __all__ = [
     "keplerian",
     "keplerian_to_cartesian",
     "kozai_izsak_mean_elements",
+    "lambert_delta_v",
     "lla_at_ascending_node",
     "molniya",
     "sso",
@@ -422,4 +423,31 @@ def geo_ym_lambert_delta_v(
     return (
         (result[0], result[1], result[2]),
         (result[3], result[4], result[5]),
+    )
+
+
+def lambert_delta_v(
+    *,
+    departure_state: CartesianState,
+    arrival_state: CartesianState,
+    time_of_flight_s: float,
+    gravitational_parameter_m3_s2: float | None = None,
+) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
+    """Return single-revolution Lambert delta-v between two Cartesian states."""
+    if not isinstance(departure_state, CartesianState):
+        raise TypeError("departure_state must be a CartesianState instance")
+    if not isinstance(arrival_state, CartesianState):
+        raise TypeError("arrival_state must be a CartesianState instance")
+
+    payload: dict[str, Any] = {
+        "RV1": departure_state.to_wire(),
+        "RV2": arrival_state.to_wire(),
+        "TOF": [time_of_flight_s],
+    }
+    _include_if_supplied(payload, "Gm", gravitational_parameter_m3_s2)
+
+    result = raw.post("/orbit/lambert", json=payload)
+    return (
+        (result["DV1"][0], result["DV1"][1], result["DV1"][2]),
+        (result["DV2"][0], result["DV2"][1], result["DV2"][2]),
     )

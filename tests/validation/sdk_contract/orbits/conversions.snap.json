@@ -65,6 +65,22 @@
       ]
     },
     {
+      "description": "Single-revolution Lambert delta-v between two Cartesian states.",
+      "id": "lambert_delta_v_cartesian",
+      "return": [
+        [
+          -8575.939825329679,
+          -1736.2629470740148,
+          -1983.8858905150032
+        ],
+        [
+          -6981.067355350402,
+          3387.1183808111055,
+          -4924.757487049451
+        ]
+      ]
+    },
+    {
       "description": "GEO-YM Lambert delta-v with server-owned platform gravitational parameter.",
       "id": "lambert_delta_v_server_default_mu",
       "return": [
@@ -83,6 +99,6 @@
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-06-05T17:07:08Z"
+    "refreshed_at": "2026-06-05T18:04:24Z"
   }
 }

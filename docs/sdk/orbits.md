@@ -6,7 +6,7 @@ This page documents the curated ASTROX Python orbit conversion and orbit wizard 
 from astrox import orbits
 ```
 
-The functions here use SDK-owned dataclasses and ordinary scalar keyword arguments. They are useful when you need to convert between Classical Keplerian and Cartesian orbit states, derive common orbit designs such as GEO, Molniya, SSO, or Walker constellations, or ask ASTROX for a compact Lambert delta-v estimate between two Keplerian orbits.
+The functions here use SDK-owned dataclasses and ordinary scalar keyword arguments. They are useful when you need to convert between Classical Keplerian and Cartesian orbit states, derive common orbit designs such as GEO, Molniya, SSO, or Walker constellations, or ask ASTROX for Lambert delta-v estimates.
 
 ## Orbit Inputs
 
@@ -136,6 +136,19 @@ custom_walker = orbits.walker_custom(
 
 ## Lambert Delta-V
 
+`orbits.lambert_delta_v(...)` solves a single-revolution Lambert transfer between two Cartesian endpoint states:
+
+```python
+departure_delta_v_m_s, arrival_delta_v_m_s = orbits.lambert_delta_v(
+    departure_state=departure_state,
+    arrival_state=arrival_state,
+    time_of_flight_s=817.4257,
+    gravitational_parameter_m3_s2=398600441500000.0,
+)
+```
+
+The return value is `(departure_delta_v_m_s, arrival_delta_v_m_s)`. Each delta-v is a three-item tuple `(x, y, z)` in meters per second. `gravitational_parameter_m3_s2` is optional; when omitted, ASTROX owns the default.
+
 `orbits.geo_ym_lambert_delta_v(...)` estimates a Lambert transfer delta-v between a platform orbit and a target orbit over a supplied time of flight:
 
 ```python
@@ -147,6 +160,6 @@ departure_delta_v_m_s, arrival_delta_v_m_s = orbits.geo_ym_lambert_delta_v(
 )
 ```
 
-The return value is `(departure_delta_v_m_s, arrival_delta_v_m_s)`. Each delta-v is a three-item tuple `(x, y, z)` in meters per second. `platform_gravitational_parameter_m3_s2` is optional; when omitted, ASTROX owns the platform orbit default.
+The GEO-YM helper accepts Keplerian input orbits instead of Cartesian endpoint states. ASTROX advances the target orbit's true anomaly linearly by mean motion times `time_of_flight_s` before solving the Lambert transfer, so its result is not the same as first propagating the target orbit through mean anomaly with Kepler's equation. `platform_gravitational_parameter_m3_s2` is optional; when omitted, ASTROX owns the platform orbit default.
 
 See `examples/02_orbits/` for runnable source examples.

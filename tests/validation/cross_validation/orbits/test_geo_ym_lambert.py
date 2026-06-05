@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Lambert cross-validation between ASTROX GEO-YM and lamberthub.
+"""Lambert cross-validation between ASTROX and lamberthub.
 
 `lamberthub` is a dev-only validation dependency used here as an independent
 zero-revolution Lambert solver.
@@ -97,6 +97,18 @@ def state_vector(orbit: orbits.KeplerianElements) -> tuple[np.ndarray, np.ndarra
     )
     rotation = inertial_rotation_matrix(orbit)
     return rotation @ perifocal_position_m, rotation @ perifocal_velocity_m_s
+
+
+def cartesian_state_from_orbit(orbit: orbits.KeplerianElements) -> orbits.CartesianState:
+    position_m, velocity_m_s = state_vector(orbit)
+    return orbits.cartesian_state(
+        x_m=float(position_m[0]),
+        y_m=float(position_m[1]),
+        z_m=float(position_m[2]),
+        vx_m_s=float(velocity_m_s[0]),
+        vy_m_s=float(velocity_m_s[1]),
+        vz_m_s=float(velocity_m_s[2]),
+    )
 
 
 def inertial_rotation_matrix(orbit: orbits.KeplerianElements) -> np.ndarray:
@@ -247,6 +259,65 @@ def lamberthub_residual(
     )
 
 
+def cartesian_lamberthub_residual() -> LambertResidual:
+    departure_state = cartesian_state_from_orbit(platform_orbit())
+    arrival_state = cartesian_state_from_orbit(
+        advance_target(target_orbit(), lead_s=TIME_OF_FLIGHT_S)
+    )
+    r1 = np.array([departure_state.x_m, departure_state.y_m, departure_state.z_m])
+    v1 = np.array(
+        [
+            departure_state.vx_m_s,
+            departure_state.vy_m_s,
+            departure_state.vz_m_s,
+        ]
+    )
+    r2 = np.array([arrival_state.x_m, arrival_state.y_m, arrival_state.z_m])
+    v2 = np.array([arrival_state.vx_m_s, arrival_state.vy_m_s, arrival_state.vz_m_s])
+    astrox_departure, astrox_arrival = orbits.lambert_delta_v(
+        departure_state=departure_state,
+        arrival_state=arrival_state,
+        time_of_flight_s=TIME_OF_FLIGHT_S,
+        gravitational_parameter_m3_s2=EARTH_MU,
+    )
+    transfer_departure, transfer_arrival = izzo2015(
+        EARTH_MU,
+        r1,
+        r2,
+        TIME_OF_FLIGHT_S,
+        M=0,
+        prograde=True,
+        low_path=True,
+    )
+    expected_departure_delta_v = np.array(transfer_departure) - v1
+    expected_arrival_delta_v = np.array(transfer_arrival) - v2
+    return LambertResidual(
+        label="cartesian_lambert_delta_v",
+        departure_m_s=float(
+            np.max(np.abs(np.array(astrox_departure) - expected_departure_delta_v))
+        ),
+        arrival_m_s=float(
+            np.max(np.abs(np.array(astrox_arrival) - expected_arrival_delta_v))
+        ),
+    )
+
+
+def compare_cartesian_lambert_case() -> None:
+    residual = cartesian_lamberthub_residual()
+    if residual.max_m_s > STRICT_RESIDUAL_M_S:
+        raise CrossValidationError(
+            "\n".join(
+                [
+                    "ASTROX Cartesian Lambert no longer matches lamberthub.",
+                    residual.format(),
+                    f"strict residual target: {STRICT_RESIDUAL_M_S:.12g} m/s",
+                    "Comparison: independent Keplerian-to-RV input, zero-revolution prograde Lambert, ASTROX delta-v versus lamberthub transfer velocity minus endpoint velocity.",
+                    "Do not widen tolerance; investigate units, branch choice, or ASTROX solver semantics.",
+                ]
+            )
+        )
+
+
 def compare_current_lambert_case() -> None:
     current_target = target_orbit()
     target_at_input = lamberthub_residual(
@@ -298,9 +369,15 @@ def test_geo_ym_lambert_matches_calibrated_lamberthub_comparison() -> None:
     compare_current_lambert_case()
 
 
+def test_cartesian_lambert_matches_lamberthub_comparison() -> None:
+    configure_astrox_from_env()
+    compare_cartesian_lambert_case()
+
+
 def main() -> int:
     try:
         configure_astrox_from_env()
+        compare_cartesian_lambert_case()
         compare_current_lambert_case()
     except (CrossValidationError, LiveConfigError) as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)

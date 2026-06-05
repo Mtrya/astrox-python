@@ -68,6 +68,17 @@ def cartesian_state() -> orbits.CartesianState:
     )
 
 
+def lambert_arrival_state() -> orbits.CartesianState:
+    return orbits.cartesian_state(
+        x_m=-4963330.5,
+        y_m=4154175.2,
+        z_m=1301603.0,
+        vx_m_s=-5569.688,
+        vy_m_s=-5716.8755,
+        vz_m_s=323.9083,
+    )
+
+
 def keplerian_to_cartesian() -> orbits.CartesianState:
     return orbits.keplerian_to_cartesian(
         leo_orbit(),
@@ -99,6 +110,18 @@ def lambert_delta_v_with_platform_mu() -> tuple[
         target_orbit=lambert_target_orbit(),
         time_of_flight_s=3600.0,
         platform_gravitational_parameter_m3_s2=EARTH_MU,
+    )
+
+
+def lambert_delta_v_cartesian() -> tuple[
+    tuple[float, float, float],
+    tuple[float, float, float],
+]:
+    return orbits.lambert_delta_v(
+        departure_state=cartesian_state(),
+        arrival_state=lambert_arrival_state(),
+        time_of_flight_s=817.4257,
+        gravitational_parameter_m3_s2=EARTH_MU,
     )
 
 
@@ -138,6 +161,11 @@ CASES = [
         id="lambert_delta_v_with_platform_mu",
         description="GEO-YM Lambert delta-v with explicit platform gravitational parameter.",
         run=lambert_delta_v_with_platform_mu,
+    ),
+    ContractCase(
+        id="lambert_delta_v_cartesian",
+        description="Single-revolution Lambert delta-v between two Cartesian states.",
+        run=lambert_delta_v_cartesian,
     ),
     ContractCase(
         id="lambert_delta_v_server_default_mu",
