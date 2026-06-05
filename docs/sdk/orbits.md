@@ -57,6 +57,8 @@ state = orbits.keplerian_to_cartesian(
 elements = orbits.cartesian_to_keplerian(state)
 ```
 
+ASTROX interprets `cartesian_to_keplerian(...)` with its default Earth gravitational parameter. Use `gravitational_parameter_m3_s2` only on `keplerian_to_cartesian(...)`; Cartesian states produced with a custom gravitational parameter are not reversible through `cartesian_to_keplerian(...)` with the same custom parameter.
+
 `orbits.lla_at_ascending_node(...)` returns the ascending-node location as `(longitude_deg, latitude_deg, height_m)`:
 
 ```python

@@ -229,7 +229,7 @@ def keplerian_to_cartesian(
 
 
 def cartesian_to_keplerian(state: CartesianState) -> KeplerianElements:
-    """Convert Cartesian state in meters and meters per second to Keplerian elements."""
+    """Convert Cartesian state to Keplerian elements using ASTROX's default Earth gravity parameter."""
     if not isinstance(state, CartesianState):
         raise TypeError("state must be a CartesianState instance")
 

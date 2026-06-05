@@ -15,7 +15,6 @@ from astrox import orbits
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 
 
-EARTH_MU = 398600441500000.0
 SEMI_MAJOR_AXIS_ABS_M = 0.1
 ECCENTRICITY_ABS = 2.0e-9
 ANGLE_ABS_DEG = 1.0e-6
@@ -219,19 +218,13 @@ def compare_keplerian_cartesian_roundtrip() -> None:
         ("geo_like", geo_like_orbit()),
         ("eccentric", eccentric_orbit()),
     ]:
-        state = orbits.keplerian_to_cartesian(
-            orbit,
-            gravitational_parameter_m3_s2=EARTH_MU,
-        )
+        state = orbits.keplerian_to_cartesian(orbit)
         roundtrip = orbits.cartesian_to_keplerian(state)
         failures.extend(compare_orbit(label, orbit, roundtrip))
 
     state = cartesian_sample()
     orbit = orbits.cartesian_to_keplerian(state)
-    roundtrip_state = orbits.keplerian_to_cartesian(
-        orbit,
-        gravitational_parameter_m3_s2=EARTH_MU,
-    )
+    roundtrip_state = orbits.keplerian_to_cartesian(orbit)
     failures.extend(compare_cartesian("cartesian_sample", state, roundtrip_state))
 
     if failures:

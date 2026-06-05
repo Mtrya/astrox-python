@@ -192,6 +192,7 @@ def test_orbits_public_exports_include_promoted_surface() -> None:
         "keplerian",
         "keplerian_to_cartesian",
         "kozai_izsak_mean_elements",
+        "lambert_delta_v",
         "lla_at_ascending_node",
         "molniya",
         "sso",
