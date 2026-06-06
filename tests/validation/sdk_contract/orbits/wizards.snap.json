@@ -8,17 +8,17 @@
           "argument_of_periapsis_deg": 0,
           "eccentricity": 0,
           "inclination_deg": 10,
-          "raan_deg": 220.15262990020435,
+          "raan_deg": 220.1525794712802,
           "semi_major_axis_m": 42166258.667,
           "true_anomaly_deg": 0
         },
         {
           "argument_of_periapsis_deg": 0,
-          "eccentricity": 6.980362366527056e-16,
-          "inclination_deg": 9.916752008658053,
-          "raan_deg": 219.25553815586974,
-          "semi_major_axis_m": 42166258.66700005,
-          "true_anomaly_deg": 0.5999995901779727
+          "eccentricity": 2.805800332412274e-16,
+          "inclination_deg": 9.916752029702526,
+          "raan_deg": 219.25548719487583,
+          "semi_major_axis_m": 42166258.667,
+          "true_anomaly_deg": 0.600000127549065
         }
       ]
     },
@@ -30,17 +30,17 @@
           "argument_of_periapsis_deg": 270,
           "eccentricity": 0.7372158564836563,
           "inclination_deg": 63.4,
-          "raan_deg": 200.15263866223492,
+          "raan_deg": 200.15258772888393,
           "semi_major_axis_m": 26554634.94343599,
           "true_anomaly_deg": 0
         },
         {
-          "argument_of_periapsis_deg": 270.14069088077514,
-          "eccentricity": 0.7372158564836574,
-          "inclination_deg": 63.35668129705908,
-          "raan_deg": 199.78346381698046,
-          "semi_major_axis_m": 26554634.943436105,
-          "true_anomaly_deg": -3.503579766299655e-15
+          "argument_of_periapsis_deg": 270.14069097096933,
+          "eccentricity": 0.7372158564836562,
+          "inclination_deg": 63.35668134885688,
+          "raan_deg": 199.78341284045706,
+          "semi_major_axis_m": 26554634.94343598,
+          "true_anomaly_deg": -2.236327510404035e-15
         }
       ]
     },
@@ -52,17 +52,17 @@
           "argument_of_periapsis_deg": 0,
           "eccentricity": 0,
           "inclination_deg": 97.78764579583225,
-          "raan_deg": 137.65262990020437,
+          "raan_deg": 137.6526298129469,
           "semi_major_axis_m": 6978137,
           "true_anomaly_deg": 0
         },
         {
           "argument_of_periapsis_deg": 0,
-          "eccentricity": 1.108270159548991e-15,
-          "inclination_deg": 97.87914344419973,
-          "raan_deg": 137.35978291967498,
-          "semi_major_axis_m": 6978137.000000007,
-          "true_anomaly_deg": 0.09747129902529394
+          "eccentricity": 1.8477218909534838e-16,
+          "inclination_deg": 97.87914345393561,
+          "raan_deg": 137.35978283960068,
+          "semi_major_axis_m": 6978137,
+          "true_anomaly_deg": 0.09747137231178071
         }
       ]
     },
@@ -249,6 +249,6 @@
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-06-05T17:07:45Z"
+    "refreshed_at": "2026-06-06T08:42:27Z"
   }
 }
