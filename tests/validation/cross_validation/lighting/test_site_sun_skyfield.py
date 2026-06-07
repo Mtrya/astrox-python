@@ -29,7 +29,8 @@ AER_AZIMUTH_ABS_DEG = 1.0e-4
 AER_ELEVATION_ABS_DEG = 5.0e-5
 # SolarAER angles match Skyfield apparent topocentric Sun geometry tightly.
 # Range is checked on representative blocking cases, while a broader annual
-# SolarAER range residual is kept visible in calibration below.
+# SolarAER-specific range residual against Skyfield, Astropy, and Orekit stays
+# visible in calibration below.
 AER_RANGE_ABS_KM = 25.0
 TRANSITION_ABS_S = 3.0
 INTENSITY_ABS = 5.0e-4
@@ -572,7 +573,7 @@ def test_site_solar_intensity_matches_skyfield_disk_geometry() -> None:
 
 @pytest.mark.calibration
 @pytest.mark.xfail(
-    reason="SolarAER range has a date-dependent residual against Skyfield/Astropy topocentric range that is not explained by DE421-vs-DE440s ephemeris differences.",
+    reason="SolarAER range has a date-dependent residual against Skyfield/Astropy/Orekit topocentric range; SolarIntensity.ApparentSolarRange matches those engines, so the residual appears SolarAER-specific.",
     raises=CrossValidationError,
     strict=True,
 )

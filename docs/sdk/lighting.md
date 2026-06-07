@@ -51,11 +51,11 @@ intensity = lighting.solar_intensity(
 
 For site positions, `az_el_mask_data` can be supplied as an alternating azimuth/elevation mask array in radians. `occultation_bodies` can be supplied when you want to override the server's occulting-body defaults.
 
-Site-position samples include the Sun azimuth/elevation/range fields returned by ASTROX. Those site angles are the light-delay-only solar direction used by the intensity calculation. For a direct apparent topocentric Sun direction at a site, use `solar_aer(...)`.
+Site-position samples include the Sun azimuth/elevation/range fields returned by ASTROX. Those site angles are the light-delay-only solar direction used by the intensity calculation. For direct apparent topocentric Sun angles at a site, use `solar_aer(...)`.
 
 ## Solar AER
 
-`lighting.solar_aer(...)` computes apparent solar azimuth, elevation, and range samples for a fixed site.
+`lighting.solar_aer(...)` computes solar azimuth, elevation, and range samples for a fixed site. The azimuth and elevation fields represent the apparent topocentric Sun direction.
 
 ```python
 aer = lighting.solar_aer(

@@ -8,7 +8,7 @@ from astrox import entities, lighting
 
 The user-facing guides are [docs/sdk/entities.md](../../docs/sdk/entities.md) and [docs/sdk/lighting.md](../../docs/sdk/lighting.md). They document position sources, named entities, sensors, lighting functions, arguments, units, and return shape.
 
-The example prints sunlight interval counts, the visible and shadowed fractions from a site solar-intensity sample, and the apparent solar azimuth/elevation/range for the same site.
+The example prints sunlight interval counts, the visible and shadowed fractions from a site solar-intensity sample, and solar azimuth/elevation/range for the same site.
 
 ## Curated Lighting Examples
 
