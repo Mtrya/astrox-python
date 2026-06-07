@@ -40,6 +40,12 @@ Run the full live propagator cross-validation tests:
 ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation/cross_validation/propagator
 ```
 
+Run the live lighting cross-validation tests:
+
+```bash
+ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation/cross_validation/lighting
+```
+
 GMAT-backed validation runs through a prepared Docker image. Scheduled SDK health pulls `ghcr.io/<owner>/astrox-gmat-validation:gmat-r2026a`, self-checks it, and sets `ASTROX_EXTERNAL_VALIDATION=strict` before running validation.
 
 Run the HPOP GMAT-backed validation with an already prepared image:
