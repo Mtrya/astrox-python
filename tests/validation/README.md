@@ -56,7 +56,7 @@ ASTROX_BASE_URL=http://astrox.cn:8765 GMAT_VALIDATION_IMAGE=ghcr.io/<owner>/astr
 
 ## Calibration
 
-Calibration tests use the `calibration` pytest marker. They are live investigations for unresolved external-tool mismatches that should remain visible but should not block scheduled SDK health. Scheduled SDK health runs blocking validation with `-m "not calibration"` and runs calibration separately with `--runxfail` as a nonblocking diagnostic step.
+Calibration tests use the `calibration` pytest marker. They are live investigations for unresolved external-tool mismatches that should remain visible while the current mismatch is expected. Calibration xfails are strict and limited to cross-validation mismatch errors, so unexpected passes or unexpected failure types are treated as SDK health failures. Scheduled SDK health runs blocking validation with `-m "not calibration"`, checks calibration expectations without `--runxfail`, and then runs calibration separately with `--runxfail` as a nonblocking diagnostic step.
 
 Run calibration diagnostics:
 

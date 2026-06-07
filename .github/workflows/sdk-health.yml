@@ -113,6 +113,14 @@ jobs:
           ASTROX_BASE_URL: http://astrox.cn:8765
         run: uv run python -m pytest tests/validation -m "not calibration"
 
+      - name: Check calibration expectations
+        id: calibration_expectation
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: uv run python -m pytest tests/validation -m calibration
+
       - name: Run calibration pytest
         id: calibration_pytest
         if: steps.install.outcome == 'success'
@@ -148,7 +156,8 @@ jobs:
             "${{ steps.pytest.outcome }}" \
             "${{ steps.live_smoke.outcome }}" \
             "${{ steps.prepare_gmat.outcome }}" \
-            "${{ steps.validation_pytest.outcome }}"
+            "${{ steps.validation_pytest.outcome }}" \
+            "${{ steps.calibration_expectation.outcome }}"
           do
             if [ "${outcome}" != "success" ]; then
               failed=true
@@ -167,6 +176,7 @@ jobs:
             echo "- live smoke: ${{ steps.live_smoke.outcome }}"
             echo "- GMAT preparation: ${{ steps.prepare_gmat.outcome }}"
             echo "- live validation pytest: ${{ steps.validation_pytest.outcome }}"
+            echo "- calibration expectation pytest: ${{ steps.calibration_expectation.outcome }}"
             echo "- calibration pytest (nonblocking): ${calibration_result}"
             echo
             echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"

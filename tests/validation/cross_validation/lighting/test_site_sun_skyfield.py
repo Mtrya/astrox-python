@@ -573,7 +573,8 @@ def test_site_solar_intensity_matches_skyfield_disk_geometry() -> None:
 @pytest.mark.calibration
 @pytest.mark.xfail(
     reason="SolarAER range has a date-dependent residual against Skyfield/Astropy topocentric range that is not explained by DE421-vs-DE440s ephemeris differences.",
-    strict=False,
+    raises=CrossValidationError,
+    strict=True,
 )
 def test_solar_aer_range_model_calibration() -> None:
     configure_astrox_from_env()
@@ -584,7 +585,8 @@ def test_solar_aer_range_model_calibration() -> None:
 @pytest.mark.calibration
 @pytest.mark.xfail(
     reason="Low-altitude site lighting transitions do not yet match the simple WGS84 geometric-horizon model; keep the residuals visible without blocking SDK health.",
-    strict=False,
+    raises=CrossValidationError,
+    strict=True,
 )
 def test_low_altitude_site_lighting_times_calibration() -> None:
     configure_astrox_from_env()
@@ -595,7 +597,8 @@ def test_low_altitude_site_lighting_times_calibration() -> None:
 @pytest.mark.calibration
 @pytest.mark.xfail(
     reason="SolarIntensity SolarGrazingAngle has an unresolved far-from-edge offset even when intensity itself matches disk visibility near the transition.",
-    strict=False,
+    raises=CrossValidationError,
+    strict=True,
 )
 def test_solar_intensity_grazing_angle_calibration() -> None:
     configure_astrox_from_env()

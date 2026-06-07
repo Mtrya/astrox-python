@@ -430,7 +430,8 @@ def test_hpop_matches_gmat_representative_cases() -> None:
 @pytest.mark.calibration
 @pytest.mark.xfail(
     reason="ASTROX and GMAT currently differ near an HPOP SRP shadow transition; run with --runxfail for residual diagnostics.",
-    strict=False,
+    raises=CrossValidationError,
+    strict=True,
 )
 def test_hpop_srp_shadow_transition_calibration() -> None:
     configure_astrox_from_env()
