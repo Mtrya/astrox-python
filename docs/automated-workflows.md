@@ -53,7 +53,7 @@ Scheduled SDK health also runs live validation tests under `tests/validation/`. 
 
 When scheduled validation depends on a prepared external tool, SDK health prepares that tool before running validation. GMAT-backed validation uses the pinned `ghcr.io/<owner>/astrox-gmat-validation:gmat-r2026a` image, runs the image self-check, and only then exposes `GMAT_VALIDATION_IMAGE` to validation scripts. A preparation failure is reported separately from validation pytest failure.
 
-Calibration tests use the `calibration` pytest marker. They are unresolved live comparisons that should remain visible while they are being understood, but they are not a blocking SDK health signal. Scheduled SDK health runs blocking validation with calibration tests excluded, then runs calibration tests separately as a nonblocking diagnostic step.
+Calibration tests use the `calibration` pytest marker. They are unresolved live comparisons that should remain visible while they are being understood. The expected mismatch itself is not a blocking SDK health signal, but strict calibration xfails let scheduled SDK health detect unexpected passes or unexpected failure types. Scheduled SDK health runs blocking validation with calibration tests excluded, checks calibration xfail expectations, then runs calibration tests separately with xfail disabled as a nonblocking residual diagnostic step.
 
 On blocking failure, the workflow creates or updates one open issue. On success, it does not automatically close that issue. Human review decides whether a previous health issue was transient, resolved, duplicate, or no longer relevant.
 

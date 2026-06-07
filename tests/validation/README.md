@@ -40,6 +40,14 @@ Run the full live propagator cross-validation tests:
 ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation/cross_validation/propagator
 ```
 
+Run the live lighting cross-validation tests:
+
+```bash
+ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation/cross_validation/lighting
+```
+
+Orekit-backed lighting validation uses `orekit-jpype[jdk4py]` to compare ASTROX spacecraft solar intensity against Orekit's conical Earth-shadow lighting ratio, including a partial-shadow sample. The test loads Orekit data from `OREKIT_DATA_PATH`, defaulting to `/tmp/astrox-python-orekit-data.zip`, and downloads that zip if it is not present.
+
 GMAT-backed validation runs through a prepared Docker image. Scheduled SDK health pulls `ghcr.io/<owner>/astrox-gmat-validation:gmat-r2026a`, self-checks it, and sets `ASTROX_EXTERNAL_VALIDATION=strict` before running validation.
 
 Run the HPOP GMAT-backed validation with an already prepared image:
@@ -50,7 +58,7 @@ ASTROX_BASE_URL=http://astrox.cn:8765 GMAT_VALIDATION_IMAGE=ghcr.io/<owner>/astr
 
 ## Calibration
 
-Calibration tests use the `calibration` pytest marker. They are live investigations for unresolved external-tool mismatches that should remain visible but should not block scheduled SDK health. Scheduled SDK health runs blocking validation with `-m "not calibration"` and runs calibration separately with `--runxfail` as a nonblocking diagnostic step.
+Calibration tests use the `calibration` pytest marker. They are live investigations for unresolved external-tool mismatches that should remain visible while the current mismatch is expected. Calibration xfails are strict and limited to cross-validation mismatch errors, so unexpected passes or unexpected failure types are treated as SDK health failures. Scheduled SDK health runs blocking validation with `-m "not calibration"`, checks calibration expectations without `--runxfail`, and then runs calibration separately with `--runxfail` as a nonblocking diagnostic step.
 
 Run calibration diagnostics:
 

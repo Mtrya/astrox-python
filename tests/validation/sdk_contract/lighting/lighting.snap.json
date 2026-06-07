@@ -1,0 +1,282 @@
+{
+  "cases": [
+    {
+      "description": "Lighting intervals for a fixed geodetic site position.",
+      "id": "lighting_times_site",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "Penumbra": {
+          "MeanDuration": 0,
+          "TotalDuration": 0
+        },
+        "SunLight": {
+          "Intervals": [
+            {
+              "Duration": 1800,
+              "Start": "2024-01-01T00:00:00.000Z",
+              "Stop": "2024-01-01T00:30:00.000Z"
+            }
+          ],
+          "MaxDuration": {
+            "Duration": 1800,
+            "Start": "2024-01-01T00:00:00.000Z",
+            "Stop": "2024-01-01T00:30:00.000Z"
+          },
+          "MeanDuration": 1800,
+          "MinDuration": {
+            "Duration": 1800,
+            "Start": "2024-01-01T00:00:00.000Z",
+            "Stop": "2024-01-01T00:30:00.000Z"
+          },
+          "TotalDuration": 1800
+        },
+        "Umbra": {
+          "MeanDuration": 0,
+          "TotalDuration": 0
+        }
+      }
+    },
+    {
+      "description": "Lighting intervals for an SGP4 TLE position.",
+      "id": "lighting_times_sgp4",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "Penumbra": {
+          "Intervals": [
+            {
+              "Duration": 9.183561708137859,
+              "Start": "2024-01-01T00:13:32.026Z",
+              "Stop": "2024-01-01T00:13:41.210Z"
+            }
+          ],
+          "MaxDuration": {
+            "Duration": 9.183561708137859,
+            "Start": "2024-01-01T00:13:32.026Z",
+            "Stop": "2024-01-01T00:13:41.210Z"
+          },
+          "MeanDuration": 9.183561708137859,
+          "MinDuration": {
+            "Duration": 9.183561708137859,
+            "Start": "2024-01-01T00:13:32.026Z",
+            "Stop": "2024-01-01T00:13:41.210Z"
+          },
+          "TotalDuration": 9.183561708137859
+        },
+        "SunLight": {
+          "Intervals": [
+            {
+              "Duration": 812.0269152832043,
+              "Start": "2024-01-01T00:00:00.000Z",
+              "Stop": "2024-01-01T00:13:32.026Z"
+            }
+          ],
+          "MaxDuration": {
+            "Duration": 812.0269152832043,
+            "Start": "2024-01-01T00:00:00.000Z",
+            "Stop": "2024-01-01T00:13:32.026Z"
+          },
+          "MeanDuration": 812.0269152832043,
+          "MinDuration": {
+            "Duration": 812.0269152832043,
+            "Start": "2024-01-01T00:00:00.000Z",
+            "Stop": "2024-01-01T00:13:32.026Z"
+          },
+          "TotalDuration": 812.0269152832043
+        },
+        "Umbra": {
+          "Intervals": [
+            {
+              "Duration": 978.7895230086579,
+              "Start": "2024-01-01T00:13:41.210Z",
+              "Stop": "2024-01-01T00:30:00.000Z"
+            }
+          ],
+          "MaxDuration": {
+            "Duration": 978.7895230086579,
+            "Start": "2024-01-01T00:13:41.210Z",
+            "Stop": "2024-01-01T00:30:00.000Z"
+          },
+          "MeanDuration": 978.7895230086579,
+          "MinDuration": {
+            "Duration": 978.7895230086579,
+            "Start": "2024-01-01T00:13:41.210Z",
+            "Stop": "2024-01-01T00:30:00.000Z"
+          },
+          "TotalDuration": 978.7895230086579
+        }
+      }
+    },
+    {
+      "description": "Solar intensity samples for a J2 Keplerian position.",
+      "id": "solar_intensity_j2",
+      "return": {
+        "Datas": [
+          {
+            "$type": "SolarIntensityScData",
+            "ApparentSolarRange": 147107425.05579448,
+            "CurrentCondition": "Umbra",
+            "Intensity": 0,
+            "Obstruction": "Earth",
+            "PercentShadow": 1,
+            "RelativeAngle": 41.187932068210856,
+            "SolarDiskHalfAngle": 0.27096404125294393,
+            "SolarGrazingAngle": -29.10976525394802,
+            "Time": "2024-01-01T00:00:00.000Z"
+          },
+          {
+            "$type": "SolarIntensityScData",
+            "ApparentSolarRange": 147108745.7326053,
+            "CurrentCondition": "Umbra",
+            "Intensity": 0,
+            "Obstruction": "Earth",
+            "PercentShadow": 1,
+            "RelativeAngle": 18.334914222901872,
+            "SolarDiskHalfAngle": 0.27096160864030805,
+            "SolarGrazingAngle": -51.71977777443133,
+            "Time": "2024-01-01T00:15:00.000Z"
+          },
+          {
+            "$type": "SolarIntensityScData",
+            "ApparentSolarRange": 147103935.54353988,
+            "CurrentCondition": "SunLight",
+            "Intensity": 1,
+            "Obstruction": "None",
+            "PercentShadow": 0,
+            "RelativeAngle": 75.98575606164016,
+            "SolarDiskHalfAngle": 0.270970468949038,
+            "SolarGrazingAngle": 5.918468684297624,
+            "Time": "2024-01-01T00:30:00.000Z"
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "Solar intensity samples for a two-body Keplerian position.",
+      "id": "solar_intensity_two_body",
+      "return": {
+        "Datas": [
+          {
+            "$type": "SolarIntensityScData",
+            "ApparentSolarRange": 147107425.05579433,
+            "CurrentCondition": "Umbra",
+            "Intensity": 0,
+            "Obstruction": "Earth",
+            "PercentShadow": 1,
+            "RelativeAngle": 41.187932069938576,
+            "SolarDiskHalfAngle": 0.2709640412529442,
+            "SolarGrazingAngle": -29.10976525222764,
+            "Time": "2024-01-01T00:00:00.000Z"
+          },
+          {
+            "$type": "SolarIntensityScData",
+            "ApparentSolarRange": 147108749.55327424,
+            "CurrentCondition": "Umbra",
+            "Intensity": 0,
+            "Obstruction": "Earth",
+            "PercentShadow": 1,
+            "RelativeAngle": 18.231832860486612,
+            "SolarDiskHalfAngle": 0.27096160160291355,
+            "SolarGrazingAngle": -51.82236139972229,
+            "Time": "2024-01-01T00:15:00.000Z"
+          },
+          {
+            "$type": "SolarIntensityScData",
+            "ApparentSolarRange": 147103960.04821783,
+            "CurrentCondition": "SunLight",
+            "Intensity": 1,
+            "Obstruction": "None",
+            "PercentShadow": 0,
+            "RelativeAngle": 75.77235930818146,
+            "SolarDiskHalfAngle": 0.27097042381025604,
+            "SolarGrazingAngle": 5.705015874244342,
+            "Time": "2024-01-01T00:30:00.000Z"
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "Solar intensity samples for a CZML-like sampled position.",
+      "id": "solar_intensity_czml",
+      "return": {
+        "Datas": [
+          {
+            "$type": "SolarIntensityScData",
+            "ApparentSolarRange": 147105189.4664989,
+            "CurrentCondition": "SunLight",
+            "Intensity": 1,
+            "Obstruction": "None",
+            "PercentShadow": 0,
+            "RelativeAngle": 67.63612250938932,
+            "SolarDiskHalfAngle": 0.2709681591826276,
+            "SolarGrazingAngle": 9.660529413816082,
+            "Time": "2024-01-01T00:00:00.000Z"
+          },
+          {
+            "$type": "SolarIntensityScData",
+            "ApparentSolarRange": 147108965.7809311,
+            "CurrentCondition": "Umbra",
+            "Intensity": 0,
+            "Obstruction": "Earth",
+            "PercentShadow": 1,
+            "RelativeAngle": 19.642889458154077,
+            "SolarDiskHalfAngle": 0.27096120332787504,
+            "SolarGrazingAngle": -44.827672996615924,
+            "Time": "2024-01-01T00:15:00.000Z"
+          },
+          {
+            "$type": "SolarIntensityScData",
+            "ApparentSolarRange": 147107075.7460881,
+            "CurrentCondition": "Umbra",
+            "Intensity": 0,
+            "Obstruction": "Earth",
+            "PercentShadow": 1,
+            "RelativeAngle": 46.454864070370135,
+            "SolarDiskHalfAngle": 0.2709646846691417,
+            "SolarGrazingAngle": -20.2763070421524,
+            "Time": "2024-01-01T00:30:00.000Z"
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "Solar azimuth/elevation/range samples for a fixed geodetic site position.",
+      "id": "solar_aer_site",
+      "return": {
+        "Datas": [
+          {
+            "Azimuth": 209.54838978568986,
+            "Elevation": 41.25272429330843,
+            "Range": 147098121.68625876,
+            "Time": "2024-01-01T00:00:00.000Z"
+          },
+          {
+            "Azimuth": 213.37568712566716,
+            "Elevation": 39.411816880117584,
+            "Range": 147098260.4064537,
+            "Time": "2024-01-01T00:15:00.000Z"
+          },
+          {
+            "Azimuth": 216.93388419190723,
+            "Elevation": 37.38100415146014,
+            "Range": 147098420.19909996,
+            "Time": "2024-01-01T00:30:00.000Z"
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-06-07T07:19:50Z"
+  }
+}
