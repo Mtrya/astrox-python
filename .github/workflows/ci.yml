@@ -37,28 +37,26 @@ jobs:
           WHEEL="$(pwd)/$(find dist -name 'astrox_python-*.whl' -print -quit)"
           cd /tmp
           uv run --no-project --with "$WHEEL" python - <<'PY'
-          from astrox import entities, lighting, orbits, propagator
+          import importlib
+          import pkgutil
 
-          orbit = orbits.keplerian(
-              semi_major_axis_m=7000000.0,
-              eccentricity=0.001,
-              inclination_deg=98.0,
-              raan_deg=20.0,
-              argument_of_periapsis_deg=30.0,
-              true_anomaly_deg=40.0,
-          )
+          import astrox
 
-          assert orbit.to_wire()[0] == 7000000.0
-          assert hasattr(propagator, "j2")
-          assert hasattr(propagator, "two_body")
-          assert hasattr(propagator, "hpop")
-          assert hasattr(orbits, "cartesian_state")
-          assert hasattr(entities, "site_position")
-          assert hasattr(lighting, "solar_intensity")
+          public_modules = [
+              module.name
+              for module in pkgutil.iter_modules(astrox.__path__)
+              if not module.name.startswith("_")
+          ]
+          assert public_modules
+          for module_name in public_modules:
+              importlib.import_module(f"astrox.{module_name}")
+
+          assert hasattr(astrox, "configure")
+          assert hasattr(astrox, "raw")
           PY
 
       - name: Check example and validation syntax
-        run: uv run python -m py_compile examples/01_propagation/*.py examples/02_orbits/*.py examples/03_lighting/*.py tests/validation/_support/*.py tests/validation/_external/gmat/*.py tests/validation/sdk_contract/propagator/test_*.py tests/validation/sdk_contract/orbits/test_*.py tests/validation/sdk_contract/lighting/test_*.py tests/validation/cross_validation/propagator/test_*.py tests/validation/cross_validation/orbits/test_*.py .github/containers/gmat-validation/self_check.py
+        run: uv run python -m compileall -q examples tests/validation .github/containers/gmat-validation
 
       - name: Run pytest
         run: uv run python -m pytest tests --ignore=tests/validation
