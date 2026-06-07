@@ -275,6 +275,16 @@ def test_entity_composes_position_and_sensor_metadata() -> None:
             "cartesian must be a sequence of numbers",
         ),
         (
+            entities.czml_position,
+            {"epoch": "2024-01-01T00:00:00.000Z", "cartesian": [0.0, "1.0", 2.0]},
+            "cartesian must be a sequence of numbers",
+        ),
+        (
+            entities.czml_position,
+            {"epoch": "2024-01-01T00:00:00.000Z", "cartesian_velocity": [0.0, True]},
+            "cartesian_velocity must be a sequence of numbers",
+        ),
+        (
             entities.entity,
             {"name": "bad", "position": {"$type": "SitePosition"}},
             "position must be an astrox.entities position value",

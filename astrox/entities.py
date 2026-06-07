@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from numbers import Real
 from typing import Any, TypeAlias
 
 from astrox.orbits import KeplerianElements
@@ -38,7 +39,10 @@ def _include_if_supplied(payload: dict[str, Any], wire_key: str, value: Any) -> 
 def _number_sequence_to_list(value: Sequence[float], *, parameter: str) -> list[float]:
     if isinstance(value, (str, bytes)) or not isinstance(value, Sequence):
         raise TypeError(f"{parameter} must be a sequence of numbers")
-    return list(value)
+    items = list(value)
+    if not all(isinstance(item, Real) and not isinstance(item, bool) for item in items):
+        raise TypeError(f"{parameter} must be a sequence of numbers")
+    return items
 
 
 def _tle_lines_to_list(value: tuple[str, str] | list[str]) -> list[str]:

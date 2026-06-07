@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from numbers import Real
 from typing import Any
 
 from astrox import entities
@@ -23,7 +24,10 @@ def _include_if_supplied(payload: dict[str, Any], wire_key: str, value: Any) -> 
 def _number_sequence_to_list(value: Sequence[float], *, parameter: str) -> list[float]:
     if isinstance(value, (str, bytes)) or not isinstance(value, Sequence):
         raise TypeError(f"{parameter} must be a sequence of numbers")
-    return list(value)
+    items = list(value)
+    if not all(isinstance(item, Real) and not isinstance(item, bool) for item in items):
+        raise TypeError(f"{parameter} must be a sequence of numbers")
+    return items
 
 
 def _string_sequence_to_list(value: Sequence[str], *, parameter: str) -> list[str]:

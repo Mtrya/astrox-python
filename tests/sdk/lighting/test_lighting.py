@@ -228,6 +228,26 @@ def test_solar_aer_emits_site_only_wire_shape_without_position_discriminator(
             },
             "site_position must be an astrox.entities.SitePosition value",
         ),
+        (
+            lighting.solar_intensity,
+            {
+                "start": "2024-01-01T00:00:00.000Z",
+                "stop": "2024-01-01T01:00:00.000Z",
+                "position": sample_site(),
+                "az_el_mask_data": [0.0, "0.1"],
+            },
+            "az_el_mask_data must be a sequence of numbers",
+        ),
+        (
+            lighting.lighting_times,
+            {
+                "start": "2024-01-01T00:00:00.000Z",
+                "stop": "2024-01-01T01:00:00.000Z",
+                "position": sample_site(),
+                "az_el_mask_data": [0.0, False],
+            },
+            "az_el_mask_data must be a sequence of numbers",
+        ),
     ],
 )
 def test_lighting_functions_reject_unsupported_public_shapes(
