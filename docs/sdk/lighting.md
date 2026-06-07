@@ -32,7 +32,7 @@ The return value is the ASTROX JSON-like response dictionary. `SunLight`, `Penum
 
 ## Solar Intensity
 
-`lighting.solar_intensity(...)` computes solar intensity samples for a position source.
+`lighting.solar_intensity(...)` computes sampled solar visibility for a position source. Each sample includes `Intensity`, where `1` means the solar disk is fully visible and `0` means fully blocked, and `PercentShadow`, the blocked fraction of the solar disk.
 
 ```python
 site = entities.site_position(
@@ -51,9 +51,11 @@ intensity = lighting.solar_intensity(
 
 For site positions, `az_el_mask_data` can be supplied as an alternating azimuth/elevation mask array in radians. `occultation_bodies` can be supplied when you want to override the server's occulting-body defaults.
 
+Site-position samples include the Sun azimuth/elevation/range fields returned by ASTROX. Those site angles are the light-delay-only solar direction used by the intensity calculation. For a direct apparent topocentric Sun direction at a site, use `solar_aer(...)`.
+
 ## Solar AER
 
-`lighting.solar_aer(...)` computes solar azimuth, elevation, and range samples for a fixed site.
+`lighting.solar_aer(...)` computes apparent solar azimuth, elevation, and range samples for a fixed site.
 
 ```python
 aer = lighting.solar_aer(

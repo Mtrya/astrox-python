@@ -41,8 +41,19 @@ def main() -> None:
     )
 
     print(f"ISS sunlight intervals: {len(intervals['SunLight']['Intervals'])}")
-    print(f"Site intensity samples: {len(intensity['Datas'])}")
-    print(f"Site solar AER samples: {len(aer['Datas'])}")
+    first_intensity = intensity["Datas"][0]
+    first_aer = aer["Datas"][0]
+    print(
+        "First site intensity sample: "
+        f"{first_intensity['Intensity']:.3f} visible, "
+        f"{first_intensity['PercentShadow']:.3f} shadow"
+    )
+    print(
+        "First site solar AER sample: "
+        f"az={first_aer['Azimuth']:.3f} deg, "
+        f"el={first_aer['Elevation']:.3f} deg, "
+        f"range={first_aer['Range']:.1f} km"
+    )
 
 
 if __name__ == "__main__":
