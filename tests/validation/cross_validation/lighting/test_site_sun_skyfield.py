@@ -8,6 +8,7 @@ import os
 import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from importlib import metadata
 from pathlib import Path
 from typing import Callable
 
@@ -17,7 +18,11 @@ if str(REPO_ROOT) not in sys.path:
 
 import pytest
 from skyfield.api import Loader, wgs84
-from skyfield.positionlib import _to_altaz
+
+try:
+    from skyfield.positionlib import _to_altaz as _skyfield_astrometric_to_altaz
+except ImportError:
+    _skyfield_astrometric_to_altaz = None
 
 from astrox import entities, lighting
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
@@ -215,15 +220,39 @@ def skyfield_alt_az_range(
 ) -> tuple[float, float, float]:
     time = context.timescale.from_datetime(parse_astrox_time(time_string))
     astrometric = context.observer.at(time).observe(context.sun)
-    if apparent:
-        altitude, azimuth, distance = astrometric.apparent().altaz()
-    else:
-        # SolarIntensity documents its site angles as light-delay-only, without
-        # aberration. Skyfield exposes that vector as astrometric; this uses the
-        # same topocentric rotation as Skyfield altaz without applying apparent
-        # corrections.
-        altitude, azimuth, distance = _to_altaz(astrometric, None, "standard")
+    altitude, azimuth, distance = skyfield_altaz(astrometric, apparent=apparent)
     return altitude.degrees, azimuth.degrees, distance.km
+
+
+def skyfield_altaz(astrometric: object, *, apparent: bool) -> tuple[object, object, object]:
+    if apparent:
+        return astrometric.apparent().altaz()
+
+    # SolarIntensity documents its site angles as light-delay-only, without
+    # aberration. Skyfield exposes that vector as astrometric but has no public
+    # astrometric altaz API, so keep the private call isolated and guarded.
+    if _skyfield_astrometric_to_altaz is None:
+        pytest.skip(
+            "Skyfield no longer exposes _to_altaz; no public astrometric altaz API is available for this validation."
+        )
+    if not supports_skyfield_astrometric_altaz():
+        pytest.skip(
+            "Skyfield astrometric altaz shim has not been calibrated for this Skyfield major version."
+        )
+    return _skyfield_astrometric_to_altaz(astrometric, None, "standard")
+
+
+def supports_skyfield_astrometric_altaz() -> bool:
+    try:
+        version_parts = metadata.version("skyfield").split(".")
+    except metadata.PackageNotFoundError:
+        return False
+    try:
+        major = int(version_parts[0])
+        minor = int(version_parts[1])
+    except (IndexError, ValueError):
+        return False
+    return major == 1 and minor >= 54
 
 
 def compare_solar_aer_case(case: SiteCase) -> None:
@@ -506,9 +535,13 @@ def format_time(value: datetime) -> str:
 
 
 def require_intervals(result: dict[str, object], key: str) -> list[dict[str, object]]:
+    if key not in result:
+        raise CrossValidationError(f"Missing key: {key}")
     block = result[key]
     if not isinstance(block, dict):
         raise CrossValidationError(f"{key} must be an object")
+    if "Intervals" not in block:
+        raise CrossValidationError(f"Missing key: {key}.Intervals")
     intervals = block["Intervals"]
     if not isinstance(intervals, list):
         raise CrossValidationError(f"{key}.Intervals must be a list")
@@ -540,6 +573,8 @@ def interior_stop(intervals: list[dict[str, object]], *, case: SiteCase) -> str:
 
 
 def require_str(payload: dict[str, object], key: str) -> str:
+    if key not in payload:
+        raise CrossValidationError(f"Missing key: {key}")
     value = payload[key]
     if not isinstance(value, str):
         raise CrossValidationError(f"{key} must be a string")
@@ -547,6 +582,8 @@ def require_str(payload: dict[str, object], key: str) -> str:
 
 
 def require_float(payload: dict[str, object], key: str) -> float:
+    if key not in payload:
+        raise CrossValidationError(f"Missing key: {key}")
     value = payload[key]
     if not isinstance(value, int | float) or isinstance(value, bool):
         raise CrossValidationError(f"{key} must be numeric")

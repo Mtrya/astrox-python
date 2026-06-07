@@ -3,6 +3,7 @@
 Functions are organized by domain modules and can use package-level
 configuration without requiring explicit client management:
 
+    import astrox
     from astrox import entities, lighting, orbits, propagator
 
     astrox.configure(base_url="http://custom:8765", timeout=120)

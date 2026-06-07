@@ -228,6 +228,8 @@ def parse_astrox_time(value: str) -> datetime:
 
 
 def require_str(payload: dict[str, object], key: str) -> str:
+    if key not in payload:
+        raise CrossValidationError(f"Missing key: {key}")
     value = payload[key]
     if not isinstance(value, str):
         raise CrossValidationError(f"{key} must be a string")
@@ -235,6 +237,8 @@ def require_str(payload: dict[str, object], key: str) -> str:
 
 
 def require_float(payload: dict[str, object], key: str) -> float:
+    if key not in payload:
+        raise CrossValidationError(f"Missing key: {key}")
     value = payload[key]
     if not isinstance(value, int | float) or isinstance(value, bool):
         raise CrossValidationError(f"{key} must be numeric")
