@@ -27,9 +27,9 @@ EARTH_EQUATORIAL_RADIUS_M = 6378137.0
 SUN_RADIUS_KM = 695700.0
 AER_AZIMUTH_ABS_DEG = 1.0e-4
 AER_ELEVATION_ABS_DEG = 5.0e-5
-# ASTROX states that lighting uses a DE430-like Sun position. Skyfield's small
-# public ephemeris here is DE421, so range is checked with a narrow kilometer
-# bound but not meter-level identity.
+# SolarAER angles match Skyfield apparent topocentric Sun geometry tightly.
+# Range is checked on representative blocking cases, while a broader annual
+# SolarAER range residual is kept visible in calibration below.
 AER_RANGE_ABS_KM = 25.0
 TRANSITION_ABS_S = 3.0
 INTENSITY_ABS = 5.0e-4
@@ -572,10 +572,10 @@ def test_site_solar_intensity_matches_skyfield_disk_geometry() -> None:
 
 @pytest.mark.calibration
 @pytest.mark.xfail(
-    reason="Quito SolarAER currently differs from Skyfield's DE421 range by hundreds of kilometers; keep the case visible while calibrating ephemeris/model assumptions.",
+    reason="SolarAER range has a date-dependent residual against Skyfield/Astropy topocentric range that is not explained by DE421-vs-DE440s ephemeris differences.",
     strict=False,
 )
-def test_solar_aer_quito_range_calibration() -> None:
+def test_solar_aer_range_model_calibration() -> None:
     configure_astrox_from_env()
     for case in SOLAR_AER_CALIBRATION_CASES:
         compare_solar_aer_case(case)
