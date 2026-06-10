@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import FrozenInstanceError, is_dataclass
 from inspect import signature
 from typing import get_type_hints
 
@@ -108,7 +109,14 @@ def hpop_config() -> propagator.HpopConfig:
 
 
 def test_hpop_branch_constructors_emit_exact_wire_fragments() -> None:
-    assert_canonical_equal(hpop_config(), HPOP_CONFIG_REQUEST)
+    config = hpop_config()
+
+    assert is_dataclass(config)
+    assert isinstance(config, propagator.HpopConfig)
+    assert_canonical_equal(config.to_wire(), HPOP_CONFIG_REQUEST)
+
+    with pytest.raises(FrozenInstanceError):
+        config.name = "mutated"
 
 
 @pytest.mark.parametrize(
@@ -136,10 +144,10 @@ def test_hpop_branch_constructors_emit_exact_wire_fragments() -> None:
     ],
 )
 def test_hpop_constructors_omit_unsupplied_optional_values(
-    fragment: dict[str, object],
+    fragment: object,
     expected: dict[str, object],
 ) -> None:
-    assert_canonical_equal(fragment, expected)
+    assert_canonical_equal(fragment.to_wire(), expected)
 
 
 @pytest.mark.parametrize(
@@ -151,11 +159,11 @@ def test_hpop_constructors_omit_unsupplied_optional_values(
         ({"srp": ["not", "mapping"]}, "srp"),
     ],
 )
-def test_hpop_config_rejects_non_mapping_subfragments(
+def test_hpop_config_rejects_non_hpop_value_subfragments(
     kwargs: dict[str, object],
     parameter: str,
 ) -> None:
-    with pytest.raises(TypeError, match=f"{parameter} must be a mapping fragment"):
+    with pytest.raises(TypeError, match=f"{parameter} must be an HPOP config value"):
         propagator.hpop_config(**kwargs)
 
 
@@ -305,7 +313,7 @@ def test_hpop_rejects_raw_orbit_and_state_fragments(kwargs: dict[str, object]) -
 def test_hpop_rejects_non_mapping_config(
     orbit: orbits.KeplerianElements,
 ) -> None:
-    with pytest.raises(TypeError, match="config must be a mapping fragment"):
+    with pytest.raises(TypeError, match="config must be an HpopConfig value or mapping fragment"):
         propagator.hpop(
             start=HPOP_CARTESIAN_REQUEST["Start"],
             stop=HPOP_CARTESIAN_REQUEST["Stop"],

@@ -168,7 +168,7 @@ See `examples/01_propagation/simple_ascent.py` and `examples/01_propagation/prop
 
 Required arguments are `start`, `stop`, `orbit_epoch`, and exactly one of `orbit` or `state`. Pass `orbit=orbits.keplerian(...)` for Classical Keplerian input, or `state=orbits.cartesian_state(...)` for Cartesian position and velocity input. Optional top-level arguments are `config`, `coord_system`, `coord_epoch`, `gravitational_parameter_m3_s2`, `coefficient_of_drag`, `area_mass_ratio_drag_m2_kg`, `coefficient_of_srp`, and `area_mass_ratio_srp_m2_kg`.
 
-Build HPOP force and integrator configuration with the curated helper constructors: `propagator.hpop_config(...)`, `propagator.hpop_rkf78(...)`, `propagator.hpop_two_body_gravity(...)`, `propagator.hpop_gravity_field(...)`, `propagator.hpop_jacchia_roberts(...)`, `propagator.hpop_srp_spherical(...)`, and `propagator.hpop_third_body(...)`. The SDK sends only supplied fields, so ASTROX keeps ownership of omitted defaults.
+Build HPOP force and integrator configuration with the curated helper constructors: `propagator.hpop_config(...)`, `propagator.hpop_rkf78(...)`, `propagator.hpop_two_body_gravity(...)`, `propagator.hpop_gravity_field(...)`, `propagator.hpop_jacchia_roberts(...)`, `propagator.hpop_srp_spherical(...)`, and `propagator.hpop_third_body(...)`. These helpers return frozen SDK-owned value objects with `to_wire()` methods. The SDK sends only supplied fields, so ASTROX keeps ownership of omitted defaults.
 
 ```python
 hpop_config = propagator.hpop_config(

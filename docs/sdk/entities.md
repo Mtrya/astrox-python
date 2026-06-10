@@ -71,6 +71,43 @@ sampled_position = entities.czml_position(
 )
 ```
 
+Create a composite CZML-like position source when ASTROX expects a sequence of sampled position blocks:
+
+```python
+track = entities.czml_positions([sampled_position])
+```
+
+Create propagated or special position sources for workflows that need reusable named entities:
+
+```python
+central_body = entities.central_body_position("Sun")
+
+hpop_position = entities.hpop_position(
+    start="2024-01-01T00:00:00.000Z",
+    stop="2024-01-01T00:10:00.000Z",
+    orbit_epoch="2024-01-01T00:00:00.000Z",
+    orbit=orbit,
+)
+
+ascent_position = entities.simple_ascent_position(
+    start="2024-01-01T00:00:00.000Z",
+    stop="2024-01-01T00:30:00.000Z",
+    launch_latitude_deg=40.0,
+    launch_longitude_deg=100.0,
+    launch_altitude_m=1000.0,
+    burnout_velocity_m_s=7800.0,
+    burnout_latitude_deg=41.0,
+    burnout_longitude_deg=101.0,
+    burnout_altitude_m=200000.0,
+)
+
+ballistic_position = entities.ballistic_position(
+    start="2024-01-01T00:00:00.000Z",
+    ballistic_type="DeltaV",
+    ballistic_type_value=5000.0,
+)
+```
+
 Optional ASTROX defaults are omitted unless you supply them. For example, `site_position(...)` does not send `CentralBody` unless `central_body` is provided.
 
 ## Sensors
@@ -104,5 +141,19 @@ satellite = entities.entity(
 ```
 
 An entity is a position source plus object metadata such as name, description, and sensor. Some ASTROX routes accept only a position source rather than a full named object. For example, lighting functions consume position sources directly because the server schema asks for `Position` or `sitePosition`.
+
+## Entity Groups
+
+Use `entities.entity_group(...)` when an ASTROX workflow accepts a named group of entities:
+
+```python
+targets = entities.entity_group(
+    name="Targets",
+    members=[satellite],
+    to_restriction="AnyOf",
+)
+```
+
+`EntityGroup` is an SDK-owned value object for composing grouped entities. The SDK lowers it to ASTROX `EntityPathGroup` wire shape, but server behavior for a given endpoint still belongs to that endpoint and its validation evidence.
 
 Use `to_wire()` only when you need to inspect the ASTROX request fragment. Ordinary SDK calls accept the SDK value objects directly.
