@@ -92,16 +92,29 @@ def install_recording_client() -> RecordingSession:
 
 
 def test_public_modules_and_names_are_available() -> None:
-    from astrox import orbits, propagator
+    from astrox import access, entities, orbits, propagator
 
+    assert "access" in astrox.__all__
+    assert "entities" in astrox.__all__
     assert "orbits" in astrox.__all__
     assert "propagator" in astrox.__all__
 
+    assert hasattr(access, "Connection")
+    assert hasattr(access, "connection")
+    assert hasattr(entities, "Entity")
+    assert hasattr(entities, "EntityGroup")
+    assert hasattr(entities, "entity")
+    assert hasattr(entities, "entity_group")
     assert hasattr(orbits, "KeplerianElements")
     assert hasattr(orbits, "CartesianState")
     assert hasattr(orbits, "keplerian")
     assert hasattr(orbits, "cartesian_state")
     assert hasattr(propagator, "HpopConfig")
+    assert hasattr(propagator, "HpopRkf78")
+    assert hasattr(propagator, "HpopTwoBodyGravity")
+    assert hasattr(propagator, "HpopGravityField")
+    assert hasattr(propagator, "HpopJacchiaRoberts")
+    assert hasattr(propagator, "HpopSrpSpherical")
     assert hasattr(propagator, "HpopIntegrator")
     assert hasattr(propagator, "HpopGravity")
     assert hasattr(propagator, "HpopAtmosphere")

@@ -14,8 +14,13 @@ __all__ = [
     "HpopConfig",
     "HpopGravity",
     "HpopIntegrator",
+    "HpopJacchiaRoberts",
+    "HpopGravityField",
+    "HpopRkf78",
     "HpopSrp",
+    "HpopSrpSpherical",
     "HpopThirdBody",
+    "HpopTwoBodyGravity",
     "PropagatorPosition",
     "ballistic",
     "ballistic_apogee_altitude",
@@ -38,14 +43,6 @@ __all__ = [
     "simple_ascent",
     "two_body",
 ]
-
-
-HpopIntegrator: TypeAlias = dict[str, Any]
-HpopGravity: TypeAlias = dict[str, Any]
-HpopAtmosphere: TypeAlias = dict[str, Any]
-HpopSrp: TypeAlias = dict[str, Any]
-HpopThirdBody: TypeAlias = dict[str, Any]
-HpopConfig: TypeAlias = dict[str, Any]
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -90,27 +87,214 @@ def _sequence_to_list(value: Sequence[str], *, parameter: str) -> list[str]:
     return items
 
 
-def _mapping_fragment_to_dict(
-    value: Mapping[str, Any],
+def _hpop_value_to_wire(
+    value: Any,
     *,
+    expected_type: type | tuple[type, ...],
     parameter: str,
 ) -> dict[str, Any]:
-    if not isinstance(value, Mapping):
-        raise TypeError(f"{parameter} must be a mapping fragment")
-    return dict(value)
+    if not isinstance(value, expected_type):
+        raise TypeError(f"{parameter} must be an HPOP config value")
+    return value.to_wire()
 
 
-def _mapping_sequence_to_list(
-    value: Sequence[Mapping[str, Any]],
-    *,
-    parameter: str,
-) -> list[dict[str, Any]]:
-    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence):
-        raise TypeError(f"{parameter} must be a sequence of mapping fragments")
-    items = list(value)
-    if not all(isinstance(item, Mapping) for item in items):
-        raise TypeError(f"{parameter} must be a sequence of mapping fragments")
-    return [dict(item) for item in items]
+@dataclass(frozen=True, kw_only=True)
+class HpopRkf78:
+    """HPOP RKF7(8) integrator configuration."""
+
+    name: str | None = None
+    description: str | None = None
+    user_comment: str | None = None
+    use_fixed_step: bool | None = None
+    initial_step_s: float | None = None
+    max_step_s: float | None = None
+    min_step_s: float | None = None
+    max_abs_error: float | None = None
+    max_rel_error: float | None = None
+    max_iterations: int | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to the ASTROX RKF7(8) integrator fragment."""
+        payload: dict[str, Any] = {"$type": "RKF7th8th"}
+        _include_if_supplied(payload, "Name", self.name)
+        _include_if_supplied(payload, "Description", self.description)
+        _include_if_supplied(payload, "UserComment", self.user_comment)
+        _include_if_supplied(payload, "UseFixedStep", self.use_fixed_step)
+        _include_if_supplied(payload, "InitialStep", self.initial_step_s)
+        _include_if_supplied(payload, "MaxStep", self.max_step_s)
+        _include_if_supplied(payload, "MinStep", self.min_step_s)
+        _include_if_supplied(payload, "MaxAbsErr", self.max_abs_error)
+        _include_if_supplied(payload, "MaxRelErr", self.max_rel_error)
+        _include_if_supplied(payload, "MaxIterations", self.max_iterations)
+        return payload
+
+
+@dataclass(frozen=True, kw_only=True)
+class HpopTwoBodyGravity:
+    """HPOP two-body gravity configuration."""
+
+    name: str | None = None
+    description: str | None = None
+    user_comment: str | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to the ASTROX two-body gravity fragment."""
+        payload: dict[str, Any] = {"$type": "TwoBody"}
+        _include_if_supplied(payload, "Name", self.name)
+        _include_if_supplied(payload, "Description", self.description)
+        _include_if_supplied(payload, "UserComment", self.user_comment)
+        return payload
+
+
+@dataclass(frozen=True, kw_only=True)
+class HpopGravityField:
+    """HPOP gravity-field configuration."""
+
+    gravity_file_name: str
+    degree: int
+    order: int
+    name: str | None = None
+    description: str | None = None
+    user_comment: str | None = None
+    use_secular_variations: bool | None = None
+    solid_tide_type: str | None = None
+    eop_file_path: str | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to the ASTROX gravity-field fragment."""
+        payload: dict[str, Any] = {
+            "$type": "GravityField",
+            "GravityFileName": self.gravity_file_name,
+            "Degree": self.degree,
+            "Order": self.order,
+        }
+        _include_if_supplied(payload, "Name", self.name)
+        _include_if_supplied(payload, "Description", self.description)
+        _include_if_supplied(payload, "UserComment", self.user_comment)
+        _include_if_supplied(payload, "UseSecularVariations", self.use_secular_variations)
+        _include_if_supplied(payload, "SolidTideType", self.solid_tide_type)
+        _include_if_supplied(payload, "EOPfilePath", self.eop_file_path)
+        return payload
+
+
+@dataclass(frozen=True, kw_only=True)
+class HpopJacchiaRoberts:
+    """HPOP Jacchia-Roberts atmosphere configuration."""
+
+    name: str | None = None
+    description: str | None = None
+    user_comment: str | None = None
+    drag_model_type: str | None = None
+    atmos_data_source: str | None = None
+    f10p7: float | None = None
+    f10p7_avg: float | None = None
+    kp: float | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to the ASTROX Jacchia-Roberts atmosphere fragment."""
+        payload: dict[str, Any] = {"$type": "JacchiaRoberts"}
+        _include_if_supplied(payload, "Name", self.name)
+        _include_if_supplied(payload, "Description", self.description)
+        _include_if_supplied(payload, "UserComment", self.user_comment)
+        _include_if_supplied(payload, "DragModelType", self.drag_model_type)
+        _include_if_supplied(payload, "AtmosDataSource", self.atmos_data_source)
+        _include_if_supplied(payload, "F10p7", self.f10p7)
+        _include_if_supplied(payload, "F10p7Avg", self.f10p7_avg)
+        _include_if_supplied(payload, "Kp", self.kp)
+        return payload
+
+
+@dataclass(frozen=True, kw_only=True)
+class HpopSrpSpherical:
+    """HPOP spherical solar-radiation-pressure configuration."""
+
+    name: str | None = None
+    description: str | None = None
+    user_comment: str | None = None
+    shadow_model: str | None = None
+    sun_position: str | None = None
+    eclipsing_bodies: tuple[str, ...] | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to the ASTROX spherical SRP fragment."""
+        payload: dict[str, Any] = {"$type": "SRPSpherical"}
+        _include_if_supplied(payload, "Name", self.name)
+        _include_if_supplied(payload, "Description", self.description)
+        _include_if_supplied(payload, "UserComment", self.user_comment)
+        _include_if_supplied(payload, "ShadowModel", self.shadow_model)
+        _include_if_supplied(payload, "SunPosition", self.sun_position)
+        if self.eclipsing_bodies is not None:
+            payload["EclipsingBodies"] = list(self.eclipsing_bodies)
+        return payload
+
+
+@dataclass(frozen=True, kw_only=True)
+class HpopThirdBody:
+    """HPOP third-body force configuration."""
+
+    third_body_name: str
+    name: str | None = None
+    description: str | None = None
+    user_comment: str | None = None
+    mode_type: str | None = None
+    ephem_source: str | None = None
+    grav_source: str | None = None
+    mu_m3_s2: float | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to the ASTROX third-body force fragment."""
+        payload: dict[str, Any] = {"ThirdBodyName": self.third_body_name}
+        _include_if_supplied(payload, "Name", self.name)
+        _include_if_supplied(payload, "Description", self.description)
+        _include_if_supplied(payload, "UserComment", self.user_comment)
+        _include_if_supplied(payload, "ModeType", self.mode_type)
+        _include_if_supplied(payload, "EphemSource", self.ephem_source)
+        _include_if_supplied(payload, "GravSource", self.grav_source)
+        _include_if_supplied(payload, "Mu", self.mu_m3_s2)
+        return payload
+
+
+HpopIntegrator: TypeAlias = HpopRkf78
+HpopGravity: TypeAlias = HpopTwoBodyGravity | HpopGravityField
+HpopAtmosphere: TypeAlias = HpopJacchiaRoberts
+HpopSrp: TypeAlias = HpopSrpSpherical
+
+
+@dataclass(frozen=True, kw_only=True)
+class HpopConfig:
+    """HPOP propagator configuration."""
+
+    name: str | None = None
+    description: str | None = None
+    user_comment: str | None = None
+    central_body: str | None = None
+    integrator: HpopIntegrator | None = None
+    gravity: HpopGravity | None = None
+    atmosphere: HpopAtmosphere | None = None
+    srp: HpopSrp | None = None
+    third_bodies: tuple[HpopThirdBody, ...] | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to the ASTROX HPOP propagator fragment."""
+        payload: dict[str, Any] = {}
+        _include_if_supplied(payload, "Name", self.name)
+        _include_if_supplied(payload, "Description", self.description)
+        _include_if_supplied(payload, "UserComment", self.user_comment)
+        _include_if_supplied(payload, "CentralBodyName", self.central_body)
+        if self.integrator is not None:
+            payload["NumericalIntegrator"] = self.integrator.to_wire()
+        if self.gravity is not None:
+            payload["GravityModel"] = self.gravity.to_wire()
+        if self.atmosphere is not None:
+            payload["AtmosphericModel"] = self.atmosphere.to_wire()
+        if self.srp is not None:
+            payload["SRPModel"] = self.srp.to_wire()
+        if self.third_bodies is not None:
+            payload["ThirdBodyForce"] = [
+                third_body.to_wire()
+                for third_body in self.third_bodies
+            ]
+        return payload
 
 
 def _keplerian_from_elements_object(payload: dict[str, Any]) -> KeplerianElements:
@@ -203,18 +387,18 @@ def hpop_rkf78(
     max_iterations: int | None = None,
 ) -> HpopIntegrator:
     """Create an HPOP RKF7(8) integrator fragment."""
-    payload: HpopIntegrator = {"$type": "RKF7th8th"}
-    _include_if_supplied(payload, "Name", name)
-    _include_if_supplied(payload, "Description", description)
-    _include_if_supplied(payload, "UserComment", user_comment)
-    _include_if_supplied(payload, "UseFixedStep", use_fixed_step)
-    _include_if_supplied(payload, "InitialStep", initial_step_s)
-    _include_if_supplied(payload, "MaxStep", max_step_s)
-    _include_if_supplied(payload, "MinStep", min_step_s)
-    _include_if_supplied(payload, "MaxAbsErr", max_abs_error)
-    _include_if_supplied(payload, "MaxRelErr", max_rel_error)
-    _include_if_supplied(payload, "MaxIterations", max_iterations)
-    return payload
+    return HpopRkf78(
+        name=name,
+        description=description,
+        user_comment=user_comment,
+        use_fixed_step=use_fixed_step,
+        initial_step_s=initial_step_s,
+        max_step_s=max_step_s,
+        min_step_s=min_step_s,
+        max_abs_error=max_abs_error,
+        max_rel_error=max_rel_error,
+        max_iterations=max_iterations,
+    )
 
 
 def hpop_two_body_gravity(
@@ -229,11 +413,11 @@ def hpop_two_body_gravity(
     ``hpop(...)`` top-level scalar arguments for spacecraft and central-body
     propagation knobs exposed by the curated SDK.
     """
-    payload: HpopGravity = {"$type": "TwoBody"}
-    _include_if_supplied(payload, "Name", name)
-    _include_if_supplied(payload, "Description", description)
-    _include_if_supplied(payload, "UserComment", user_comment)
-    return payload
+    return HpopTwoBodyGravity(
+        name=name,
+        description=description,
+        user_comment=user_comment,
+    )
 
 
 def hpop_gravity_field(
@@ -249,19 +433,17 @@ def hpop_gravity_field(
     eop_file_path: str | None = None,
 ) -> HpopGravity:
     """Create an HPOP gravity-field fragment."""
-    payload: HpopGravity = {
-        "$type": "GravityField",
-        "GravityFileName": gravity_file_name,
-        "Degree": degree,
-        "Order": order,
-    }
-    _include_if_supplied(payload, "Name", name)
-    _include_if_supplied(payload, "Description", description)
-    _include_if_supplied(payload, "UserComment", user_comment)
-    _include_if_supplied(payload, "UseSecularVariations", use_secular_variations)
-    _include_if_supplied(payload, "SolidTideType", solid_tide_type)
-    _include_if_supplied(payload, "EOPfilePath", eop_file_path)
-    return payload
+    return HpopGravityField(
+        gravity_file_name=gravity_file_name,
+        degree=degree,
+        order=order,
+        name=name,
+        description=description,
+        user_comment=user_comment,
+        use_secular_variations=use_secular_variations,
+        solid_tide_type=solid_tide_type,
+        eop_file_path=eop_file_path,
+    )
 
 
 def hpop_jacchia_roberts(
@@ -276,16 +458,16 @@ def hpop_jacchia_roberts(
     kp: float | None = None,
 ) -> HpopAtmosphere:
     """Create an HPOP Jacchia-Roberts atmosphere fragment."""
-    payload: HpopAtmosphere = {"$type": "JacchiaRoberts"}
-    _include_if_supplied(payload, "Name", name)
-    _include_if_supplied(payload, "Description", description)
-    _include_if_supplied(payload, "UserComment", user_comment)
-    _include_if_supplied(payload, "DragModelType", drag_model_type)
-    _include_if_supplied(payload, "AtmosDataSource", atmos_data_source)
-    _include_if_supplied(payload, "F10p7", f10p7)
-    _include_if_supplied(payload, "F10p7Avg", f10p7_avg)
-    _include_if_supplied(payload, "Kp", kp)
-    return payload
+    return HpopJacchiaRoberts(
+        name=name,
+        description=description,
+        user_comment=user_comment,
+        drag_model_type=drag_model_type,
+        atmos_data_source=atmos_data_source,
+        f10p7=f10p7,
+        f10p7_avg=f10p7_avg,
+        kp=kp,
+    )
 
 
 def hpop_srp_spherical(
@@ -298,18 +480,22 @@ def hpop_srp_spherical(
     eclipsing_bodies: Sequence[str] | None = None,
 ) -> HpopSrp:
     """Create an HPOP spherical solar-radiation-pressure fragment."""
-    payload: HpopSrp = {"$type": "SRPSpherical"}
-    _include_if_supplied(payload, "Name", name)
-    _include_if_supplied(payload, "Description", description)
-    _include_if_supplied(payload, "UserComment", user_comment)
-    _include_if_supplied(payload, "ShadowModel", shadow_model)
-    _include_if_supplied(payload, "SunPosition", sun_position)
+    bodies = None
     if eclipsing_bodies is not None:
-        payload["EclipsingBodies"] = _sequence_to_list(
-            eclipsing_bodies,
-            parameter="eclipsing_bodies",
+        bodies = tuple(
+            _sequence_to_list(
+                eclipsing_bodies,
+                parameter="eclipsing_bodies",
+            )
         )
-    return payload
+    return HpopSrpSpherical(
+        name=name,
+        description=description,
+        user_comment=user_comment,
+        shadow_model=shadow_model,
+        sun_position=sun_position,
+        eclipsing_bodies=bodies,
+    )
 
 
 def hpop_third_body(
@@ -324,15 +510,16 @@ def hpop_third_body(
     mu_m3_s2: float | None = None,
 ) -> HpopThirdBody:
     """Create an HPOP third-body force fragment."""
-    payload: HpopThirdBody = {"ThirdBodyName": third_body_name}
-    _include_if_supplied(payload, "Name", name)
-    _include_if_supplied(payload, "Description", description)
-    _include_if_supplied(payload, "UserComment", user_comment)
-    _include_if_supplied(payload, "ModeType", mode_type)
-    _include_if_supplied(payload, "EphemSource", ephem_source)
-    _include_if_supplied(payload, "GravSource", grav_source)
-    _include_if_supplied(payload, "Mu", mu_m3_s2)
-    return payload
+    return HpopThirdBody(
+        third_body_name=third_body_name,
+        name=name,
+        description=description,
+        user_comment=user_comment,
+        mode_type=mode_type,
+        ephem_source=ephem_source,
+        grav_source=grav_source,
+        mu_m3_s2=mu_m3_s2,
+    )
 
 
 def hpop_config(
@@ -341,44 +528,58 @@ def hpop_config(
     description: str | None = None,
     user_comment: str | None = None,
     central_body: str | None = None,
-    integrator: Mapping[str, Any] | None = None,
-    gravity: Mapping[str, Any] | None = None,
-    atmosphere: Mapping[str, Any] | None = None,
-    srp: Mapping[str, Any] | None = None,
-    third_bodies: Sequence[Mapping[str, Any]] | None = None,
+    integrator: HpopIntegrator | None = None,
+    gravity: HpopGravity | None = None,
+    atmosphere: HpopAtmosphere | None = None,
+    srp: HpopSrp | None = None,
+    third_bodies: Sequence[HpopThirdBody] | None = None,
 ) -> HpopConfig:
     """Create an HPOP propagator configuration fragment."""
-    payload: HpopConfig = {}
-    _include_if_supplied(payload, "Name", name)
-    _include_if_supplied(payload, "Description", description)
-    _include_if_supplied(payload, "UserComment", user_comment)
-    _include_if_supplied(payload, "CentralBodyName", central_body)
     if integrator is not None:
-        payload["NumericalIntegrator"] = _mapping_fragment_to_dict(
+        _hpop_value_to_wire(
             integrator,
+            expected_type=HpopRkf78,
             parameter="integrator",
         )
     if gravity is not None:
-        payload["GravityModel"] = _mapping_fragment_to_dict(
+        _hpop_value_to_wire(
             gravity,
+            expected_type=(HpopTwoBodyGravity, HpopGravityField),
             parameter="gravity",
         )
     if atmosphere is not None:
-        payload["AtmosphericModel"] = _mapping_fragment_to_dict(
+        _hpop_value_to_wire(
             atmosphere,
+            expected_type=HpopJacchiaRoberts,
             parameter="atmosphere",
         )
     if srp is not None:
-        payload["SRPModel"] = _mapping_fragment_to_dict(
+        _hpop_value_to_wire(
             srp,
+            expected_type=HpopSrpSpherical,
             parameter="srp",
         )
+    body_values = None
     if third_bodies is not None:
-        payload["ThirdBodyForce"] = _mapping_sequence_to_list(
+        if isinstance(third_bodies, (str, bytes)) or not isinstance(
             third_bodies,
-            parameter="third_bodies",
-        )
-    return payload
+            Sequence,
+        ):
+            raise TypeError("third_bodies must be a sequence of HPOP config values")
+        body_values = tuple(third_bodies)
+        if not all(isinstance(body, HpopThirdBody) for body in body_values):
+            raise TypeError("third_bodies must be a sequence of HPOP config values")
+    return HpopConfig(
+        name=name,
+        description=description,
+        user_comment=user_comment,
+        central_body=central_body,
+        integrator=integrator,
+        gravity=gravity,
+        atmosphere=atmosphere,
+        srp=srp,
+        third_bodies=body_values,
+    )
 
 
 def hpop(
@@ -388,7 +589,7 @@ def hpop(
     orbit_epoch: str,
     orbit: KeplerianElements | None = None,
     state: CartesianState | None = None,
-    config: Mapping[str, Any] | None = None,
+    config: HpopConfig | Mapping[str, Any] | None = None,
     coord_system: str | None = None,
     coord_epoch: str | None = None,
     gravitational_parameter_m3_s2: float | None = None,
@@ -426,9 +627,12 @@ def hpop(
     _include_if_supplied(payload, "CoefficientOfSRP", coefficient_of_srp)
     _include_if_supplied(payload, "AreaMassRatioSRP", area_mass_ratio_srp_m2_kg)
     if config is not None:
-        if not isinstance(config, Mapping):
-            raise TypeError("config must be a mapping fragment")
-        payload["HpopPropagator"] = dict(config)
+        if isinstance(config, HpopConfig):
+            payload["HpopPropagator"] = config.to_wire()
+        elif isinstance(config, Mapping):
+            payload["HpopPropagator"] = dict(config)
+        else:
+            raise TypeError("config must be an HpopConfig value or mapping fragment")
 
     result = raw.post("/Propagator/HPOP", json=payload)
     return _success_path(result)
