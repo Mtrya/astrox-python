@@ -56,7 +56,7 @@ requires-dist = [{ name = "requests", specifier = ">=2.34.2" }]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "brahe", specifier = ">=1.5.2" },
+    { name = "brahe", specifier = ">=1.6.0" },
     { name = "hatchling", specifier = ">=1.30.1" },
     { name = "lamberthub", specifier = ">=1.0.0" },
     { name = "matplotlib", specifier = ">=3.10.9" },
@@ -69,7 +69,7 @@ dev = [
 
 [[package]]
 name = "brahe"
-version = "1.5.2"
+version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cartopy" },
@@ -85,23 +85,23 @@ dependencies = [
     { name = "shapely" },
     { name = "typer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/52/fb/3df105a675d0e12c7779ae8578749129b2f887cb305c1703cb91264f43fe/brahe-1.5.2.tar.gz", hash = "sha256:62e937c2063d9f2828dae4e2a1defcc398626e9d3f4c77fc3dc2a82f7ff18968", size = 17594282, upload-time = "2026-05-18T16:15:05.491Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c0/0b/431a07c4d81a94d0387e8357f107762fccf6e4c5c924cc4c96b5e79848a9/brahe-1.6.0.tar.gz", hash = "sha256:16c91d5791dfcc7143fa7321a603d1a76599c03917986bfbc47d26e20dcc7605", size = 19208283, upload-time = "2026-06-06T06:26:53.038Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4a/b5/81446b7d007d2722d1fbf4520bbe3f14da407061ca1db4f36f2b6fb5396d/brahe-1.5.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:c12f288f37c28f3cee7ee662bc4632ead25e6cd1bbc1b1fedd76aa1c9b4cb186", size = 20243574, upload-time = "2026-05-18T16:14:26.431Z" },
-    { url = "https://files.pythonhosted.org/packages/ba/fd/7b63fe5059070d18bd9a764ae0e2a7c7bf2645902085e9a30811ade4274c/brahe-1.5.2-cp310-cp310-manylinux_2_34_x86_64.whl", hash = "sha256:305598802fae63a408f0d4268968d82439e826299677a7d449d20017898d4380", size = 20526580, upload-time = "2026-05-18T16:14:29.571Z" },
-    { url = "https://files.pythonhosted.org/packages/72/1f/f23fd684e3efe124c85ef7341d2e2c132fa49ae1bba2e92507ffd9e00749/brahe-1.5.2-cp310-cp310-win_amd64.whl", hash = "sha256:faaf8a1926465274eeb86e670de5bf9832e01aa583203a3c05d44d67eabc3616", size = 20361505, upload-time = "2026-05-18T16:14:32.25Z" },
-    { url = "https://files.pythonhosted.org/packages/e2/f9/ffe3551e9b6809643c71113e2e303aab4c7df268754509ab8aa0d6e0be38/brahe-1.5.2-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:b5fe362915e752b7dbcf77d5ceb11680aa3e0a4b35ca16167c91b22306db61f2", size = 20242839, upload-time = "2026-05-18T16:14:35.086Z" },
-    { url = "https://files.pythonhosted.org/packages/62/91/ef0966f092f15fb52ecf57cc3d10c7a22446d74bc30c1c189f0ac4b06ab5/brahe-1.5.2-cp311-cp311-manylinux_2_34_x86_64.whl", hash = "sha256:0ca49ce8615c40bf2f79af2651418dce0e64fb7951db21a45b10e67342b92401", size = 20526004, upload-time = "2026-05-18T16:14:37.482Z" },
-    { url = "https://files.pythonhosted.org/packages/45/9f/f6f643e8829b8242959e4d73b1e606418f8b33e6c1f4d955bc572ed8055d/brahe-1.5.2-cp311-cp311-win_amd64.whl", hash = "sha256:a2c2d61a00cc8e483381c6d85ff984c6df5702347a1c7b624a0a4880a4f436b0", size = 20362435, upload-time = "2026-05-18T16:14:39.671Z" },
-    { url = "https://files.pythonhosted.org/packages/e1/21/dc9521d966931675c8f56728eeb9128a910f6ac7f1c8993edfaad8c37c77/brahe-1.5.2-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:366e5b252f5a3007b79b399fb9a2f200b50ed561336945cf209e273196b7b44f", size = 20232800, upload-time = "2026-05-18T16:14:42.03Z" },
-    { url = "https://files.pythonhosted.org/packages/53/cc/024dffeab57d732df35604c0e3046e822a696ed6eadf802e6964b9902b13/brahe-1.5.2-cp312-cp312-manylinux_2_34_x86_64.whl", hash = "sha256:fca42706a0af944765f9136c33f18868e8f20709636de765f0e48bb950812a3e", size = 20538676, upload-time = "2026-05-18T16:14:44.785Z" },
-    { url = "https://files.pythonhosted.org/packages/ae/95/0c82a468a926e71bc74d4e3dcd33bd0ec7b05d8143e9f6f6ef9fca83b1a8/brahe-1.5.2-cp312-cp312-win_amd64.whl", hash = "sha256:c39842e601b3d6754c64e4dd44c75bc4b19d8a21252f9e3679647cb1c67f7dfc", size = 20371178, upload-time = "2026-05-18T16:14:47.204Z" },
-    { url = "https://files.pythonhosted.org/packages/dd/eb/c16496d382b2d26b24aae33b9d43a42f4aa11b1ff5b2aa0c46891f468dc9/brahe-1.5.2-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:4679aa57126e2dd0c893317552b95b4d9167d67ebfc4cbd92c39c47cee4e7d56", size = 20234541, upload-time = "2026-05-18T16:14:50.076Z" },
-    { url = "https://files.pythonhosted.org/packages/63/fd/c063de3669118e1891a788c8c38f37a3adb88c37c676a4b4d37c45043c07/brahe-1.5.2-cp313-cp313-manylinux_2_34_x86_64.whl", hash = "sha256:41d533a73e5ec804f7e4180b3bc50c8c09879cbd89011bf0f902f1474a86022b", size = 20543601, upload-time = "2026-05-18T16:14:52.477Z" },
-    { url = "https://files.pythonhosted.org/packages/aa/90/d33100da50b1a27ae87e3950c8f172e3fe6881dc4a1e6cd4a6e1e7c036f4/brahe-1.5.2-cp313-cp313-win_amd64.whl", hash = "sha256:5a52c59b0f5b4c7b035d3b9ec4bbdcd85f8b153fb3a311e63322b156205a3575", size = 20375381, upload-time = "2026-05-18T16:14:54.972Z" },
-    { url = "https://files.pythonhosted.org/packages/1a/48/6c5f8c18c7cff4afdde1a69de0419d09c5284a506d52e2e69affe966f6c3/brahe-1.5.2-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:d2e5c95d88389245fdf09572c16178006e3914c92b1bcdee47261ad975aa4ace", size = 20215829, upload-time = "2026-05-18T16:14:57.345Z" },
-    { url = "https://files.pythonhosted.org/packages/ed/d1/65620ea3771b04d248c3c9aa14a54c26149d1c6cde1fb6990a6931bca1c6/brahe-1.5.2-cp314-cp314-manylinux_2_34_x86_64.whl", hash = "sha256:8e60258533f69d124358f7a29166cb84516014a97e922c1901335fd372e3241b", size = 20536889, upload-time = "2026-05-18T16:15:00.081Z" },
-    { url = "https://files.pythonhosted.org/packages/4f/2c/44d3756686e6533c32a5702dd980394d9dd470d9746028e25c39f191f0b3/brahe-1.5.2-cp314-cp314-win_amd64.whl", hash = "sha256:d8ad7eec75e093104381498f4eef82be050b8f2c524c6532e43f86ba00dcb848", size = 20369534, upload-time = "2026-05-18T16:15:02.958Z" },
+    { url = "https://files.pythonhosted.org/packages/88/59/9c0c723452b57ccc9f7cb41cf17bcc666e1c26f2baa039ee7c39ff8a5f14/brahe-1.6.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:326250776516ba724a58d4b908f36e7b35520a9c55e6a040218bd87f2478b41f", size = 20610585, upload-time = "2026-06-06T06:26:04.785Z" },
+    { url = "https://files.pythonhosted.org/packages/36/67/87bca7b452175615163f6255d44d8269398b64078f4b98c49875d99f44e2/brahe-1.6.0-cp310-cp310-manylinux_2_34_x86_64.whl", hash = "sha256:54086f5894b4ab3787f0ddca9d2dfd5a29fd7343a072331c13176b044090be00", size = 20925552, upload-time = "2026-06-06T06:26:07.679Z" },
+    { url = "https://files.pythonhosted.org/packages/cd/30/8911f1656ba67da601e123222865f59c8c7329bc756fc15fbafd5c29cbfc/brahe-1.6.0-cp310-cp310-win_amd64.whl", hash = "sha256:2f971e0d193f743078f00ec2ea08dccd4a5cf6706a04ce8a6996ceac58489c78", size = 20727472, upload-time = "2026-06-06T06:26:11.025Z" },
+    { url = "https://files.pythonhosted.org/packages/3c/2b/f3aad987aa70a887f778be4ae2ce87ee8583c3e152aef42de46b284af1a5/brahe-1.6.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:23f821b206020ea085d70795f66bbf4357e1742055833a707df9b51b5621399a", size = 20610137, upload-time = "2026-06-06T06:26:14.249Z" },
+    { url = "https://files.pythonhosted.org/packages/dc/ed/dbb91af623c2c1d73b65a513142124df118bead8d8494587a0ad7a6b827b/brahe-1.6.0-cp311-cp311-manylinux_2_34_x86_64.whl", hash = "sha256:0d05541e37c967df72094a984bad68f55455250e44ba58139061a5481b9d6c94", size = 20925608, upload-time = "2026-06-06T06:26:17.243Z" },
+    { url = "https://files.pythonhosted.org/packages/f1/f4/c64c6e59010d08da283d76e37bf970fd84665754f6fd3fd9affcdbc69080/brahe-1.6.0-cp311-cp311-win_amd64.whl", hash = "sha256:95a3e8533481c050bc28cf2c41c19e14986713f78deb425aa42f1467243ac1d8", size = 20729479, upload-time = "2026-06-06T06:26:20.409Z" },
+    { url = "https://files.pythonhosted.org/packages/05/ee/4d2c0f29b83d0e0b3382a0846674044613f23976147386056fc96dbb557c/brahe-1.6.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:cc511e1d10a77a3b5a16bbe691c0ee94d7764f808021088f727d5855352e8258", size = 20597795, upload-time = "2026-06-06T06:26:23.539Z" },
+    { url = "https://files.pythonhosted.org/packages/33/a2/de4fd4b486fcf64c62314188e183a7158ad115d223f09525ac7a4dcdde7d/brahe-1.6.0-cp312-cp312-manylinux_2_34_x86_64.whl", hash = "sha256:63cb88347d2f9d7f8a2e59e83325e92af08ea11b694c9d1e81dd0a9f5ca8df05", size = 20938585, upload-time = "2026-06-06T06:26:26.617Z" },
+    { url = "https://files.pythonhosted.org/packages/a4/b6/cff9dbc69aa31f6abac8ffa704dec394c889f5829a79ba1520b059212640/brahe-1.6.0-cp312-cp312-win_amd64.whl", hash = "sha256:ff003e4c0fa00e46ad3720cabebd1a2051c50fbd80def0a33fa5c996e2954cfd", size = 20738162, upload-time = "2026-06-06T06:26:29.698Z" },
+    { url = "https://files.pythonhosted.org/packages/64/f7/b94039fc699859edd09fd0674bef18415d830425828d280a7447d59b3d24/brahe-1.6.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:739d0ef7ca71b592f0ce0afc23b2b12c1f236a672804134f4550a1fa0a68d572", size = 20610772, upload-time = "2026-06-06T06:26:33.096Z" },
+    { url = "https://files.pythonhosted.org/packages/57/38/bb592b0265205c5569dc9e7bc96745810f9ec513619ea13e6d8708e46e47/brahe-1.6.0-cp313-cp313-manylinux_2_34_x86_64.whl", hash = "sha256:7e06f6db9e99e1fd082b6b89ca1d28a213fa16fec47e758eea0925dde64ddf5a", size = 20942766, upload-time = "2026-06-06T06:26:36.57Z" },
+    { url = "https://files.pythonhosted.org/packages/6d/85/18385b4d25003be27ffa8d56d6cb6425a21ac4440cf7d375c894082c7c55/brahe-1.6.0-cp313-cp313-win_amd64.whl", hash = "sha256:b4da1b6f61b27a98fe3c3ccd00d4cf6607159e1d5eaad2c46386711c6e91ee16", size = 20742970, upload-time = "2026-06-06T06:26:39.834Z" },
+    { url = "https://files.pythonhosted.org/packages/d2/ee/eabf89e7761b1f78306bca8d677230de9cba73784751f287d58940c2939d/brahe-1.6.0-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:a43931e9523c69e3fe386022543345d07ec13f93f50177aa48de77ac6529bbea", size = 20591391, upload-time = "2026-06-06T06:26:43.062Z" },
+    { url = "https://files.pythonhosted.org/packages/bf/de/f3c8386065f0b7b7fdcc1304457368c177d18be98c50228d60f8092163e8/brahe-1.6.0-cp314-cp314-manylinux_2_34_x86_64.whl", hash = "sha256:4248cad26031dea72709276921de59416d284c4d608122aece2b56f160016afc", size = 20937478, upload-time = "2026-06-06T06:26:46.071Z" },
+    { url = "https://files.pythonhosted.org/packages/2b/06/ef494419d4fcab3b4132cdf0e770ecd840ccf3348994ffb27f233f8f5131/brahe-1.6.0-cp314-cp314-win_amd64.whl", hash = "sha256:796a80da922ddbfc90d0ffee52bf4bdd421b7d935a9003cb9571fb0d97d329fb", size = 20737436, upload-time = "2026-06-06T06:26:49.753Z" },
 ]
 
 [[package]]
