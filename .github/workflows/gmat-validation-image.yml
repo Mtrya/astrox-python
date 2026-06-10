@@ -40,7 +40,7 @@ jobs:
           echo "tag=ghcr.io/${owner}/astrox-gmat-validation:gmat-r2026a" >> "${GITHUB_OUTPUT}"
 
       - name: Build and publish image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .github/containers/gmat-validation
           push: true
