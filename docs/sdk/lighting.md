@@ -55,7 +55,7 @@ Site-position samples include the Sun azimuth/elevation/range fields returned by
 
 ## Solar AER
 
-`lighting.solar_aer(...)` computes solar azimuth, elevation, and range samples for a position source. For fixed sites, the azimuth and elevation fields represent the apparent topocentric Sun direction. For spacecraft positions, ASTROX reports the apparent Sun direction in the route's spacecraft frame convention.
+`lighting.solar_aer(...)` computes solar azimuth, elevation, and range samples for a position source. For fixed sites, azimuth is in the local horizontal plane with north as `0 deg` and positive eastward; elevation is the angle to the local horizontal plane, positive toward zenith. For spacecraft positions, azimuth is in VVLH front/right/down axes with forward as `0 deg` and positive toward right; elevation is the angle to the VVLH `xy` plane, positive toward zenith.
 
 ```python
 aer = lighting.solar_aer(
