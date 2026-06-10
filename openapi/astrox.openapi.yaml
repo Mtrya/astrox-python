@@ -2282,8 +2282,7 @@ paths:
               type: object
               properties:
                 file:
-                  type: string
-                  format: binary
+                  $ref: '#/components/schemas/IFormFile'
         required: true
       responses:
         '200':
@@ -9952,6 +9951,9 @@ components:
           - 0
           - 0
           - 0
+    IFormFile:
+      type: string
+      format: binary
     IGravityFunction:
       required:
       - $type
