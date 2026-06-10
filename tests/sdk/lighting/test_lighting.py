@@ -156,7 +156,7 @@ def test_lighting_accepts_propagated_position_sources(
     )
 
 
-def test_solar_aer_emits_site_only_wire_shape_without_position_discriminator(
+def test_solar_aer_emits_typed_position_payload(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls = record_raw_post(
@@ -178,7 +178,7 @@ def test_solar_aer_emits_site_only_wire_shape_without_position_discriminator(
     lighting.solar_aer(
         start="2024-01-01T00:00:00.000Z",
         stop="2024-01-01T01:00:00.000Z",
-        site_position=sample_site(),
+        position=sample_site(),
         text="Mauna Kea sun",
         step_s=600,
     )
@@ -190,8 +190,49 @@ def test_solar_aer_emits_site_only_wire_shape_without_position_discriminator(
             "Start": "2024-01-01T00:00:00.000Z",
             "Stop": "2024-01-01T01:00:00.000Z",
             "Text": "Mauna Kea sun",
-            "sitePosition": {
+            "Position": {
+                "$type": "SitePosition",
                 "cartographicDegrees": [-155.468, 19.821, 4205.0],
+            },
+            "TimeStepSec": 600,
+        },
+    )
+
+
+def test_solar_aer_accepts_spacecraft_position_sources(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(
+        monkeypatch,
+        {
+            "IsSuccess": True,
+            "Message": "",
+            "Datas": [
+                {
+                    "Time": "2024-01-01T00:00:00.000Z",
+                    "Azimuth": 205.0,
+                    "Elevation": 28.0,
+                    "Range": 147100000.0,
+                }
+            ],
+        },
+    )
+
+    lighting.solar_aer(
+        start="2024-01-01T00:00:00.000Z",
+        stop="2024-01-01T01:00:00.000Z",
+        position=entities.sgp4_position(tle_lines=TLE_LINES),
+        step_s=600,
+    )
+
+    assert_canonical_equal(
+        calls[0]["json"],
+        {
+            "Start": "2024-01-01T00:00:00.000Z",
+            "Stop": "2024-01-01T01:00:00.000Z",
+            "Position": {
+                "$type": "SGP4",
+                "TLEs": list(TLE_LINES),
             },
             "TimeStepSec": 600,
         },
@@ -224,9 +265,9 @@ def test_solar_aer_emits_site_only_wire_shape_without_position_discriminator(
             {
                 "start": "2024-01-01T00:00:00.000Z",
                 "stop": "2024-01-01T01:00:00.000Z",
-                "site_position": entities.sgp4_position(tle_lines=TLE_LINES),
+                "position": {"$type": "SGP4"},
             },
-            "site_position must be an astrox.entities.SitePosition value",
+            "position must be an astrox.entities position value",
         ),
         (
             lighting.solar_intensity,

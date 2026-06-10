@@ -6,7 +6,7 @@ This page documents the curated ASTROX Python lighting interface. The intended i
 from astrox import entities, lighting
 ```
 
-The lighting functions compute sunlight intervals, solar intensity samples, and site-based solar azimuth/elevation/range samples. They use the position-source values from `astrox.entities`.
+The lighting functions compute sunlight intervals, solar intensity samples, and solar azimuth/elevation/range samples. They use the position-source values from `astrox.entities`.
 
 ## Lighting Times
 
@@ -55,21 +55,21 @@ Site-position samples include the Sun azimuth/elevation/range fields returned by
 
 ## Solar AER
 
-`lighting.solar_aer(...)` computes solar azimuth, elevation, and range samples for a fixed site. The azimuth and elevation fields represent the apparent topocentric Sun direction.
+`lighting.solar_aer(...)` computes solar azimuth, elevation, and range samples for a position source. For fixed sites, azimuth is in the local horizontal plane with north as `0 deg` and positive eastward; elevation is the angle to the local horizontal plane, positive toward zenith. For spacecraft positions, azimuth is in VVLH front/right/down axes with forward as `0 deg` and positive toward right; elevation is the angle to the VVLH `xy` plane, positive toward zenith.
 
 ```python
 aer = lighting.solar_aer(
     start="2024-01-01T00:00:00.000Z",
     stop="2024-01-01T00:30:00.000Z",
-    site_position=site,
+    position=site,
     step_s=900,
 )
 ```
 
-`solar_aer(...)` accepts `site_position=entities.site_position(...)`, not a full named entity. The server schema for this route is site-specific.
+`solar_aer(...)` accepts the promoted position-source values from `astrox.entities`, not a full named entity. The route now requires the same typed `Position` envelope used by `lighting_times(...)` and `solar_intensity(...)`.
 
 ## Position Sources
 
-`lighting_times(...)` and `solar_intensity(...)` accept the promoted position-source values from `astrox.entities`: fixed sites, SGP4 TLE positions, J2 and two-body Keplerian positions, and CZML-like sampled positions.
+`lighting_times(...)`, `solar_intensity(...)`, and `solar_aer(...)` accept the promoted position-source values from `astrox.entities`: fixed sites, SGP4 TLE positions, J2 and two-body Keplerian positions, and CZML-like sampled positions.
 
 Lighting functions currently return ASTROX JSON-like response dictionaries. The SDK assembles the Pythonic request shape and leaves the response envelope visible.

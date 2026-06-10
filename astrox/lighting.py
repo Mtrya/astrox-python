@@ -105,15 +105,15 @@ def solar_aer(
     *,
     start: str,
     stop: str,
-    site_position: entities.SitePosition,
+    position: entities.EntityPosition,
     text: str | None = None,
     step_s: int | None = None,
 ) -> dict[str, Any]:
-    """Compute solar azimuth, elevation, and range samples for a site position."""
+    """Compute solar azimuth, elevation, and range samples for a position source."""
     payload: dict[str, Any] = {
         "Start": start,
         "Stop": stop,
-        "sitePosition": entities._site_position_to_wire(site_position),
+        "Position": entities._position_to_wire(position),
     }
     _include_if_supplied(payload, "Text", text)
     _include_if_supplied(payload, "TimeStepSec", step_s)
