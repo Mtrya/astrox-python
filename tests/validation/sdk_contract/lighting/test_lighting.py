@@ -163,7 +163,16 @@ def solar_aer_for_site() -> dict[str, Any]:
     return lighting.solar_aer(
         start=START,
         stop=STOP,
-        site_position=site_position(),
+        position=site_position(),
+        step_s=900,
+    )
+
+
+def solar_aer_for_sgp4() -> dict[str, Any]:
+    return lighting.solar_aer(
+        start=START,
+        stop=STOP,
+        position=sgp4_position(),
         step_s=900,
     )
 
@@ -198,6 +207,11 @@ CASES = [
         id="solar_aer_site",
         description="Solar azimuth/elevation/range samples for a fixed geodetic site position.",
         run=solar_aer_for_site,
+    ),
+    ContractCase(
+        id="solar_aer_sgp4",
+        description="Solar azimuth/elevation/range samples for an SGP4 TLE position.",
+        run=solar_aer_for_sgp4,
     ),
 ]
 

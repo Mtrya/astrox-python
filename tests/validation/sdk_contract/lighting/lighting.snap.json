@@ -273,10 +273,38 @@
         "IsSuccess": true,
         "Message": "Success"
       }
+    },
+    {
+      "description": "Solar azimuth/elevation/range samples for an SGP4 TLE position.",
+      "id": "solar_aer_sgp4",
+      "return": {
+        "Datas": [
+          {
+            "Azimuth": 205.22476720055286,
+            "Elevation": 28.38251489972023,
+            "Range": 147099105.7617966,
+            "Time": "2024-01-01T00:00:00.000Z"
+          },
+          {
+            "Azimuth": 204.42722471212355,
+            "Elevation": -25.168639156283117,
+            "Range": 147105207.8129277,
+            "Time": "2024-01-01T00:15:00.000Z"
+          },
+          {
+            "Azimuth": 258.87742254177283,
+            "Elevation": -67.62335074012141,
+            "Range": 147108581.98698726,
+            "Time": "2024-01-01T00:30:00.000Z"
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
     }
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-06-07T07:19:50Z"
+    "refreshed_at": "2026-06-10T05:55:22Z"
   }
 }

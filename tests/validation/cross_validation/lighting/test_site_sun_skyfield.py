@@ -188,7 +188,7 @@ def astrox_solar_aer(case: SiteCase) -> list[dict[str, object]]:
     result = lighting.solar_aer(
         start=case.start,
         stop=case.stop,
-        site_position=site_position(case),
+        position=site_position(case),
         step_s=int(case.step_s) if case.step_s is not None else None,
     )
     return result["Datas"]

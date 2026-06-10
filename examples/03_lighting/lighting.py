@@ -36,7 +36,7 @@ def main() -> None:
     aer = lighting.solar_aer(
         start="2024-01-01T00:00:00.000Z",
         stop="2024-01-01T00:30:00.000Z",
-        site_position=site,
+        position=site,
         step_s=900,
     )
 
