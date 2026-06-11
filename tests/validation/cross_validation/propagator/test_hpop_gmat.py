@@ -8,7 +8,7 @@
 #     - HPOP gravity degree/order zero with Sun/Moon point masses: verified
 #     - HPOP spherical SRP in sunlit geometry: verified
 #     - HPOP spherical SRP near Earth-shadow transition: unresolved calibration xfail
-#     - HPOP atmosphere/drag configs: unresolved (GMAT driver support still missing)
+#     - HPOP atmosphere/drag configs: partial live invariants in test_hpop_drag_invariants.py; GMAT same-model mapping unresolved
 #   Fields:
 #     - Position.cartesian_velocity time/position/velocity samples: verified for representative cases
 #   Parameters:
@@ -16,14 +16,14 @@
 #     - initial-state coordinate type: partial (Classical and Cartesian covered)
 #     - gravity model and third bodies: partial (degree/order zero plus Sun/Moon point masses)
 #     - SRP spacecraft coefficients and area/mass: partial (spherical SRP covered; shadow transition unresolved)
-#     - atmosphere and drag spacecraft coefficients: unresolved
+#     - atmosphere and drag spacecraft coefficients: partial live invariant coverage in test_hpop_drag_invariants.py
 #   Comparison:
 #     - External: GMAT R2026a driver executed through the validation image
 #     - Constants: EARTH_MU, ASTROX_GRAVITY_FILE, SAMPLE_OFFSETS_S
 #     - Tolerances: POSITION_ABS_M, VELOCITY_ABS_M_S
 #   Unresolved:
 #     - SRP Earth-shadow transition residual remains visible as strict calibration xfail
-#     - Atmosphere/drag cross-validation needs GMAT driver atmosphere-model mapping
+#     - Atmosphere/drag same-model cross-validation still needs GMAT driver atmosphere-model mapping or another available Jacchia-Roberts oracle
 
 from __future__ import annotations
 
