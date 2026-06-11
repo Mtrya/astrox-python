@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from astrox import entities, lighting, orbits
+from astrox import entities, exceptions, lighting, orbits
 from tests.sdk.helpers import assert_canonical_equal
 
 
@@ -65,6 +65,105 @@ def sample_site() -> entities.SitePosition:
         latitude_deg=19.821,
         height_m=4205.0,
     )
+
+
+@pytest.mark.parametrize(
+    ("function", "kwargs", "endpoint"),
+    [
+        (
+            lighting.lighting_times,
+            {
+                "start": "2024-01-01T00:00:00.000Z",
+                "stop": "2024-01-01T01:00:00.000Z",
+                "position": sample_site(),
+            },
+            "/Lighting/LightingTimes",
+        ),
+        (
+            lighting.solar_intensity,
+            {
+                "start": "2024-01-01T00:00:00.000Z",
+                "stop": "2024-01-01T01:00:00.000Z",
+                "position": sample_site(),
+            },
+            "/Lighting/SolarIntensity",
+        ),
+        (
+            lighting.solar_aer,
+            {
+                "start": "2024-01-01T00:00:00.000Z",
+                "stop": "2024-01-01T01:00:00.000Z",
+                "position": sample_site(),
+            },
+            "/Lighting/SolarAER",
+        ),
+    ],
+)
+def test_lighting_functions_return_malformed_raw_response_without_parsing(
+    monkeypatch: pytest.MonkeyPatch,
+    function: object,
+    kwargs: dict[str, object],
+    endpoint: str,
+) -> None:
+    response = {"unexpected": ["lighting", "shape"]}
+    calls = record_raw_post(monkeypatch, response)
+
+    actual = function(**kwargs)
+
+    assert actual is response
+    assert calls[0]["endpoint"] == endpoint
+
+
+@pytest.mark.parametrize(
+    ("function", "kwargs", "endpoint"),
+    [
+        (
+            lighting.lighting_times,
+            {
+                "start": "2024-01-01T00:00:00.000Z",
+                "stop": "2024-01-01T01:00:00.000Z",
+                "position": sample_site(),
+            },
+            "/Lighting/LightingTimes",
+        ),
+        (
+            lighting.solar_intensity,
+            {
+                "start": "2024-01-01T00:00:00.000Z",
+                "stop": "2024-01-01T01:00:00.000Z",
+                "position": sample_site(),
+            },
+            "/Lighting/SolarIntensity",
+        ),
+        (
+            lighting.solar_aer,
+            {
+                "start": "2024-01-01T00:00:00.000Z",
+                "stop": "2024-01-01T01:00:00.000Z",
+                "position": sample_site(),
+            },
+            "/Lighting/SolarAER",
+        ),
+    ],
+)
+def test_lighting_functions_propagate_api_errors_unchanged(
+    monkeypatch: pytest.MonkeyPatch,
+    function: object,
+    kwargs: dict[str, object],
+    endpoint: str,
+) -> None:
+    error = exceptions.AstroxAPIError("bad lighting", endpoint, response=None)
+
+    def fake_post(post_endpoint: str, *, json: object) -> dict[str, Any]:
+        assert post_endpoint == endpoint
+        raise error
+
+    monkeypatch.setattr(lighting.raw, "post", fake_post)
+
+    with pytest.raises(exceptions.AstroxAPIError) as exc_info:
+        function(**kwargs)
+
+    assert exc_info.value is error
 
 
 def test_lighting_times_emits_typed_position_payload_and_returns_raw_response(

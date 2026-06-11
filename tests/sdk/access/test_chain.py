@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from astrox import access, entities
+from astrox import access, entities, exceptions
 from tests.sdk.access.helpers import ground, hubble, iss, record_raw_post
 from tests.sdk.helpers import assert_canonical_equal
 
@@ -101,6 +101,47 @@ def test_chain_emits_definition_table_name_references_and_direct_null_connection
             "UseLightTimeDelay": True,
         },
     )
+
+
+def test_chain_returns_malformed_raw_response_without_parsing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    response = {"unexpected": ["chain", "shape"]}
+    record_raw_post(monkeypatch, response)
+    target_group = targets()
+
+    actual = access.chain(
+        start="2024-01-01T00:00:00.000Z",
+        stop="2024-01-02T00:00:00.000Z",
+        participants=[ground(), target_group],
+        start_participant=ground(),
+        end_participant=target_group,
+    )
+
+    assert actual is response
+
+
+def test_chain_propagates_api_errors_unchanged(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    error = exceptions.AstroxAPIError("bad chain", "/access/ChainCompute", response=None)
+
+    def fake_post(endpoint: str, *, json: object) -> dict[str, Any]:
+        raise error
+
+    monkeypatch.setattr(access.raw, "post", fake_post)
+    target_group = targets()
+
+    with pytest.raises(exceptions.AstroxAPIError) as exc_info:
+        access.chain(
+            start="2024-01-01T00:00:00.000Z",
+            stop="2024-01-02T00:00:00.000Z",
+            participants=[ground(), target_group],
+            start_participant=ground(),
+            end_participant=target_group,
+        )
+
+    assert exc_info.value is error
 
 
 def test_chain_omits_use_light_time_delay_when_explicitly_none(
