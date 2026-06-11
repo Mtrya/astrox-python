@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from astrox import orbits
 from tests.validation._support import configure_astrox_from_env
 from tests.validation.cross_validation.access._aer import first_aer_rows
 from tests.validation.cross_validation.access._cases import (
@@ -29,6 +30,18 @@ from tests.validation.cross_validation.access._geometry import (
     sampled_satellite_visibility_intervals,
     sgp4_state_ecef,
 )
+
+
+def slightly_offset_access_orbit() -> orbits.KeplerianElements:
+    base = access_orbit()
+    return orbits.keplerian(
+        semi_major_axis_m=base.semi_major_axis_m,
+        eccentricity=base.eccentricity,
+        inclination_deg=base.inclination_deg,
+        argument_of_periapsis_deg=base.argument_of_periapsis_deg,
+        raan_deg=base.raan_deg,
+        true_anomaly_deg=base.true_anomaly_deg + 1.0e-6,
+    )
 
 
 def test_sgp4_to_j2_no_access_matches_segment_obstruction_oracle() -> None:
@@ -92,18 +105,47 @@ def test_hpop_two_body_distinct_satellite_pair_is_callable_and_symmetric() -> No
     )
 
 
+def test_hpop_two_body_near_coincident_satellite_pair_is_callable_and_symmetric() -> None:
+    configure_astrox_from_env()
+    left_orbit = access_orbit()
+    right_orbit = slightly_offset_access_orbit()
+    forward = compute_access(
+        two_body_entity(left_orbit, name="TwoBodyA"),
+        hpop_entity(right_orbit, name="HpopB"),
+    )
+    reverse = compute_access(
+        hpop_entity(right_orbit, name="HpopB"),
+        two_body_entity(left_orbit, name="TwoBodyA"),
+    )
+    compare_intervals(
+        intervals_from_access_passes(forward["Passes"]),
+        intervals_from_access_passes(reverse["Passes"]),
+        tolerance_s=CHAIN_INTERVAL_ABS_S,
+    )
+
+
 @pytest.mark.calibration
 @pytest.mark.xfail(
     reason=(
-        "HPOP/two-body access with coincident initial orbits is isolated to a server worker error, "
-        "while site-paired branches and distinct mixed-model satellite pairs are callable."
+        "Satellite access with coincident initial orbits is isolated to a server worker error, "
+        "including same-model and mixed HPOP/two-body pairs; tiny orbital offsets are callable."
     ),
     raises=CrossValidationError,
     strict=True,
 )
-def test_hpop_two_body_coincident_orbit_server_error_calibration() -> None:
+def test_coincident_satellite_orbit_server_error_calibration() -> None:
     configure_astrox_from_env()
     probes = [
+        branch_probe(
+            "two_body->two_body",
+            two_body_entity(access_orbit(), name="TwoBodyA"),
+            two_body_entity(access_orbit(), name="TwoBodyB"),
+        ),
+        branch_probe(
+            "HPOP->HPOP",
+            hpop_entity(access_orbit(), name="HpopA"),
+            hpop_entity(access_orbit(), name="HpopB"),
+        ),
         branch_probe("two_body->HPOP", two_body_entity(), hpop_entity()),
         branch_probe("HPOP->two_body", hpop_entity(), two_body_entity()),
     ]
@@ -115,5 +157,5 @@ def test_hpop_two_body_coincident_orbit_server_error_calibration() -> None:
     if failures:
         raise CrossValidationError("\n".join(failures))
     raise CrossValidationError(
-        "both coincident-orbit HPOP/two-body directions still produce the isolated server worker error"
+        "coincident satellite orbit pairs still produce the isolated server worker error"
     )

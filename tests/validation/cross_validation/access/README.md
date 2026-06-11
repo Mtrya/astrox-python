@@ -20,7 +20,8 @@ The current non-orientation access calibration covers these behavior axes:
 | SGP4 to J2 no-access branch | covered for the chosen case | Skyfield SGP4 plus calibrated ASTROX-like secular J2 sampled segment-obstruction oracle |
 | Site-paired HPOP/two-body branches | covered for callability | live companion probes verify site to model and model to site calls return successfully |
 | Distinct-orbit HPOP/two-body satellite pair | partial | live role-reversal interval symmetry is checked; no independent timing oracle is claimed |
-| Coincident-orbit HPOP/two-body satellite pair | calibration xfail | same initial orbit mixed-model pair produces a server worker error in both directions |
+| Near-coincident HPOP/two-body satellite pair | partial | a tiny true-anomaly offset is callable and role-reversal symmetric; no independent timing oracle is claimed |
+| Coincident satellite orbit pairs | calibration xfail | exact same initial orbit produces a server worker error for same-model and mixed HPOP/two-body satellite pairs |
 | Direct chain site to SGP4 | covered | chain output matches direct compute and the independent line-of-sight oracle |
 | Empty connection-list chain | covered | live `Connections: []` matches the direct `Connections: null` two-participant chain and reports the same direct strand |
 | Entity-group AnyOf chain | covered | complete access equals the union of member strand intervals |
