@@ -1,4 +1,4 @@
-"""Independent geometry and interval helpers for access cross-validation."""
+"""Independent geometry and interval helpers for access validation."""
 
 from __future__ import annotations
 

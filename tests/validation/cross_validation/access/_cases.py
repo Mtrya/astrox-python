@@ -1,4 +1,4 @@
-"""Shared live access cases for access cross-validation."""
+"""Shared live access cases for access validation."""
 
 from __future__ import annotations
 

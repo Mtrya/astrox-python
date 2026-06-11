@@ -1,4 +1,4 @@
-"""AccessComputeV2 option semantics cross-validation."""
+"""Live AccessComputeV2 option behavior checks."""
 
 from __future__ import annotations
 

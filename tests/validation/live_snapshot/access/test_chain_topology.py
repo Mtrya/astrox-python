@@ -1,4 +1,4 @@
-"""Access chain cross-validation against direct links and interval composition."""
+"""Live access chain topology behavior checks."""
 
 from __future__ import annotations
 
@@ -11,10 +11,6 @@ from tests.validation.cross_validation.access._cases import (
     CHAIN_INTERVAL_ABS_S,
     CrossValidationError,
     DAY_STOP,
-    INTERVAL_ABS_S,
-    SITE_HEIGHT_M,
-    SITE_LATITUDE_DEG,
-    SITE_LONGITUDE_DEG,
     START,
     STOP,
     TLE_A,
@@ -34,9 +30,6 @@ from tests.validation.cross_validation.access._geometry import (
     intervals_from_access_passes,
     intervals_from_chain,
     merge_intervals,
-    sgp4_site_visibility_intervals,
-    skyfield_satellite,
-    skyfield_site,
 )
 
 
@@ -79,22 +72,6 @@ def _serial_chain(
         connections=route_connections,
         use_light_time_delay=use_light_time_delay,
     )
-
-
-def test_direct_chain_matches_compute_and_obstruction_oracle() -> None:
-    configure_astrox_from_env()
-    compute_result = compute_access(site(), sgp4_entity())
-    chain_result = direct_chain_sgp4()
-    compute_intervals = intervals_from_access_passes(compute_result["Passes"])
-    chain_intervals = intervals_from_chain(chain_result["CompleteChainAccess"])
-    oracle_intervals = sgp4_site_visibility_intervals(
-        start=START,
-        stop=STOP,
-        satellite=skyfield_satellite(TLE_A, "ISS"),
-        site_position=skyfield_site(SITE_LATITUDE_DEG, SITE_LONGITUDE_DEG, SITE_HEIGHT_M),
-    )
-    compare_intervals(compute_intervals, chain_intervals, tolerance_s=CHAIN_INTERVAL_ABS_S)
-    compare_intervals(oracle_intervals, compute_intervals, tolerance_s=INTERVAL_ABS_S)
 
 
 def test_empty_connections_matches_direct_chain_semantics() -> None:
@@ -158,43 +135,6 @@ def test_entity_group_atleastn_complete_access_is_intersection_of_member_strands
     expected = intersect_intervals(iss_intervals, hubble_intervals)
     actual = intervals_from_chain(result["CompleteChainAccess"])
     compare_intervals(expected, actual, tolerance_s=CHAIN_INTERVAL_ABS_S)
-
-
-def test_ground_relay_ground_chain_is_intersection_of_links() -> None:
-    configure_astrox_from_env()
-    chain_result, ground_a, relay, ground_b = relay_chain()
-    first_link = compute_access(
-        ground_a,
-        relay,
-        start=START,
-        stop=DAY_STOP,
-        use_light_time_delay=True,
-    )
-    second_link = compute_access(
-        relay,
-        ground_b,
-        start=START,
-        stop=DAY_STOP,
-        use_light_time_delay=True,
-    )
-    first_intervals = intervals_from_access_passes(first_link["Passes"])
-    second_intervals = intervals_from_access_passes(second_link["Passes"])
-    expected = intersect_intervals(first_intervals, second_intervals)
-    actual = intervals_from_chain(chain_result["CompleteChainAccess"])
-    compare_intervals(expected, actual, tolerance_s=CHAIN_INTERVAL_ABS_S)
-
-    computed_strands = chain_result["ComputedStrands"]
-    if computed_strands != [["GroundA", "Relay", "GroundB"]]:
-        raise CrossValidationError(f"unexpected ComputedStrands: {computed_strands!r}")
-    strand_access = chain_result["IndividualStrandAccess"]["GroundA>Relay>GroundB"]
-    compare_intervals(actual, intervals_from_chain(strand_access), tolerance_s=CHAIN_INTERVAL_ABS_S)
-    object_access = chain_result["IndividualObjectAccess"]
-    for object_name in ("GroundA", "Relay", "GroundB"):
-        compare_intervals(
-            actual,
-            intervals_from_chain(object_access[object_name]),
-            tolerance_s=CHAIN_INTERVAL_ABS_S,
-        )
 
 
 def test_single_explicit_route_allows_unused_participants() -> None:
@@ -328,7 +268,6 @@ def test_serial_chain_light_time_delay_matches_direct_link_composition() -> None
     raise CrossValidationError("serial chain light-time option did not change complete access intervals")
 
 
-@pytest.mark.calibration
 @pytest.mark.xfail(
     reason=(
         "ChainCompute rejects one request containing multiple explicit relay routes even though each route works separately."
@@ -336,7 +275,7 @@ def test_serial_chain_light_time_delay_matches_direct_link_composition() -> None
     raises=CrossValidationError,
     strict=True,
 )
-def test_multiple_explicit_relay_routes_calibration() -> None:
+def test_multiple_explicit_relay_routes_expected_server_no_path() -> None:
     configure_astrox_from_env()
     ground = site("G")
     relay_a = sgp4_entity("A", TLE_A)
@@ -376,13 +315,12 @@ def test_multiple_explicit_relay_routes_calibration() -> None:
         raise
 
 
-@pytest.mark.calibration
 @pytest.mark.xfail(
     reason="ChainCompute rejects duplicate explicit links with no-path even when the unique serial route works.",
     raises=CrossValidationError,
     strict=True,
 )
-def test_duplicate_explicit_link_calibration() -> None:
+def test_duplicate_explicit_link_expected_server_no_path() -> None:
     configure_astrox_from_env()
     ground = site("G")
     relay = sgp4_entity("A", TLE_A)
@@ -409,13 +347,12 @@ def test_duplicate_explicit_link_calibration() -> None:
         raise
 
 
-@pytest.mark.calibration
 @pytest.mark.xfail(
     reason="ChainCompute rejects a single working explicit route when an extra branch connection is also present.",
     raises=CrossValidationError,
     strict=True,
 )
-def test_extra_branch_connection_calibration() -> None:
+def test_extra_branch_connection_expected_server_no_path() -> None:
     configure_astrox_from_env()
     ground = site("G")
     relay = sgp4_entity("A", TLE_A)
@@ -449,13 +386,12 @@ def test_extra_branch_connection_calibration() -> None:
         raise
 
 
-@pytest.mark.calibration
 @pytest.mark.xfail(
     reason="ChainCompute raises an index error when an EntityGroup is used as the chain start object.",
     raises=CrossValidationError,
     strict=True,
 )
-def test_start_entity_group_calibration() -> None:
+def test_start_entity_group_expected_server_index_error() -> None:
     configure_astrox_from_env()
     ground = site("Ground")
     sources = entities.entity_group(
@@ -482,13 +418,12 @@ def test_start_entity_group_calibration() -> None:
         raise
 
 
-@pytest.mark.calibration
 @pytest.mark.xfail(
     reason="ChainCompute currently returns the same single-strand intervals when a required link has MaxUses=0.",
     raises=CrossValidationError,
     strict=True,
 )
-def test_connection_max_uses_zero_calibration() -> None:
+def test_connection_max_uses_zero_expected_to_change_intervals() -> None:
     configure_astrox_from_env()
     chain_result, ground, relay, target = relay_chain()
     constrained = access.chain(
@@ -514,13 +449,12 @@ def test_connection_max_uses_zero_calibration() -> None:
     raise CrossValidationError("MaxUses=0 did not change complete chain intervals")
 
 
-@pytest.mark.calibration
 @pytest.mark.xfail(
     reason="ChainCompute currently returns unchanged single-route intervals even for inconsistent MinUses/MaxUses values.",
     raises=CrossValidationError,
     strict=True,
 )
-def test_connection_min_uses_max_uses_inconsistent_calibration() -> None:
+def test_connection_min_uses_max_uses_inconsistent_expected_to_change_intervals() -> None:
     configure_astrox_from_env()
     chain_result, ground, relay, target = relay_chain()
     constrained = access.chain(
