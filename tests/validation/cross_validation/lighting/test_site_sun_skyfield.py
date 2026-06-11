@@ -1,6 +1,27 @@
 #!/usr/bin/env python3
 """Live ASTROX lighting cross-validation against Skyfield Sun geometry."""
 
+# Coverage:
+#   Branches:
+#     - site SolarAER: verified for representative topocentric Sun cases
+#     - spacecraft SolarAER: unresolved calibration xfail
+#     - site LightingTimes: verified for high-altitude/representative cases; low-altitude transition residual unresolved
+#     - site SolarIntensity: verified for disk visibility and intensity; grazing-angle offset unresolved
+#   Fields:
+#     - SolarAER Azimuth/Elevation/Range: partial (angles verified; broader range residual unresolved)
+#     - LightingTimes sunlight/penumbra/umbra intervals: partial (representative cases verified; low-altitude residual unresolved)
+#     - SolarIntensity Intensity/ApparentSolarRange/SolarGrazingAngle: partial (intensity verified; grazing-angle residual unresolved)
+#   Parameters:
+#     - site longitude/latitude/height: partial (Hawaii/Greenwich and a low-altitude calibration case)
+#     - spacecraft TLE/step_s: unresolved for spacecraft SolarAER convention
+#     - start/stop windows: partial (day, short, sunrise/sunset windows)
+#   Comparison:
+#     - External: Skyfield apparent topocentric Sun geometry and WGS84 solar-disk horizon derivation
+#     - Constants: EARTH_EQUATORIAL_RADIUS_M, SUN_RADIUS_KM, ISS_TLE_LINES
+#     - Tolerances: AER_* constants, TRANSITION_ABS_S, INTENSITY_ABS, GRAZING_ANGLE_ABS_DEG, SOLAR_DISK_HALF_ANGLE_ABS_DEG
+#   Unresolved:
+#     - spacecraft SolarAER convention, SolarAER range model, low-altitude LightingTimes transitions, and far-from-edge SolarGrazingAngle offset remain strict calibration xfails
+
 from __future__ import annotations
 
 import math
@@ -774,7 +795,7 @@ def test_spacecraft_solar_aer_matches_skyfield_vvlh_apparent_sun_calibration() -
         compare_spacecraft_solar_aer_case(case)
 
 
-def test_site_lighting_times_match_skyfield_solar_disk_geometry() -> None:
+def test_site_lighting_times_matches_skyfield_solar_disk_geometry() -> None:
     configure_astrox_from_env()
     for case in LIGHTING_TIME_CASES:
         compare_lighting_times_case(case)
@@ -792,7 +813,7 @@ def test_site_solar_intensity_matches_skyfield_disk_geometry() -> None:
     raises=CrossValidationError,
     strict=True,
 )
-def test_solar_aer_range_model_calibration() -> None:
+def test_solar_aer_range_model_matches_skyfield_range_calibration() -> None:
     configure_astrox_from_env()
     for case in SOLAR_AER_CALIBRATION_CASES:
         compare_solar_aer_case(case)
@@ -804,7 +825,7 @@ def test_solar_aer_range_model_calibration() -> None:
     raises=CrossValidationError,
     strict=True,
 )
-def test_low_altitude_site_lighting_times_calibration() -> None:
+def test_low_altitude_site_lighting_times_matches_skyfield_calibration() -> None:
     configure_astrox_from_env()
     for case in LIGHTING_TIME_CALIBRATION_CASES:
         compare_lighting_times_case(case)
@@ -816,7 +837,7 @@ def test_low_altitude_site_lighting_times_calibration() -> None:
     raises=CrossValidationError,
     strict=True,
 )
-def test_solar_intensity_grazing_angle_calibration() -> None:
+def test_solar_intensity_grazing_angle_matches_skyfield_calibration() -> None:
     configure_astrox_from_env()
     for case in SOLAR_INTENSITY_GRAZING_CALIBRATION_CASES:
         compare_solar_intensity_case(case, check_all_grazing_angles=True)
@@ -825,7 +846,7 @@ def test_solar_intensity_grazing_angle_calibration() -> None:
 def main() -> int:
     try:
         test_solar_aer_matches_skyfield_topocentric_sun()
-        test_site_lighting_times_match_skyfield_solar_disk_geometry()
+        test_site_lighting_times_matches_skyfield_solar_disk_geometry()
         test_site_solar_intensity_matches_skyfield_disk_geometry()
     except (CrossValidationError, LiveConfigError) as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)

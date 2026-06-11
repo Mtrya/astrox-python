@@ -5,6 +5,22 @@
 zero-revolution Lambert solver.
 """
 
+# Coverage:
+#   Branches:
+#     - GEO-YM Lambert delta-v from Keplerian platform/target orbits: verified with calibrated ASTROX target convention
+#     - Cartesian Lambert delta-v between endpoint states: verified
+#   Fields:
+#     - departure delta-v vector: verified (ASTROX vector residual against lamberthub)
+#     - arrival delta-v vector: verified (ASTROX vector residual against lamberthub)
+#   Parameters:
+#     - platform_orbit/target_orbit: partial (one GEO-like pair)
+#     - departure_state/arrival_state: partial (one Cartesian transfer)
+#     - time_of_flight_s/gravitational_parameter_m3_s2: verified for TIME_OF_FLIGHT_S and EARTH_MU
+#   Comparison:
+#     - External: lamberthub izzo2015 zero-revolution prograde Lambert solver
+#     - Constants: EARTH_MU, TIME_OF_FLIGHT_S
+#     - Tolerances: STRICT_RESIDUAL_M_S, CONVENTION_DIAGNOSTIC_RESIDUAL_M_S
+
 from __future__ import annotations
 
 import math

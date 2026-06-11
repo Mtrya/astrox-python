@@ -1,6 +1,25 @@
 #!/usr/bin/env python3
 """Live HPOP cross-validation between ASTROX and GMAT."""
 
+# Coverage:
+#   Branches:
+#     - HPOP gravity degree/order zero: verified
+#     - HPOP gravity degree/order zero with Sun/Moon point masses: verified
+#     - HPOP spherical SRP in sunlit geometry: verified
+#     - HPOP spherical SRP near Earth-shadow transition: unresolved calibration xfail
+#   Fields:
+#     - Position.cartesian_velocity time/position/velocity samples: verified for representative cases
+#   Parameters:
+#     - integrator fixed-step settings: verified for the GMAT comparison cases
+#     - gravity model and third bodies: partial (degree/order zero plus Sun/Moon point masses)
+#     - SRP spacecraft coefficients and area/mass: partial (spherical SRP covered; shadow transition unresolved)
+#   Comparison:
+#     - External: GMAT R2026a driver executed through the validation image
+#     - Constants: EARTH_MU, ASTROX_GRAVITY_FILE, SAMPLE_OFFSETS_S
+#     - Tolerances: POSITION_ABS_M, VELOCITY_ABS_M_S
+#   Unresolved:
+#     - SRP Earth-shadow transition residual remains visible as strict calibration xfail
+
 from __future__ import annotations
 
 import math
@@ -433,7 +452,7 @@ def test_hpop_matches_gmat_representative_cases() -> None:
     raises=CrossValidationError,
     strict=True,
 )
-def test_hpop_srp_shadow_transition_calibration() -> None:
+def test_hpop_srp_shadow_transition_matches_gmat_calibration() -> None:
     configure_astrox_from_env()
     try:
         require_gmat_image()

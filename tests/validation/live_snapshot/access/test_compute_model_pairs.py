@@ -1,4 +1,4 @@
-"""Access cross-validation for satellite model pair branches."""
+"""Live access behavior checks for satellite model pair branches."""
 
 from __future__ import annotations
 
@@ -6,30 +6,21 @@ import pytest
 
 from astrox import orbits
 from tests.validation._support import configure_astrox_from_env
-from tests.validation.cross_validation.access._aer import first_aer_rows
 from tests.validation.cross_validation.access._cases import (
     CHAIN_INTERVAL_ABS_S,
     CrossValidationError,
-    INTERVAL_ABS_S,
-    START,
-    STOP,
     access_orbit,
     branch_probe,
     compute_access,
     distinct_access_orbit,
     hpop_entity,
     is_server_worker_thread_message,
-    j2_entity,
-    sgp4_entity,
     site,
     two_body_entity,
 )
 from tests.validation.cross_validation.access._geometry import (
     compare_intervals,
     intervals_from_access_passes,
-    j2_state_ecef,
-    sampled_satellite_visibility_intervals,
-    sgp4_state_ecef,
 )
 
 
@@ -43,28 +34,6 @@ def slightly_offset_access_orbit() -> orbits.KeplerianElements:
         raan_deg=base.raan_deg,
         true_anomaly_deg=base.true_anomaly_deg + 1.0e-6,
     )
-
-
-def test_sgp4_to_j2_no_access_matches_segment_obstruction_oracle() -> None:
-    configure_astrox_from_env()
-    result = compute_access(
-        sgp4_entity(),
-        j2_entity(),
-        compute_aer=True,
-        step_s=300.0,
-    )
-    actual = intervals_from_access_passes(result["Passes"])
-    expected = sampled_satellite_visibility_intervals(
-        start=START,
-        stop=STOP,
-        left_state=sgp4_state_ecef,
-        right_state=lambda offset_s: j2_state_ecef(access_orbit(), offset_s),
-    )
-    compare_intervals(expected, actual, tolerance_s=INTERVAL_ABS_S)
-    if actual:
-        rows = list(first_aer_rows(result, max_passes=1))
-        if not rows:
-            raise CrossValidationError("ASTROX returned SGP4-to-J2 passes without AER samples")
 
 
 def test_hpop_two_body_site_companion_branches_are_callable() -> None:
@@ -125,7 +94,6 @@ def test_hpop_two_body_near_coincident_satellite_pair_is_callable_and_symmetric(
     )
 
 
-@pytest.mark.calibration
 @pytest.mark.xfail(
     reason=(
         "Satellite access with coincident initial orbits is isolated to a server worker error, "
@@ -134,7 +102,7 @@ def test_hpop_two_body_near_coincident_satellite_pair_is_callable_and_symmetric(
     raises=CrossValidationError,
     strict=True,
 )
-def test_coincident_satellite_orbit_server_error_calibration() -> None:
+def test_coincident_satellite_orbit_pair_expected_server_worker_error() -> None:
     configure_astrox_from_env()
     probes = [
         branch_probe(

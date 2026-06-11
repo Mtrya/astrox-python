@@ -1,10 +1,32 @@
 """Access cross-validation for fixed-ground and SGP4 branches."""
 
+# Coverage:
+#   Branches:
+#     - ground site -> SGP4 satellite: verified for intervals, AER convention, and light-time shift
+#     - SGP4 satellite -> ground site: verified for interval/range symmetry and satellite-origin AER convention
+#     - ground site -> ground site: verified for a blocked WGS84 segment case
+#   Fields:
+#     - Passes.AccessStart/AccessStop: verified (Skyfield SGP4 plus WGS84 segment-obstruction oracle)
+#     - AllDatas.Azimuth/Elevation/Range: partial (ground-origin and satellite-origin conventions calibrated; strict dense residual unresolved)
+#     - Passes with no access: verified (blocked WGS84 ground segment returns no passes)
+#   Parameters:
+#     - compute_aer: verified for true on AER comparisons; false/omitted field-shape behavior lives in live snapshot tests
+#     - step_s: partial (60 s dense AER sample compared; cadence semantics live in live snapshot tests)
+#     - use_light_time_delay: verified for ground -> SGP4 range-over-c shift in the covered case
+#   Comparison:
+#     - External: Skyfield SGP4 topocentric geometry, WGS84 segment obstruction, range-over-c light-time derivation, geodetic local satellite frame
+#     - Constants: TLE_A, WGS84 ellipsoid, SPEED_OF_LIGHT_M_S from helper diagnostics
+#     - Tolerances: INTERVAL_ABS_S, CHAIN_INTERVAL_ABS_S, AER_* constants, LIGHT_TIME_* constants
+#   Unresolved:
+#     - strict dense ground-origin AER residual: unresolved after same-epoch, light-time, manual ITRS, ellipsoid-horizon, and site/time-offset diagnostics
+
 from __future__ import annotations
+
+import sys
 
 import pytest
 
-from tests.validation._support import configure_astrox_from_env
+from tests.validation._support import LiveConfigError, configure_astrox_from_env
 from tests.validation.cross_validation.access._aer import (
     compare_ground_origin_aer_rows_with_skyfield,
     compare_light_time_aer_effect,
@@ -51,7 +73,7 @@ from tests.validation.cross_validation.access._geometry import (
 )
 
 
-def test_ground_to_sgp4_intervals_match_ellipsoid_obstruction_oracle() -> None:
+def test_ground_to_sgp4_intervals_matches_ellipsoid_obstruction_oracle() -> None:
     configure_astrox_from_env()
     result = compute_access(site(), sgp4_entity(), start=START, stop=DAY_STOP)
     actual = intervals_from_access_passes(result["Passes"])
@@ -111,7 +133,7 @@ def test_ground_to_sgp4_dense_aer_matches_skyfield_topocentric_convention() -> N
     raises=CrossValidationError,
     strict=True,
 )
-def test_ground_to_sgp4_aer_strict_residual_diagnostics() -> None:
+def test_ground_to_sgp4_strict_aer_matches_skyfield_topocentric_diagnostics() -> None:
     configure_astrox_from_env()
     result = compute_access(
         site(),
@@ -133,7 +155,7 @@ def test_ground_to_sgp4_aer_strict_residual_diagnostics() -> None:
         raise CrossValidationError("\n".join([*failures, *diagnostics]))
 
 
-def test_sgp4_to_ground_intervals_and_ranges_are_symmetric() -> None:
+def test_sgp4_to_ground_matches_ground_to_sgp4_symmetry_invariant() -> None:
     configure_astrox_from_env()
     forward = compute_access(site(), sgp4_entity(), start=START, stop=DAY_STOP, compute_aer=True)
     reverse = compute_access(sgp4_entity(), site(), start=START, stop=DAY_STOP, compute_aer=True)
@@ -185,7 +207,7 @@ def test_ground_to_sgp4_light_time_delay_matches_range_over_c_shift() -> None:
     )
 
 
-def test_blocked_ground_to_ground_returns_no_access() -> None:
+def test_blocked_ground_to_ground_matches_wgs84_obstruction_oracle() -> None:
     configure_astrox_from_env()
     ground_a = site("Hawaii")
     ground_b = remote_site()
@@ -200,3 +222,24 @@ def test_blocked_ground_to_ground_returns_no_access() -> None:
         raise CrossValidationError(
             "ASTROX returned access for a ground-to-ground pair whose straight segment intersects WGS84"
         )
+
+
+def main() -> int:
+    try:
+        test_ground_to_sgp4_intervals_matches_ellipsoid_obstruction_oracle()
+        test_ground_to_sgp4_aer_matches_skyfield_topocentric_convention()
+        test_ground_to_sgp4_dense_aer_matches_skyfield_topocentric_convention()
+        test_sgp4_to_ground_matches_ground_to_sgp4_symmetry_invariant()
+        test_sgp4_to_ground_satellite_origin_aer_matches_geodetic_local_frame()
+        test_ground_to_sgp4_light_time_delay_matches_range_over_c_shift()
+        test_blocked_ground_to_ground_matches_wgs84_obstruction_oracle()
+    except (CrossValidationError, LiveConfigError) as exc:
+        print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
+        return 1
+    print("CROSS_VALIDATION_CHECKED=7")
+    print("CROSS_VALIDATION_FAILED=0")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

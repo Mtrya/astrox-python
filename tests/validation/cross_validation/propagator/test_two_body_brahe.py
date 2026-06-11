@@ -1,6 +1,22 @@
 #!/usr/bin/env python3
 """Live two-body cross-validation between ASTROX and Brahe."""
 
+# Coverage:
+#   Branches:
+#     - two_body Cartesian state propagation: verified
+#     - two_body Keplerian element propagation: verified
+#   Fields:
+#     - Position.cartesian_velocity time/position/velocity samples: verified (Brahe Keplerian propagation)
+#     - final Keplerian elements: verified (Brahe propagated state converted back to elements)
+#   Parameters:
+#     - orbit: partial (LEO and inclined LEO samples)
+#     - gravitational_parameter_m3_s2: verified for Brahe Earth GM
+#     - start/target/step_s: partial (fixed 10-minute window)
+#   Comparison:
+#     - External: Brahe two-body state transition and element conversion
+#     - Constants: EARTH_MU, START, TARGET, STEP_S
+#     - Tolerances: POSITION_ABS_M, VELOCITY_ABS_M_S, SEMI_MAJOR_AXIS_ABS_M, ECCENTRICITY_ABS, ANGLE_ABS_DEG
+
 from __future__ import annotations
 
 import math

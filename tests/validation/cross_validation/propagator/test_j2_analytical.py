@@ -1,6 +1,22 @@
 #!/usr/bin/env python3
 """Live J2 cross-validation against ASTROX's secular J2 convention."""
 
+# Coverage:
+#   Branches:
+#     - single J2 Cartesian propagation: verified
+#     - single J2 Keplerian element propagation: verified
+#   Fields:
+#     - Position.cartesian_velocity time/position/velocity samples: verified (analytical secular J2 model)
+#     - final Keplerian elements: verified (calibrated secular rates)
+#   Parameters:
+#     - j2_normalized_value: verified with calibrated ASTROX_EFFECTIVE_J2_NORMALIZED_VALUE
+#     - ref_distance_m/gravitational_parameter_m3_s2: verified for Earth constants
+#     - orbit/start/target/step_s: partial (one LEO case over a 10-minute window)
+#   Comparison:
+#     - External: local analytical secular J2 implementation with documented effective J2 coefficient
+#     - Constants: EARTH_MU, EARTH_RADIUS_M, ASTROX_EFFECTIVE_J2_NORMALIZED_VALUE
+#     - Tolerances: POSITION_ABS_M, VELOCITY_ABS_M_S, SEMI_MAJOR_AXIS_ABS_M, ECCENTRICITY_ABS, INCLINATION_ABS_DEG, SECULAR_ANGLE_ABS_DEG
+
 from __future__ import annotations
 
 import math

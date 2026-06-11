@@ -1,6 +1,20 @@
 #!/usr/bin/env python3
 """Live multi-SGP4 cross-validation between ASTROX and Skyfield."""
 
+# Coverage:
+#   Branches:
+#     - multi-SGP4 element query for multiple TLEs: verified
+#   Fields:
+#     - semi_major_axis_m/eccentricity/inclination_deg: verified (Skyfield state converted with Brahe)
+#     - raan_deg/argument_of_periapsis_deg/true_anomaly_deg: verified (Skyfield/Brahe element conversion with mean-to-true anomaly)
+#   Parameters:
+#     - target time: verified for TARGET
+#     - TLE list: partial (ISS and Hubble regimes covered)
+#   Comparison:
+#     - External: Skyfield GCRS states converted to Keplerian elements with Brahe
+#     - Constants: ISS_TLE, HUBBLE_TLE, TARGET
+#     - Tolerances: SEMI_MAJOR_AXIS_ABS_M, ECCENTRICITY_ABS, INCLINATION_ABS_DEG, ANGLE_ABS_DEG
+
 from __future__ import annotations
 
 import math

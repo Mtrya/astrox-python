@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Live ASTROX-internal cross-validation for orbit conversions."""
+"""Live ASTROX-internal orbit conversion consistency checks."""
 
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ class RoundtripFailure:
         )
 
 
-class CrossValidationError(Exception):
+class LiveSnapshotError(Exception):
     """Raised when ASTROX orbit conversions are not internally consistent."""
 
 
@@ -228,22 +228,22 @@ def compare_keplerian_cartesian_roundtrip() -> None:
     failures.extend(compare_cartesian("cartesian_sample", state, roundtrip_state))
 
     if failures:
-        raise CrossValidationError("\n".join(failure.format() for failure in failures))
+        raise LiveSnapshotError("\n".join(failure.format() for failure in failures))
 
 
-def test_orbit_conversions_are_internally_consistent() -> None:
+def test_orbit_conversion_roundtrip_live_snapshot() -> None:
     configure_astrox_from_env()
     compare_keplerian_cartesian_roundtrip()
 
 
 def main() -> int:
     try:
-        test_orbit_conversions_are_internally_consistent()
-    except (CrossValidationError, LiveConfigError) as exc:
-        print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
+        test_orbit_conversion_roundtrip_live_snapshot()
+    except (LiveSnapshotError, LiveConfigError) as exc:
+        print(f"LIVE_SNAPSHOT_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    print("CROSS_VALIDATION_CHECKED=1")
-    print("CROSS_VALIDATION_FAILED=0")
+    print("LIVE_SNAPSHOT_CHECKED=1")
+    print("LIVE_SNAPSHOT_FAILED=0")
     return 0
 
 
