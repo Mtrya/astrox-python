@@ -12,7 +12,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from astrox import propagator
 from tests.validation._support import (
-    ContractCase,
+    LiveSnapshotCase,
     check_snapshot,
     configure_astrox_from_env,
     main,
@@ -62,27 +62,27 @@ def time_of_flight() -> tuple[float, propagator.PropagatorPosition]:
 
 
 CASES = [
-    ContractCase(
+    LiveSnapshotCase(
         id="nominal",
         description="Nominal ballistic trajectory without an explicit branch discriminator.",
         run=nominal,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="delta_v",
         description="Ballistic trajectory branch constrained by launch delta-v.",
         run=delta_v,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="delta_v_min_ecc",
         description="Ballistic trajectory branch constrained by launch delta-v with minimum eccentricity.",
         run=delta_v_min_ecc,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="apogee_altitude",
         description="Ballistic trajectory branch constrained by apogee altitude.",
         run=apogee_altitude,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="time_of_flight",
         description="Ballistic trajectory branch constrained by time of flight.",
         run=time_of_flight,

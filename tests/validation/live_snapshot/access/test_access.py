@@ -13,7 +13,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from astrox import access, entities, orbits, propagator
 from tests.validation._support import (
-    ContractCase,
+    LiveSnapshotCase,
     check_snapshot,
     configure_astrox_from_env,
     main,
@@ -293,47 +293,47 @@ def access_chain_explicit_multi_hop() -> dict[str, Any]:
 
 
 CASES = [
-    ContractCase(
+    LiveSnapshotCase(
         id="access_compute_site_sgp4",
         description="Direct access from a fixed site to an SGP4 entity, including AER output.",
         run=access_compute_site_sgp4,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="access_compute_site_central_body",
         description="Direct access from a fixed site to a central-body entity.",
         run=access_compute_site_central_body,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="access_compute_site_hpop",
         description="Direct access from a fixed site to an HPOP entity.",
         run=access_compute_site_hpop,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="access_compute_site_czml_positions",
         description="Direct access from a fixed site to a composite CZML positions entity.",
         run=access_compute_site_czml_positions,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="access_compute_site_simple_ascent",
         description="Direct access from a fixed site to a simple ascent entity.",
         run=access_compute_site_simple_ascent,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="access_compute_site_ballistic",
         description="Direct access from a fixed site to a ballistic entity.",
         run=access_compute_site_ballistic,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="access_chain_site_sgp4",
         description="Direct chain access between a site participant and an SGP4 participant.",
         run=access_chain_site_sgp4,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="access_chain_site_group",
         description="Chain access from a site participant to an entity group.",
         run=access_chain_site_group,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="access_chain_explicit_multi_hop",
         description="Explicit chain topology through a relay participant.",
         run=access_chain_explicit_multi_hop,

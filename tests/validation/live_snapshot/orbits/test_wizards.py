@@ -12,7 +12,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from astrox import orbits
 from tests.validation._support import (
-    ContractCase,
+    LiveSnapshotCase,
     check_snapshot,
     configure_astrox_from_env,
     main,
@@ -88,32 +88,32 @@ def walker_custom() -> tuple[tuple[orbits.KeplerianElements, ...], ...]:
 
 
 CASES = [
-    ContractCase(
+    LiveSnapshotCase(
         id="geo",
         description="GEO wizard returned as TOD and inertial Keplerian elements.",
         run=geo,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="molniya",
         description="Molniya wizard returned as TOD and inertial Keplerian elements.",
         run=molniya,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="sso",
         description="SSO wizard returned as TOD and inertial Keplerian elements.",
         run=sso,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="walker_delta",
         description="Walker Delta constellation returned as nested plane and satellite tuples.",
         run=walker_delta,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="walker_star",
         description="Walker Star constellation returned as nested plane and satellite tuples.",
         run=walker_star,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="walker_custom",
         description="Custom Walker constellation returned as nested plane and satellite tuples.",
         run=walker_custom,

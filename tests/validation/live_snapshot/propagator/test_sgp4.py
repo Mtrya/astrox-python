@@ -12,7 +12,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from astrox import propagator
 from tests.validation._support import (
-    ContractCase,
+    LiveSnapshotCase,
     check_snapshot,
     configure_astrox_from_env,
     main,
@@ -36,7 +36,7 @@ def iss_tle() -> tuple[float, propagator.PropagatorPosition]:
 
 
 CASES = [
-    ContractCase(
+    LiveSnapshotCase(
         id="iss_tle",
         description="Short ISS TLE propagation through the public SGP4 SDK function.",
         run=iss_tle,

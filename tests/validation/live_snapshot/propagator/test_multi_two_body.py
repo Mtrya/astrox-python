@@ -12,7 +12,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from astrox import orbits, propagator
 from tests.validation._support import (
-    ContractCase,
+    LiveSnapshotCase,
     check_snapshot,
     configure_astrox_from_env,
     main,
@@ -63,12 +63,12 @@ def empty() -> tuple[orbits.KeplerianElements, ...]:
 
 
 CASES = [
-    ContractCase(
+    LiveSnapshotCase(
         id="two_states",
         description="Two Classical states with different source epochs propagated to one target epoch.",
         run=two_states,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="empty",
         description="Server-supported empty batch returns an empty tuple.",
         run=empty,

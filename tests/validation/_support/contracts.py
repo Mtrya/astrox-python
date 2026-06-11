@@ -14,7 +14,7 @@ from typing import Any, Callable, Sequence
 
 
 @dataclass(frozen=True, kw_only=True)
-class ContractCase:
+class LiveSnapshotCase:
     """One public-SDK-input validation case."""
 
     id: str
@@ -126,7 +126,7 @@ def write_snapshot(path: Path, snapshot: dict[str, Any]) -> None:
 
 def refresh_snapshot(
     *,
-    cases: Sequence[ContractCase],
+    cases: Sequence[LiveSnapshotCase],
     snapshot_path: Path,
     env: dict[str, str] | None = None,
 ) -> dict[str, Any]:
@@ -144,7 +144,7 @@ def refresh_snapshot(
 
 def check_snapshot(
     *,
-    cases: Sequence[ContractCase],
+    cases: Sequence[LiveSnapshotCase],
     snapshot_path: Path,
     abs_tol: float = 0.0,
     rel_tol: float = 0.0,
@@ -185,7 +185,7 @@ def compare_values(
 
 def main(
     *,
-    cases: Sequence[ContractCase],
+    cases: Sequence[LiveSnapshotCase],
     snapshot_path: Path,
     argv: Sequence[str] | None = None,
     configure_live: bool = True,
@@ -219,7 +219,7 @@ def main(
     return 0
 
 
-def _run_cases(cases: Sequence[ContractCase]) -> list[dict[str, Any]]:
+def _run_cases(cases: Sequence[LiveSnapshotCase]) -> list[dict[str, Any]]:
     seen: set[str] = set()
     results: list[dict[str, Any]] = []
     for case in cases:

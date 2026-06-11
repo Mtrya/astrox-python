@@ -12,7 +12,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from astrox import orbits
 from tests.validation._support import (
-    ContractCase,
+    LiveSnapshotCase,
     check_snapshot,
     configure_astrox_from_env,
     main,
@@ -137,37 +137,37 @@ def lambert_delta_v_server_default_mu() -> tuple[
 
 
 CASES = [
-    ContractCase(
+    LiveSnapshotCase(
         id="keplerian_to_cartesian",
         description="Classical Keplerian elements converted to Cartesian position and velocity with explicit Earth mu.",
         run=keplerian_to_cartesian,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="cartesian_to_keplerian",
         description="Cartesian position and velocity converted to Classical Keplerian elements.",
         run=cartesian_to_keplerian,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="lla_at_ascending_node",
         description="Ascending-node location returned as longitude, latitude, and height.",
         run=lla_at_ascending_node,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="kozai_izsak_mean_elements",
         description="Osculating Classical elements converted to Kozai-Izsak mean elements.",
         run=kozai_izsak_mean_elements,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="lambert_delta_v_with_platform_mu",
         description="GEO-YM Lambert delta-v with explicit platform gravitational parameter.",
         run=lambert_delta_v_with_platform_mu,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="lambert_delta_v_cartesian",
         description="Single-revolution Lambert delta-v between two Cartesian states.",
         run=lambert_delta_v_cartesian,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="lambert_delta_v_server_default_mu",
         description="GEO-YM Lambert delta-v with server-owned platform gravitational parameter.",
         run=lambert_delta_v_server_default_mu,

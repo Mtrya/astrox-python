@@ -12,7 +12,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from astrox import orbits, propagator
 from tests.validation._support import (
-    ContractCase,
+    LiveSnapshotCase,
     check_snapshot,
     configure_astrox_from_env,
     main,
@@ -46,7 +46,7 @@ def sso() -> tuple[float, propagator.PropagatorPosition]:
 
 
 CASES = [
-    ContractCase(
+    LiveSnapshotCase(
         id="sso",
         description="Short two-body propagation from a low Earth orbit using explicit Earth constants.",
         run=sso,

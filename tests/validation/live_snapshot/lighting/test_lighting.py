@@ -13,7 +13,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from astrox import entities, lighting, orbits
 from tests.validation._support import (
-    ContractCase,
+    LiveSnapshotCase,
     check_snapshot,
     configure_astrox_from_env,
     main,
@@ -182,37 +182,37 @@ def solar_aer_for_sgp4() -> dict[str, Any]:
 
 
 CASES = [
-    ContractCase(
+    LiveSnapshotCase(
         id="lighting_times_site",
         description="Lighting intervals for a fixed geodetic site position.",
         run=lighting_times_for_site,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="lighting_times_sgp4",
         description="Lighting intervals for an SGP4 TLE position.",
         run=lighting_times_for_sgp4,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="solar_intensity_j2",
         description="Solar intensity samples for a J2 Keplerian position.",
         run=solar_intensity_for_j2,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="solar_intensity_two_body",
         description="Solar intensity samples for a two-body Keplerian position.",
         run=solar_intensity_for_two_body,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="solar_intensity_czml",
         description="Solar intensity samples for a CZML-like sampled position.",
         run=solar_intensity_for_czml,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="solar_aer_site",
         description="Solar azimuth/elevation/range samples for a fixed geodetic site position.",
         run=solar_aer_for_site,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="solar_aer_sgp4",
         description="Solar azimuth/elevation/range samples for an SGP4 TLE position.",
         run=solar_aer_for_sgp4,

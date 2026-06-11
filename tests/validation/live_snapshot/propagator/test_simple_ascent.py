@@ -12,7 +12,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from astrox import propagator
 from tests.validation._support import (
-    ContractCase,
+    LiveSnapshotCase,
     check_snapshot,
     configure_astrox_from_env,
     main,
@@ -39,7 +39,7 @@ def launch_to_burnout() -> tuple[float, propagator.PropagatorPosition]:
 
 
 CASES = [
-    ContractCase(
+    LiveSnapshotCase(
         id="launch_to_burnout",
         description="Simple ascent from launch point to burnout point using explicit scalar inputs.",
         run=launch_to_burnout,

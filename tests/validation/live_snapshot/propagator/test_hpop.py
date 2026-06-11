@@ -12,7 +12,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from astrox import orbits, propagator
 from tests.validation._support import (
-    ContractCase,
+    LiveSnapshotCase,
     check_snapshot,
     configure_astrox_from_env,
     main,
@@ -179,22 +179,22 @@ def full_branch_surface() -> tuple[float, propagator.PropagatorPosition]:
 
 
 CASES = [
-    ContractCase(
+    LiveSnapshotCase(
         id="classical_two_body",
         description="Classical HPOP propagation with explicit two-body gravity config.",
         run=classical_two_body,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="cartesian_two_body",
         description="Cartesian HPOP propagation with explicit two-body gravity config.",
         run=cartesian_two_body,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="gravity_field_integrator",
         description="Classical HPOP propagation with gravity-field config and explicit RKF78 knobs.",
         run=gravity_field_integrator,
     ),
-    ContractCase(
+    LiveSnapshotCase(
         id="full_branch_surface",
         description="Classical HPOP propagation exercising gravity field, Jacchia-Roberts, SRP spherical, third-body, and spacecraft scalar branches.",
         run=full_branch_surface,
