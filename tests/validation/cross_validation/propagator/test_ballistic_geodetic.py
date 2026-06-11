@@ -172,6 +172,8 @@ def compare_step_grid(
 
 
 def cartesian_rows(values: tuple[float, ...]) -> list[tuple[float, float, float, float, float, float, float]]:
+    if not values:
+        raise CrossValidationError("cartesianVelocity payload is empty")
     if len(values) % 7 != 0:
         raise CrossValidationError(f"cartesianVelocity length {len(values)} is not divisible by 7")
     return [

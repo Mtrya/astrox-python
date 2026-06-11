@@ -185,9 +185,10 @@ def require_sample(
     *,
     label: str,
 ) -> StateSample:
-    if offset_s not in samples:
-        raise CrossValidationError(f"{label} missing sample at offset_s={offset_s:g}")
-    return samples[offset_s]
+    for sample_offset_s, sample in samples.items():
+        if math.isclose(sample_offset_s, offset_s, abs_tol=1.0e-6):
+            return sample
+    raise CrossValidationError(f"{label} missing sample at offset_s={offset_s:g}")
 
 
 def max_abs_state_error(

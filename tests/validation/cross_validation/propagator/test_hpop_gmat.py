@@ -133,6 +133,16 @@ def case_state(case: HpopGmatCase) -> orbits.CartesianState | None:
     return case.state
 
 
+def case_initial_sources(
+    case: HpopGmatCase,
+) -> tuple[orbits.KeplerianElements | None, orbits.CartesianState | None]:
+    if case.orbit is not None and case.state is not None:
+        raise CrossValidationError(f"{case.id}: define orbit or state, not both")
+    state = case_state(case)
+    orbit = None if state is not None else case_orbit(case)
+    return orbit, state
+
+
 def hpop_integrator() -> propagator.HpopIntegrator:
     return propagator.hpop_rkf78(
         use_fixed_step=True,
@@ -405,8 +415,7 @@ def astrox_hpop_samples(case: HpopGmatCase) -> dict[float, StateSample]:
         "coefficient_of_srp": 1.0,
         "area_mass_ratio_srp_m2_kg": 0.0,
     }
-    state = case_state(case)
-    orbit = None if state is not None else case_orbit(case)
+    orbit, state = case_initial_sources(case)
     _, position = propagator.hpop(
         start=START,
         stop=STOP,
@@ -425,8 +434,7 @@ def astrox_hpop_samples(case: HpopGmatCase) -> dict[float, StateSample]:
 
 
 def gmat_hpop_samples(case: HpopGmatCase) -> dict[float, StateSample]:
-    state = case_state(case)
-    orbit = None if state is not None else case_orbit(case)
+    orbit, state = case_initial_sources(case)
     payload = {
         "epoch_utc": START,
         "start_utc": START,
