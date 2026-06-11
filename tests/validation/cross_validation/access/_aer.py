@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
 from datetime import timedelta
 from typing import Iterable
 
 import numpy as np
+from skyfield.api import wgs84
 from skyfield.framelib import itrs
 
 from tests.validation.cross_validation.access._cases import (
@@ -33,14 +33,6 @@ from tests.validation.cross_validation.access._geometry import (
     ts,
     wrapped_angle_error_deg,
 )
-
-
-@dataclass(frozen=True, kw_only=True)
-class SpacecraftFrameResidual:
-    name: str
-    azimuth_error_deg: float
-    elevation_error_deg: float
-    range_error_m: float
 
 
 def first_aer_rows(
@@ -75,6 +67,23 @@ def compare_ground_origin_aer_rows_with_skyfield(
         raise CrossValidationError("\n".join(failures))
 
 
+def compare_satellite_origin_aer_rows_with_geodetic_local_frame(
+    rows: list[dict[str, object]],
+    *,
+    azimuth_abs_deg: float,
+    elevation_abs_deg: float,
+    range_abs_m: float,
+) -> None:
+    failures = satellite_origin_aer_failures(
+        rows,
+        azimuth_abs_deg=azimuth_abs_deg,
+        elevation_abs_deg=elevation_abs_deg,
+        range_abs_m=range_abs_m,
+    )
+    if failures:
+        raise CrossValidationError("\n".join(failures))
+
+
 def ground_origin_aer_failures(
     rows: list[dict[str, object]],
     *,
@@ -91,6 +100,46 @@ def ground_origin_aer_failures(
         azimuth_error_deg = abs(wrapped_angle_error_deg(float(row["Azimuth"]), azimuth.degrees))
         elevation_error_deg = abs(float(row["Elevation"]) - altitude.degrees)
         range_error_m = abs(float(row["Range"]) - distance.m)
+        if azimuth_error_deg > azimuth_abs_deg:
+            failures.append(
+                f"{row['Time']} azimuth error {azimuth_error_deg:.12g} deg exceeds {azimuth_abs_deg:.12g} deg"
+            )
+        if elevation_error_deg > elevation_abs_deg:
+            failures.append(
+                f"{row['Time']} elevation error {elevation_error_deg:.12g} deg exceeds {elevation_abs_deg:.12g} deg"
+            )
+        if range_error_m > range_abs_m:
+            failures.append(
+                f"{row['Time']} range error {range_error_m:.12g} m exceeds {range_abs_m:.12g} m"
+            )
+    return failures
+
+
+def satellite_origin_aer_failures(
+    rows: list[dict[str, object]],
+    *,
+    azimuth_abs_deg: float,
+    elevation_abs_deg: float,
+    range_abs_m: float,
+) -> list[str]:
+    satellite = skyfield_satellite(TLE_A, "ISS")
+    target = skyfield_site(SITE_LATITUDE_DEG, SITE_LONGITUDE_DEG, SITE_HEIGHT_M)
+    failures: list[str] = []
+    for row in rows:
+        time = skyfield_time(str(row["Time"]))
+        satellite_state = satellite.at(time)
+        satellite_subpoint = wgs84.geographic_position_of(satellite_state)
+        satellite_ecef = np.array(satellite_state.frame_xyz(itrs).m)
+        target_ecef = np.array(target.at(time).frame_xyz(itrs).m)
+        azimuth, elevation, range_m = site_topocentric_from_ecef(
+            satellite_ecef,
+            target_ecef,
+            latitude_deg=satellite_subpoint.latitude.degrees,
+            longitude_deg=satellite_subpoint.longitude.degrees,
+        )
+        azimuth_error_deg = abs(wrapped_angle_error_deg(float(row["Azimuth"]), azimuth))
+        elevation_error_deg = abs(float(row["Elevation"]) - elevation)
+        range_error_m = abs(float(row["Range"]) - range_m)
         if azimuth_error_deg > azimuth_abs_deg:
             failures.append(
                 f"{row['Time']} azimuth error {azimuth_error_deg:.12g} deg exceeds {azimuth_abs_deg:.12g} deg"
@@ -163,37 +212,6 @@ def compare_range_symmetry(
             )
     if failures:
         raise CrossValidationError("\n".join(failures))
-
-
-def spacecraft_frame_residuals(rows: list[dict[str, object]]) -> list[SpacecraftFrameResidual]:
-    satellite = skyfield_satellite(TLE_A, "ISS")
-    observer = skyfield_site(SITE_LATITUDE_DEG, SITE_LONGITUDE_DEG, SITE_HEIGHT_M)
-    totals: dict[str, list[float]] = {}
-    for row in rows:
-        time = skyfield_time(str(row["Time"]))
-        sat_state = satellite.at(time)
-        sat_position = np.array(sat_state.position.m)
-        sat_velocity = np.array(sat_state.velocity.m_per_s)
-        target = np.array(observer.at(time).position.m)
-        target_vector = target - sat_position
-        for name, axes in spacecraft_frame_candidates(sat_position, sat_velocity).items():
-            azimuth_deg, elevation_deg, range_m = vector_to_aer(target_vector, axes)
-            totals.setdefault(name, [0.0, 0.0, 0.0])
-            totals[name][0] = max(
-                totals[name][0],
-                abs(wrapped_angle_error_deg(float(row["Azimuth"]), azimuth_deg)),
-            )
-            totals[name][1] = max(totals[name][1], abs(float(row["Elevation"]) - elevation_deg))
-            totals[name][2] = max(totals[name][2], abs(float(row["Range"]) - range_m))
-    return [
-        SpacecraftFrameResidual(
-            name=name,
-            azimuth_error_deg=values[0],
-            elevation_error_deg=values[1],
-            range_error_m=values[2],
-        )
-        for name, values in totals.items()
-    ]
 
 
 def compare_light_time_interval_shift(
@@ -284,47 +302,3 @@ def site_topocentric_from_ecef(
         math.degrees(math.asin(up_m / range_m)),
         range_m,
     )
-
-
-def spacecraft_frame_candidates(
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-) -> dict[str, tuple[np.ndarray, np.ndarray, np.ndarray]]:
-    radial = unit(position_m)
-    velocity = unit(velocity_m_s)
-    normal = unit(np.cross(position_m, velocity_m_s))
-    along_track = unit(np.cross(normal, radial))
-    return {
-        "RSW_x_radial_y_along_z_normal": (radial, along_track, normal),
-        "TNW_x_velocity_y_normal_z_radial": (velocity, normal, radial),
-        "VVLH_x_velocity_y_cross_z_nadir": (
-            velocity,
-            unit(np.cross(-radial, velocity)),
-            -radial,
-        ),
-        "LVLH_x_along_y_normal_z_nadir": (unit(np.cross(normal, -radial)), normal, -radial),
-        "nadir_velocity_cross": (-radial, velocity, unit(np.cross(-radial, velocity))),
-    }
-
-
-def vector_to_aer(
-    vector_m: np.ndarray,
-    axes: tuple[np.ndarray, np.ndarray, np.ndarray],
-) -> tuple[float, float, float]:
-    x_axis, y_axis, z_axis = axes
-    x = float(np.dot(vector_m, x_axis))
-    y = float(np.dot(vector_m, y_axis))
-    z = float(np.dot(vector_m, z_axis))
-    range_m = float(np.linalg.norm(vector_m))
-    return (
-        math.degrees(math.atan2(y, x)),
-        math.degrees(math.asin(z / range_m)),
-        range_m,
-    )
-
-
-def unit(value: np.ndarray) -> np.ndarray:
-    norm = float(np.linalg.norm(value))
-    if norm == 0.0:
-        raise CrossValidationError("cannot normalize zero vector")
-    return value / norm

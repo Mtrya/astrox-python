@@ -10,9 +10,9 @@ from tests.validation.cross_validation.access._aer import (
     compare_light_time_aer_effect,
     compare_light_time_interval_shift,
     compare_range_symmetry,
+    compare_satellite_origin_aer_rows_with_geodetic_local_frame,
     first_aer_rows,
     ground_origin_aer_failures,
-    spacecraft_frame_residuals,
     strict_ground_aer_diagnostics,
 )
 from tests.validation.cross_validation.access._cases import (
@@ -27,7 +27,7 @@ from tests.validation.cross_validation.access._cases import (
     REMOTE_HEIGHT_M,
     REMOTE_LATITUDE_DEG,
     REMOTE_LONGITUDE_DEG,
-    SATELLITE_AER_FRAME_ABS_DEG,
+    SATELLITE_LOCAL_AER_ABS_DEG,
     SITE_HEIGHT_M,
     SITE_LATITUDE_DEG,
     SITE_LONGITUDE_DEG,
@@ -126,37 +126,16 @@ def test_sgp4_to_ground_intervals_and_ranges_are_symmetric() -> None:
     )
 
 
-@pytest.mark.calibration
-@pytest.mark.xfail(
-    reason=(
-        "Satellite-origin access AER range is symmetric, but angle samples do not fit the "
-        "tested RSW, TNW, VVLH, LVLH, or nadir/velocity candidate frames closely enough."
-    ),
-    raises=CrossValidationError,
-    strict=True,
-)
-def test_sgp4_to_ground_satellite_origin_aer_frame_calibration() -> None:
+def test_sgp4_to_ground_satellite_origin_aer_matches_geodetic_local_frame() -> None:
     configure_astrox_from_env()
     result = compute_access(sgp4_entity(), site(), start=START, stop=DAY_STOP, compute_aer=True)
     rows = list(first_aer_rows(result, max_passes=2))
-    residuals = spacecraft_frame_residuals(rows)
-    best = min(residuals, key=lambda item: max(item.azimuth_error_deg, item.elevation_error_deg))
-    if (
-        best.azimuth_error_deg > SATELLITE_AER_FRAME_ABS_DEG
-        or best.elevation_error_deg > SATELLITE_AER_FRAME_ABS_DEG
-        or best.range_error_m > AER_CONVENTION_RANGE_ABS_M
-    ):
-        details = [
-            (
-                f"{item.name}: az={item.azimuth_error_deg:.12g} deg "
-                f"el={item.elevation_error_deg:.12g} deg range={item.range_error_m:.12g} m"
-            )
-            for item in sorted(residuals, key=lambda item: max(item.azimuth_error_deg, item.elevation_error_deg))
-        ]
-        raise CrossValidationError(
-            "best tested spacecraft frame does not explain ASTROX satellite-origin AER:\n"
-            + "\n".join(details)
-        )
+    compare_satellite_origin_aer_rows_with_geodetic_local_frame(
+        rows,
+        azimuth_abs_deg=SATELLITE_LOCAL_AER_ABS_DEG,
+        elevation_abs_deg=SATELLITE_LOCAL_AER_ABS_DEG,
+        range_abs_m=AER_CONVENTION_RANGE_ABS_M,
+    )
 
 
 def test_ground_to_sgp4_light_time_delay_matches_range_over_c_shift() -> None:

@@ -14,7 +14,7 @@ The current non-orientation access calibration covers these behavior axes:
 | Ground-origin SGP4 AER convention | covered with precision caveat | Skyfield topocentric azimuth/elevation/range comparison |
 | Strict ground-origin SGP4 AER precision | calibration xfail | same-epoch, light-time-shifted, manual ITRS topocentric, and horizon diagnostics still leave a sub-arcsecond residual |
 | SGP4 to ground interval/range role reversal | covered | symmetry against ground to SGP4 live output |
-| Satellite-origin SGP4 AER frame | calibration xfail | range is symmetric, but tested RSW/TNW/VVLH/LVLH/nadir-velocity frames do not explain angles |
+| Satellite-origin SGP4 AER convention | covered for fixed ground target | angles match an Earth-fixed local east/north/up frame at the satellite WGS84 geodetic subpoint; orbital RSW/TNW/VVLH-style frames were rejected by targeted diagnostics |
 | Fixed ground to fixed ground obstruction | covered | blocked WGS84 segment case returns no passes |
 | No-access response with AER requested | covered for fixed ground to fixed ground | blocked case returns an empty `Passes` list even when `ComputeAER=true` |
 | SGP4 to J2 no-access branch | covered for the chosen case | Skyfield SGP4 plus calibrated ASTROX-like secular J2 sampled segment-obstruction oracle |
@@ -47,7 +47,6 @@ These tests do not prove full ASTROX access correctness. They do not yet calibra
 | Central-body access semantics | live SDK contract only |
 | CZML, simple-ascent, and ballistic access semantics | live SDK contract only |
 | Broad HPOP force-model access semantics | live SDK contract plus companion callability only |
-| Satellite-origin AER frame convention | calibration xfail |
 | One request containing multiple alternative relay routes | partial; the calibrated two-route case currently fails, and an extra branch connection also fails |
 | LinkConnection MinUses/MaxUses cardinality semantics beyond the single-route probes | partial |
 | EntityGroup as StartObject and intermediate connection node | partial; start-group calibration currently fails |
