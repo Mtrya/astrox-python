@@ -64,7 +64,7 @@ def test_check_snapshot_reports_case_and_first_mismatch(tmp_path: Path) -> None:
     with pytest.raises(contracts.SnapshotMismatch) as exc_info:
         contracts.check_snapshot(
             cases=[
-                contracts.ContractCase(
+                contracts.LiveSnapshotCase(
                     id="case",
                     run=lambda: {"value": 2.0},
                 )
@@ -95,7 +95,7 @@ def test_check_snapshot_uses_exact_canonical_json_by_default(tmp_path: Path) -> 
     with pytest.raises(contracts.SnapshotMismatch, match="category=type"):
         contracts.check_snapshot(
             cases=[
-                contracts.ContractCase(
+                contracts.LiveSnapshotCase(
                     id="case",
                     run=lambda: {"value": 0.0},
                 )
@@ -120,7 +120,7 @@ def test_check_snapshot_allows_explicit_approximate_numeric_tolerance(tmp_path: 
 
     contracts.check_snapshot(
         cases=[
-            contracts.ContractCase(
+            contracts.LiveSnapshotCase(
                 id="case",
                 run=lambda: {"value": 1.000001},
             )
@@ -136,7 +136,7 @@ def test_check_snapshot_rejects_case_id_drift(tmp_path: Path) -> None:
 
     with pytest.raises(contracts.SnapshotMismatch, match="case id mismatch"):
         contracts.check_snapshot(
-            cases=[contracts.ContractCase(id="actual", run=lambda: True)],
+            cases=[contracts.LiveSnapshotCase(id="actual", run=lambda: True)],
             snapshot_path=path,
         )
 
@@ -144,7 +144,7 @@ def test_check_snapshot_rejects_case_id_drift(tmp_path: Path) -> None:
 def test_main_check_and_refresh_without_live_network(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     path = tmp_path / "sample.snap.json"
     cases = [
-        contracts.ContractCase(
+        contracts.LiveSnapshotCase(
             id="case",
             run=lambda: {"value": 1},
         )
@@ -157,7 +157,7 @@ def test_main_check_and_refresh_without_live_network(tmp_path: Path, capsys: pyt
         configure_live=False,
         env={"ASTROX_BASE_URL": "http://example.test"},
     ) == 0
-    assert "SDK_CONTRACT_REFRESHED=1" in capsys.readouterr().out
+    assert "LIVE_SNAPSHOT_REFRESHED=1" in capsys.readouterr().out
 
     assert contracts.main(
         cases=cases,
@@ -165,4 +165,4 @@ def test_main_check_and_refresh_without_live_network(tmp_path: Path, capsys: pyt
         argv=["--check"],
         configure_live=False,
     ) == 0
-    assert "SDK_CONTRACT_CHECKED=1" in capsys.readouterr().out
+    assert "LIVE_SNAPSHOT_CHECKED=1" in capsys.readouterr().out

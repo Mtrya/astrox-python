@@ -1,4 +1,4 @@
-"""Support mechanics for runnable live SDK contract scripts."""
+"""Support mechanics for runnable live snapshot scripts."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from typing import Any, Callable, Sequence
 
 
 @dataclass(frozen=True, kw_only=True)
-class ContractCase:
+class LiveSnapshotCase:
     """One public-SDK-input validation case."""
 
     id: str
@@ -126,7 +126,7 @@ def write_snapshot(path: Path, snapshot: dict[str, Any]) -> None:
 
 def refresh_snapshot(
     *,
-    cases: Sequence[ContractCase],
+    cases: Sequence[LiveSnapshotCase],
     snapshot_path: Path,
     env: dict[str, str] | None = None,
 ) -> dict[str, Any]:
@@ -144,7 +144,7 @@ def refresh_snapshot(
 
 def check_snapshot(
     *,
-    cases: Sequence[ContractCase],
+    cases: Sequence[LiveSnapshotCase],
     snapshot_path: Path,
     abs_tol: float = 0.0,
     rel_tol: float = 0.0,
@@ -185,7 +185,7 @@ def compare_values(
 
 def main(
     *,
-    cases: Sequence[ContractCase],
+    cases: Sequence[LiveSnapshotCase],
     snapshot_path: Path,
     argv: Sequence[str] | None = None,
     configure_live: bool = True,
@@ -193,7 +193,7 @@ def main(
     abs_tol: float = 0.0,
     rel_tol: float = 0.0,
 ) -> int:
-    parser = argparse.ArgumentParser(description="Check or refresh a live SDK contract snapshot.")
+    parser = argparse.ArgumentParser(description="Check or refresh a live snapshot.")
     action = parser.add_mutually_exclusive_group(required=True)
     action.add_argument("--check", action="store_true", help="Compare live SDK returns with the sidecar snapshot.")
     action.add_argument("--refresh", action="store_true", help="Rewrite the sidecar snapshot from live SDK returns.")
@@ -204,7 +204,7 @@ def main(
             configure_astrox_from_env(env)
         if args.refresh:
             snapshot = refresh_snapshot(cases=cases, snapshot_path=snapshot_path, env=env)
-            print(f"SDK_CONTRACT_REFRESHED={len(snapshot['cases'])}")
+            print(f"LIVE_SNAPSHOT_REFRESHED={len(snapshot['cases'])}")
         else:
             check_snapshot(
                 cases=cases,
@@ -212,14 +212,14 @@ def main(
                 abs_tol=abs_tol,
                 rel_tol=rel_tol,
             )
-            print(f"SDK_CONTRACT_CHECKED={len(cases)}")
+            print(f"LIVE_SNAPSHOT_CHECKED={len(cases)}")
     except SnapshotError as exc:
-        print(f"SDK_CONTRACT_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
+        print(f"LIVE_SNAPSHOT_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
     return 0
 
 
-def _run_cases(cases: Sequence[ContractCase]) -> list[dict[str, Any]]:
+def _run_cases(cases: Sequence[LiveSnapshotCase]) -> list[dict[str, Any]]:
     seen: set[str] = set()
     results: list[dict[str, Any]] = []
     for case in cases:

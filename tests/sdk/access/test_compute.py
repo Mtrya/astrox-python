@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from astrox import access
+from astrox import access, exceptions
 from tests.sdk.access.helpers import ground, iss, record_raw_post
 from tests.sdk.helpers import assert_canonical_equal
 
@@ -71,6 +71,44 @@ def test_compute_emits_direct_access_payload_and_returns_raw_response(
             "UseLightTimeDelay": False,
         },
     )
+
+
+def test_compute_returns_malformed_raw_response_without_parsing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    response = {"unexpected": ["server", "shape"]}
+    record_raw_post(monkeypatch, response)
+
+    actual = access.compute(
+        start="2024-01-01T00:00:00.000Z",
+        stop="2024-01-02T00:00:00.000Z",
+        from_entity=ground(),
+        to_entity=iss(),
+    )
+
+    assert actual is response
+
+
+def test_compute_propagates_api_errors_unchanged(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    error = exceptions.AstroxAPIError("bad access", "/access/AccessComputeV2", response=None)
+
+    def fake_post(endpoint: str, *, json: object) -> dict[str, Any]:
+        assert endpoint == "/access/AccessComputeV2"
+        raise error
+
+    monkeypatch.setattr(access.raw, "post", fake_post)
+
+    with pytest.raises(exceptions.AstroxAPIError) as exc_info:
+        access.compute(
+            start="2024-01-01T00:00:00.000Z",
+            stop="2024-01-02T00:00:00.000Z",
+            from_entity=ground(),
+            to_entity=iss(),
+        )
+
+    assert exc_info.value is error
 
 
 def test_compute_omits_optional_fields_when_not_supplied(

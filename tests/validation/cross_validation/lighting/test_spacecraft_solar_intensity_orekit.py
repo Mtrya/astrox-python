@@ -1,6 +1,19 @@
 #!/usr/bin/env python3
 """Live ASTROX spacecraft solar-intensity cross-validation against Orekit."""
 
+# Coverage:
+#   Branches:
+#     - spacecraft SolarIntensity from CZML-like inertial state samples: verified
+#   Fields:
+#     - Intensity: verified (Orekit conical Earth-shadow lighting ratio)
+#   Parameters:
+#     - spacecraft positions/velocities: partial (general-shadow and partial-shadow samples)
+#     - start/stop/sample offsets: partial (two fixed case windows)
+#   Comparison:
+#     - External: Orekit ConicallyShadowedLightFluxModel with EME2000 state samples
+#     - Constants: Orekit WGS84 Earth equatorial radius and Sun radius
+#     - Tolerances: INTENSITY_ABS
+
 from __future__ import annotations
 
 import math

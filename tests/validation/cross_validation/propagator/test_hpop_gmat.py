@@ -1,6 +1,31 @@
 #!/usr/bin/env python3
 """Live HPOP cross-validation between ASTROX and GMAT."""
 
+# Coverage:
+#   Branches:
+#     - HPOP gravity degree/order zero: verified
+#     - HPOP Cartesian input with degree/order zero gravity: verified
+#     - HPOP gravity degree/order zero with Sun/Moon point masses: verified
+#     - HPOP spherical SRP in sunlit geometry: verified
+#     - HPOP spherical SRP near Earth-shadow transition: unresolved calibration xfail
+#     - HPOP Jacchia-Roberts constant-values atmosphere with spherical drag: verified against GMAT when GMAT validation image is configured
+#   Fields:
+#     - Position.cartesian_velocity time/position/velocity samples: verified for representative cases
+#   Parameters:
+#     - integrator fixed-step settings: verified for the GMAT comparison cases
+#     - initial-state coordinate type: partial (Classical and Cartesian covered)
+#     - gravity model and third bodies: partial (degree/order zero plus Sun/Moon point masses)
+#     - SRP spacecraft coefficients and area/mass: partial (spherical SRP covered; shadow transition unresolved)
+#     - atmosphere and drag spacecraft coefficients: partial (Jacchia-Roberts constant-values branch covered)
+#   Comparison:
+#     - External: GMAT R2026a driver executed through the validation image
+#     - Constants: EARTH_MU, ASTROX_GRAVITY_FILE, SAMPLE_OFFSETS_S
+#     - Tolerances: POSITION_ABS_M, VELOCITY_ABS_M_S
+#     - Jacchia-Roberts drag tolerance: 5 mm and 1e-5 m/s, calibrated after matching constant F107/F107A/Kp because GMAT and ASTROX do not produce bitwise-identical atmosphere accelerations
+#   Unresolved:
+#     - SRP Earth-shadow transition residual remains visible as strict calibration xfail
+#     - Other atmosphere data-source branches are not covered
+
 from __future__ import annotations
 
 import math
@@ -50,8 +75,11 @@ class HpopGmatCase:
     astrox_config: propagator.HpopConfig
     gmat_force_model: dict[str, Any]
     orbit: orbits.KeplerianElements | None = None
+    state: orbits.CartesianState | None = None
     spacecraft: dict[str, float] | None = None
     sample_offsets_s: tuple[float, ...] = SAMPLE_OFFSETS_S
+    position_abs_m: float = POSITION_ABS_M
+    velocity_abs_m_s: float = VELOCITY_ABS_M_S
 
 
 class CrossValidationError(Exception):
@@ -80,12 +108,39 @@ def leo_sunlit_orbit() -> orbits.KeplerianElements:
     )
 
 
+def leo_cartesian_state() -> orbits.CartesianState:
+    return orbits.cartesian_state(
+        x_m=7000000.0,
+        y_m=1000.0,
+        z_m=2000.0,
+        vx_m_s=-1.0,
+        vy_m_s=7500.0,
+        vz_m_s=10.0,
+    )
+
+
 def leo_shadow_transition_orbit() -> orbits.KeplerianElements:
     return leo_orbit()
 
 
 def case_orbit(case: HpopGmatCase) -> orbits.KeplerianElements:
+    if case.orbit is None and case.state is not None:
+        raise CrossValidationError(f"{case.id}: case has Cartesian state, not Keplerian elements")
     return leo_orbit() if case.orbit is None else case.orbit
+
+
+def case_state(case: HpopGmatCase) -> orbits.CartesianState | None:
+    return case.state
+
+
+def case_initial_sources(
+    case: HpopGmatCase,
+) -> tuple[orbits.KeplerianElements | None, orbits.CartesianState | None]:
+    if case.orbit is not None and case.state is not None:
+        raise CrossValidationError(f"{case.id}: define orbit or state, not both")
+    state = case_state(case)
+    orbit = None if state is not None else case_orbit(case)
+    return orbit, state
 
 
 def hpop_integrator() -> propagator.HpopIntegrator:
@@ -149,6 +204,28 @@ def astrox_srp_third_body_config() -> propagator.HpopConfig:
     )
 
 
+def astrox_drag_config() -> propagator.HpopConfig:
+    return propagator.hpop_config(
+        central_body="Earth",
+        integrator=hpop_integrator(),
+        gravity=propagator.hpop_gravity_field(
+            gravity_file_name=ASTROX_GRAVITY_FILE,
+            degree=0,
+            order=0,
+            use_secular_variations=False,
+            solid_tide_type="Permanent tide only",
+            eop_file_path="EOP-v1.1.txt",
+        ),
+        atmosphere=propagator.hpop_jacchia_roberts(
+            drag_model_type="Spherical",
+            atmos_data_source="Constant Values",
+            f10p7=150.0,
+            f10p7_avg=150.0,
+            kp=3.0,
+        ),
+    )
+
+
 def gmat_srp_third_body_force_model() -> dict[str, Any]:
     return {
         "gravity": {"type": "point_mass"},
@@ -163,12 +240,42 @@ def gmat_srp_third_body_force_model() -> dict[str, Any]:
     }
 
 
+def gmat_jacchia_roberts_drag_force_model() -> dict[str, Any]:
+    return {
+        "gravity": {
+            "type": "earth_gravity_field",
+            "degree": 0,
+            "order": 0,
+            "potential_file": "JGM2.cof",
+            "tide_model": "None",
+        },
+        "atmosphere": {
+            "model": "jacchia_roberts",
+            "data_source": "constant_values",
+            "f10p7": 150.0,
+            "f10p7_avg": 150.0,
+            "kp": 3.0,
+        },
+        "srp": None,
+        "third_bodies": [],
+    }
+
+
 def srp_spacecraft() -> dict[str, float]:
     return {
         "coefficient_of_drag": 2.2,
         "area_mass_ratio_drag_m2_kg": 0.0,
         "coefficient_of_srp": 1.0,
         "area_mass_ratio_srp_m2_kg": 0.02,
+    }
+
+
+def drag_spacecraft() -> dict[str, float]:
+    return {
+        "coefficient_of_drag": 2.2,
+        "area_mass_ratio_drag_m2_kg": 0.02,
+        "coefficient_of_srp": 1.0,
+        "area_mass_ratio_srp_m2_kg": 0.0,
     }
 
 
@@ -179,6 +286,21 @@ CASES = [
             "ASTROX HPOP GravityField degree/order zero against GMAT Earth point-mass propagation; "
             "ASTROX currently accepts only CoordSystem='Inertial', mapped here to GMAT EarthMJ2000Eq."
         ),
+        astrox_config=astrox_degree_zero_gravity_config(),
+        gmat_force_model={
+            "gravity": {"type": "point_mass"},
+            "atmosphere": None,
+            "srp": None,
+            "third_bodies": [],
+        },
+    ),
+    HpopGmatCase(
+        id="cartesian_gravity_field_degree_zero",
+        description=(
+            "ASTROX HPOP Cartesian initial state with GravityField degree/order zero "
+            "against GMAT Cartesian Earth point-mass propagation."
+        ),
+        state=leo_cartesian_state(),
         astrox_config=astrox_degree_zero_gravity_config(),
         gmat_force_model={
             "gravity": {"type": "point_mass"},
@@ -237,6 +359,26 @@ CASES = [
         gmat_force_model=gmat_srp_third_body_force_model(),
         spacecraft=srp_spacecraft(),
     ),
+    HpopGmatCase(
+        id="jacchia_roberts_constant_drag",
+        description=(
+            "ASTROX HPOP Jacchia-Roberts constant-values spherical drag branch "
+            "against GMAT JacchiaRoberts drag with matching F107/F107A/MagneticIndex settings."
+        ),
+        orbit=orbits.keplerian(
+            semi_major_axis_m=6678137.0,
+            eccentricity=0.001,
+            inclination_deg=51.6,
+            argument_of_periapsis_deg=0.0,
+            raan_deg=0.0,
+            true_anomaly_deg=0.0,
+        ),
+        astrox_config=astrox_drag_config(),
+        gmat_force_model=gmat_jacchia_roberts_drag_force_model(),
+        spacecraft=drag_spacecraft(),
+        position_abs_m=5.0e-3,
+        velocity_abs_m_s=1.0e-5,
+    ),
 ]
 
 
@@ -273,11 +415,13 @@ def astrox_hpop_samples(case: HpopGmatCase) -> dict[float, StateSample]:
         "coefficient_of_srp": 1.0,
         "area_mass_ratio_srp_m2_kg": 0.0,
     }
+    orbit, state = case_initial_sources(case)
     _, position = propagator.hpop(
         start=START,
         stop=STOP,
         orbit_epoch=START,
-        orbit=case_orbit(case),
+        orbit=orbit,
+        state=state,
         coord_system="Inertial",
         gravitational_parameter_m3_s2=EARTH_MU,
         coefficient_of_drag=spacecraft["coefficient_of_drag"],
@@ -290,22 +434,14 @@ def astrox_hpop_samples(case: HpopGmatCase) -> dict[float, StateSample]:
 
 
 def gmat_hpop_samples(case: HpopGmatCase) -> dict[float, StateSample]:
-    orbit = case_orbit(case)
+    orbit, state = case_initial_sources(case)
     payload = {
         "epoch_utc": START,
         "start_utc": START,
         "stop_utc": STOP,
         "sample_offsets_s": list(case.sample_offsets_s),
         "coordinate_system": "EarthMJ2000Eq",
-        "initial_state": {
-            "type": "classical",
-            "semi_major_axis_m": orbit.semi_major_axis_m,
-            "eccentricity": orbit.eccentricity,
-            "inclination_deg": orbit.inclination_deg,
-            "argument_of_periapsis_deg": orbit.argument_of_periapsis_deg,
-            "raan_deg": orbit.raan_deg,
-            "true_anomaly_deg": orbit.true_anomaly_deg,
-        },
+        "initial_state": initial_state_payload(orbit=orbit, state=state),
         "spacecraft": case.spacecraft
         or {
             "coefficient_of_drag": 2.2,
@@ -323,6 +459,35 @@ def gmat_hpop_samples(case: HpopGmatCase) -> dict[float, StateSample]:
     }
     result = run_gmat_driver(GMAT_DRIVER, payload, timeout_s=240.0)
     return samples_from_gmat(result)
+
+
+def initial_state_payload(
+    *,
+    orbit: orbits.KeplerianElements | None,
+    state: orbits.CartesianState | None,
+) -> dict[str, float | str]:
+    if (orbit is None) == (state is None):
+        raise CrossValidationError("exactly one of orbit or state is required for GMAT HPOP comparison")
+    if state is not None:
+        return {
+            "type": "cartesian",
+            "x_m": state.x_m,
+            "y_m": state.y_m,
+            "z_m": state.z_m,
+            "vx_m_s": state.vx_m_s,
+            "vy_m_s": state.vy_m_s,
+            "vz_m_s": state.vz_m_s,
+        }
+    assert orbit is not None
+    return {
+        "type": "classical",
+        "semi_major_axis_m": orbit.semi_major_axis_m,
+        "eccentricity": orbit.eccentricity,
+        "inclination_deg": orbit.inclination_deg,
+        "argument_of_periapsis_deg": orbit.argument_of_periapsis_deg,
+        "raan_deg": orbit.raan_deg,
+        "true_anomaly_deg": orbit.true_anomaly_deg,
+    }
 
 
 def samples_from_astrox(cartesian_velocity: tuple[float, ...]) -> dict[float, StateSample]:
@@ -383,15 +548,15 @@ def compare_samples(
         ]
         position_error_m = max(abs(value) for value in position_errors)
         velocity_error_m_s = max(abs(value) for value in velocity_errors)
-        if position_error_m > POSITION_ABS_M:
+        if position_error_m > case.position_abs_m:
             failures.append(
                 f"{case.id}: position error at offset_s={offset_s:g} is {position_error_m:.12g} m "
-                f"(vector={_format_vector(position_errors)}), tolerance {POSITION_ABS_M:.12g} m"
+                f"(vector={_format_vector(position_errors)}), tolerance {case.position_abs_m:.12g} m"
             )
-        if velocity_error_m_s > VELOCITY_ABS_M_S:
+        if velocity_error_m_s > case.velocity_abs_m_s:
             failures.append(
                 f"{case.id}: velocity error at offset_s={offset_s:g} is {velocity_error_m_s:.12g} m/s "
-                f"(vector={_format_vector(velocity_errors)}), tolerance {VELOCITY_ABS_M_S:.12g} m/s"
+                f"(vector={_format_vector(velocity_errors)}), tolerance {case.velocity_abs_m_s:.12g} m/s"
             )
     if failures:
         raise CrossValidationError("\n".join(failures))
@@ -433,7 +598,7 @@ def test_hpop_matches_gmat_representative_cases() -> None:
     raises=CrossValidationError,
     strict=True,
 )
-def test_hpop_srp_shadow_transition_calibration() -> None:
+def test_hpop_srp_shadow_transition_matches_gmat_calibration() -> None:
     configure_astrox_from_env()
     try:
         require_gmat_image()

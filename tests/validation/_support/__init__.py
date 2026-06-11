@@ -1,7 +1,7 @@
 """Shared mechanics for runnable validation scripts."""
 
 from tests.validation._support.contracts import (
-    ContractCase,
+    LiveSnapshotCase,
     LiveConfigError,
     SnapshotError,
     SnapshotMismatch,
@@ -27,7 +27,7 @@ from tests.validation._support.gmat import (
 )
 
 __all__ = [
-    "ContractCase",
+    "LiveSnapshotCase",
     "EXTERNAL_VALIDATION_MODE_ENV",
     "ExternalToolError",
     "GMAT_VALIDATION_IMAGE_ENV",

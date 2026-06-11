@@ -1,6 +1,21 @@
 #!/usr/bin/env python3
 """Live SGP4 cross-validation between ASTROX and Skyfield."""
 
+# Coverage:
+#   Branches:
+#     - single SGP4 propagation from TLE: verified
+#   Fields:
+#     - period_s: verified (Skyfield mean motion)
+#     - Position.cartesian_velocity time/position/velocity samples: verified (GCRS state samples)
+#   Parameters:
+#     - satellite_number: verified for ISS sample
+#     - tle_lines: verified for ISS TLE_A sample
+#     - start/stop/step_s: partial (two samples over one 10-minute window)
+#   Comparison:
+#     - External: Skyfield EarthSatellite GCRS state
+#     - Constants: TLE_LINES, SAMPLE_OFFSETS_S
+#     - Tolerances: PERIOD_ABS_S, POSITION_ABS_M, VELOCITY_ABS_M_S
+
 from __future__ import annotations
 
 import math

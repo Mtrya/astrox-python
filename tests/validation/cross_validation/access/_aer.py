@@ -1,5 +1,18 @@
 """AER comparison helpers for access cross-validation."""
 
+# Coverage:
+#   Branches:
+#     - ground-origin access AER comparison helpers: partial
+#     - satellite-origin access AER convention diagnostics: partial
+#     - light-time access AER diagnostics: partial
+#   Fields:
+#     - Azimuth/Elevation/Range rows from ASTROX access AllDatas: partial
+#   Parameters:
+#     - compute_aer and use_light_time_delay are exercised by the importing test modules: partial
+#   Comparison path:
+#     - External: Skyfield topocentric geometry and ECEF frame transforms
+#     - Constants and tolerances are imported from access cross-validation cases
+
 from __future__ import annotations
 
 import math

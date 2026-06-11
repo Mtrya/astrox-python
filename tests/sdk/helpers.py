@@ -1,4 +1,4 @@
-"""Shared helpers for SDK contract tests."""
+"""Shared helpers for SDK behavior tests."""
 
 from __future__ import annotations
 

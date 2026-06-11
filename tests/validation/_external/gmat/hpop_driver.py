@@ -149,8 +149,6 @@ def _force_model_lines(force_model: dict[str, Any]) -> list[str]:
     atmosphere = force_model.get("atmosphere")
     srp = force_model.get("srp")
     third_bodies = force_model.get("third_bodies", [])
-    if atmosphere is not None:
-        raise ValueError("GMAT HPOP driver does not support atmosphere/drag cases yet")
 
     lines: list[str] = []
     point_masses = [GMAT_BODY_NAMES[name] for name in third_bodies]
@@ -175,7 +173,7 @@ def _force_model_lines(force_model: dict[str, Any]) -> list[str]:
     else:
         lines.append("HpopForceModel.PointMasses = {};")
 
-    lines.append("HpopForceModel.Drag = None;")
+    lines.extend(_drag_model_lines(atmosphere))
     if srp is None:
         lines.append("HpopForceModel.SRP = Off;")
     else:
@@ -197,6 +195,25 @@ def _force_model_lines(force_model: dict[str, Any]) -> list[str]:
                 f"HpopForceModel.SRP.ExtraShadowBodies = {{{', '.join(extra_shadow_bodies)}}};"
             )
     return lines
+
+
+def _drag_model_lines(atmosphere: dict[str, Any] | None) -> list[str]:
+    if atmosphere is None:
+        return ["HpopForceModel.Drag = None;"]
+
+    atmosphere_model = atmosphere["model"]
+    if atmosphere_model != "jacchia_roberts":
+        raise ValueError(f"unsupported atmosphere.model: {atmosphere_model!r}")
+    if atmosphere.get("data_source") != "constant_values":
+        raise ValueError(f"unsupported jacchia_roberts data_source: {atmosphere.get('data_source')!r}")
+    return [
+        "HpopForceModel.Drag = JacchiaRoberts;",
+        "HpopForceModel.Drag.AtmosphereModel = 'JacchiaRoberts';",
+        "HpopForceModel.Drag.HistoricWeatherSource = 'ConstantFluxAndGeoMag';",
+        f"HpopForceModel.Drag.F107 = {float(atmosphere['f10p7']):.16g};",
+        f"HpopForceModel.Drag.F107A = {float(atmosphere['f10p7_avg']):.16g};",
+        f"HpopForceModel.Drag.MagneticIndex = {float(atmosphere['kp']):.16g};",
+    ]
 
 
 def _sample_offsets(values: list[Any]) -> list[float]:
