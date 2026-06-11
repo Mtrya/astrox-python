@@ -8,7 +8,7 @@
 #     - HPOP gravity degree/order zero with Sun/Moon point masses: verified
 #     - HPOP spherical SRP in sunlit geometry: verified
 #     - HPOP spherical SRP near Earth-shadow transition: unresolved calibration xfail
-#     - HPOP atmosphere/drag configs: partial live invariants in test_hpop_drag_invariants.py; GMAT same-model mapping unresolved
+#     - HPOP Jacchia-Roberts constant-values atmosphere with spherical drag: verified against GMAT when GMAT validation image is configured
 #   Fields:
 #     - Position.cartesian_velocity time/position/velocity samples: verified for representative cases
 #   Parameters:
@@ -16,14 +16,15 @@
 #     - initial-state coordinate type: partial (Classical and Cartesian covered)
 #     - gravity model and third bodies: partial (degree/order zero plus Sun/Moon point masses)
 #     - SRP spacecraft coefficients and area/mass: partial (spherical SRP covered; shadow transition unresolved)
-#     - atmosphere and drag spacecraft coefficients: partial live invariant coverage in test_hpop_drag_invariants.py
+#     - atmosphere and drag spacecraft coefficients: partial (Jacchia-Roberts constant-values branch covered)
 #   Comparison:
 #     - External: GMAT R2026a driver executed through the validation image
 #     - Constants: EARTH_MU, ASTROX_GRAVITY_FILE, SAMPLE_OFFSETS_S
 #     - Tolerances: POSITION_ABS_M, VELOCITY_ABS_M_S
+#     - Jacchia-Roberts drag tolerance: 5 mm and 1e-5 m/s, calibrated after matching constant F107/F107A/Kp because GMAT and ASTROX do not produce bitwise-identical atmosphere accelerations
 #   Unresolved:
 #     - SRP Earth-shadow transition residual remains visible as strict calibration xfail
-#     - Atmosphere/drag same-model cross-validation still needs GMAT driver atmosphere-model mapping or another available Jacchia-Roberts oracle
+#     - Other atmosphere data-source branches are not covered
 
 from __future__ import annotations
 
@@ -77,6 +78,8 @@ class HpopGmatCase:
     state: orbits.CartesianState | None = None
     spacecraft: dict[str, float] | None = None
     sample_offsets_s: tuple[float, ...] = SAMPLE_OFFSETS_S
+    position_abs_m: float = POSITION_ABS_M
+    velocity_abs_m_s: float = VELOCITY_ABS_M_S
 
 
 class CrossValidationError(Exception):
@@ -191,6 +194,28 @@ def astrox_srp_third_body_config() -> propagator.HpopConfig:
     )
 
 
+def astrox_drag_config() -> propagator.HpopConfig:
+    return propagator.hpop_config(
+        central_body="Earth",
+        integrator=hpop_integrator(),
+        gravity=propagator.hpop_gravity_field(
+            gravity_file_name=ASTROX_GRAVITY_FILE,
+            degree=0,
+            order=0,
+            use_secular_variations=False,
+            solid_tide_type="Permanent tide only",
+            eop_file_path="EOP-v1.1.txt",
+        ),
+        atmosphere=propagator.hpop_jacchia_roberts(
+            drag_model_type="Spherical",
+            atmos_data_source="Constant Values",
+            f10p7=150.0,
+            f10p7_avg=150.0,
+            kp=3.0,
+        ),
+    )
+
+
 def gmat_srp_third_body_force_model() -> dict[str, Any]:
     return {
         "gravity": {"type": "point_mass"},
@@ -205,12 +230,42 @@ def gmat_srp_third_body_force_model() -> dict[str, Any]:
     }
 
 
+def gmat_jacchia_roberts_drag_force_model() -> dict[str, Any]:
+    return {
+        "gravity": {
+            "type": "earth_gravity_field",
+            "degree": 0,
+            "order": 0,
+            "potential_file": "JGM2.cof",
+            "tide_model": "None",
+        },
+        "atmosphere": {
+            "model": "jacchia_roberts",
+            "data_source": "constant_values",
+            "f10p7": 150.0,
+            "f10p7_avg": 150.0,
+            "kp": 3.0,
+        },
+        "srp": None,
+        "third_bodies": [],
+    }
+
+
 def srp_spacecraft() -> dict[str, float]:
     return {
         "coefficient_of_drag": 2.2,
         "area_mass_ratio_drag_m2_kg": 0.0,
         "coefficient_of_srp": 1.0,
         "area_mass_ratio_srp_m2_kg": 0.02,
+    }
+
+
+def drag_spacecraft() -> dict[str, float]:
+    return {
+        "coefficient_of_drag": 2.2,
+        "area_mass_ratio_drag_m2_kg": 0.02,
+        "coefficient_of_srp": 1.0,
+        "area_mass_ratio_srp_m2_kg": 0.0,
     }
 
 
@@ -293,6 +348,26 @@ CASES = [
         astrox_config=astrox_srp_third_body_config(),
         gmat_force_model=gmat_srp_third_body_force_model(),
         spacecraft=srp_spacecraft(),
+    ),
+    HpopGmatCase(
+        id="jacchia_roberts_constant_drag",
+        description=(
+            "ASTROX HPOP Jacchia-Roberts constant-values spherical drag branch "
+            "against GMAT JacchiaRoberts drag with matching F107/F107A/MagneticIndex settings."
+        ),
+        orbit=orbits.keplerian(
+            semi_major_axis_m=6678137.0,
+            eccentricity=0.001,
+            inclination_deg=51.6,
+            argument_of_periapsis_deg=0.0,
+            raan_deg=0.0,
+            true_anomaly_deg=0.0,
+        ),
+        astrox_config=astrox_drag_config(),
+        gmat_force_model=gmat_jacchia_roberts_drag_force_model(),
+        spacecraft=drag_spacecraft(),
+        position_abs_m=5.0e-3,
+        velocity_abs_m_s=1.0e-5,
     ),
 ]
 
@@ -465,15 +540,15 @@ def compare_samples(
         ]
         position_error_m = max(abs(value) for value in position_errors)
         velocity_error_m_s = max(abs(value) for value in velocity_errors)
-        if position_error_m > POSITION_ABS_M:
+        if position_error_m > case.position_abs_m:
             failures.append(
                 f"{case.id}: position error at offset_s={offset_s:g} is {position_error_m:.12g} m "
-                f"(vector={_format_vector(position_errors)}), tolerance {POSITION_ABS_M:.12g} m"
+                f"(vector={_format_vector(position_errors)}), tolerance {case.position_abs_m:.12g} m"
             )
-        if velocity_error_m_s > VELOCITY_ABS_M_S:
+        if velocity_error_m_s > case.velocity_abs_m_s:
             failures.append(
                 f"{case.id}: velocity error at offset_s={offset_s:g} is {velocity_error_m_s:.12g} m/s "
-                f"(vector={_format_vector(velocity_errors)}), tolerance {VELOCITY_ABS_M_S:.12g} m/s"
+                f"(vector={_format_vector(velocity_errors)}), tolerance {case.velocity_abs_m_s:.12g} m/s"
             )
     if failures:
         raise CrossValidationError("\n".join(failures))

@@ -12,8 +12,8 @@
 #   Comparison:
 #     - Strong invariant: zero drag area with atmosphere present matches no-atmosphere propagation
 #     - Strong invariant: positive drag area changes the trajectory and lowers specific mechanical energy relative to the no-drag counterpart
-#   Unresolved:
-#     - Same-model comparison against GMAT/Orekit remains unavailable in this repo state: the GMAT driver still lacks atmosphere-model mapping, and Orekit 13.1.5 does not expose a Jacchia-Roberts atmosphere class through orekit-jpype
+#   Related external comparison:
+#     - GMAT Jacchia-Roberts constant-values same-model comparison lives in test_hpop_gmat.py
 
 from __future__ import annotations
 
