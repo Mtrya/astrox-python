@@ -36,7 +36,11 @@ def iss() -> entities.Entity:
 
 def test_public_access_value_names_are_exported() -> None:
     assert "Connection" in access.__all__
+    assert "chain" in access.__all__
+    assert "compute" in access.__all__
     assert "connection" in access.__all__
+    assert "AccessParticipant" not in access.__all__
+    assert "AccessParticipantRef" not in access.__all__
     assert "EntityGroup" in entities.__all__
     assert "entity_group" in entities.__all__
 

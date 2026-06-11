@@ -100,6 +100,8 @@ def test_public_modules_and_names_are_available() -> None:
     assert "propagator" in astrox.__all__
 
     assert hasattr(access, "Connection")
+    assert hasattr(access, "chain")
+    assert hasattr(access, "compute")
     assert hasattr(access, "connection")
     assert hasattr(entities, "Entity")
     assert hasattr(entities, "EntityGroup")
