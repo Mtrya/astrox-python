@@ -108,6 +108,29 @@ def test_compute_omits_optional_fields_when_not_supplied(
     )
 
 
+def test_compute_omits_optional_fields_when_explicitly_none(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(monkeypatch, ACCESS_RESPONSE)
+
+    access.compute(
+        start="2024-01-01T00:00:00.000Z",
+        stop="2024-01-02T00:00:00.000Z",
+        from_entity=ground(),
+        to_entity=iss(),
+    )
+    access.compute(
+        start="2024-01-01T00:00:00.000Z",
+        stop="2024-01-02T00:00:00.000Z",
+        from_entity=ground(),
+        to_entity=iss(),
+        compute_aer=None,
+        use_light_time_delay=None,
+    )
+
+    assert_canonical_equal(calls[0]["json"], calls[1]["json"])
+
+
 @pytest.mark.parametrize(
     ("kwargs", "match"),
     [

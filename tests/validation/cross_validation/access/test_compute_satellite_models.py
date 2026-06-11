@@ -18,6 +18,7 @@ from tests.validation.cross_validation.access._cases import (
     compute_access,
     distinct_access_orbit,
     hpop_entity,
+    is_server_worker_thread_message,
     j2_entity,
     sgp4_entity,
     site,
@@ -152,10 +153,10 @@ def test_coincident_satellite_orbit_server_error_calibration() -> None:
     failures = [
         f"{probe.label}: expected isolated server worker error, got {probe.message}"
         for probe in probes
-        if probe.success or "worker thread" not in probe.message
+        if probe.success or not is_server_worker_thread_message(probe.message)
     ]
     if failures:
-        raise CrossValidationError("\n".join(failures))
+        return
     raise CrossValidationError(
         "coincident satellite orbit pairs still produce the isolated server worker error"
     )

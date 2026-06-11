@@ -249,19 +249,14 @@ def astrox_like_j2_elements(
         0.75 * keplerian_mean_motion_rad_s * factor * beta * (3.0 * cos_i * cos_i - 1.0)
     )
     mean_anomaly_deg = true_to_mean_deg(orbit.true_anomaly_deg, eccentricity)
+    propagated_mean_deg = (mean_anomaly_deg + math.degrees(mean_anomaly_rate * offset_s)) % 360.0
     return (
         semi_major_axis_m,
         eccentricity,
         orbit.inclination_deg,
         (orbit.raan_deg + math.degrees(raan_rate * offset_s)) % 360.0,
         (orbit.argument_of_periapsis_deg + math.degrees(argument_rate * offset_s)) % 360.0,
-        true_to_mean_deg(
-            mean_to_true_deg(
-                mean_anomaly_deg + math.degrees(mean_anomaly_rate * offset_s),
-                eccentricity,
-            ),
-            eccentricity,
-        ),
+        propagated_mean_deg,
     )
 
 
@@ -277,20 +272,6 @@ def true_to_mean_deg(true_anomaly_deg: float, eccentricity: float) -> float:
     )
     mean_anomaly = eccentric_anomaly - eccentricity * math.sin(eccentric_anomaly)
     return math.degrees(mean_anomaly) % 360.0
-
-
-def mean_to_true_deg(mean_anomaly_deg: float, eccentricity: float) -> float:
-    mean_anomaly = math.radians(mean_anomaly_deg)
-    eccentric_anomaly = mean_anomaly
-    for _ in range(30):
-        eccentric_anomaly -= (
-            eccentric_anomaly - eccentricity * math.sin(eccentric_anomaly) - mean_anomaly
-        ) / (1.0 - eccentricity * math.cos(eccentric_anomaly))
-    true_anomaly = 2.0 * math.atan2(
-        math.sqrt(1.0 + eccentricity) * math.sin(eccentric_anomaly / 2.0),
-        math.sqrt(1.0 - eccentricity) * math.cos(eccentric_anomaly / 2.0),
-    )
-    return math.degrees(true_anomaly) % 360.0
 
 
 def wrapped_angle_error_deg(actual: float, expected: float) -> float:

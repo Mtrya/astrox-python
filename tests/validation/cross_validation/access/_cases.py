@@ -43,6 +43,9 @@ SATELLITE_LOCAL_AER_ABS_DEG = 5.0e-3
 LIGHT_TIME_SHIFT_ABS_S = 3.0e-3
 LIGHT_TIME_AER_ABS_DEG = 1.0e-6
 LIGHT_TIME_RANGE_ABS_M = 1.0e-3
+SERVER_NO_PATH_MESSAGE = "未找到任何路径"
+SERVER_INDEX_ERROR_MESSAGE = "Index was outside the bounds of the array"
+SERVER_WORKER_THREAD_MESSAGE = "worker thread"
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -54,6 +57,18 @@ class BranchProbe:
 
 class CrossValidationError(Exception):
     """Raised when ASTROX access behavior disagrees with a comparison path."""
+
+
+def is_server_no_path_error(exc: AstroxAPIError) -> bool:
+    return SERVER_NO_PATH_MESSAGE in str(exc)
+
+
+def is_server_index_error(exc: AstroxAPIError) -> bool:
+    return SERVER_INDEX_ERROR_MESSAGE in str(exc)
+
+
+def is_server_worker_thread_message(message: str) -> bool:
+    return SERVER_WORKER_THREAD_MESSAGE in message
 
 
 def site(name: str = "Ground") -> entities.Entity:

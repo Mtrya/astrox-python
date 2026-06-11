@@ -44,11 +44,20 @@ def main() -> None:
             f"{first['AccessStart']} to {first['AccessStop']} "
             f"({first['Duration']:.1f} s)"
         )
-        max_elevation = first["MaxElevationData"]
-        print(
-            "Max elevation in first interval: "
-            f"{max_elevation['Elevation']:.3f} deg at {max_elevation['Time']}"
-        )
+        max_elevation = first.get("MaxElevationData")
+        if isinstance(max_elevation, dict):
+            elevation = max_elevation.get("Elevation")
+            time = max_elevation.get("Time")
+        else:
+            elevation = None
+            time = None
+        if isinstance(elevation, (int, float)) and time is not None:
+            print(
+                "Max elevation in first interval: "
+                f"{elevation:.3f} deg at {time}"
+            )
+        else:
+            print("Max elevation data was not included in the first interval")
 
 
 if __name__ == "__main__":

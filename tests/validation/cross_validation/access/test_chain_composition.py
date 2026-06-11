@@ -22,6 +22,8 @@ from tests.validation.cross_validation.access._cases import (
     compute_access,
     direct_chain_sgp4,
     group_chain_anyof,
+    is_server_index_error,
+    is_server_no_path_error,
     relay_chain,
     sgp4_entity,
     site,
@@ -236,7 +238,7 @@ def test_explicit_connections_are_directional() -> None:
             ],
         )
     except AstroxAPIError as exc:
-        if "未找到任何路径" not in str(exc):
+        if not is_server_no_path_error(exc):
             raise
     else:
         raise CrossValidationError("reversed link directions unexpectedly produced a forward chain")
@@ -367,7 +369,7 @@ def test_multiple_explicit_relay_routes_calibration() -> None:
             ],
         )
     except AstroxAPIError as exc:
-        if "未找到任何路径" in str(exc):
+        if is_server_no_path_error(exc):
             raise CrossValidationError(
                 "combined explicit relay routes failed with no-path error despite both routes working separately"
             ) from exc
@@ -400,7 +402,7 @@ def test_duplicate_explicit_link_calibration() -> None:
             ],
         )
     except AstroxAPIError as exc:
-        if "未找到任何路径" in str(exc):
+        if is_server_no_path_error(exc):
             raise CrossValidationError(
                 "duplicate explicit link failed with no-path error despite the unique route working"
             ) from exc
@@ -440,7 +442,7 @@ def test_extra_branch_connection_calibration() -> None:
             ],
         )
     except AstroxAPIError as exc:
-        if "未找到任何路径" in str(exc):
+        if is_server_no_path_error(exc):
             raise CrossValidationError(
                 "extra branch connection failed with no-path error despite the original route still being present"
             ) from exc
@@ -473,7 +475,7 @@ def test_start_entity_group_calibration() -> None:
             end_participant=ground,
         )
     except AstroxAPIError as exc:
-        if "Index was outside the bounds of the array" in str(exc):
+        if is_server_index_error(exc):
             raise CrossValidationError(
                 "start EntityGroup failed with server index error"
             ) from exc

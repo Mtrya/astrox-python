@@ -30,6 +30,13 @@ AER_KEYS = {
 }
 
 
+def first_pass_for(result: dict[str, object], purpose: str) -> dict[str, object]:
+    passes = result["Passes"]
+    if not passes:
+        raise CrossValidationError(f"expected at least one pass for {purpose}")
+    return passes[0]
+
+
 def test_compute_aer_false_matches_omitted_and_true_preserves_intervals() -> None:
     configure_astrox_from_env()
     ground = site()
@@ -49,9 +56,9 @@ def test_compute_aer_false_matches_omitted_and_true_preserves_intervals() -> Non
         tolerance_s=CHAIN_INTERVAL_ABS_S,
     )
 
-    omitted_keys = set(omitted["Passes"][0])
-    false_keys = set(explicit_false["Passes"][0])
-    true_keys = set(explicit_true["Passes"][0])
+    omitted_keys = set(first_pass_for(omitted, "ComputeAER key validation"))
+    false_keys = set(first_pass_for(explicit_false, "ComputeAER key validation"))
+    true_keys = set(first_pass_for(explicit_true, "ComputeAER key validation"))
     if omitted_keys & AER_KEYS:
         raise CrossValidationError(f"ComputeAER omitted unexpectedly returned AER keys: {omitted_keys & AER_KEYS}")
     if false_keys & AER_KEYS:
@@ -88,8 +95,8 @@ def test_out_step_controls_aer_sample_cadence_not_interval_boundaries() -> None:
         tolerance_s=CHAIN_INTERVAL_ABS_S,
     )
 
-    coarse_pass = coarse["Passes"][0]
-    fine_pass = fine["Passes"][0]
+    coarse_pass = first_pass_for(coarse, "OutStep cadence validation")
+    fine_pass = first_pass_for(fine, "OutStep cadence validation")
     coarse_rows = coarse_pass["AllDatas"]
     fine_rows = fine_pass["AllDatas"]
     if len(coarse_rows) != 2:

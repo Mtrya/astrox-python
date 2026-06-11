@@ -14,7 +14,7 @@ from tests.sdk.helpers import assert_canonical_equal
 
 CHAIN_RESPONSE: dict[str, Any] = {
     "IsSuccess": True,
-    "Message": "计算成功！",
+    "Message": "计算成功!",
     "ComputedStrands": [["Ground", "ISS"]],
     "CompleteChainAccess": [],
     "IndividualStrandAccess": {},
@@ -101,6 +101,24 @@ def test_chain_emits_definition_table_name_references_and_direct_null_connection
             "UseLightTimeDelay": True,
         },
     )
+
+
+def test_chain_omits_use_light_time_delay_when_explicitly_none(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(monkeypatch, CHAIN_RESPONSE)
+    target_group = targets()
+
+    access.chain(
+        start="2024-01-01T00:00:00.000Z",
+        stop="2024-01-02T00:00:00.000Z",
+        participants=[ground(), target_group],
+        start_participant=ground(),
+        end_participant=target_group,
+        use_light_time_delay=None,
+    )
+
+    assert "UseLightTimeDelay" not in calls[0]["json"]
 
 
 def test_chain_emits_explicit_multi_hop_connections(

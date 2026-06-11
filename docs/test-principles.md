@@ -99,7 +99,7 @@ External libraries are also acceptable when they are established, auditable, and
 
 Each cross-validation script includes a structured coverage checklist in a docstring or comment block after the module docstring:
 
-```
+```text
 Coverage:
   Branches:
     - single_j2: verified
@@ -122,23 +122,23 @@ Coverage:
 ## Naming and Organization
 
 Cross-validation test functions:
-```
+```text
 test_<branch>_matches_<comparison>
 ```
 
 Cross-validation test files:
-```
+```text
 test_<branch>_<comparison_tool>.py
 ```
 If a branch uses different comparison tools, separate them into multiple files.
 
 Behavior test functions:
-```
+```text
 test_<function>_<property>
 ```
 
 Contract test functions:
-```
+```text
 test_<function>_sdk_contract
 ```
 
