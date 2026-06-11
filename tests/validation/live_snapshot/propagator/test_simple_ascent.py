@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Live SDK contract snapshot for the simple-ascent propagator."""
+"""Live live snapshot snapshot for the simple-ascent propagator."""
 
 from __future__ import annotations
 
@@ -47,7 +47,7 @@ CASES = [
 ]
 
 
-def test_simple_ascent_sdk_contract() -> None:
+def test_simple_ascent_live_snapshot() -> None:
     configure_astrox_from_env()
     check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
 

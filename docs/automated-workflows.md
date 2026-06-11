@@ -49,7 +49,7 @@ Do not duplicate those checks inside the OpenAPI drift workflow. If an automated
 
 Scheduled SDK health exists for live regressions that are not accompanied by an OpenAPI refresh PR. It should mirror CI closely enough to catch supported SDK breakage and direct endpoint smoke failures.
 
-Scheduled SDK health also runs live validation tests under `tests/validation/`. SDK contract validation protects promoted public SDK calls against ASTROX return drift, and cross-validation scripts compare selected behavior with independent tools when that comparison is lightweight and credible enough for scheduled execution.
+Scheduled SDK health also runs live validation tests under `tests/validation/`. live snapshot validation protects promoted public SDK calls against ASTROX return drift, and cross-validation scripts compare selected behavior with independent tools when that comparison is lightweight and credible enough for scheduled execution.
 
 When scheduled validation depends on a prepared external tool, SDK health prepares that tool before running validation. GMAT-backed validation uses the pinned `ghcr.io/<owner>/astrox-gmat-validation:gmat-r2026a` image, runs the image self-check, and only then exposes `GMAT_VALIDATION_IMAGE` to validation scripts. A preparation failure is reported separately from validation pytest failure.
 
@@ -65,7 +65,7 @@ The image workflow runs on manual dispatch and on `main` changes to the containe
 
 ## Validation Policy
 
-Supported SDK behavior is protected by tests, not by endpoint-centered replay. Deterministic behavior tests live under `tests/sdk/`; live SDK contract and cross-validation checks live under `tests/validation/` and run in scheduled SDK health.
+Supported SDK behavior is protected by tests, not by endpoint-centered replay. Deterministic behavior tests live under `tests/sdk/`; live live snapshot and cross-validation checks live under `tests/validation/` and run in scheduled SDK health.
 
 ## Automation Principles
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Live SDK contract snapshots for orbit wizard helpers."""
+"""Live snapshots for orbit wizard helpers."""
 
 from __future__ import annotations
 
@@ -121,7 +121,7 @@ CASES = [
 ]
 
 
-def test_orbit_wizard_sdk_contract() -> None:
+def test_orbit_wizard_live_snapshot() -> None:
     configure_astrox_from_env()
     check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
 

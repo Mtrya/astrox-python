@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Live SDK contract snapshots for the HPOP propagator."""
+"""Live snapshots for the HPOP propagator."""
 
 from __future__ import annotations
 
@@ -202,7 +202,7 @@ CASES = [
 ]
 
 
-def test_hpop_sdk_contract() -> None:
+def test_hpop_live_snapshot() -> None:
     configure_astrox_from_env()
     check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
 

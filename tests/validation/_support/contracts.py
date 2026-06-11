@@ -1,4 +1,4 @@
-"""Support mechanics for runnable live SDK contract scripts."""
+"""Support mechanics for runnable live snapshot scripts."""
 
 from __future__ import annotations
 
@@ -193,7 +193,7 @@ def main(
     abs_tol: float = 0.0,
     rel_tol: float = 0.0,
 ) -> int:
-    parser = argparse.ArgumentParser(description="Check or refresh a live SDK contract snapshot.")
+    parser = argparse.ArgumentParser(description="Check or refresh a live snapshot.")
     action = parser.add_mutually_exclusive_group(required=True)
     action.add_argument("--check", action="store_true", help="Compare live SDK returns with the sidecar snapshot.")
     action.add_argument("--refresh", action="store_true", help="Rewrite the sidecar snapshot from live SDK returns.")
@@ -204,7 +204,7 @@ def main(
             configure_astrox_from_env(env)
         if args.refresh:
             snapshot = refresh_snapshot(cases=cases, snapshot_path=snapshot_path, env=env)
-            print(f"SDK_CONTRACT_REFRESHED={len(snapshot['cases'])}")
+            print(f"LIVE_SNAPSHOT_REFRESHED={len(snapshot['cases'])}")
         else:
             check_snapshot(
                 cases=cases,
@@ -212,9 +212,9 @@ def main(
                 abs_tol=abs_tol,
                 rel_tol=rel_tol,
             )
-            print(f"SDK_CONTRACT_CHECKED={len(cases)}")
+            print(f"LIVE_SNAPSHOT_CHECKED={len(cases)}")
     except SnapshotError as exc:
-        print(f"SDK_CONTRACT_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
+        print(f"LIVE_SNAPSHOT_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
     return 0
 

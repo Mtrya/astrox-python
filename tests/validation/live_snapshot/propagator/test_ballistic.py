@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Live SDK contract snapshots for promoted ballistic propagator functions."""
+"""Live snapshots for promoted ballistic propagator functions."""
 
 from __future__ import annotations
 
@@ -90,7 +90,7 @@ CASES = [
 ]
 
 
-def test_ballistic_sdk_contract() -> None:
+def test_ballistic_live_snapshot() -> None:
     configure_astrox_from_env()
     check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
 

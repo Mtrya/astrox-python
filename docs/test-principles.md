@@ -23,7 +23,7 @@ The test tree has three layers with non-overlapping jobs. No layer may be used a
 | Layer | Location | Question it answers | What it does NOT prove |
 |-------|----------|---------------------|------------------------|
 | Behavior | `tests/sdk/` | Does the SDK lower, wire, parse, and error-propagate exactly as designed? | Nothing about the live server. Tests are deterministic and offline. |
-| Contract | `tests/validation/sdk_contract/` | Does the live server still return shape-compatible results for maintained public inputs? | Nothing about semantic or physical correctness. It surfaces upstream drift. |
+| Live snapshot | `tests/validation/live_snapshot/` | Does the live server still return shape-compatible results for maintained public inputs? | Nothing about semantic or physical correctness. It surfaces upstream drift. |
 | Cross-validation | `tests/validation/cross_validation/` | What does ASTROX behavior actually mean physically? | Nothing about whether the SDK lowers correctly. That is behavior tests. |
 
 ## Behavior Tests
@@ -40,11 +40,11 @@ A behavior test for a public function must prove five things:
 
 Behavior tests must not assert server semantics. They must not claim a mock return value is "correct physics." They must only assert that the SDK transforms and transports values correctly.
 
-## Contract Tests
+## Live Snapshot Tests
 
-Contract tests are live drift detectors. Each script constructs public SDK inputs, calls live ASTROX through the public SDK, normalizes the return, and compares it with a committed sidecar snapshot.
+Live snapshot tests are live drift detectors. Each script constructs public SDK inputs, calls live ASTROX through the public SDK, normalizes the return, and compares it with a committed sidecar snapshot.
 
-Contract tests prove that the live server still returns shape-compatible results for inputs the SDK maintains. They do not prove physical correctness. A passing contract test is not a semantic guarantee.
+Live snapshot tests prove that the live server still returns shape-compatible results for inputs the SDK maintains. They do not prove physical correctness. A passing live snapshot test is not a semantic guarantee.
 
 Snapshots are sidecar `.snap.json` files checked into the repo. They can be `--check`ed or `--refresh`ed. Large arrays are normalized to avoid snapshot bloat. Case IDs must be stable.
 
@@ -137,24 +137,24 @@ Behavior test functions:
 test_<function>_<property>
 ```
 
-Contract test functions:
+Live snapshot test functions:
 ```text
-test_<function>_sdk_contract
+test_<function>_live_snapshot
 ```
 
 Never name a cross-validation test `test_<function>_works` or `test_<function>_returns_correct_result`. "Works" and "correct" hide the comparison path and the calibration effort.
 
 ## Structured Output Conventions
 
-Cross-validation and contract scripts are runnable as standalone CLIs. They should emit parseable output:
+Cross-validation and live snapshot scripts are runnable as standalone CLIs. They should emit parseable output:
 
 - Cross-validation on success: `CROSS_VALIDATION_CHECKED=<int>` and `CROSS_VALIDATION_FAILED=0`
 - Cross-validation on failure: `CROSS_VALIDATION_FAILED=<exception_name>: <message>` to stderr
-- Contract on success: `SDK_CONTRACT_CHECKED=<int>`
-- Contract on refresh: `SDK_CONTRACT_REFRESHED=<int>`
-- Contract on failure: `SDK_CONTRACT_FAILED=<exception_name>: <message>` to stderr
+- Live snapshot on success: `LIVE_SNAPSHOT_CHECKED=<int>`
+- Live snapshot on refresh: `LIVE_SNAPSHOT_REFRESHED=<int>`
+- Live snapshot on failure: `LIVE_SNAPSHOT_FAILED=<exception_name>: <message>` to stderr
 
-Contract scripts should accept `--check` and `--refresh` as standard CLI flags.
+Live snapshot scripts should accept `--check` and `--refresh` as standard CLI flags.
 
 ## Anti-patterns
 

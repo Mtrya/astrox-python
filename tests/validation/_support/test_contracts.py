@@ -157,7 +157,7 @@ def test_main_check_and_refresh_without_live_network(tmp_path: Path, capsys: pyt
         configure_live=False,
         env={"ASTROX_BASE_URL": "http://example.test"},
     ) == 0
-    assert "SDK_CONTRACT_REFRESHED=1" in capsys.readouterr().out
+    assert "LIVE_SNAPSHOT_REFRESHED=1" in capsys.readouterr().out
 
     assert contracts.main(
         cases=cases,
@@ -165,4 +165,4 @@ def test_main_check_and_refresh_without_live_network(tmp_path: Path, capsys: pyt
         argv=["--check"],
         configure_live=False,
     ) == 0
-    assert "SDK_CONTRACT_CHECKED=1" in capsys.readouterr().out
+    assert "LIVE_SNAPSHOT_CHECKED=1" in capsys.readouterr().out

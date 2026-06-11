@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Live SDK contract snapshots for the multi-J2 propagator."""
+"""Live snapshots for the multi-J2 propagator."""
 
 from __future__ import annotations
 
@@ -76,7 +76,7 @@ CASES = [
 ]
 
 
-def test_multi_j2_sdk_contract() -> None:
+def test_multi_j2_live_snapshot() -> None:
     configure_astrox_from_env()
     check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
 

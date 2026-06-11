@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Live SDK contract snapshot for the two-body propagator."""
+"""Live live snapshot snapshot for the J2 propagator."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from tests.validation._support import (
 )
 
 
-SNAPSHOT_PATH = Path(__file__).with_name("two_body.snap.json")
+SNAPSHOT_PATH = Path(__file__).with_name("j2.snap.json")
 
 
 def sso_orbit() -> orbits.KeplerianElements:
@@ -34,7 +34,7 @@ def sso_orbit() -> orbits.KeplerianElements:
 
 
 def sso() -> tuple[float, propagator.PropagatorPosition]:
-    return propagator.two_body(
+    return propagator.j2(
         start="2024-01-01T00:00:00.000Z",
         stop="2024-01-01T00:10:00.000Z",
         orbit_epoch="2024-01-01T00:00:00.000Z",
@@ -42,19 +42,21 @@ def sso() -> tuple[float, propagator.PropagatorPosition]:
         step_s=300.0,
         coord_system="Inertial",
         gravitational_parameter_m3_s2=398600441500000.0,
+        j2_normalized_value=0.000484165143790815,
+        ref_distance_m=6378137.0,
     )
 
 
 CASES = [
     ContractCase(
         id="sso",
-        description="Short two-body propagation from a low Earth orbit using explicit Earth constants.",
+        description="Short J2 propagation from a low Earth orbit using explicit Earth constants.",
         run=sso,
     )
 ]
 
 
-def test_two_body_sdk_contract() -> None:
+def test_j2_live_snapshot() -> None:
     configure_astrox_from_env()
     check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
 

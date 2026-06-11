@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Live SDK contract snapshots for lighting helpers."""
+"""Live snapshots for lighting helpers."""
 
 from __future__ import annotations
 
@@ -216,7 +216,7 @@ CASES = [
 ]
 
 
-def test_lighting_sdk_contract() -> None:
+def test_lighting_live_snapshot() -> None:
     configure_astrox_from_env()
     check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
 

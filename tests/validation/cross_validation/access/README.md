@@ -1,6 +1,6 @@
 # Access Cross-Validation Scope
 
-This folder calibrates ASTROX access behavior against independent geometry, external propagation helpers, and cross-endpoint invariants. It is not a snapshot layer; SDK contract snapshots live under `tests/validation/sdk_contract/access/` and only prove maintained live response shape.
+This folder calibrates ASTROX access behavior against independent geometry, external propagation helpers, and cross-endpoint invariants. It is not a snapshot layer; live snapshot files live under `tests/validation/live_snapshot/access/` and only prove maintained live response shape.
 
 ## Current Majority Coverage
 
@@ -45,9 +45,9 @@ These tests do not prove full ASTROX access correctness. They do not yet calibra
 
 | Axis | Current status |
 | --- | --- |
-| Central-body access semantics | live SDK contract only |
-| CZML, simple-ascent, and ballistic access semantics | live SDK contract only |
-| Broad HPOP force-model access semantics | live SDK contract plus companion callability only |
+| Central-body access semantics | live snapshot only |
+| CZML, simple-ascent, and ballistic access semantics | live snapshot only |
+| Broad HPOP force-model access semantics | live snapshot plus companion callability only |
 | One request containing multiple possible relay paths | partial; the calibrated two-path case currently fails, and an additional connection from the same start object also fails |
 | LinkConnection MinUses/MaxUses cardinality semantics beyond the single-route probes | partial |
 | EntityGroup as StartObject and intermediate connection node | partial; start-group calibration currently fails |

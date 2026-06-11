@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Live SDK contract snapshots for access functions."""
+"""Live snapshots for access functions."""
 
 from __future__ import annotations
 
@@ -341,7 +341,7 @@ CASES = [
 ]
 
 
-def test_access_sdk_contract() -> None:
+def test_access_live_snapshot() -> None:
     configure_astrox_from_env()
     check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
 

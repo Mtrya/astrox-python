@@ -2,9 +2,9 @@
 
 This directory contains runnable validation scripts for supported SDK behavior.
 
-## SDK Contract
+## Live Snapshot
 
-SDK contract scripts live under `sdk_contract/`. Each script constructs public SDK inputs in Python, calls live ASTROX through the public SDK, normalizes the SDK return, and compares that return with a sidecar `.snap.json` file. The point of SDK contract is to identify potential upstream server behaviour drifts.
+Live snapshot scripts live under `live_snapshot/`. Each script constructs public SDK inputs in Python, calls live ASTROX through the public SDK, normalizes the SDK return, and compares that return with a sidecar `.snap.json` file. The point of live snapshot validation is to identify potential upstream server behaviour drifts.
 
 Run all live validation tests:
 
@@ -12,16 +12,16 @@ Run all live validation tests:
 ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation -m "not calibration"
 ```
 
-Run one SDK contract family through pytest:
+Run one live snapshot family through pytest:
 
 ```bash
-ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation/sdk_contract/propagator/test_sgp4.py
+ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation/live_snapshot/propagator/test_sgp4.py
 ```
 
-Refresh a snapshot only when intentionally accepting the current live ASTROX return as the maintained SDK contract:
+Refresh a snapshot only when intentionally accepting the current live ASTROX return as the maintained live snapshot:
 
 ```bash
-ASTROX_BASE_URL=http://astrox.cn:8765 uv run python tests/validation/sdk_contract/propagator/test_sgp4.py --refresh
+ASTROX_BASE_URL=http://astrox.cn:8765 uv run python tests/validation/live_snapshot/propagator/test_sgp4.py --refresh
 ```
 
 ## Cross Validation

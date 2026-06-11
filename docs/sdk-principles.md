@@ -97,13 +97,13 @@ Evidence is layered. Each layer answers a different question and should not be u
 
 `tests/sdk/` contains deterministic SDK behavior tests. These tests protect SDK self-consistency: public imports, call style, exact request lowering, optional-key omission, branch and discriminator wiring, parser behavior, raw response policy, and error propagation. When the SDK owns a transformation, compare the complete emitted payload or return snapshot, not only loose shape.
 
-`tests/validation/sdk_contract/` contains live SDK contract validation. Each script constructs public SDK inputs in Python, calls live ASTROX through the public SDK, normalizes the SDK return, and compares that return with a committed sidecar snapshot. This layer surfaces upstream server behavior drift for maintained public SDK cases. It does not prove physical or semantic correctness.
+`tests/validation/live_snapshot/` contains live snapshot validation. Each script constructs public SDK inputs in Python, calls live ASTROX through the public SDK, normalizes the SDK return, and compares that return with a committed sidecar snapshot. This layer surfaces upstream server behavior drift for maintained public SDK cases. It does not prove physical or semantic correctness.
 
 `tests/validation/cross_validation/` contains semantic cross-validation. Each script compares live ASTROX behavior with an external library, trusted tool, physical invariant, or independent local derivation. This layer calibrates what ASTROX behavior appears to mean.
 
 `docs/sdk/` is user-facing documentation. It should make the recommended path obvious and may also document other callable branches when that helps users understand choices, scope, and caveats. It must distinguish validated behavior from behavior that is merely callable or still unexplained.
 
-The sequence is allowed to loop, but claims must not outrun evidence. If later validation changes the understanding of a branch, update runtime code only when SDK lowering or parsing was wrong, then update behavior tests, contract validation, cross-validation, docs, and examples as appropriate.
+The sequence is allowed to loop, but claims must not outrun evidence. If later validation changes the understanding of a branch, update runtime code only when SDK lowering or parsing was wrong, then update behavior tests, live snapshot validation, cross-validation, docs, and examples as appropriate.
 
 ## Cross-Validation
 
@@ -136,7 +136,7 @@ Use this sequence when developing a new curated SDK surface:
 1. Sketch the desired public API shape in `examples/` when discussion with the maintainer would clarify the most usable interface.
 2. Implement the settled runtime surface in `astrox/` with thin lowering, minimal SDK-owned validation, explicit route calls, and intentional response policy.
 3. Add `tests/sdk/` behavior tests for SDK-owned lowering, wiring, parsing, raw return policy, and error propagation.
-4. Add `tests/validation/sdk_contract/` cases and sidecar snapshots for maintained public SDK calls so live upstream drift surfaces.
+4. Add `tests/validation/live_snapshot/` cases and sidecar snapshots for maintained public SDK calls so live upstream drift surfaces.
 5. Add `tests/validation/cross_validation/` cases for semantics-sensitive branches whenever credible comparison is feasible.
 6. Revisit `astrox/` only if behavior tests or validation reveal an SDK lowering, wiring, public-shape, or parser problem.
 7. Write or update `docs/sdk/` with the implemented interface, units, return policy, recommended path, and caveats that match the evidence.
