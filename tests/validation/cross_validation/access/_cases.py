@@ -1,5 +1,16 @@
 """Shared live access cases for access validation."""
 
+# Coverage:
+#   Branches:
+#     - shared access participants and live call helpers: partial
+#     - SGP4, J2, two-body, HPOP, site, direct chain, and relay-chain case construction: partial
+#   Fields:
+#     - response field checks are performed by importing runner modules: unverifiable
+#   Parameters:
+#     - shared parameter constants cover start/stop/step_s, compute_aer, use_light_time_delay, and model-specific entity fragments: partial
+#   Comparison path:
+#     - this module is input/case infrastructure; external oracles live in the runner and geometry modules
+
 from __future__ import annotations
 
 from dataclasses import dataclass

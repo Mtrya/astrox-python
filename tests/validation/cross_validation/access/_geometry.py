@@ -1,5 +1,18 @@
 """Independent geometry and interval helpers for access validation."""
 
+# Coverage:
+#   Branches:
+#     - WGS84 segment-obstruction interval oracle: partial
+#     - SGP4 site visibility oracle: partial
+#     - sampled satellite-pair visibility oracle: partial
+#     - ASTROX-like J2 state helper for access comparison: partial
+#   Fields:
+#     - AccessStart/AccessStop and chain Start/Stop interval parsing helpers: partial
+#   Parameters:
+#     - start/stop sampling, bracket tolerance, WGS84 ellipsoid constants, and ASTROX J2 constants: partial
+#   Comparison path:
+#     - External: Skyfield SGP4/site states, WGS84 ellipsoid obstruction, Brahe Kepler/J2 transforms where used
+
 from __future__ import annotations
 
 import math
