@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Live live snapshot snapshot for the simple-ascent propagator."""
+"""Live snapshot validation for the simple-ascent propagator."""
 
 from __future__ import annotations
 

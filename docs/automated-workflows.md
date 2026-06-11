@@ -65,7 +65,7 @@ The image workflow runs on manual dispatch and on `main` changes to the containe
 
 ## Validation Policy
 
-Supported SDK behavior is protected by tests, not by endpoint-centered replay. Deterministic behavior tests live under `tests/sdk/`; live live snapshot and cross-validation checks live under `tests/validation/` and run in scheduled SDK health.
+Supported SDK behavior is protected by tests, not by endpoint-centered replay. Deterministic behavior tests live under `tests/sdk/`; live snapshot and cross-validation checks live under `tests/validation/` and run in scheduled SDK health.
 
 ## Automation Principles
 

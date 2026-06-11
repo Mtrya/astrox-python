@@ -1,1 +1,1 @@
-"""Live live snapshot validation for lighting functions."""
+"""Live snapshot validation for lighting functions."""

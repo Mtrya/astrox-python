@@ -67,37 +67,40 @@ def sample_site() -> entities.SitePosition:
     )
 
 
+LIGHTING_RAW_CASES = [
+    (
+        lighting.lighting_times,
+        {
+            "start": "2024-01-01T00:00:00.000Z",
+            "stop": "2024-01-01T01:00:00.000Z",
+            "position": sample_site(),
+        },
+        "/Lighting/LightingTimes",
+    ),
+    (
+        lighting.solar_intensity,
+        {
+            "start": "2024-01-01T00:00:00.000Z",
+            "stop": "2024-01-01T01:00:00.000Z",
+            "position": sample_site(),
+        },
+        "/Lighting/SolarIntensity",
+    ),
+    (
+        lighting.solar_aer,
+        {
+            "start": "2024-01-01T00:00:00.000Z",
+            "stop": "2024-01-01T01:00:00.000Z",
+            "position": sample_site(),
+        },
+        "/Lighting/SolarAER",
+    ),
+]
+
+
 @pytest.mark.parametrize(
     ("function", "kwargs", "endpoint"),
-    [
-        (
-            lighting.lighting_times,
-            {
-                "start": "2024-01-01T00:00:00.000Z",
-                "stop": "2024-01-01T01:00:00.000Z",
-                "position": sample_site(),
-            },
-            "/Lighting/LightingTimes",
-        ),
-        (
-            lighting.solar_intensity,
-            {
-                "start": "2024-01-01T00:00:00.000Z",
-                "stop": "2024-01-01T01:00:00.000Z",
-                "position": sample_site(),
-            },
-            "/Lighting/SolarIntensity",
-        ),
-        (
-            lighting.solar_aer,
-            {
-                "start": "2024-01-01T00:00:00.000Z",
-                "stop": "2024-01-01T01:00:00.000Z",
-                "position": sample_site(),
-            },
-            "/Lighting/SolarAER",
-        ),
-    ],
+    LIGHTING_RAW_CASES,
 )
 def test_lighting_functions_return_malformed_raw_response_without_parsing(
     monkeypatch: pytest.MonkeyPatch,
@@ -116,35 +119,7 @@ def test_lighting_functions_return_malformed_raw_response_without_parsing(
 
 @pytest.mark.parametrize(
     ("function", "kwargs", "endpoint"),
-    [
-        (
-            lighting.lighting_times,
-            {
-                "start": "2024-01-01T00:00:00.000Z",
-                "stop": "2024-01-01T01:00:00.000Z",
-                "position": sample_site(),
-            },
-            "/Lighting/LightingTimes",
-        ),
-        (
-            lighting.solar_intensity,
-            {
-                "start": "2024-01-01T00:00:00.000Z",
-                "stop": "2024-01-01T01:00:00.000Z",
-                "position": sample_site(),
-            },
-            "/Lighting/SolarIntensity",
-        ),
-        (
-            lighting.solar_aer,
-            {
-                "start": "2024-01-01T00:00:00.000Z",
-                "stop": "2024-01-01T01:00:00.000Z",
-                "position": sample_site(),
-            },
-            "/Lighting/SolarAER",
-        ),
-    ],
+    LIGHTING_RAW_CASES,
 )
 def test_lighting_functions_propagate_api_errors_unchanged(
     monkeypatch: pytest.MonkeyPatch,

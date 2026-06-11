@@ -127,6 +127,7 @@ def test_chain_propagates_api_errors_unchanged(
     error = exceptions.AstroxAPIError("bad chain", "/access/ChainCompute", response=None)
 
     def fake_post(endpoint: str, *, json: object) -> dict[str, Any]:
+        assert endpoint == "/access/ChainCompute"
         raise error
 
     monkeypatch.setattr(access.raw, "post", fake_post)

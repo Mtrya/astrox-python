@@ -94,6 +94,7 @@ def test_hpop_two_body_near_coincident_satellite_pair_is_callable_and_symmetric(
     )
 
 
+@pytest.mark.calibration
 @pytest.mark.xfail(
     reason=(
         "Satellite access with coincident initial orbits is isolated to a server worker error, "

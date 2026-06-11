@@ -268,6 +268,7 @@ def test_serial_chain_light_time_delay_matches_direct_link_composition() -> None
     raise CrossValidationError("serial chain light-time option did not change complete access intervals")
 
 
+@pytest.mark.calibration
 @pytest.mark.xfail(
     reason=(
         "ChainCompute rejects one request containing multiple explicit relay routes even though each route works separately."
@@ -315,6 +316,7 @@ def test_multiple_explicit_relay_routes_expected_server_no_path() -> None:
         raise
 
 
+@pytest.mark.calibration
 @pytest.mark.xfail(
     reason="ChainCompute rejects duplicate explicit links with no-path even when the unique serial route works.",
     raises=CrossValidationError,
@@ -347,6 +349,7 @@ def test_duplicate_explicit_link_expected_server_no_path() -> None:
         raise
 
 
+@pytest.mark.calibration
 @pytest.mark.xfail(
     reason="ChainCompute rejects a single working explicit route when an extra branch connection is also present.",
     raises=CrossValidationError,
@@ -386,6 +389,7 @@ def test_extra_branch_connection_expected_server_no_path() -> None:
         raise
 
 
+@pytest.mark.calibration
 @pytest.mark.xfail(
     reason="ChainCompute raises an index error when an EntityGroup is used as the chain start object.",
     raises=CrossValidationError,
@@ -418,6 +422,7 @@ def test_start_entity_group_expected_server_index_error() -> None:
         raise
 
 
+@pytest.mark.calibration
 @pytest.mark.xfail(
     reason="ChainCompute currently returns the same single-strand intervals when a required link has MaxUses=0.",
     raises=CrossValidationError,
@@ -449,6 +454,7 @@ def test_connection_max_uses_zero_expected_to_change_intervals() -> None:
     raise CrossValidationError("MaxUses=0 did not change complete chain intervals")
 
 
+@pytest.mark.calibration
 @pytest.mark.xfail(
     reason="ChainCompute currently returns unchanged single-route intervals even for inconsistent MinUses/MaxUses values.",
     raises=CrossValidationError,

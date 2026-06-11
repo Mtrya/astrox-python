@@ -1,1 +1,1 @@
-"""Live live snapshot validation for access functions."""
+"""Live snapshot validation for access functions."""

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Live live snapshot snapshot for the J2 propagator."""
+"""Live snapshot validation for the J2 propagator."""
 
 from __future__ import annotations
 
