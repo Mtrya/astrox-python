@@ -158,6 +158,7 @@ def satellite_origin_aer_failures(
 def strict_ground_aer_diagnostics(rows: list[dict[str, object]]) -> list[str]:
     satellite = skyfield_satellite(TLE_A, "ISS")
     observer = skyfield_site(SITE_LATITUDE_DEG, SITE_LONGITUDE_DEG, SITE_HEIGHT_M)
+    same_epoch_errors: list[tuple[float, float, float]] = []
     diagnostics = ["strict residual diagnostics:"]
     for row in rows[:4]:
         row_time = parse_time(str(row["Time"]))
@@ -175,6 +176,13 @@ def strict_ground_aer_diagnostics(rows: list[dict[str, object]]) -> list[str]:
             longitude_deg=SITE_LONGITUDE_DEG,
         )
         horizon_blocked = segment_intersects_wgs84(observer_ecef, satellite_ecef)
+        same_epoch_errors.append(
+            (
+                abs(wrapped_angle_error_deg(float(row["Azimuth"]), azimuth.degrees)),
+                abs(float(row["Elevation"]) - altitude.degrees),
+                abs(float(row["Range"]) - distance.m),
+            )
+        )
         diagnostics.append(
             (
                 f"{row['Time']} same_epoch_az={wrapped_angle_error_deg(float(row['Azimuth']), azimuth.degrees):.12g}deg "
@@ -190,7 +198,78 @@ def strict_ground_aer_diagnostics(rows: list[dict[str, object]]) -> list[str]:
                 f"ellipsoid_blocked={horizon_blocked}"
             )
         )
+    for row in rows[4:]:
+        instant = skyfield_time(str(row["Time"]))
+        altitude, azimuth, distance = (satellite - observer).at(instant).altaz()
+        same_epoch_errors.append(
+            (
+                abs(wrapped_angle_error_deg(float(row["Azimuth"]), azimuth.degrees)),
+                abs(float(row["Elevation"]) - altitude.degrees),
+                abs(float(row["Range"]) - distance.m),
+            )
+        )
+    if same_epoch_errors:
+        max_azimuth = max(error[0] for error in same_epoch_errors)
+        max_elevation = max(error[1] for error in same_epoch_errors)
+        max_range = max(error[2] for error in same_epoch_errors)
+        diagnostics.append(
+            (
+                f"dense_row_summary count={len(rows)} "
+                f"max_same_epoch_az={max_azimuth:.12g}deg "
+                f"max_same_epoch_el={max_elevation:.12g}deg "
+                f"max_same_epoch_range={max_range:.12g}m"
+            )
+        )
+    for label, latitude_deg, longitude_deg, height_m, time_shift_s in [
+        ("time_shift_plus_1ms", SITE_LATITUDE_DEG, SITE_LONGITUDE_DEG, SITE_HEIGHT_M, 0.001),
+        ("time_shift_minus_1ms", SITE_LATITUDE_DEG, SITE_LONGITUDE_DEG, SITE_HEIGHT_M, -0.001),
+        ("latitude_plus_1e-5deg", SITE_LATITUDE_DEG + 1.0e-5, SITE_LONGITUDE_DEG, SITE_HEIGHT_M, 0.0),
+        ("longitude_minus_1e-5deg", SITE_LATITUDE_DEG, SITE_LONGITUDE_DEG - 1.0e-5, SITE_HEIGHT_M, 0.0),
+        ("height_plus_1m", SITE_LATITUDE_DEG, SITE_LONGITUDE_DEG, SITE_HEIGHT_M + 1.0, 0.0),
+    ]:
+        candidate = ground_origin_residual_maxima(
+            rows,
+            latitude_deg=latitude_deg,
+            longitude_deg=longitude_deg,
+            height_m=height_m,
+            time_shift_s=time_shift_s,
+        )
+        diagnostics.append(
+            (
+                f"{label} max_az={candidate[0]:.12g}deg "
+                f"max_el={candidate[1]:.12g}deg "
+                f"max_range={candidate[2]:.12g}m"
+            )
+        )
     return diagnostics
+
+
+def ground_origin_residual_maxima(
+    rows: list[dict[str, object]],
+    *,
+    latitude_deg: float,
+    longitude_deg: float,
+    height_m: float,
+    time_shift_s: float,
+) -> tuple[float, float, float]:
+    satellite = skyfield_satellite(TLE_A, "ISS")
+    observer = skyfield_site(latitude_deg, longitude_deg, height_m)
+    errors: list[tuple[float, float, float]] = []
+    for row in rows:
+        shifted_time = ts().from_datetime(parse_time(str(row["Time"])) + timedelta(seconds=time_shift_s))
+        altitude, azimuth, distance = (satellite - observer).at(shifted_time).altaz()
+        errors.append(
+            (
+                abs(wrapped_angle_error_deg(float(row["Azimuth"]), azimuth.degrees)),
+                abs(float(row["Elevation"]) - altitude.degrees),
+                abs(float(row["Range"]) - distance.m),
+            )
+        )
+    return (
+        max(error[0] for error in errors),
+        max(error[1] for error in errors),
+        max(error[2] for error in errors),
+    )
 
 
 def compare_range_symmetry(

@@ -19,6 +19,8 @@ from tests.validation.cross_validation.access._cases import (
     AER_CONVENTION_AZIMUTH_ABS_DEG,
     AER_CONVENTION_ELEVATION_ABS_DEG,
     AER_CONVENTION_RANGE_ABS_M,
+    AER_DENSE_AZIMUTH_ABS_DEG,
+    AER_DENSE_ELEVATION_ABS_DEG,
     AER_STRICT_ABS_DEG,
     CHAIN_INTERVAL_ABS_S,
     CrossValidationError,
@@ -80,12 +82,31 @@ def test_ground_to_sgp4_aer_matches_skyfield_topocentric_convention() -> None:
     )
 
 
+def test_ground_to_sgp4_dense_aer_matches_skyfield_topocentric_convention() -> None:
+    configure_astrox_from_env()
+    result = compute_access(
+        site(),
+        sgp4_entity(),
+        start=START,
+        stop=DAY_STOP,
+        step_s=60.0,
+        compute_aer=True,
+    )
+    rows = list(first_aer_rows(result, max_passes=3))
+    compare_ground_origin_aer_rows_with_skyfield(
+        rows,
+        azimuth_abs_deg=AER_DENSE_AZIMUTH_ABS_DEG,
+        elevation_abs_deg=AER_DENSE_ELEVATION_ABS_DEG,
+        range_abs_m=AER_CONVENTION_RANGE_ABS_M,
+    )
+
+
 @pytest.mark.calibration
 @pytest.mark.xfail(
     reason=(
-        "Ground-origin access AER keeps a small residual against Skyfield; same-epoch, "
-        "range-over-c light-time, manual ITRS topocentric, and ellipsoid-horizon diagnostics "
-        "do not explain the sub-arcsecond mismatch."
+        "Ground-origin access AER keeps a residual against Skyfield; same-epoch, "
+        "range-over-c light-time, manual ITRS topocentric, ellipsoid-horizon, "
+        "and simple site/time offset diagnostics do not explain the dense-row mismatch."
     ),
     raises=CrossValidationError,
     strict=True,
@@ -97,9 +118,10 @@ def test_ground_to_sgp4_aer_strict_residual_diagnostics() -> None:
         sgp4_entity(),
         start=START,
         stop=DAY_STOP,
+        step_s=60.0,
         compute_aer=True,
     )
-    rows = list(first_aer_rows(result, max_passes=2))
+    rows = list(first_aer_rows(result, max_passes=3))
     failures = ground_origin_aer_failures(
         rows,
         azimuth_abs_deg=AER_STRICT_ABS_DEG,
