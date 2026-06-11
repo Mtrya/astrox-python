@@ -24,6 +24,10 @@ SNAPSHOT_PATH = Path(__file__).with_name("lighting.snap.json")
 START = "2024-01-01T00:00:00.000Z"
 STOP = "2024-01-01T00:30:00.000Z"
 EARTH_MU = 398600441500000.0
+# SolarAER live snapshots can vary at the same sub-arcsecond scale already
+# accepted by the Skyfield SolarAER cross-validation.
+LIGHTING_SNAPSHOT_ABS_TOL = 1.0e-4
+LIGHTING_SNAPSHOT_REL_TOL = 5.0e-11
 TLE_LINES = (
     "1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9995",
     "2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456",
@@ -218,8 +222,20 @@ CASES = [
 
 def test_lighting_live_snapshot() -> None:
     configure_astrox_from_env()
-    check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
+    check_snapshot(
+        cases=CASES,
+        snapshot_path=SNAPSHOT_PATH,
+        abs_tol=LIGHTING_SNAPSHOT_ABS_TOL,
+        rel_tol=LIGHTING_SNAPSHOT_REL_TOL,
+    )
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(cases=CASES, snapshot_path=SNAPSHOT_PATH))
+    raise SystemExit(
+        main(
+            cases=CASES,
+            snapshot_path=SNAPSHOT_PATH,
+            abs_tol=LIGHTING_SNAPSHOT_ABS_TOL,
+            rel_tol=LIGHTING_SNAPSHOT_REL_TOL,
+        )
+    )
