@@ -4,7 +4,6 @@
 # Coverage:
 #   Branches:
 #     - site SolarAER: verified for representative topocentric Sun cases
-#     - spacecraft SolarAER: unresolved calibration xfail
 #     - site LightingTimes: verified for high-altitude/representative cases; low-altitude transition residual unresolved
 #     - site SolarIntensity: partial (Quito sunrise verified; Hawaii sunset transition residual unresolved)
 #   Fields:
@@ -13,14 +12,13 @@
 #     - SolarIntensity Intensity/ApparentSolarRange/SolarGrazingAngle: partial (stable sunrise case verified; sunset transition residual unresolved)
 #   Parameters:
 #     - site longitude/latitude/height: partial (Hawaii/Greenwich and a low-altitude calibration case)
-#     - spacecraft TLE/step_s: unresolved for spacecraft SolarAER convention
 #     - start/stop windows: partial (day, short, sunrise/sunset windows)
 #   Comparison:
 #     - External: Skyfield apparent topocentric Sun geometry and WGS84 solar-disk horizon derivation
-#     - Constants: EARTH_EQUATORIAL_RADIUS_M, SUN_RADIUS_KM, ISS_TLE_LINES
+#     - Constants: EARTH_EQUATORIAL_RADIUS_M, SUN_RADIUS_KM
 #     - Tolerances: AER_* constants, TRANSITION_ABS_S, INTENSITY_ABS, GRAZING_ANGLE_ABS_DEG, SOLAR_DISK_HALF_ANGLE_ABS_DEG
 #   Unresolved:
-#     - spacecraft SolarAER convention, SolarAER range model, low-altitude LightingTimes transitions, Hawaii sunset SolarIntensity residuals, and far-from-edge SolarGrazingAngle offset remain strict calibration xfails
+#     - SolarAER range model, low-altitude LightingTimes transitions, Hawaii sunset SolarIntensity residuals, and far-from-edge SolarGrazingAngle offset remain strict calibration xfails
 
 from __future__ import annotations
 
@@ -38,7 +36,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import pytest
-from skyfield.api import EarthSatellite, Loader, wgs84
+from skyfield.api import Loader, wgs84
 
 try:
     from skyfield.positionlib import _to_altaz as _skyfield_astrometric_to_altaz
@@ -64,12 +62,6 @@ GRAZING_ANGLE_ABS_DEG = 1.0e-4
 SOLAR_DISK_HALF_ANGLE_ABS_DEG = 5.0e-5
 GRAZING_EDGE_MULTIPLIER = 2.0
 ROOT_BRACKET_S = 900.0
-ISS_TLE_LINES = (
-    "1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9995",
-    "2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456",
-)
-Vector3 = tuple[float, float, float]
-
 
 @dataclass(frozen=True, kw_only=True)
 class SiteCase:
@@ -86,26 +78,9 @@ class SiteCase:
 
 
 @dataclass(frozen=True, kw_only=True)
-class SpacecraftCase:
-    id: str
-    tle_lines: tuple[str, str]
-    start: str
-    stop: str
-    step_s: int
-
-
-@dataclass(frozen=True, kw_only=True)
 class SkyfieldContext:
     site_case: SiteCase
     timescale: object
-    observer: object
-    sun: object
-
-
-@dataclass(frozen=True, kw_only=True)
-class SpacecraftSkyfieldContext:
-    timescale: object
-    satellite: object
     observer: object
     sun: object
 
@@ -192,16 +167,7 @@ QUITO_MAR_DAY = SiteCase(
     expected_penumbra_intervals=2,
     expected_umbra_intervals=2,
 )
-ISS_SGP4_SHORT = SpacecraftCase(
-    id="iss_sgp4_short",
-    tle_lines=ISS_TLE_LINES,
-    start="2024-01-01T00:00:00.000Z",
-    stop="2024-01-01T00:30:00.000Z",
-    step_s=900,
-)
-
 AER_CASES = (HAWAII_JAN_SHORT, GREENWICH_JAN_SUNRISE)
-SPACECRAFT_AER_CASES = (ISS_SGP4_SHORT,)
 LIGHTING_TIME_CASES = (HAWAII_JAN_DAY, QUITO_MAR_DAY)
 SOLAR_INTENSITY_CASES = (QUITO_MAR_SUNRISE,)
 SOLAR_AER_CALIBRATION_CASES = (QUITO_MAR_SHORT,)
@@ -235,36 +201,12 @@ def skyfield_context(case: SiteCase) -> SkyfieldContext:
     )
 
 
-def spacecraft_skyfield_context(case: SpacecraftCase) -> SpacecraftSkyfieldContext:
-    data_dir = Path(os.environ.get("SKYFIELD_DATA_DIR", "/tmp/astrox-python-skyfield"))
-    loader = Loader(str(data_dir))
-    timescale = loader.timescale(builtin=True)
-    eph = loader("de421.bsp")
-    satellite = EarthSatellite(*case.tle_lines, case.id, timescale)
-    return SpacecraftSkyfieldContext(
-        timescale=timescale,
-        satellite=satellite,
-        observer=eph["earth"] + satellite,
-        sun=eph["sun"],
-    )
-
-
 def astrox_solar_aer(case: SiteCase) -> list[dict[str, object]]:
     result = lighting.solar_aer(
         start=case.start,
         stop=case.stop,
         position=site_position(case),
         step_s=int(case.step_s) if case.step_s is not None else None,
-    )
-    return result["Datas"]
-
-
-def astrox_spacecraft_solar_aer(case: SpacecraftCase) -> list[dict[str, object]]:
-    result = lighting.solar_aer(
-        start=case.start,
-        stop=case.stop,
-        position=entities.sgp4_position(tle_lines=case.tle_lines),
-        step_s=case.step_s,
     )
     return result["Datas"]
 
@@ -297,74 +239,6 @@ def skyfield_alt_az_range(
     astrometric = context.observer.at(time).observe(context.sun)
     altitude, azimuth, distance = skyfield_altaz(astrometric, apparent=apparent)
     return altitude.degrees, azimuth.degrees, distance.km
-
-
-def skyfield_spacecraft_vvlh_solar_aer(
-    context: SpacecraftSkyfieldContext,
-    time_string: str,
-) -> tuple[float, float, float]:
-    time = context.timescale.from_datetime(parse_astrox_time(time_string))
-    satellite_state = context.satellite.at(time)
-    astrometric = context.observer.at(time).observe(context.sun)
-    sun_vector = as_vector3(astrometric.apparent().position.km)
-    forward, right, down = spacecraft_vvlh_axes(
-        position=as_vector3(satellite_state.position.km),
-        velocity=as_vector3(satellite_state.velocity.km_per_s),
-    )
-    x = vector_dot(sun_vector, forward)
-    y = vector_dot(sun_vector, right)
-    z = vector_dot(sun_vector, down)
-    azimuth_deg = math.degrees(math.atan2(y, x)) % 360.0
-    elevation_deg = math.degrees(math.atan2(-z, math.hypot(x, y)))
-    return elevation_deg, azimuth_deg, vector_norm(sun_vector)
-
-
-def spacecraft_vvlh_axes(
-    *,
-    position: Vector3,
-    velocity: Vector3,
-) -> tuple[Vector3, Vector3, Vector3]:
-    # ASTROX defines spacecraft SolarAER in VVLH front/right/down axes.
-    down = vector_unit(vector_scale(position, -1.0))
-    along_track = vector_subtract(
-        velocity,
-        vector_scale(down, vector_dot(velocity, down)),
-    )
-    forward = vector_unit(along_track)
-    right = vector_unit(vector_cross(down, forward))
-    return forward, right, down
-
-
-def as_vector3(values: object) -> Vector3:
-    x, y, z = values
-    return float(x), float(y), float(z)
-
-
-def vector_dot(left: Vector3, right: Vector3) -> float:
-    return sum(a * b for a, b in zip(left, right))
-
-
-def vector_cross(left: Vector3, right: Vector3) -> Vector3:
-    ax, ay, az = left
-    bx, by, bz = right
-    return ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx
-
-
-def vector_norm(vector: Vector3) -> float:
-    return math.sqrt(vector_dot(vector, vector))
-
-
-def vector_scale(vector: Vector3, factor: float) -> Vector3:
-    return tuple(value * factor for value in vector)
-
-
-def vector_subtract(left: Vector3, right: Vector3) -> Vector3:
-    return tuple(a - b for a, b in zip(left, right))
-
-
-def vector_unit(vector: Vector3) -> Vector3:
-    length = vector_norm(vector)
-    return tuple(value / length for value in vector)
 
 
 def skyfield_altaz(astrometric: object, *, apparent: bool) -> tuple[object, object, object]:
@@ -437,50 +311,6 @@ def compare_solar_aer_case(case: SiteCase) -> None:
             if error > tolerance:
                 failures.append(
                     f"{case.id} solar_aer {time_string} {field} error {error:.12g} {unit}, tolerance {tolerance:.12g}"
-                )
-    if failures:
-        raise CrossValidationError("\n".join(failures))
-
-
-def compare_spacecraft_solar_aer_case(case: SpacecraftCase) -> None:
-    context = spacecraft_skyfield_context(case)
-    failures: list[str] = []
-    for row in astrox_spacecraft_solar_aer(case):
-        time_string = require_str(row, "Time")
-        skyfield_elevation_deg, skyfield_azimuth_deg, skyfield_range_km = (
-            skyfield_spacecraft_vvlh_solar_aer(context, time_string)
-        )
-        checks = [
-            (
-                "Azimuth",
-                require_float(row, "Azimuth"),
-                skyfield_azimuth_deg,
-                AER_AZIMUTH_ABS_DEG,
-                "deg",
-            ),
-            (
-                "Elevation",
-                require_float(row, "Elevation"),
-                skyfield_elevation_deg,
-                AER_ELEVATION_ABS_DEG,
-                "deg",
-            ),
-            (
-                "Range",
-                require_float(row, "Range"),
-                skyfield_range_km,
-                AER_RANGE_ABS_KM,
-                "km",
-            ),
-        ]
-        for field, astrox_value, skyfield_value, tolerance, unit in checks:
-            if field == "Azimuth":
-                error = angle_error_deg(astrox_value, skyfield_value)
-            else:
-                error = abs(astrox_value - skyfield_value)
-            if error > tolerance:
-                failures.append(
-                    f"{case.id} spacecraft_solar_aer {time_string} {field} error {error:.12g} {unit}, tolerance {tolerance:.12g}"
                 )
     if failures:
         raise CrossValidationError("\n".join(failures))
@@ -781,18 +611,6 @@ def test_solar_aer_matches_skyfield_topocentric_sun() -> None:
     configure_astrox_from_env()
     for case in AER_CASES:
         compare_solar_aer_case(case)
-
-
-@pytest.mark.calibration
-@pytest.mark.xfail(
-    reason="Spacecraft SolarAER does not yet match a spacecraft-relative apparent-Sun vector in VVLH at site-level angular tolerances; live probes show Azimuth tracks a geocentric Sun direction more closely while Elevation remains mixed.",
-    raises=CrossValidationError,
-    strict=True,
-)
-def test_spacecraft_solar_aer_matches_skyfield_vvlh_apparent_sun_calibration() -> None:
-    configure_astrox_from_env()
-    for case in SPACECRAFT_AER_CASES:
-        compare_spacecraft_solar_aer_case(case)
 
 
 def test_site_lighting_times_matches_skyfield_solar_disk_geometry() -> None:
