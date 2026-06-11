@@ -5,6 +5,7 @@
 #     - WGS84 segment-obstruction interval oracle: partial
 #     - SGP4 site visibility oracle: partial
 #     - sampled satellite-pair visibility oracle: partial
+#     - two-body ECEF state helper for access comparison: partial
 #     - ASTROX-like J2 state helper for access comparison: partial
 #   Fields:
 #     - AccessStart/AccessStop and chain Start/Stop interval parsing helpers: partial
@@ -230,6 +231,24 @@ def sgp4_state_ecef(offset_s: float) -> np.ndarray:
     return np.array(skyfield_satellite(TLE_A, "ISS").at(time_at_offset(START, offset_s)).frame_xyz(itrs).m)
 
 
+def two_body_state_ecef(orbit: orbits.KeplerianElements, offset_s: float) -> np.ndarray:
+    mean_motion_rad_s = math.sqrt(EARTH_MU / orbit.semi_major_axis_m**3)
+    mean_anomaly_deg = true_to_mean_deg(orbit.true_anomaly_deg, orbit.eccentricity)
+    propagated_mean_rad = math.radians(mean_anomaly_deg) + mean_motion_rad_s * offset_s
+    true_anomaly_deg = mean_to_true_deg(propagated_mean_rad, orbit.eccentricity)
+    state = elements_to_cartesian(
+        (
+            orbit.semi_major_axis_m,
+            orbit.eccentricity,
+            orbit.inclination_deg,
+            orbit.raan_deg,
+            orbit.argument_of_periapsis_deg,
+            true_anomaly_deg,
+        )
+    )
+    return inertial_to_ecef(state[:3], offset_s)
+
+
 def j2_state_ecef(orbit: orbits.KeplerianElements, offset_s: float) -> np.ndarray:
     state = elements_to_cartesian(astrox_like_j2_elements(orbit, offset_s))
     return inertial_to_ecef(state[:3], offset_s)
@@ -285,6 +304,21 @@ def true_to_mean_deg(true_anomaly_deg: float, eccentricity: float) -> float:
     )
     mean_anomaly = eccentric_anomaly - eccentricity * math.sin(eccentric_anomaly)
     return math.degrees(mean_anomaly) % 360.0
+
+
+def mean_to_true_deg(mean_anomaly_rad: float, eccentricity: float) -> float:
+    eccentric_anomaly = mean_anomaly_rad
+    for _ in range(30):
+        eccentric_anomaly -= (
+            eccentric_anomaly
+            - eccentricity * math.sin(eccentric_anomaly)
+            - mean_anomaly_rad
+        ) / (1.0 - eccentricity * math.cos(eccentric_anomaly))
+    true_anomaly = 2.0 * math.atan2(
+        math.sqrt(1.0 + eccentricity) * math.sin(eccentric_anomaly / 2.0),
+        math.sqrt(1.0 - eccentricity) * math.cos(eccentric_anomaly / 2.0),
+    )
+    return math.degrees(true_anomaly) % 360.0
 
 
 def wrapped_angle_error_deg(actual: float, expected: float) -> float:
