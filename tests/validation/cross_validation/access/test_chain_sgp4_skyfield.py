@@ -3,7 +3,7 @@
 # Coverage:
 #   Branches:
 #     - direct site -> SGP4 chain with Connections omitted: verified
-#     - explicit site -> SGP4 -> SGP4 chain with two satellite participants: verified against direct-link intersection
+#     - explicit site -> SGP4 -> SGP4 chain with two satellite participants: verified against independent Skyfield/WGS84 link-visibility intersection
 #     - serial site -> SGP4 relay -> site chain with explicit connections: unresolved
 #     - explicit site -> SGP4 -> SGP4 -> site chain: unresolved server no-path calibration
 #   Fields:
@@ -13,7 +13,7 @@
 #   Parameters:
 #     - participants: verified for fixed-site and SGP4 entity participants in the covered routes
 #     - connections: verified for omitted direct chain, a two-link satellite route, and a single explicit serial route
-#     - use_light_time_delay: partial (two-link satellite chain matches delayed direct-link composition; the ground-to-satellite link is checked against range-over-c)
+#     - use_light_time_delay: partial (two-link satellite chain delay matches range-over-c on the limiting ground-to-satellite link; satellite-pair link is not boundary-limiting in this case)
 #   Comparison:
 #     - External: Skyfield SGP4 states plus WGS84 segment-obstruction line-of-sight oracle
 #     - Constants: TLE_A, WGS84 ellipsoid from Skyfield, ASTROX fixed-site coordinates from access cases
@@ -36,6 +36,7 @@ from tests.validation.cross_validation.access._cases import (
     CHAIN_INTERVAL_ABS_S,
     DAY_STOP,
     INTERVAL_ABS_S,
+    SPEED_OF_LIGHT_M_S,
     SITE_HEIGHT_M,
     SITE_LATITUDE_DEG,
     SITE_LONGITUDE_DEG,
@@ -52,10 +53,13 @@ from tests.validation.cross_validation.access._cases import (
     site,
 )
 from tests.validation.cross_validation.access._geometry import (
+    Interval,
     compare_intervals,
     intersect_intervals,
     intervals_from_access_passes,
     intervals_from_chain,
+    sampled_satellite_visibility_intervals,
+    sgp4_state_ecef_for,
     sgp4_site_visibility_intervals,
     skyfield_satellite,
     skyfield_site,
@@ -128,6 +132,30 @@ def direct_link_intersection(
     return expected
 
 
+def two_satellite_chain_oracle_intervals() -> list[Interval]:
+    first_link = sgp4_site_visibility_intervals(
+        start=START,
+        stop=DAY_STOP,
+        satellite=skyfield_satellite(TLE_A, "RelayA"),
+        site_position=skyfield_site(SITE_LATITUDE_DEG, SITE_LONGITUDE_DEG, SITE_HEIGHT_M),
+    )
+    second_link = sampled_satellite_visibility_intervals(
+        start=START,
+        stop=DAY_STOP,
+        left_state=lambda offset_s: sgp4_state_ecef_for(
+            TLE_A,
+            "RelayA",
+            offset_s,
+        ),
+        right_state=lambda offset_s: sgp4_state_ecef_for(
+            TLE_B,
+            "RelayB",
+            offset_s,
+        ),
+    )
+    return intersect_intervals(first_link, second_link)
+
+
 def compare_two_satellite_chain_to_direct_links(
     *,
     use_light_time_delay: bool | None,
@@ -173,6 +201,79 @@ def compare_two_satellite_chain_to_direct_links(
     return chain_result, links
 
 
+def compare_two_satellite_chain_to_oracle(
+    *,
+    use_light_time_delay: bool | None,
+) -> tuple[dict[str, object], list[dict[str, object]]]:
+    chain_result, links = compare_two_satellite_chain_to_direct_links(
+        use_light_time_delay=use_light_time_delay,
+        compute_aer=True,
+    )
+    if use_light_time_delay:
+        return chain_result, links
+    expected = two_satellite_chain_oracle_intervals()
+    actual = intervals_from_chain(chain_result["CompleteChainAccess"])
+    compare_intervals(expected, actual, tolerance_s=INTERVAL_ABS_S)
+    return chain_result, links
+
+
+def compare_two_satellite_chain_light_time_shift(
+    plain_chain: dict[str, object],
+    delayed_chain: dict[str, object],
+    limiting_plain_link: dict[str, object],
+) -> None:
+    plain_chain_intervals = intervals_from_chain(plain_chain["CompleteChainAccess"])
+    delayed_chain_intervals = intervals_from_chain(delayed_chain["CompleteChainAccess"])
+    plain_link_intervals = intervals_from_access_passes(limiting_plain_link["Passes"])
+    if len(plain_chain_intervals) != len(delayed_chain_intervals):
+        raise CrossValidationError(
+            f"chain light-time interval count mismatch: plain={len(plain_chain_intervals)} delayed={len(delayed_chain_intervals)}"
+        )
+
+    failures: list[str] = []
+    for index, (plain_interval, delayed_interval) in enumerate(
+        zip(plain_chain_intervals, delayed_chain_intervals, strict=True)
+    ):
+        plain_link_pass = matching_access_pass_for_interval(
+            plain_interval,
+            limiting_plain_link["Passes"],
+        )
+        start_shift_s = delayed_interval.start_s - plain_interval.start_s
+        stop_shift_s = delayed_interval.stop_s - plain_interval.stop_s
+        expected_start_shift_s = -float(plain_link_pass["AccessBeginData"]["Range"]) / SPEED_OF_LIGHT_M_S
+        expected_stop_shift_s = -float(plain_link_pass["AccessEndData"]["Range"]) / SPEED_OF_LIGHT_M_S
+        start_error_s = abs(start_shift_s - expected_start_shift_s)
+        stop_error_s = abs(stop_shift_s - expected_stop_shift_s)
+        if start_error_s > 3.0e-3:
+            failures.append(
+                f"interval {index} start light-time shift error {start_error_s:.12g} s exceeds 0.003 s"
+            )
+        if stop_error_s > 3.0e-3:
+            failures.append(
+                f"interval {index} stop light-time shift error {stop_error_s:.12g} s exceeds 0.003 s"
+            )
+    if failures:
+        raise CrossValidationError("\n".join(failures))
+
+
+def matching_access_pass_for_interval(
+    interval: Interval,
+    passes: list[dict[str, object]],
+) -> dict[str, object]:
+    for access_pass, pass_interval in zip(
+        passes,
+        intervals_from_access_passes(passes),
+        strict=True,
+    ):
+        start_error_s = abs(interval.start_s - pass_interval.start_s)
+        stop_error_s = abs(interval.stop_s - pass_interval.stop_s)
+        if start_error_s <= CHAIN_INTERVAL_ABS_S and stop_error_s <= CHAIN_INTERVAL_ABS_S:
+            return access_pass
+    raise CrossValidationError(
+        f"no limiting ground-to-satellite pass matches chain interval {interval!r}"
+    )
+
+
 def test_direct_chain_matches_sgp4_skyfield_obstruction_oracle() -> None:
     configure_astrox_from_env()
     compute_result = compute_access(site(), sgp4_entity())
@@ -193,29 +294,23 @@ def test_direct_chain_matches_sgp4_skyfield_obstruction_oracle() -> None:
 
 def test_two_satellite_chain_matches_direct_link_intersection() -> None:
     configure_astrox_from_env()
-    compare_two_satellite_chain_to_direct_links(use_light_time_delay=False)
+    compare_two_satellite_chain_to_oracle(use_light_time_delay=False)
 
 
 def test_two_satellite_chain_light_time_matches_delayed_direct_link_intersection() -> None:
     configure_astrox_from_env()
-    plain_chain, plain_links = compare_two_satellite_chain_to_direct_links(
+    plain_chain, plain_links = compare_two_satellite_chain_to_oracle(
         use_light_time_delay=False,
-        compute_aer=True,
     )
-    delayed_chain, delayed_links = compare_two_satellite_chain_to_direct_links(
+    delayed_chain, delayed_links = compare_two_satellite_chain_to_oracle(
         use_light_time_delay=True,
-        compute_aer=True,
     )
     compare_light_time_interval_shift(plain_links[0]["Passes"], delayed_links[0]["Passes"])
-    try:
-        compare_intervals(
-            intervals_from_chain(plain_chain["CompleteChainAccess"]),
-            intervals_from_chain(delayed_chain["CompleteChainAccess"]),
-            tolerance_s=CHAIN_INTERVAL_ABS_S,
-        )
-    except CrossValidationError:
-        return
-    raise CrossValidationError("two-satellite chain light-time option did not change complete access intervals")
+    compare_two_satellite_chain_light_time_shift(
+        plain_chain,
+        delayed_chain,
+        plain_links[0],
+    )
 
 
 @pytest.mark.calibration

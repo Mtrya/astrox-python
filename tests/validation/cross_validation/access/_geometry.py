@@ -4,6 +4,7 @@
 #   Branches:
 #     - WGS84 segment-obstruction interval oracle: partial
 #     - SGP4 site visibility oracle: partial
+#     - SGP4 satellite-pair visibility oracle: partial
 #     - sampled satellite-pair visibility oracle: partial
 #     - two-body ECEF state helper for access comparison: partial
 #     - ASTROX-like J2 state helper for access comparison: partial
@@ -229,6 +230,21 @@ def fixed_site_ecef(latitude_deg: float, longitude_deg: float, height_m: float) 
 
 def sgp4_state_ecef(offset_s: float) -> np.ndarray:
     return np.array(skyfield_satellite(TLE_A, "ISS").at(time_at_offset(START, offset_s)).frame_xyz(itrs).m)
+
+
+def sgp4_state_ecef_for(
+    tle_lines: tuple[str, str],
+    name: str,
+    offset_s: float,
+    *,
+    start: str = START,
+) -> np.ndarray:
+    return np.array(
+        skyfield_satellite(tle_lines, name)
+        .at(time_at_offset(start, offset_s))
+        .frame_xyz(itrs)
+        .m
+    )
 
 
 def two_body_state_ecef(orbit: orbits.KeplerianElements, offset_s: float) -> np.ndarray:
