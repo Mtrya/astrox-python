@@ -1,0 +1,65 @@
+{
+  "cases": [
+    {
+      "description": "Landing zone for a diagonal launch-to-impact track.",
+      "id": "diagonal_launch_to_impact",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "cartographicDegrees": [
+          101.00644849946714,
+          30.49160235039126,
+          100.09828760419641,
+          100.98837247272847,
+          30.500570376621706,
+          100.0979035792633,
+          100.99355039254866,
+          30.508397319755044,
+          100.09820155788091,
+          101.01162739146223,
+          30.49942858626844,
+          100.09790943105043
+        ]
+      }
+    },
+    {
+      "description": "Landing zone for a pure north-south launch-to-impact track.",
+      "id": "north_south_launch_to_impact",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "cartographicDegrees": [
+          99.99481838475674,
+          29.99097889088962,
+          0.09830533569196312,
+          99.99481744737552,
+          30.009020892763335,
+          0.09830524556556824,
+          100.00518255262448,
+          30.009020892763335,
+          0.09830524506892044,
+          100.00518161524326,
+          29.990978890889636,
+          0.09830533552405997
+        ]
+      }
+    },
+    {
+      "description": "Landing zone with a single zero-offset vertex at the impact point.",
+      "id": "small_offset_single_vertex",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "cartographicDegrees": [
+          101,
+          30.499999999999996,
+          99.99999999899055
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-06-12T10:55:43Z"
+  }
+}

@@ -58,8 +58,19 @@ jobs:
       - name: Check example and validation syntax
         run: uv run python -m compileall -q examples tests/validation .github/containers/gmat-validation
 
-      - name: Run pytest
-        run: uv run python -m pytest tests --ignore=tests/validation
+      - name: Run pytest (PR - fast check)
+        if: github.event_name == 'pull_request'
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: uv run python -m pytest tests --ignore=tests/validation/cross_validation
+
+      - name: Run pytest (push to main - full)
+        if: >-
+          (github.event_name == 'push' && github.ref == 'refs/heads/main')
+          || github.event_name == 'workflow_dispatch'
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: uv run python -m pytest tests
 
   live-smoke:
     name: Live smoke
