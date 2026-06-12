@@ -20,10 +20,8 @@ def observer_satellite() -> entities.Entity:
         raan_deg=20.0,
         true_anomaly_deg=10.0,
     )
-    body_axes = entities.vvlh_axes(name="Body VVLH")
     camera_axes = entities.fixed_axes(
-        name="Camera Axes",
-        reference_axes=body_axes,
+        reference_axes="VVLH",
         rotation=entities.euler_rotation(
             sequence="321",
             a_deg=0.0,
@@ -40,7 +38,6 @@ def observer_satellite() -> entities.Entity:
             stop=STOP,
             step_s=120.0,
         ),
-        vgt=entities.vgt(axes=[body_axes, camera_axes]),
         orientation=camera_axes,
         sensor=entities.conic_sensor(outer_half_angle_deg=8.0),
     )
