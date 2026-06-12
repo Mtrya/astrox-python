@@ -19,7 +19,7 @@
 #     - Constants: controlled two-body orbit in _orientation.py, EARTH_MU from access cases
 #     - Tolerances: ORIENTATION_INTERVAL_ABS_S=0.5 s
 #   Unresolved:
-#     - Skyfield DE421 body-vector candidate did not match Moon/Mars: VVLH(Moon/Mars) returned central-body-target passes when the Skyfield +Z body-vector FOV oracle predicted none, VNC(Moon) was shifted by about 90-137 s for the +X candidate, and VNC(Mars) selected a different boresight branch
+#     - Skyfield DE421 body-vector candidates remain just outside the promoted tolerance for Moon/Mars: body-pointing VVLH matched interval counts but had 0.91-1.68 s boundary residuals; body-relative VNC(Moon) matched interval counts but had 1.36-1.77 s residuals; body-relative LVLH(Moon), VNC(Mars), and LVLH(Mars) matched empty interval counts, which is useful but not enough to promote a semantic branch
 
 from __future__ import annotations
 
@@ -216,13 +216,27 @@ def test_lvlh_branches_match_radial_and_along_track_frame_candidates() -> None:
 @pytest.mark.xfail(
     reason=(
         "Moon/Mars axes remain unresolved: matching central-body target probes produced live passes, "
-        "but the Skyfield DE421 body-vector candidate did not match interval counts or transition times."
+        "but Skyfield DE421 body-vector candidates either exceed the transition tolerance or only "
+        "match empty interval controls."
     ),
     raises=CrossValidationError,
     strict=True,
 )
 def test_moon_mars_relative_axes_remain_unresolved_after_body_vector_probe() -> None:
     configure_astrox_from_env()
+    # Bounded implementation probe, using Skyfield DE421 and the same local FOV
+    # interval oracle, tried:
+    # - VVLH(body): +Z points from observer to the body and +X follows relative
+    #   velocity projected perpendicular to +Z. It matched Moon/Mars interval
+    #   counts, but Moon residuals were 0.91-1.68 s and Mars start residual was
+    #   1.37 s, above ORIENTATION_INTERVAL_ABS_S.
+    # - VNC(body): +X follows body-relative velocity, +Y follows the
+    #   body-relative angular momentum, and +Z completes the triad. It matched
+    #   Moon interval counts but residuals were 1.36-1.77 s; Mars matched only
+    #   the empty interval count.
+    # - LVLH(body): +X is body-relative radial outward, +Z is body-relative
+    #   angular momentum, and +Y completes the triad. Moon/Mars matched only
+    #   empty interval counts.
     observations: list[str] = []
     for body_name in ("Moon", "Mars"):
         target = entities.entity(name=body_name, position=entities.central_body_position(body_name))
@@ -269,20 +283,49 @@ def test_moon_mars_relative_axes_remain_unresolved_after_body_vector_probe() -> 
 )
 def test_sun_relative_axes_remain_unresolved_server_failure() -> None:
     configure_astrox_from_env()
-    observer = observer_with_sensor(
-        name="sun_relative_axes",
-        orientation=entities.vvlh_axes(relative_to="Sun"),
-        sensor=conic_sensor(20.0),
-        rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
-    )
     target = entities.entity(name="Sun", position=entities.central_body_position("Sun"))
-    try:
-        compute_sensor_access(observer, target)
-    except AstroxAPIError as exc:
-        if "Object reference not set to an instance of an object" not in str(exc):
-            raise
-        raise CrossValidationError(f"Sun relative-axis central-body target unresolved: {exc}") from exc
-    return
+    failures: list[str] = []
+    successes: list[str] = []
+    for axes_name, axes, rotation in (
+        (
+            "VVLH",
+            entities.vvlh_axes(relative_to="Sun"),
+            entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+        ),
+        (
+            "VNC",
+            entities.vnc_axes(relative_to="Sun"),
+            entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
+        ),
+        (
+            "LVLH",
+            entities.lvlh_axes(relative_to="Sun"),
+            entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
+        ),
+    ):
+        observer = observer_with_sensor(
+            name=f"{axes_name}_sun_relative_axes",
+            orientation=axes,
+            sensor=conic_sensor(20.0),
+            rotation=rotation,
+        )
+        try:
+            intervals = compute_sensor_access(observer, target)
+        except AstroxAPIError as exc:
+            if "Object reference not set to an instance of an object" not in str(exc):
+                raise
+            failures.append(f"{axes_name}(Sun): {exc}")
+        else:
+            successes.append(f"{axes_name}(Sun): returned intervals {intervals}")
+    if successes:
+        raise AssertionError(
+            "Sun relative axes partially resolved; reclassify successful cases before "
+            "keeping this xfail:\n" + "\n".join(successes)
+        )
+    raise CrossValidationError(
+        "Sun relative-axis central-body targets unresolved for every axes family:\n"
+        + "\n".join(failures)
+    )
 
 
 def case_for_axes(*, case_id: str, axes, target, rotation, expected, sensor=None):
