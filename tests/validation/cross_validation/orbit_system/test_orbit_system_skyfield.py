@@ -11,9 +11,9 @@ Coverage:
   Fields (EarthMoonLibration2):
     - cartesian (Moon-centered libration coordinates): verified against JPL DE440 frame
     - unit_quaternion (frame orientation): unresolved (does not match simple JPL-derived frame)
-    - cartesian_translation: unverifiable (absent from live response)
+    - cartesian_translation: partial (absent from live response; parser accepts but not validated)
   Parameters:
-    - static inertial longitude (0 deg and 90 deg): verified
+    - static inertial longitude (0, 90, 180 deg for CentralBodyFrame; 0, 90 deg for Libration): verified
     - sample epoch/time-grid: verified
     - to_central_body/target_reference_frame: verified for the tested branch
     - interpolationAlgorithm/interpolationDegree: not independently validated
@@ -43,7 +43,10 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from astrox import entities, orbits
-from tests.validation._support import configure_astrox_from_env
+from tests.validation._support import (
+    LiveConfigError,
+    configure_astrox_from_env,
+)
 
 
 EPOCH = "2024-01-01T00:00:00Z"
@@ -56,6 +59,10 @@ RADIUS_ABS_M = 1.0
 LONGITUDE_ABS_DEG = 0.001
 LIBRATION_POSITION_ABS_M = 1.0
 QUATERNION_ANGLE_ABS_DEG = 5.0
+
+
+class CrossValidationError(Exception):
+    """Raised when ASTROX output deviates from the independent comparison path."""
 
 
 def _skyfield_loader() -> Loader:
@@ -115,16 +122,7 @@ def _earth_rotation_angle_degrees(jd_ut1: float) -> float:
     return math.degrees(era) % 360.0
 
 
-@pytest.fixture(autouse=True)
-def _configure_astrox() -> None:
-    configure_astrox_from_env()
-
-
-@pytest.mark.parametrize(
-    "inertial_longitude_deg",
-    [0.0, 90.0],
-)
-def test_central_body_frame_static_inertial_to_fixed(
+def _check_central_body_frame_static_inertial_to_fixed(
     inertial_longitude_deg: float,
 ) -> None:
     """A static inertial vector rotates to the expected fixed longitude via ERA."""
@@ -142,7 +140,11 @@ def test_central_body_frame_static_inertial_to_fixed(
 
     for t_s, x_m, y_m, z_m in _cartesian_samples(fixed.cartesian):
         radius_m = math.sqrt(x_m**2 + y_m**2 + z_m**2)
-        assert abs(radius_m - SAMPLE_RADIUS_M) <= RADIUS_ABS_M
+        if abs(radius_m - SAMPLE_RADIUS_M) > RADIUS_ABS_M:
+            raise CrossValidationError(
+                f"radius {radius_m} deviates from {SAMPLE_RADIUS_M} "
+                f"by more than {RADIUS_ABS_M}"
+            )
 
         t = ts.utc(2024, 1, 1, 0, 0, t_s)
         era_deg = _earth_rotation_angle_degrees(t.ut1)
@@ -153,7 +155,11 @@ def test_central_body_frame_static_inertial_to_fixed(
         delta_deg = (
             astrox_longitude_deg - expected_fixed_longitude_deg + 180.0
         ) % 360.0 - 180.0
-        assert abs(delta_deg) <= LONGITUDE_ABS_DEG
+        if abs(delta_deg) > LONGITUDE_ABS_DEG:
+            raise CrossValidationError(
+                f"longitude delta {delta_deg} deg exceeds {LONGITUDE_ABS_DEG} deg "
+                f"at inertial_longitude={inertial_longitude_deg}, t={t_s}"
+            )
 
 
 def _expected_moon_centered_libration_position(
@@ -189,23 +195,32 @@ def _expected_moon_centered_libration_position(
     )
 
 
-def test_earth_moon_libration_cartesian_matches_moon_centered_frame() -> None:
+def _check_earth_moon_libration_cartesian_matches_moon_centered_frame(
+    inertial_longitude_deg: float,
+) -> None:
     """ASTROX returns the input state in a Moon-centered libration frame."""
     load = _skyfield_loader()
     ts = load.timescale()
 
-    # Use the first sample of the static [R, 0, 0] inertial input.
-    position = _sample_static_inertial_position(inertial_longitude_deg=0.0)
+    position = _sample_static_inertial_position(
+        inertial_longitude_deg=inertial_longitude_deg,
+    )
     state = orbits.earth_moon_libration(position)
 
     samples = _cartesian_samples(state.cartesian)
-    assert samples
+    if not samples:
+        raise CrossValidationError("no cartesian samples returned")
     t_s, x_m, y_m, z_m = samples[0]
     astrox_position_m = np.array([x_m, y_m, z_m])
 
     epoch_t = ts.utc(2024, 1, 1, 0, 0, t_s)
+    longitude_rad = math.radians(inertial_longitude_deg)
     satellite_inertial_m = np.array(
-        [SAMPLE_RADIUS_M * math.cos(0.0), SAMPLE_RADIUS_M * math.sin(0.0), 0.0]
+        [
+            SAMPLE_RADIUS_M * math.cos(longitude_rad),
+            SAMPLE_RADIUS_M * math.sin(longitude_rad),
+            0.0,
+        ]
     )
     expected_position_m = _expected_moon_centered_libration_position(
         satellite_inertial_m,
@@ -213,7 +228,63 @@ def test_earth_moon_libration_cartesian_matches_moon_centered_frame() -> None:
     )
 
     diff_m = astrox_position_m - expected_position_m
-    assert np.linalg.norm(diff_m) <= LIBRATION_POSITION_ABS_M
+    if np.linalg.norm(diff_m) > LIBRATION_POSITION_ABS_M:
+        raise CrossValidationError(
+            f"libration position residual {np.linalg.norm(diff_m)} m "
+            f"exceeds {LIBRATION_POSITION_ABS_M} m "
+            f"at inertial_longitude={inertial_longitude_deg}"
+        )
+
+
+def _rotation_matrix_to_quaternion(matrix: np.ndarray) -> np.ndarray:
+    """Convert a 3x3 rotation matrix to a unit quaternion [x, y, z, w]."""
+    m00, m01, m02 = matrix[0]
+    m10, m11, m12 = matrix[1]
+    m20, m21, m22 = matrix[2]
+    if m22 < 0:
+        if m00 > m11:
+            trace = 1.0 + m00 - m11 - m22
+            quaternion = np.array([trace, m01 + m10, m20 + m02, m12 - m21])
+        else:
+            trace = 1.0 - m00 + m11 - m22
+            quaternion = np.array([m01 + m10, trace, m12 + m21, m20 - m02])
+    else:
+        if m00 < -m11:
+            trace = 1.0 - m00 - m11 + m22
+            quaternion = np.array([m20 + m02, m12 + m21, trace, m01 - m10])
+        else:
+            trace = 1.0 + m00 + m11 + m22
+            quaternion = np.array([m12 - m21, m20 - m02, m01 + m10, trace])
+    return quaternion / np.linalg.norm(quaternion) * 0.5 * math.sqrt(trace)
+
+
+@pytest.fixture(autouse=True)
+def _configure_astrox() -> None:
+    configure_astrox_from_env()
+
+
+@pytest.mark.parametrize(
+    "inertial_longitude_deg",
+    [0.0, 90.0, 180.0],
+)
+def test_central_body_frame_static_inertial_to_fixed(
+    inertial_longitude_deg: float,
+) -> None:
+    """A static inertial vector rotates to the expected fixed longitude via ERA."""
+    _check_central_body_frame_static_inertial_to_fixed(inertial_longitude_deg)
+
+
+@pytest.mark.parametrize(
+    "inertial_longitude_deg",
+    [0.0, 90.0],
+)
+def test_earth_moon_libration_cartesian_matches_moon_centered_frame(
+    inertial_longitude_deg: float,
+) -> None:
+    """ASTROX returns the input state in a Moon-centered libration frame."""
+    _check_earth_moon_libration_cartesian_matches_moon_centered_frame(
+        inertial_longitude_deg,
+    )
 
 
 @pytest.mark.calibration
@@ -252,23 +323,21 @@ def test_earth_moon_libration_unit_quaternion_matches_moon_centered_frame() -> N
     assert angle_deg <= QUATERNION_ANGLE_ABS_DEG
 
 
-def _rotation_matrix_to_quaternion(matrix: np.ndarray) -> np.ndarray:
-    """Convert a 3x3 rotation matrix to a unit quaternion [x, y, z, w]."""
-    m00, m01, m02 = matrix[0]
-    m10, m11, m12 = matrix[1]
-    m20, m21, m22 = matrix[2]
-    if m22 < 0:
-        if m00 > m11:
-            trace = 1.0 + m00 - m11 - m22
-            quaternion = np.array([trace, m01 + m10, m20 + m02, m12 - m21])
-        else:
-            trace = 1.0 - m00 + m11 - m22
-            quaternion = np.array([m01 + m10, trace, m12 + m21, m20 - m02])
-    else:
-        if m00 < -m11:
-            trace = 1.0 - m00 - m11 + m22
-            quaternion = np.array([m20 + m02, m12 + m21, trace, m01 - m10])
-        else:
-            trace = 1.0 + m00 + m11 + m22
-            quaternion = np.array([m12 - m21, m20 - m02, m01 + m10, trace])
-    return quaternion / np.linalg.norm(quaternion) * 0.5 * math.sqrt(trace)
+def main() -> int:
+    try:
+        configure_astrox_from_env()
+        _check_central_body_frame_static_inertial_to_fixed(0.0)
+        _check_central_body_frame_static_inertial_to_fixed(90.0)
+        _check_central_body_frame_static_inertial_to_fixed(180.0)
+        _check_earth_moon_libration_cartesian_matches_moon_centered_frame(0.0)
+        _check_earth_moon_libration_cartesian_matches_moon_centered_frame(90.0)
+    except (CrossValidationError, LiveConfigError) as exc:
+        print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
+        return 1
+    print("CROSS_VALIDATION_CHECKED=5")
+    print("CROSS_VALIDATION_FAILED=0")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
