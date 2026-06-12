@@ -399,9 +399,14 @@ def fixed_frame(reference: Callable[[float], Frame], rotation: Frame) -> Callabl
     return lambda offset_s: reference(offset_s) @ rotation
 
 
-def frozen_at_epoch_frame(source: Callable[[float], Frame], reference: Callable[[float], Frame]) -> Callable[[float], Frame]:
-    source_epoch = source(0.0)
-    reference_epoch = reference(0.0)
+def frozen_at_epoch_frame(
+    source: Callable[[float], Frame],
+    reference: Callable[[float], Frame],
+    *,
+    epoch_s: float = 0.0,
+) -> Callable[[float], Frame]:
+    source_epoch = source(epoch_s)
+    reference_epoch = reference(epoch_s)
     frozen_rotation = reference_epoch.T @ source_epoch
     return lambda offset_s: reference(offset_s) @ frozen_rotation
 
