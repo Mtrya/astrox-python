@@ -14,6 +14,8 @@ The user-facing guides are [docs/sdk/entities.md](../../docs/sdk/entities.md) an
 | --- | --- |
 | `compute.py` | `entities.entity(...)`, `entities.site_position(...)`, `entities.sgp4_position(...)`, and `access.compute(...)` |
 | `chain.py` | `entities.entity_group(...)`, `access.connection(...)`, and `access.chain(...)` |
+| `sensor_pointing.py` | `entities.vvlh_axes(...)`, `entities.conic_sensor(...)`, `entities.fixed_sensor_pointing(...)`, quaternion sensor pointing, and `access.compute(...)` |
+| `custom_axes.py` | `entities.fixed_axes(...)`, `entities.euler_rotation(...)`, calibrated VVLH-relative sensor frames, and `access.compute(...)` |
 
 Install the development environment once, then run examples from the repository root:
 
@@ -21,6 +23,8 @@ Install the development environment once, then run examples from the repository 
 uv sync --group dev
 uv run python examples/04_access/compute.py
 uv run python examples/04_access/chain.py
+uv run python examples/04_access/sensor_pointing.py
+uv run python examples/04_access/custom_axes.py
 ```
 
 These examples call the ASTROX API through the package default client configuration. Running them end to end requires access to a compatible ASTROX server.

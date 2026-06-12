@@ -54,6 +54,47 @@ For SGP4-to-ground role reversal, current cross-validation confirms interval sym
 
 `use_light_time_delay=True` is exercised for the representative ground-to-SGP4 case. The observed access-boundary shifts are consistent with a simple range-over-speed-of-light estimate at millisecond scale for that case; this validates the option is wired and produces physically plausible timing shifts, not that every model pair has been calibrated.
 
+## Sensor-Constrained Access
+
+Attach `orientation`, `sensor`, and optional `sensor_pointing` metadata to the `from_entity` when an access computation should be constrained by a spacecraft sensor:
+
+```python
+observer = entities.entity(
+    name="Observer",
+    position=entities.two_body_position(
+        orbit_epoch="2024-01-01T00:00:00.000Z",
+        orbit=orbit,
+        start="2024-01-01T00:00:00.000Z",
+        stop="2024-01-01T02:00:00.000Z",
+        step_s=120.0,
+    ),
+    orientation=entities.vvlh_axes(),
+    sensor=entities.conic_sensor(outer_half_angle_deg=8.0),
+    sensor_pointing=entities.fixed_sensor_pointing(
+        rotation=entities.quaternion_rotation(
+            scalar=1.0,
+            x=0.0,
+            y=0.0,
+            z=0.0,
+        ),
+    ),
+)
+```
+
+Current cross-validation covers conic and rectangular sensor fields of view; quaternion, Euler, and Az/El fixed sensor pointing; VVLH/LVLH/VNC axes; Fixed, FixedAtEpoch, Composite, short-span sampled-identity CZML axes; and VGT aligned-and-constrained axes built from fixed vectors. These cases compare `Passes.AccessStart` and `Passes.AccessStop` against an independent local geometry oracle that samples two-body state, WGS84 obstruction, calibrated body frames, and sensor field-of-view predicates.
+
+The calibrated body-frame summary is:
+
+| Frame | Validated convention |
+| --- | --- |
+| `VVLH` | `+Z` nadir, `+X` along-track projected into the local horizontal plane, `+Y` completes the right-side frame |
+| `LVLH` | `+X` radial outward, `+Z` orbit angular momentum, `+Y = Z x X` |
+| `VNC` | `+X` inertial velocity, `+Y` orbit angular momentum, `+Z` completes the right-handed frame |
+
+Quaternion and Euler sensor rotations act on the local `+Z` boresight. Az/El sensor pointing is not equivalent to those rotations: validation shows ASTROX treats Az/El as a direct boresight vector in the parent axes, with azimuth from `+X` toward `+Y` and elevation toward `+Z`.
+
+Unresolved orientation branches are deliberately not hidden. Moon/Mars/Sun-relative axes, Fixed axes relative to inertial-name variants such as `ICRF` and `J2000`, CZML constant and non-identity quaternion behavior, VGT names containing spaces, and non-empty VGT Points/Systems remain strict calibration xfails under `tests/validation/cross_validation/access/`. The SDK forwards those request fragments when you build them, but this documentation does not present them as semantically understood.
+
 ## Chain Access
 
 `access.chain(...)` computes access through named chain participants. `participants` defines the objects that may appear in the chain. `start_participant`, `end_participant`, and optional `connections` refer to those participants by name; you can pass the participant value itself and the SDK lowers it to its name.
