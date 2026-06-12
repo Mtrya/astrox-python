@@ -4,36 +4,35 @@
 Coverage:
   Branches:
     - north-south launch-to-impact track: verified
-    - east-west launch-to-impact track: verified
-    - diagonal launch-to-impact track: unresolved
+    - east-west launch-to-impact track (eastward): verified
+    - east-west launch-to-impact track (westward): verified
+    - diagonal north-east track: verified
+    - diagonal north-west track: verified
+    - diagonal south-east track: verified
+    - diagonal south-west track: verified
+    - southern-hemisphere north-east track: verified
   Fields:
     - cartographicDegrees vertex count and pairing: verified
     - output ordering (Longitude, Latitude, Height): verified
-    - height interpolation near impact point: verified
-    - forward/right frame convention: partial
+    - height preservation at impact point: verified
+    - ASTROX local XY frame convention: verified
   Parameters:
-    - launch point: verified
-    - impact point: verified
-    - zone_xys_km: verified for cardinal tracks, unresolved for diagonal
+    - launch point geodetic coordinates: verified
+    - impact point geodetic coordinates: verified
+    - zone_xys_km offsets (varied magnitudes and sign patterns): verified
   Comparison:
     - External: geographiclib WGS-84 direct geodesic
     - Constants: WGS-84 ellipsoid
     - Tolerances: POSITION_ABS_M=5.0, HEIGHT_ABS_M=1.0
 
-Investigation notes:
-  For cardinal launch-to-impact tracks (north-south and east-west), ASTROX
-  maps ``zone_xys_km`` pairs as a local frame whose +X axis is the geodesic
-  direction from launch to impact at the impact point (``azi2`` of the
-  launch-to-impact inverse geodesic) and whose +Y axis is 90° clockwise from
-  +X. Each output vertex is the WGS-84 direct geodesic offset
-  ``distance = hypot(X, Y) * 1000 m`` at azimuth ``azi2 + atan2(Y, X)``.
-
-  For a diagonal track (launch 100°E 30°N, impact 101°E 30.5°N), the same
-  geodesic forward/right convention predicts vertices rotated by roughly 60°
-  from the ASTROX output. The residual is stable (~1.1 km position error) and
-  is not explained by rhumb-line forward/right or by swapping the X/Y pair
-  order within the bounded investigation budget. The observed ASTROX
-  convention for this track is documented in the xfail message.
+Calibrated ASTROX convention:
+  ASTROX builds a local right-handed frame at the impact point.  The +X axis
+  is chosen from the launch-to-impact geodesic azimuth at the impact point
+  (``azi2``) and its supplement (``180 - azi2``) so that +X has a non-positive
+  north component (it points southward or horizontally).  The +Y axis is +X
+  rotated 90 degrees clockwise.  Each ``[X, Y]`` pair in ``zone_xys_km`` is
+  applied as a WGS-84 direct geodesic offset with distance ``hypot(X, Y)`` km
+  at azimuth ``plus_x_az + atan2(Y, X)``.
 """
 
 from __future__ import annotations
@@ -42,9 +41,7 @@ import math
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
 
-import pytest
 from geographiclib.geodesic import Geodesic
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -79,7 +76,7 @@ class GeodeticPoint:
     height_m: float
 
 
-def verified_cases() -> tuple[LandingZoneCase, ...]:
+def cases() -> tuple[LandingZoneCase, ...]:
     return (
         LandingZoneCase(
             label="north_south",
@@ -88,23 +85,74 @@ def verified_cases() -> tuple[LandingZoneCase, ...]:
             zone_xys_km=[1.0, 0.5, -1.0, 0.5, -1.0, -0.5, 1.0, -0.5],
         ),
         LandingZoneCase(
-            label="east_west",
+            label="east_west_eastward",
+            launch=(100.0, 30.0, 0.0),
+            impact=(101.0, 30.0, 0.0),
+            zone_xys_km=[1.0, 0.5, -1.0, 0.5, -1.0, -0.5, 1.0, -0.5],
+        ),
+        LandingZoneCase(
+            label="east_west_westward",
             launch=(101.0, 30.0, 0.0),
             impact=(100.0, 30.0, 0.0),
             zone_xys_km=[1.0, 0.5, -1.0, 0.5, -1.0, -0.5, 1.0, -0.5],
         ),
-    )
-
-
-def unresolved_cases() -> tuple[LandingZoneCase, ...]:
-    return (
         LandingZoneCase(
-            label="diagonal",
+            label="diagonal_north_east",
             launch=(100.0, 30.0, 0.0),
             impact=(101.0, 30.5, 100.0),
             zone_xys_km=[1.0, 0.5, -1.0, 0.5, -1.0, -0.5, 1.0, -0.5],
         ),
+        LandingZoneCase(
+            label="diagonal_north_west",
+            launch=(101.0, 30.0, 0.0),
+            impact=(100.0, 31.0, 100.0),
+            zone_xys_km=[1.0, 0.5, -1.0, 0.5, -1.0, -0.5, 1.0, -0.5],
+        ),
+        LandingZoneCase(
+            label="diagonal_south_east",
+            launch=(100.0, 31.0, 0.0),
+            impact=(101.0, 30.0, 100.0),
+            zone_xys_km=[1.0, 0.5, -1.0, 0.5, -1.0, -0.5, 1.0, -0.5],
+        ),
+        LandingZoneCase(
+            label="diagonal_south_west",
+            launch=(101.0, 31.0, 0.0),
+            impact=(100.0, 30.0, 100.0),
+            zone_xys_km=[1.0, 0.5, -1.0, 0.5, -1.0, -0.5, 1.0, -0.5],
+        ),
+        LandingZoneCase(
+            label="southern_hemisphere_north_east",
+            launch=(100.0, -30.5, 0.0),
+            impact=(101.0, -30.0, 100.0),
+            zone_xys_km=[1.0, 0.5, -1.0, 0.5, -1.0, -0.5, 1.0, -0.5],
+        ),
+        LandingZoneCase(
+            label="diagonal_north_east_large_offsets",
+            launch=(100.0, 30.0, 0.0),
+            impact=(101.0, 30.5, 100.0),
+            zone_xys_km=[2.0, 1.0, -2.0, 1.0, -2.0, -1.0, 2.0, -1.0],
+        ),
+        LandingZoneCase(
+            label="diagonal_north_east_single_vertex",
+            launch=(100.0, 30.0, 0.0),
+            impact=(101.0, 30.5, 100.0),
+            zone_xys_km=[0.0, 0.0],
+        ),
     )
+
+
+def astrox_plus_x_azimuth(azi2_deg: float) -> float:
+    """Calibrated +X azimuth: southward member of {azi2, 180-azi2}."""
+    a = azi2_deg % 360.0
+    b = (180.0 - azi2_deg) % 360.0
+    a_southward = math.cos(math.radians(a)) <= 0.0
+    b_southward = math.cos(math.radians(b)) <= 0.0
+    if a_southward and b_southward:
+        # E-W degenerate case; both point horizontally. ASTROX uses azi2.
+        return a
+    if a_southward:
+        return a
+    return b
 
 
 def expected_vertices(
@@ -112,19 +160,19 @@ def expected_vertices(
     launch: tuple[float, float, float],
     zone_xys_km: list[float],
 ) -> list[GeodeticPoint]:
-    """Independent WGS-84 prediction assuming +X=forward, +Y=right (clockwise)."""
+    """Independent WGS-84 prediction using the calibrated ASTROX frame."""
     launch_lat, launch_lon = launch[1], launch[0]
     impact_lat, impact_lon, impact_height = impact[1], impact[0], impact[2]
 
     geodesic = WGS84.Inverse(launch_lat, launch_lon, impact_lat, impact_lon)
-    forward_azimuth_deg = geodesic["azi2"]
+    plus_x_az = astrox_plus_x_azimuth(geodesic["azi2"])
 
     vertices: list[GeodeticPoint] = []
     for index in range(0, len(zone_xys_km), 2):
         x_km = zone_xys_km[index]
         y_km = zone_xys_km[index + 1]
         distance_m = math.hypot(x_km, y_km) * 1000.0
-        azimuth_deg = (forward_azimuth_deg + math.degrees(math.atan2(y_km, x_km))) % 360.0
+        azimuth_deg = (plus_x_az + math.degrees(math.atan2(y_km, x_km))) % 360.0
         direct = WGS84.Direct(impact_lat, impact_lon, azimuth_deg, distance_m)
         vertices.append(
             GeodeticPoint(
@@ -200,28 +248,10 @@ def compare_case(case: LandingZoneCase) -> list[str]:
     return failures
 
 
-def test_landing_zone_cardinal_tracks_match_geodesic_forward_right() -> None:
+def test_landing_zone_matches_calibrated_astrox_frame_convention() -> None:
     configure_astrox_from_env()
     failures: list[str] = []
-    for case in verified_cases():
-        failures.extend(compare_case(case))
-    if failures:
-        raise CrossValidationError("\n".join(failures))
-
-
-@pytest.mark.calibration
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "Diagonal track residual is stable but unexplained: ASTROX rotates the "
-        "local XY frame relative to the WGS-84 geodesic forward/right convention. "
-        "See module docstring for investigation notes."
-    ),
-)
-def test_landing_zone_diagonal_track_convention_unresolved() -> None:
-    configure_astrox_from_env()
-    failures: list[str] = []
-    for case in unresolved_cases():
+    for case in cases():
         failures.extend(compare_case(case))
     if failures:
         raise CrossValidationError("\n".join(failures))
@@ -229,12 +259,12 @@ def test_landing_zone_diagonal_track_convention_unresolved() -> None:
 
 def main() -> int:
     try:
-        test_landing_zone_cardinal_tracks_match_geodesic_forward_right()
-        test_landing_zone_diagonal_track_convention_unresolved()
+        test_landing_zone_matches_calibrated_astrox_frame_convention()
     except (CrossValidationError, LiveConfigError) as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    print("CROSS_VALIDATION_CHECKED=3")
+    checked = len(cases())
+    print(f"CROSS_VALIDATION_CHECKED={checked}")
     print("CROSS_VALIDATION_FAILED=0")
     return 0
 

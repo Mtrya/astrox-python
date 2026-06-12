@@ -39,11 +39,16 @@ Arguments use explicit unit suffixes:
 | `impact_height_m` | metres | Impact geodetic height |
 | `zone_xys_km` | kilometres | Flat `[+X1, +Y1, +X2, +Y2, ...]` offset pairs |
 
-`zone_xys_km` must contain an even number of numeric values. Each pair defines one boundary vertex relative to the impact point. The OpenAPI description states that `+X` points forward along the launch-to-impact direction and `+Y` points to the right.
+`zone_xys_km` must contain an even number of numeric values. Each pair defines one boundary vertex relative to the impact point. Cross-validation against WGS-84 geodesy shows that ASTROX builds a local right-handed frame at the impact point:
+
+- `+X` is chosen from the launch-to-impact geodesic azimuth at the impact point and its supplement so that `+X` points southward (or horizontally at the equator).
+- `+Y` is `+X` rotated 90° clockwise.
+
+This means the OpenAPI description "forward is +X, right is +Y" matches cardinal tracks (north-south and east-west) literally, but for diagonal tracks `+X` is the southward-facing member of the geodesic azimuth pair and `+Y` follows clockwise from it.
 
 The function returns the raw ASTROX JSON-like response dictionary, including `IsSuccess`, `Message`, and `cartographicDegrees`. `cartographicDegrees` is a flat array of `[Longitude, Latitude, Height, ...]` values in `[deg, deg, m]`.
 
-Cross-validation shows that for cardinal launch-to-impact tracks the ASTROX frame matches a WGS-84 geodesic forward/right convention, but for diagonal tracks the frame rotation is currently unresolved. See `tests/validation/cross_validation/rocket/test_landing_zone_geographiclib.py` for the calibration details.
+See `tests/validation/cross_validation/rocket/test_landing_zone_geographiclib.py` for the calibration details and coverage checklist.
 
 ## Rocket Trajectory Endpoints
 
