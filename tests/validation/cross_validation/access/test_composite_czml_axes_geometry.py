@@ -7,7 +7,7 @@
 #     - FixedAtEpoch axes from VVLH and LVLH into ICRF at start epoch and +60 s: verified against frozen-at-epoch local frame derivations
 #     - Composite axes with identity/off-nadir two-interval and identity/off-nadir/identity three-interval layouts: verified for multiple switch points against piecewise local FOV intervals
 #     - CZML axes sampled identity quaternions over short sample spans: verified against inertial-frame oracle for 30 s and 60 s spans, with and without CentralBody, and with LINEAR/LAGRANGE/HERMITE interpolation options
-#     - CZML axes constant, long-span sampled, and non-identity sampled quaternions: unresolved after live probes of constant vs sampled arrays, xyzw/wxyz order, sign, X/Y component discriminator, non-identity rotation, and full-span sampling; kept as strict calibration xfail
+#     - CZML axes constant, long-span sampled, and non-identity sampled quaternions: unresolved after live probes of constant vs sampled arrays, inertial and Earth-fixed identity candidates, xyzw/wxyz order, sign, X/Y component discriminator, non-identity rotation, and full-span sampling; kept as strict calibration xfail
 #   Fields:
 #     - Passes.AccessStart/AccessStop: verified for Fixed, FixedAtEpoch, and Composite branches listed above; unresolved for Fixed(ICRF/J2000)
 #     - CZML sampled-identity AccessStart/AccessStop over short spans: verified
@@ -15,7 +15,7 @@
 #   Parameters:
 #     - reference_axes, FixedOrientation, SourceAxesName, ReferenceAxesName, Epoch, Intervals, Start/Stop: verified with multiple values for covered Fixed/FixedAtEpoch/Composite branches; ICRF/J2000 fixed references unresolved; INERTIAL/MeanEclpJ2000/FIXED name variants fail before semantic output
 #     - unitQuaternion identity samples, interpolationAlgorithm=LINEAR/LAGRANGE/HERMITE, interpolationDegree=1/3, CentralBody omission/Earth: verified for short-span CZML sampled identity
-#     - unitQuaternion constant arrays, non-identity X/Y/sign samples, and longer sampled spans: unresolved after server failures, sampled-array residuals, and no matching component-order/sign/passive candidate
+#     - unitQuaternion constant arrays, non-identity X/Y/sign samples, and longer sampled spans: unresolved after server failures, sampled-array residuals against inertial and Earth-fixed candidates, and no matching component-order/sign/passive candidate
 #   Comparison:
 #     - External: independent VVLH frame, Euler rotation, frozen source/reference transform, and piecewise composite interval derivation
 #     - Constants: controlled two-body orbit in _orientation.py, COMPOSITE_SWITCH_S=20 s
@@ -565,7 +565,10 @@ def test_czml_axes_remain_unresolved_after_variant_probe_matrix() -> None:
                 interpolation_algorithm="LINEAR",
                 interpolation_degree=1,
             ),
-            inertial_frame,
+            [
+                ("inertial_identity", inertial_frame),
+                ("skyfield_itrs_fixed_identity", earth_fixed_frame),
+            ],
             600.0,
         ),
         (
@@ -588,7 +591,10 @@ def test_czml_axes_remain_unresolved_after_variant_probe_matrix() -> None:
                 interpolation_algorithm="LINEAR",
                 interpolation_degree=1,
             ),
-            inertial_frame,
+            [
+                ("inertial_identity", inertial_frame),
+                ("skyfield_itrs_fixed_identity", earth_fixed_frame),
+            ],
             7200.0,
         ),
         (
@@ -611,15 +617,20 @@ def test_czml_axes_remain_unresolved_after_variant_probe_matrix() -> None:
                 interpolation_algorithm="LINEAR",
                 interpolation_degree=1,
             ),
-            fixed_frame(
-                inertial_frame,
-                quaternion_rotation(
-                    scalar=0.984807753012208,
-                    x=0.0,
-                    y=-0.17364817766693033,
-                    z=0.0,
+            [
+                (
+                    "active_xyzw_y_minus_20",
+                    fixed_frame(
+                        inertial_frame,
+                        quaternion_rotation(
+                            scalar=0.984807753012208,
+                            x=0.0,
+                            y=-0.17364817766693033,
+                            z=0.0,
+                        ),
+                    ),
                 ),
-            ),
+            ],
             60.0,
         ),
         (
@@ -642,15 +653,20 @@ def test_czml_axes_remain_unresolved_after_variant_probe_matrix() -> None:
                 interpolation_algorithm="LINEAR",
                 interpolation_degree=1,
             ),
-            fixed_frame(
-                inertial_frame,
-                quaternion_rotation(
-                    scalar=0.984807753012208,
-                    x=-0.17364817766693033,
-                    y=0.0,
-                    z=0.0,
+            [
+                (
+                    "active_xyzw_x_minus_20",
+                    fixed_frame(
+                        inertial_frame,
+                        quaternion_rotation(
+                            scalar=0.984807753012208,
+                            x=-0.17364817766693033,
+                            y=0.0,
+                            z=0.0,
+                        ),
+                    ),
                 ),
-            ),
+            ],
             60.0,
         ),
         (
@@ -673,7 +689,7 @@ def test_czml_axes_remain_unresolved_after_variant_probe_matrix() -> None:
                 interpolation_algorithm="LINEAR",
                 interpolation_degree=1,
             ),
-            inertial_frame,
+            [("wxyz_order_as_inertial_probe", inertial_frame)],
             7200.0,
         ),
     ]
@@ -791,7 +807,7 @@ def test_czml_axes_remain_unresolved_after_variant_probe_matrix() -> None:
             failures.append(f"{case_id}: {exc}")
             continue
         successes.append(f"{case_id}: returned intervals {actual}")
-    for case_id, czml, frame, stop_s in sampled_variants:
+    for case_id, czml, candidate_frames, stop_s in sampled_variants:
         observer = observer_with_sensor(
             name=case_id,
             orientation=czml,
@@ -799,26 +815,33 @@ def test_czml_axes_remain_unresolved_after_variant_probe_matrix() -> None:
             rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
         )
         actual = compute_sensor_access(observer, positive_target)
-        expected = expected_intervals(
-            target_state=state_function(
-                controlled_orbit(
-                    inclination_delta_deg=-20.0,
-                    raan_delta_deg=-60.0,
-                    true_anomaly_offset_deg=60.0,
-                )
-            ),
-            frame=frame,
-            sensor_predicate=conic_predicate(20.0, np.array([0.0, 0.0, 1.0])),
-            stop_s=stop_s,
-        )
-        try:
-            compare_intervals(expected, actual, tolerance_s=ORIENTATION_INTERVAL_ABS_S)
-        except CrossValidationError as exc:
-            failures.append(
-                f"{case_id}: expected {expected}, actual {actual}, residual {exc}"
+        candidate_residuals = []
+        for candidate_name, frame in candidate_frames:
+            expected = expected_intervals(
+                target_state=state_function(
+                    controlled_orbit(
+                        inclination_delta_deg=-20.0,
+                        raan_delta_deg=-60.0,
+                        true_anomaly_offset_deg=60.0,
+                    )
+                ),
+                frame=frame,
+                sensor_predicate=conic_predicate(20.0, np.array([0.0, 0.0, 1.0])),
+                stop_s=stop_s,
             )
-        else:
-            successes.append(f"{case_id}: matched local candidate {expected}")
+            try:
+                compare_intervals(expected, actual, tolerance_s=ORIENTATION_INTERVAL_ABS_S)
+            except CrossValidationError as exc:
+                candidate_residuals.append(
+                    f"{candidate_name}: expected {expected}, residual {exc}"
+                )
+            else:
+                successes.append(f"{case_id}: matched {candidate_name} candidate {expected}")
+        if candidate_residuals:
+            failures.append(
+                f"{case_id}: actual {actual}; no sampled candidate matched: "
+                + "; ".join(candidate_residuals)
+            )
     for case_id, czml, expected_signature in component_discriminator_variants:
         observer = observer_with_sensor(
             name=case_id,
