@@ -3,29 +3,43 @@
 
 Coverage:
   Branches:
-    - CentralBodyFrame (Earth INERTIAL -> Earth FIXED): verified for static inertial inputs
+    - CentralBodyFrame (Earth INERTIAL -> Earth FIXED): verified for static inputs
+    - CentralBodyFrame (Earth FIXED -> Earth INERTIAL): verified for static inputs
+    - CentralBodyFrame (Earth INERTIAL -> Moon INERTIAL): partial
+        - linear/rigid part (norms and right angles preserved): verified
+        - absolute orientation and translation: unresolved
     - EarthMoonLibration2 (Earth INERTIAL -> Moon-centered libration frame): partial
   Fields (CentralBodyFrame):
-    - cartesian radius: verified (no scaling between inertial and fixed)
-    - cartesian longitude: verified against IAU 2000 Earth Rotation Angle
+    - cartesian radius: verified (no scaling between source and target frames)
+    - cartesian longitude (Earth cases): verified against IAU 2000 Earth Rotation Angle
+    - relative geometry (Moon INERTIAL case): verified as rigid rotation + translation
   Fields (EarthMoonLibration2):
     - cartesian (Moon-centered libration coordinates): verified against JPL DE440 frame
     - unit_quaternion (frame orientation): unresolved (does not match simple JPL-derived frame)
     - cartesian_translation: partial (absent from live response; parser accepts but not validated)
   Parameters:
-    - static inertial longitude (0, 90, 180 deg for CentralBodyFrame; 0, 90 deg for Libration): verified
-    - sample epoch/time-grid: verified
-    - to_central_body/target_reference_frame: verified for the tested branch
+    - static inertial longitude (0, 90, 180 deg): verified
+    - static fixed longitude (0, 90, 180 deg): verified
+    - to_central_body (Earth and Moon INERTIAL): partial
+    - target_reference_frame (FIXED, INERTIAL): verified for tested Earth branches
     - interpolationAlgorithm/interpolationDegree: not independently validated
   Comparison:
     - External: Skyfield de440.bsp Earth rotation angle and Moon geocentric position/velocity
     - Constants: EARTH_MU_M3_S2
-    - Tolerances: RADIUS_ABS_M=1.0, LONGITUDE_ABS_DEG=0.001, LIBRATION_POSITION_ABS_M=1.0, QUATERNION_ANGLE_ABS_DEG=5.0
+    - Tolerances:
+        RADIUS_ABS_M=1.0
+        LONGITUDE_ABS_DEG=0.001
+        LIBRATION_POSITION_ABS_M=1.0
+        QUATERNION_ANGLE_ABS_DEG=5.0
+        MOON_RIGID_NORM_REL=0.01
+        MOON_RIGID_ANGLE_REL=0.01
   Unresolved:
     - EarthMoonLibration2 unit_quaternion convention remains unexplained after bounded
       investigation. The cartesian field is verified in the same Moon-centered frame, so the
       origin and axis conventions are calibrated; only the auxiliary orientation encoding is
       not yet understood.
+    - CentralBodyFrame to non-Earth central bodies beyond the rigid-geometry check is not yet
+      calibrated (e.g., Moon FIXED orientation, other planets).
 """
 
 from __future__ import annotations
@@ -59,6 +73,8 @@ RADIUS_ABS_M = 1.0
 LONGITUDE_ABS_DEG = 0.001
 LIBRATION_POSITION_ABS_M = 1.0
 QUATERNION_ANGLE_ABS_DEG = 5.0
+MOON_RIGID_NORM_REL = 0.01
+MOON_RIGID_ANGLE_REL = 0.01
 
 
 class CrossValidationError(Exception):
@@ -69,11 +85,12 @@ def _skyfield_loader() -> Loader:
     return Loader(Path.home() / ".skyfield")
 
 
-def _sample_static_inertial_position(
+def _sample_static_position(
     *,
     inertial_longitude_deg: float,
+    reference_frame: str,
 ) -> entities.CzmlPosition:
-    """Build a static, equatorial, Earth-centered inertial CZML sample."""
+    """Build a static, equatorial CZML sample in the requested Earth frame."""
     longitude_rad = math.radians(inertial_longitude_deg)
     dt_s = SAMPLE_DURATION_S / (SAMPLE_COUNT - 1)
     cartesian: list[float] = []
@@ -88,7 +105,7 @@ def _sample_static_inertial_position(
     return entities.czml_position(
         epoch=EPOCH,
         central_body="Earth",
-        reference_frame="INERTIAL",
+        reference_frame=reference_frame,
         interpolation_algorithm="LAGRANGE",
         interpolation_degree=7,
         cartesian=cartesian,
@@ -129,8 +146,9 @@ def _check_central_body_frame_static_inertial_to_fixed(
     load = _skyfield_loader()
     ts = load.timescale()
 
-    position = _sample_static_inertial_position(
+    position = _sample_static_position(
         inertial_longitude_deg=inertial_longitude_deg,
+        reference_frame="INERTIAL",
     )
     _period, fixed = orbits.central_body_frame(
         position,
@@ -160,6 +178,112 @@ def _check_central_body_frame_static_inertial_to_fixed(
                 f"longitude delta {delta_deg} deg exceeds {LONGITUDE_ABS_DEG} deg "
                 f"at inertial_longitude={inertial_longitude_deg}, t={t_s}"
             )
+
+
+def _check_central_body_frame_static_fixed_to_inertial(
+    fixed_longitude_deg: float,
+) -> None:
+    """A static fixed vector rotates to the expected inertial longitude via ERA."""
+    load = _skyfield_loader()
+    ts = load.timescale()
+
+    position = _sample_static_position(
+        inertial_longitude_deg=fixed_longitude_deg,
+        reference_frame="FIXED",
+    )
+    _period, inertial = orbits.central_body_frame(
+        position,
+        to_central_body="Earth",
+        target_reference_frame="INERTIAL",
+    )
+
+    for t_s, x_m, y_m, z_m in _cartesian_samples(inertial.cartesian):
+        radius_m = math.sqrt(x_m**2 + y_m**2 + z_m**2)
+        if abs(radius_m - SAMPLE_RADIUS_M) > RADIUS_ABS_M:
+            raise CrossValidationError(
+                f"radius {radius_m} deviates from {SAMPLE_RADIUS_M} "
+                f"by more than {RADIUS_ABS_M}"
+            )
+
+        t = ts.utc(2024, 1, 1, 0, 0, t_s)
+        era_deg = _earth_rotation_angle_degrees(t.ut1)
+        expected_inertial_longitude_deg = (
+            fixed_longitude_deg + era_deg
+        ) % 360.0
+        astrox_longitude_deg = math.degrees(math.atan2(y_m, x_m)) % 360.0
+        delta_deg = (
+            astrox_longitude_deg - expected_inertial_longitude_deg + 180.0
+        ) % 360.0 - 180.0
+        if abs(delta_deg) > LONGITUDE_ABS_DEG:
+            raise CrossValidationError(
+                f"longitude delta {delta_deg} deg exceeds {LONGITUDE_ABS_DEG} deg "
+                f"at fixed_longitude={fixed_longitude_deg}, t={t_s}"
+            )
+
+
+def _sample_origin_position(
+    *,
+    reference_frame: str,
+) -> entities.CzmlPosition:
+    """Build an origin (zero-radius) CZML sample to isolate the frame translation."""
+    dt_s = SAMPLE_DURATION_S / (SAMPLE_COUNT - 1)
+    cartesian: list[float] = []
+    for index in range(SAMPLE_COUNT):
+        t_s = index * dt_s
+        cartesian += [t_s, 0.0, 0.0, 0.0]
+    return entities.czml_position(
+        epoch=EPOCH,
+        central_body="Earth",
+        reference_frame=reference_frame,
+        interpolation_algorithm="LAGRANGE",
+        interpolation_degree=7,
+        cartesian=cartesian,
+    )
+
+
+def _check_moon_inertial_preserves_rigid_geometry() -> None:
+    """Earth INERTIAL -> Moon INERTIAL behaves as a rigid rotation plus translation."""
+    origin = orbits.central_body_frame(
+        _sample_origin_position(reference_frame="INERTIAL"),
+        to_central_body="Moon",
+        target_reference_frame="INERTIAL",
+    )[1]
+    origin_sample = _cartesian_samples(origin.cartesian)[0]
+    origin_vector = np.array(origin_sample[1:])
+
+    vectors: dict[float, np.ndarray] = {}
+    for longitude_deg in (0.0, 90.0, 180.0):
+        position = _sample_static_position(
+            inertial_longitude_deg=longitude_deg,
+            reference_frame="INERTIAL",
+        )
+        output = orbits.central_body_frame(
+            position,
+            to_central_body="Moon",
+            target_reference_frame="INERTIAL",
+        )[1]
+        sample = _cartesian_samples(output.cartesian)[0]
+        satellite_vector = np.array(sample[1:]) - origin_vector
+        vectors[longitude_deg] = satellite_vector
+        norm = float(np.linalg.norm(satellite_vector))
+        if abs(norm - SAMPLE_RADIUS_M) > MOON_RIGID_NORM_REL * SAMPLE_RADIUS_M:
+            raise CrossValidationError(
+                f"Moon INERTIAL satellite vector norm {norm} deviates from "
+                f"{SAMPLE_RADIUS_M} by more than "
+                f"{MOON_RIGID_NORM_REL * SAMPLE_RADIUS_M} "
+                f"at longitude={longitude_deg}"
+            )
+
+    dot_0_90 = float(np.dot(vectors[0.0], vectors[90.0]))
+    dot_0_180 = float(np.dot(vectors[0.0], vectors[180.0]))
+    if abs(dot_0_90) > MOON_RIGID_ANGLE_REL * SAMPLE_RADIUS_M**2:
+        raise CrossValidationError(
+            f"Moon INERTIAL 0/90 vectors are not orthogonal: dot={dot_0_90}"
+        )
+    if abs(dot_0_180 + SAMPLE_RADIUS_M**2) > MOON_RIGID_ANGLE_REL * SAMPLE_RADIUS_M**2:
+        raise CrossValidationError(
+            f"Moon INERTIAL 0/180 vectors are not opposite: dot={dot_0_180}"
+        )
 
 
 def _expected_moon_centered_libration_position(
@@ -202,8 +326,9 @@ def _check_earth_moon_libration_cartesian_matches_moon_centered_frame(
     load = _skyfield_loader()
     ts = load.timescale()
 
-    position = _sample_static_inertial_position(
+    position = _sample_static_position(
         inertial_longitude_deg=inertial_longitude_deg,
+        reference_frame="INERTIAL",
     )
     state = orbits.earth_moon_libration(position)
 
@@ -275,6 +400,22 @@ def test_central_body_frame_static_inertial_to_fixed(
 
 
 @pytest.mark.parametrize(
+    "fixed_longitude_deg",
+    [0.0, 90.0, 180.0],
+)
+def test_central_body_frame_static_fixed_to_inertial(
+    fixed_longitude_deg: float,
+) -> None:
+    """A static fixed vector rotates to the expected inertial longitude via ERA."""
+    _check_central_body_frame_static_fixed_to_inertial(fixed_longitude_deg)
+
+
+def test_central_body_frame_moon_inertial_preserves_rigid_geometry() -> None:
+    """Earth INERTIAL -> Moon INERTIAL is a rigid rotation plus translation."""
+    _check_moon_inertial_preserves_rigid_geometry()
+
+
+@pytest.mark.parametrize(
     "inertial_longitude_deg",
     [0.0, 90.0],
 )
@@ -297,7 +438,10 @@ def test_earth_moon_libration_unit_quaternion_matches_moon_centered_frame() -> N
     load = _skyfield_loader()
     ts = load.timescale()
 
-    position = _sample_static_inertial_position(inertial_longitude_deg=0.0)
+    position = _sample_static_position(
+        inertial_longitude_deg=0.0,
+        reference_frame="INERTIAL",
+    )
     state = orbits.earth_moon_libration(position)
 
     quaternion = state.unit_quaternion
@@ -326,15 +470,18 @@ def test_earth_moon_libration_unit_quaternion_matches_moon_centered_frame() -> N
 def main() -> int:
     try:
         configure_astrox_from_env()
-        _check_central_body_frame_static_inertial_to_fixed(0.0)
-        _check_central_body_frame_static_inertial_to_fixed(90.0)
-        _check_central_body_frame_static_inertial_to_fixed(180.0)
-        _check_earth_moon_libration_cartesian_matches_moon_centered_frame(0.0)
-        _check_earth_moon_libration_cartesian_matches_moon_centered_frame(90.0)
+        for longitude_deg in (0.0, 90.0, 180.0):
+            _check_central_body_frame_static_inertial_to_fixed(longitude_deg)
+            _check_central_body_frame_static_fixed_to_inertial(longitude_deg)
+        _check_moon_inertial_preserves_rigid_geometry()
+        for longitude_deg in (0.0, 90.0):
+            _check_earth_moon_libration_cartesian_matches_moon_centered_frame(
+                longitude_deg,
+            )
     except (CrossValidationError, LiveConfigError) as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    print("CROSS_VALIDATION_CHECKED=5")
+    print("CROSS_VALIDATION_CHECKED=8")
     print("CROSS_VALIDATION_FAILED=0")
     return 0
 
