@@ -5,14 +5,13 @@
 #     - Fixed axes relative to built-in VVLH with Euler 321 B=-20 deg: verified
 #     - FixedAtEpoch axes from VVLH into ICRF at start epoch: verified against a frozen-at-epoch local frame derivation
 #     - Composite axes with identity first interval and off-nadir second interval: verified against piecewise local FOV intervals
-#     - CZML axes constant identity quaternion: unverifiable (live server raises Index was outside the bounds of the array before returning semantic output; maintainer sign-off inherited from the implementation plan)
-#     - CZML axes sampled quaternion interpretation: unverifiable for the same live server failure
+#     - CZML axes constant and sampled quaternions: unresolved after live probes of constant vs sampled arrays, xyzw/wxyz order, sign, non-identity rotation, interpolation options, CentralBody, and sampled-span behavior; kept as strict calibration xfail
 #   Fields:
 #     - Passes.AccessStart/AccessStop: verified for Fixed, FixedAtEpoch, and Composite branches
-#     - CZML semantic fields: unverifiable because no response is produced
+#     - CZML semantic fields: unresolved because every probed variant fails before semantic output
 #   Parameters:
 #     - reference_axes, FixedOrientation, SourceAxesName, ReferenceAxesName, Epoch, Intervals, Start/Stop: verified for covered branches
-#     - unitQuaternion, interpolationAlgorithm, interpolationDegree: unverifiable while CZML axes route fails before comparison
+#     - unitQuaternion, interpolationAlgorithm, interpolationDegree, CentralBody: unresolved while CZML axes route fails before comparison
 #   Comparison:
 #     - External: independent VVLH frame, Euler rotation, frozen source/reference transform, and piecewise composite interval derivation
 #     - Constants: controlled two-body orbit in _orientation.py, COMPOSITE_SWITCH_S=20 s
@@ -23,6 +22,7 @@ from __future__ import annotations
 import sys
 
 import numpy as np
+import pytest
 
 from astrox import entities
 from astrox.exceptions import AstroxAPIError
@@ -37,12 +37,16 @@ from tests.validation.cross_validation.access._orientation import (
     compute_sensor_access,
     euler_321_rotation,
     expected_site_intervals,
+    expected_intervals,
     fixed_frame,
     frozen_at_epoch_frame,
     inertial_frame,
     observer_with_sensor,
     quaternion_rotation,
+    controlled_orbit,
+    state_function,
     subpoint_site,
+    target_orbit_entity,
     vvlh_frame,
 )
 
@@ -133,27 +137,160 @@ def test_composite_axes_match_piecewise_interval_oracle() -> None:
     compare_sensor_case(case)
 
 
-def test_czml_axes_constant_identity_remains_unverifiable_server_failure() -> None:
+@pytest.mark.calibration
+@pytest.mark.xfail(
+    reason=(
+        "CZML axes remain unresolved: constant quaternion variants fail before semantic output, "
+        "while sampled variants return output with unresolved sample-span/boundary residuals."
+    ),
+    raises=CrossValidationError,
+    strict=True,
+)
+def test_czml_axes_remain_unresolved_after_variant_probe_matrix() -> None:
     configure_astrox_from_env()
     target = subpoint_site()
-    czml = entities.czml_axes(
-        epoch=START,
-        unit_quaternion_xyzw=[0.0, 0.0, 0.0, 1.0],
-        central_body="Earth",
-    )
-    observer = observer_with_sensor(
-        name="czml_identity",
-        orientation=czml,
-        sensor=conic_sensor(8.0),
-        rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
-    )
-    try:
-        compute_sensor_access(observer, target)
-    except AstroxAPIError as exc:
-        if "Index was outside the bounds of the array" not in str(exc):
-            raise
-        return
-    raise CrossValidationError("CZML axes unexpectedly returned semantic output; replace unverifiable classification with calibration")
+    variants = [
+        (
+            "constant_xyzw_identity_with_central_body",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[0.0, 0.0, 0.0, 1.0],
+                central_body="Earth",
+            ),
+            target,
+        ),
+        (
+            "constant_wxyz_identity_probe",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[1.0, 0.0, 0.0, 0.0],
+                central_body="Earth",
+            ),
+            target,
+        ),
+        (
+            "constant_xyzw_negative_identity_probe",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[0.0, 0.0, 0.0, -1.0],
+                central_body="Earth",
+            ),
+            target,
+        ),
+        (
+            "constant_xyzw_y_minus_20_probe",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[
+                    0.0,
+                    -0.17364817766693033,
+                    0.0,
+                    0.984807753012208,
+                ],
+                central_body="Earth",
+            ),
+            target,
+        ),
+        (
+            "sampled_identity_two_points_linear",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[0.0, 0.0, 0.0, 0.0, 1.0, 60.0, 0.0, 0.0, 0.0, 1.0],
+                central_body="Earth",
+                interpolation_algorithm="LINEAR",
+                interpolation_degree=1,
+            ),
+            target,
+        ),
+        (
+            "sampled_identity_two_points_lagrange",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[0.0, 0.0, 0.0, 0.0, 1.0, 60.0, 0.0, 0.0, 0.0, 1.0],
+                interpolation_algorithm="LAGRANGE",
+                interpolation_degree=1,
+            ),
+            target,
+        ),
+        (
+            "sampled_identity_no_central_body",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[0.0, 0.0, 0.0, 0.0, 1.0, 60.0, 0.0, 0.0, 0.0, 1.0],
+            ),
+            target,
+        ),
+        (
+            "sampled_identity_positive_span_60",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[0.0, 0.0, 0.0, 0.0, 1.0, 60.0, 0.0, 0.0, 0.0, 1.0],
+                central_body="Earth",
+                interpolation_algorithm="LINEAR",
+                interpolation_degree=1,
+            ),
+            target_orbit_entity(
+                name="CzmlPositiveSpan60",
+                inclination_delta_deg=-20.0,
+                raan_delta_deg=-60.0,
+                true_anomaly_offset_deg=60.0,
+            ),
+        ),
+        (
+            "sampled_identity_positive_span_600",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[0.0, 0.0, 0.0, 0.0, 1.0, 600.0, 0.0, 0.0, 0.0, 1.0],
+                central_body="Earth",
+                interpolation_algorithm="LINEAR",
+                interpolation_degree=1,
+            ),
+            target_orbit_entity(
+                name="CzmlPositiveSpan600",
+                inclination_delta_deg=-20.0,
+                raan_delta_deg=-60.0,
+                true_anomaly_offset_deg=60.0,
+            ),
+        ),
+    ]
+    failures: list[str] = []
+    for case_id, czml, variant_target in variants:
+        observer = observer_with_sensor(
+            name=case_id,
+            orientation=czml,
+            sensor=conic_sensor(8.0),
+            rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+        )
+        try:
+            actual = compute_sensor_access(observer, variant_target)
+        except AstroxAPIError as exc:
+            failures.append(f"{case_id}: {exc}")
+            continue
+        failures.append(f"{case_id}: returned intervals {actual}")
+        if case_id == "sampled_identity_positive_span_60":
+            failures.append(
+                "sampled_identity_positive_span_60: output is truncated at "
+                "the last quaternion sample instead of the full inertial-candidate interval"
+            )
+        if case_id == "sampled_identity_positive_span_600":
+            expected = expected_intervals(
+                target_state=state_function(
+                    controlled_orbit(
+                        inclination_delta_deg=-20.0,
+                        raan_delta_deg=-60.0,
+                        true_anomaly_offset_deg=60.0,
+                    )
+                ),
+                frame=inertial_frame,
+                sensor_predicate=conic_predicate(20.0, np.array([0.0, 0.0, 1.0])),
+                stop_s=600.0,
+            )
+            failures.append(
+                "sampled_identity_positive_span_600: inertial-candidate "
+                f"expected intervals {expected}; live stop residual was about "
+                "0.98 s in the implementation probe"
+            )
+    raise CrossValidationError("CZML axes unresolved after variant probes:\n" + "\n".join(failures))
 
 
 def case_for_orientation(*, case_id: str, orientation, target, expected):
@@ -174,11 +311,10 @@ def main() -> int:
         test_fixed_axes_relative_to_vvlh_matches_fixed_rotation_oracle()
         test_fixed_at_epoch_axes_match_frozen_vvlh_inertial_oracle()
         test_composite_axes_match_piecewise_interval_oracle()
-        test_czml_axes_constant_identity_remains_unverifiable_server_failure()
     except (CrossValidationError, LiveConfigError, AstroxAPIError) as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    print("CROSS_VALIDATION_CHECKED=4")
+    print("CROSS_VALIDATION_CHECKED=3")
     print("CROSS_VALIDATION_FAILED=0")
     return 0
 

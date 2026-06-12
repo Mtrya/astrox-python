@@ -5,14 +5,14 @@
 #     - VVLH, VVLH(Earth), and VVLH(CBF): verified against local front/right/down frame for nadir and along-track targets
 #     - VNC, VNC(Earth), and VNC(CBF): verified against local velocity/normal/co-normal frame for along-track target
 #     - LVLH, LVLH(Earth), and LVLH(CBF): verified against local radial/along-track/angular-momentum frame for radial-out and along-track targets
-#     - VVLH/LVLH/VNC Moon and Mars variants: unresolved after matching central-body target probes and Skyfield body-vector candidate comparison; kept as strict calibration xfail
-#     - VVLH/LVLH/VNC Sun variants: unverifiable for central-body target comparison while live ASTROX returns Object reference not set; maintainer sign-off inherited from implementation plan
+#     - VVLH/LVLH/VNC Moon and Mars variants: unresolved after live central-body target probes and Skyfield body-vector candidate comparison; kept as strict calibration xfail
+#     - VVLH/LVLH/VNC Sun variants: unresolved because live central-body target comparison returns Object reference not set before semantic output; kept as strict calibration xfail
 #   Fields:
 #     - Passes.AccessStart/AccessStop: verified for VVLH/VNC/LVLH branches listed above
 #   Parameters:
 #     - relative_to: verified for generic, Earth, and CBF where those live variants match the corresponding generic branch
 #     - relative_to Moon/Mars: unresolved; no passing semantic comparison is claimed
-#     - relative_to Sun: unverifiable while the matching central-body target fails before semantic output
+#     - relative_to Sun: unresolved while the matching central-body target fails before semantic output
 #     - sensor orientation: verified with Quaternion identity, AzEl(0,0), and AzEl(90,0) probes
 #   Comparison:
 #     - External: independent two-body state sampling, local orbital-frame derivations, WGS84 obstruction, and conic FOV predicates
@@ -155,12 +155,52 @@ def test_lvlh_branches_match_radial_and_along_track_frame_candidates() -> None:
     strict=True,
 )
 def test_moon_mars_relative_axes_remain_unresolved_after_body_vector_probe() -> None:
+    configure_astrox_from_env()
+    observations: list[str] = []
+    for body_name in ("Moon", "Mars"):
+        target = entities.entity(name=body_name, position=entities.central_body_position(body_name))
+        for axes_name, axes, rotation in (
+            (
+                "VVLH",
+                entities.vvlh_axes(relative_to=body_name),
+                entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+            ),
+            (
+                "VNC",
+                entities.vnc_axes(relative_to=body_name),
+                entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
+            ),
+            (
+                "LVLH",
+                entities.lvlh_axes(relative_to=body_name),
+                entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
+            ),
+        ):
+            observer = observer_with_sensor(
+                name=f"{axes_name}_{body_name}_probe",
+                orientation=axes,
+                sensor=conic_sensor(20.0),
+                rotation=rotation,
+            )
+            intervals = compute_sensor_access(observer, target)
+            observations.append(f"{axes_name}({body_name}) central-body target intervals={intervals}")
     raise CrossValidationError(
-        "Moon/Mars body-relative axes unresolved: VVLH body-target intervals contradict the Skyfield +Z body-vector FOV candidate, VNC(Moon) +X transitions differ by about 90-137 s, and VNC(Mars) selects -Z rather than the Skyfield +X candidate"
+        "Moon/Mars body-relative axes unresolved after live probes. "
+        "Skyfield DE421 body-vector candidates still do not explain the observed intervals; "
+        + "; ".join(observations)
     )
 
 
-def test_sun_relative_axes_remain_unverifiable_server_failure() -> None:
+@pytest.mark.calibration
+@pytest.mark.xfail(
+    reason=(
+        "Sun relative axes remain unresolved: live central-body target comparison fails "
+        "with Object reference not set before semantic output."
+    ),
+    raises=CrossValidationError,
+    strict=True,
+)
+def test_sun_relative_axes_remain_unresolved_server_failure() -> None:
     configure_astrox_from_env()
     observer = observer_with_sensor(
         name="sun_relative_axes",
@@ -174,8 +214,8 @@ def test_sun_relative_axes_remain_unverifiable_server_failure() -> None:
     except AstroxAPIError as exc:
         if "Object reference not set to an instance of an object" not in str(exc):
             raise
-        return
-    raise CrossValidationError("Sun relative-axis central-body target unexpectedly returned semantic output")
+        raise CrossValidationError(f"Sun relative-axis central-body target unresolved: {exc}") from exc
+    return
 
 
 def case_for_axes(*, case_id: str, axes, target, rotation, expected):
@@ -197,11 +237,10 @@ def main() -> int:
         test_vvlh_generic_earth_and_cbf_match_local_vvlh_frame()
         test_vvlh_and_vnc_along_track_branches_match_local_frame_candidates()
         test_lvlh_branches_match_radial_and_along_track_frame_candidates()
-        test_sun_relative_axes_remain_unverifiable_server_failure()
     except (CrossValidationError, LiveConfigError, AstroxAPIError) as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    print("CROSS_VALIDATION_CHECKED=4")
+    print("CROSS_VALIDATION_CHECKED=3")
     print("CROSS_VALIDATION_FAILED=0")
     return 0
 

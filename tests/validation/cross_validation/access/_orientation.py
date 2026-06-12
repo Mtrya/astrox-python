@@ -45,6 +45,12 @@ from tests.validation.cross_validation.access._geometry import (
     mean_to_true_deg,
 )
 
+# Boundary times are found by bisection to 0.01 s in the local oracle. The
+# larger comparison bound records the remaining ASTROX site-convention residual
+# for satellite-to-site sensor cases: replacing the surface-direction target
+# below with an ellipsoid-geodetic subpoint shifts live interval ends by
+# 0.35-0.41 s, so that physically cleaner hypothesis is documented but not
+# promoted as the ASTROX-matching convention here.
 ORIENTATION_INTERVAL_ABS_S = 0.5
 SHORT_SAMPLE_STEP_S = 1.0
 CONTROLLED_SEMI_MAJOR_AXIS_M = 6878137.0
@@ -349,6 +355,8 @@ def site_ecef(*, latitude_deg: float, longitude_deg: float, height_m: float) -> 
 
 
 def inertial_to_ecef(position_m: Vector, offset_s: float) -> Vector:
+    # Local Earth-fixed conversion uses Skyfield ITRS at the ASTROX UTC epoch;
+    # the orbital state itself is the independent two-body inertial state.
     return np.array(itrs.rotation_at(time_at_offset(START, offset_s)) @ position_m)
 
 
@@ -357,6 +365,9 @@ def ecef_to_inertial(position_m: Vector, offset_s: float) -> Vector:
 
 
 def vvlh_frame(offset_s: float) -> Frame:
+    # ASTROX VVLH calibration: +Z points nadir, +X is the along-track velocity
+    # projected into the local horizontal plane, and +Y completes the frame to
+    # the spacecraft right side.
     position, velocity = state_function(controlled_orbit())(offset_s)
     down = unit(-position)
     forward = unit(velocity - down * float(np.dot(velocity, down)))
@@ -365,6 +376,8 @@ def vvlh_frame(offset_s: float) -> Frame:
 
 
 def vnc_frame(offset_s: float) -> Frame:
+    # ASTROX VNC calibration: +X follows inertial velocity, +Y follows orbit
+    # angular momentum, and +Z completes the right-handed triad.
     position, velocity = state_function(controlled_orbit())(offset_s)
     x_axis = unit(velocity)
     y_axis = unit(np.cross(position, velocity))
@@ -373,6 +386,8 @@ def vnc_frame(offset_s: float) -> Frame:
 
 
 def lvlh_frame(offset_s: float) -> Frame:
+    # ASTROX LVLH calibration: +X is radial outward, +Z is orbit angular
+    # momentum, and +Y is the in-track axis produced by Z cross X.
     position, velocity = state_function(controlled_orbit())(offset_s)
     z_axis = unit(np.cross(position, velocity))
     x_axis = unit(position)
@@ -405,6 +420,8 @@ def inertial_frame(_: float) -> Frame:
 
 
 def conic_predicate(half_angle_deg: float, boresight: Vector) -> Callable[[Vector], bool]:
+    # ConicSensor outer_half_angle_deg is treated as the half-angle around the
+    # sensor boresight. The predicate runs in the observer body axes.
     limit = math.cos(math.radians(half_angle_deg))
     boresight = unit(boresight)
     return lambda relative_body: float(np.dot(unit(relative_body), boresight)) >= limit
@@ -416,6 +433,8 @@ def rectangular_predicate(
     y_half_angle_deg: float,
     boresight_rotation: Frame,
 ) -> Callable[[Vector], bool]:
+    # RectangularSensor half angles are independent X/Z and Y/Z angular limits
+    # after rotating the target vector into the sensor camera axes.
     x_limit = math.radians(x_half_angle_deg)
     y_limit = math.radians(y_half_angle_deg)
 
@@ -431,6 +450,9 @@ def rectangular_predicate(
 
 
 def az_el_boresight(*, azimuth_deg: float, elevation_deg: float) -> Vector:
+    # ASTROX AzEl sensor pointing is calibrated as a direct boresight vector in
+    # the parent axes: azimuth rotates from +X toward +Y and elevation raises
+    # toward +Z. It is not equivalent to a quaternion/Euler rotation of +Z.
     azimuth_rad = math.radians(azimuth_deg)
     elevation_rad = math.radians(elevation_deg)
     return np.array(
@@ -443,6 +465,8 @@ def az_el_boresight(*, azimuth_deg: float, elevation_deg: float) -> Vector:
 
 
 def quaternion_rotation(*, scalar: float, x: float, y: float, z: float) -> Frame:
+    # SDK arguments are scalar-first; ASTROX rotation behavior matches the
+    # standard active quaternion matrix applied to the local +Z boresight.
     norm = math.sqrt(scalar * scalar + x * x + y * y + z * z)
     w = scalar / norm
     qx = x / norm
@@ -458,7 +482,19 @@ def quaternion_rotation(*, scalar: float, x: float, y: float, z: float) -> Frame
 
 
 def euler_321_rotation(*, a_deg: float, b_deg: float, c_deg: float) -> Frame:
-    return rotation_z(a_deg) @ rotation_y(b_deg) @ rotation_x(c_deg)
+    return euler_rotation("321", a_deg=a_deg, b_deg=b_deg, c_deg=c_deg)
+
+
+def euler_rotation(sequence: str, *, a_deg: float, b_deg: float, c_deg: float) -> Frame:
+    rotations = {
+        "1": rotation_x,
+        "2": rotation_y,
+        "3": rotation_z,
+    }
+    result = np.identity(3)
+    for axis, angle_deg in zip(sequence, (a_deg, b_deg, c_deg), strict=True):
+        result = result @ rotations[axis](angle_deg)
+    return result
 
 
 def rotation_x(angle_deg: float) -> Frame:
