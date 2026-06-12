@@ -71,13 +71,19 @@ class SensorCase:
     expected: list[Interval]
 
 
-def controlled_orbit(*, true_anomaly_offset_deg: float = 0.0) -> orbits.KeplerianElements:
+def controlled_orbit(
+    *,
+    semi_major_delta_m: float = 0.0,
+    inclination_delta_deg: float = 0.0,
+    raan_delta_deg: float = 0.0,
+    true_anomaly_offset_deg: float = 0.0,
+) -> orbits.KeplerianElements:
     return orbits.keplerian(
-        semi_major_axis_m=CONTROLLED_SEMI_MAJOR_AXIS_M,
+        semi_major_axis_m=CONTROLLED_SEMI_MAJOR_AXIS_M + semi_major_delta_m,
         eccentricity=CONTROLLED_ECCENTRICITY,
-        inclination_deg=CONTROLLED_INCLINATION_DEG,
+        inclination_deg=CONTROLLED_INCLINATION_DEG + inclination_delta_deg,
         argument_of_periapsis_deg=0.0,
-        raan_deg=CONTROLLED_RAAN_DEG,
+        raan_deg=CONTROLLED_RAAN_DEG + raan_delta_deg,
         true_anomaly_deg=CONTROLLED_TRUE_ANOMALY_DEG + true_anomaly_offset_deg,
     )
 
@@ -136,6 +142,25 @@ def target_satellite(delta_true_anomaly_deg: float) -> entities.Entity:
     return two_body_entity(
         name=f"TargetSat{delta_true_anomaly_deg:g}",
         orbit=controlled_orbit(true_anomaly_offset_deg=delta_true_anomaly_deg),
+    )
+
+
+def target_orbit_entity(
+    *,
+    name: str,
+    semi_major_delta_m: float = 0.0,
+    inclination_delta_deg: float = 0.0,
+    raan_delta_deg: float = 0.0,
+    true_anomaly_offset_deg: float = 0.0,
+) -> entities.Entity:
+    return two_body_entity(
+        name=name,
+        orbit=controlled_orbit(
+            semi_major_delta_m=semi_major_delta_m,
+            inclination_delta_deg=inclination_delta_deg,
+            raan_delta_deg=raan_delta_deg,
+            true_anomaly_offset_deg=true_anomaly_offset_deg,
+        ),
     )
 
 

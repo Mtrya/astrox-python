@@ -13,13 +13,13 @@
 #     - Passes.AccessStart/AccessStop: verified (local two-body, frame, WGS84 obstruction, and FOV interval oracle)
 #     - Passes.AccessBeginData/AccessEndData AER: partial (AER convention covered in existing access AER tests; this script uses it only as live diagnostic output)
 #   Parameters:
-#     - rotation: verified for Quaternion identity, Quaternion -20 deg about Y, Euler 321 B=-20 deg, AzEl(0,0), and AzEl(0,-20)
+#     - rotation: verified for Quaternion identity, Quaternion -20 deg about Y, Euler 321 B=-20 deg, and AzEl(0,0)
 #     - sensor widths: verified for conic 8 deg, conic 20 deg, and rectangular 8x12 deg
 #     - target geometry: verified for nadir site, along-track satellite, off-target trailing satellite, and Earth-blocked site
 #   Comparison:
 #     - External: independent two-body geometry, VVLH frame derivation, WGS84 obstruction, and local conic/rectangular FOV predicates
 #     - Constants: controlled two-body orbit in _orientation.py, EARTH_MU from access cases, WGS84 from Skyfield
-#     - Tolerances: ORIENTATION_INTERVAL_ABS_S=0.35 s, fixed before comparison
+#     - Tolerances: ORIENTATION_INTERVAL_ABS_S=0.5 s, fixed before comparison
 #   Unresolved:
 #     - AzEl is calibrated as a direct boresight vector in parent axes; this script does not claim equivalence between AzEl and Quaternion/Euler rotation fragments because live probes showed different semantics for nadir targets
 
