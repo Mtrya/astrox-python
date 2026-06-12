@@ -6,13 +6,13 @@
 #     - VNC, VNC(Earth), and VNC(CBF): verified against local velocity/normal/co-normal frame for along-track, radial-out, and cross-track targets
 #     - LVLH, LVLH(Earth), and LVLH(CBF): verified against local radial/along-track/angular-momentum frame for radial-out, along-track, and cross-track targets
 #     - VVLH/LVLH/VNC Moon and Mars variants: unresolved after live central-body target probes and Skyfield body-vector candidate comparison; kept as strict calibration xfail
-#     - VVLH/LVLH/VNC Sun variants: unresolved because live central-body target comparison returns Object reference not set before semantic output; kept as strict calibration xfail
+#     - VVLH/LVLH/VNC Sun variants: unresolved because live central-body target comparison returns Object reference not set before semantic output, and DE421-sampled CZML Sun target probes do not calibrate all axes; kept as strict calibration xfail
 #   Fields:
 #     - Passes.AccessStart/AccessStop: verified for VVLH/VNC/LVLH branches listed above
 #   Parameters:
 #     - relative_to: verified for generic, Earth, and CBF where those live variants match the corresponding generic branch
 #     - relative_to Moon/Mars: unresolved; no passing semantic comparison is claimed
-#     - relative_to Sun: unresolved while the matching central-body target fails before semantic output
+#     - relative_to Sun: unresolved while the matching central-body target fails before semantic output and CZML Sun target candidates have residuals or empty-only agreement
 #     - sensor orientation: verified with Quaternion identity, AzEl(0,0), AzEl(90,0), and AzEl(0,90) probes
 #   Comparison:
 #     - External: independent two-body state sampling, local orbital-frame derivations, WGS84 obstruction, and conic FOV predicates
@@ -20,6 +20,7 @@
 #     - Tolerances: ORIENTATION_INTERVAL_ABS_S=0.5 s
 #   Unresolved:
 #     - Skyfield DE421 body-vector candidates remain just outside the promoted tolerance for Moon/Mars: body-pointing VVLH matched interval counts but had 0.91-1.68 s boundary residuals; body-relative VNC(Moon) matched interval counts but had 1.36-1.77 s residuals; body-relative LVLH(Moon), VNC(Mars), and LVLH(Mars) matched empty interval counts, which is useful but not enough to promote a semantic branch
+#     - Skyfield DE421 Sun-vector candidates with a sampled CZML Sun target produce VVLH interval-count agreement with a 0.99 s boundary residual, VNC empty-only agreement, and LVLH interval-count mismatch
 
 from __future__ import annotations
 
@@ -30,7 +31,7 @@ import pytest
 from astrox import entities
 from astrox.exceptions import AstroxAPIError
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
-from tests.validation.cross_validation.access._cases import CrossValidationError
+from tests.validation.cross_validation.access._cases import CrossValidationError, START
 from tests.validation.cross_validation.access._geometry import compare_intervals
 from tests.validation.cross_validation.access._orientation import (
     ORIENTATION_INTERVAL_ABS_S,
@@ -305,12 +306,13 @@ def test_moon_mars_relative_axes_remain_unresolved_after_body_vector_probe() -> 
 @pytest.mark.xfail(
     reason=(
         "Sun relative axes remain unresolved: live central-body target comparison fails "
-        "with Object reference not set before semantic output."
+        "before semantic output, and a DE421-sampled CZML Sun target still leaves "
+        "unexplained residuals or empty-only agreement."
     ),
     raises=CrossValidationError,
     strict=True,
 )
-def test_sun_relative_axes_remain_unresolved_server_failure() -> None:
+def test_sun_relative_axes_remain_unresolved_after_central_body_and_czml_probes() -> None:
     configure_astrox_from_env()
     target = entities.entity(name="Sun", position=entities.central_body_position("Sun"))
     failures: list[str] = []
@@ -351,9 +353,82 @@ def test_sun_relative_axes_remain_unresolved_server_failure() -> None:
             "Sun relative axes partially resolved; reclassify successful cases before "
             "keeping this xfail:\n" + "\n".join(successes)
         )
+    diagnostics = [*failures]
+    sun_state = skyfield_body_state_function("Sun")
+    sampled_target = skyfield_body_czml_entity("SunCzmlTarget", sun_state)
+    for axes_name, axes, rotation, frame, boresight in (
+        (
+            "VVLH",
+            entities.vvlh_axes(relative_to="Sun"),
+            entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+            body_vvlh_frame(sun_state),
+            quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0) @ [0.0, 0.0, 1.0],
+        ),
+        (
+            "VNC",
+            entities.vnc_axes(relative_to="Sun"),
+            entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
+            body_vnc_frame(sun_state),
+            az_el_boresight(azimuth_deg=0.0, elevation_deg=0.0),
+        ),
+        (
+            "LVLH",
+            entities.lvlh_axes(relative_to="Sun"),
+            entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
+            body_lvlh_frame(sun_state),
+            az_el_boresight(azimuth_deg=0.0, elevation_deg=0.0),
+        ),
+    ):
+        observer = observer_with_sensor(
+            name=f"{axes_name}_sun_czml_probe",
+            orientation=axes,
+            sensor=conic_sensor(20.0),
+            rotation=rotation,
+        )
+        actual = compute_sensor_access(observer, sampled_target)
+        expected = expected_intervals(
+            target_state=sun_state,
+            frame=frame,
+            sensor_predicate=conic_predicate(20.0, boresight),
+        )
+        if not expected and not actual:
+            diagnostics.append(
+                f"{axes_name}(Sun CZML): expected and actual are both empty; "
+                "empty-control agreement is not enough to promote Sun-relative axes"
+            )
+            continue
+        try:
+            compare_intervals(expected, actual, tolerance_s=ORIENTATION_INTERVAL_ABS_S)
+        except CrossValidationError as exc:
+            diagnostics.append(
+                f"{axes_name}(Sun CZML): expected {expected}, actual {actual}, residual {exc}"
+            )
+        else:
+            raise AssertionError(
+                f"{axes_name}(Sun CZML) matched the Skyfield Sun-relative candidate; "
+                "reclassify this branch as verified"
+            )
     raise CrossValidationError(
-        "Sun relative-axis central-body targets unresolved for every axes family:\n"
-        + "\n".join(failures)
+        "Sun relative-axis variants unresolved after central-body and CZML target probes:\n"
+        + "\n".join(diagnostics)
+    )
+
+
+def skyfield_body_czml_entity(name: str, body_state) -> entities.Entity:
+    cartesian: list[float] = []
+    for offset_s in range(0, 7201, 600):
+        position, _ = body_state(float(offset_s))
+        cartesian.extend([float(offset_s), *[float(value) for value in position]])
+    return entities.entity(
+        name=name,
+        position=entities.czml_position(
+            epoch=START,
+            reference_frame="INERTIAL",
+            central_body="Earth",
+            interpolation_algorithm="LINEAR",
+            interpolation_degree=1,
+            cartesian=cartesian,
+        ),
     )
 
 
