@@ -5,7 +5,7 @@
 #     - fixed_sensor_pointing Quaternion identity with conic FOV: verified
 #     - fixed_sensor_pointing Quaternion off-nadir and single-axis rotations with conic FOV: verified
 #     - fixed_sensor_pointing Euler 321/123/213 off-nadir equivalents to Quaternion: verified
-#     - fixed_sensor_pointing AzEl along-track and cross-track with conic FOV: verified
+#     - fixed_sensor_pointing AzEl along-track, cross-track, positive-elevation, and negative-elevation cases with conic FOV: verified
 #     - fixed_sensor_pointing AzEl off-target no-access case: verified
 #     - rectangular sensor FOV with identity/off-nadir rotations and two width pairs: verified
 #     - no-sensor line-of-sight positive and WGS84 blocked target controls: verified
@@ -13,9 +13,9 @@
 #     - Passes.AccessStart/AccessStop: verified (local two-body, frame, WGS84 obstruction, and FOV interval oracle)
 #     - Passes.AccessBeginData/AccessEndData AER: partial (AER convention covered in existing access AER tests; this script uses it only as live diagnostic output)
 #   Parameters:
-#     - rotation: verified for Quaternion identity, Quaternion rotations about X/Y/Z, Euler 321/123/213, AzEl(0,0), AzEl(90,0), and AzEl(0,-20) no-access
+#     - rotation: verified for Quaternion identity, Quaternion rotations about X/Y/Z, Euler 321/123/213, AzEl(0,0), AzEl(90,0), AzEl(0,+20), and AzEl(0,-20) no-access
 #     - sensor widths: verified for conic 8 deg, conic 20 deg, rectangular 8x12 deg, and rectangular 12x8 deg
-#     - target geometry: verified for nadir surface-direction site, along-track satellite, cross-track altered-inclination satellite, off-target trailing satellite, and Earth-blocked site
+#     - target geometry: verified for nadir surface-direction site, along-track satellite, cross-track altered-inclination satellite, lower cross-track trailing satellite, off-target trailing satellite, and Earth-blocked site
 #   Comparison:
 #     - External: independent two-body geometry, VVLH frame derivation, WGS84 obstruction, and local conic/rectangular FOV predicates
 #     - Constants: controlled two-body orbit in _orientation.py, EARTH_MU from access cases, WGS84 from Skyfield
@@ -260,6 +260,34 @@ def test_az_el_cross_track_and_negative_elevation_match_satellite_target_oracles
     compare_sensor_case(below_boresight_case)
 
 
+def test_az_el_positive_elevation_matches_satellite_target_oracle() -> None:
+    configure_astrox_from_env()
+    target = target_orbit_entity(
+        name="AzElPositiveElevation",
+        semi_major_delta_m=-100000.0,
+        inclination_delta_deg=-5.0,
+        true_anomaly_offset_deg=-5.0,
+    )
+    case = sensor_case_for_satellite(
+        case_id="az_el_0_plus_20_lower_cross_trailing",
+        target=target,
+        sensor=conic_sensor(8.0),
+        rotation=az_el_rotation(0.0, 20.0),
+        expected=expected_intervals(
+            target_state=state_function(
+                controlled_orbit(
+                    semi_major_delta_m=-100000.0,
+                    inclination_delta_deg=-5.0,
+                    true_anomaly_offset_deg=-5.0,
+                )
+            ),
+            frame=vvlh_frame,
+            sensor_predicate=conic_predicate(8.0, az_el_boresight(azimuth_deg=0.0, elevation_deg=20.0)),
+        ),
+    )
+    compare_sensor_case(case)
+
+
 def test_az_el_off_target_and_earth_blocked_controls_match_oracles() -> None:
     configure_astrox_from_env()
     trailing = target_satellite(-3.0)
@@ -350,11 +378,12 @@ def main() -> int:
         test_rectangular_fov_matches_local_half_angle_oracle()
         test_az_el_along_track_conic_matches_satellite_target_oracle()
         test_az_el_cross_track_and_negative_elevation_match_satellite_target_oracles()
+        test_az_el_positive_elevation_matches_satellite_target_oracle()
         test_az_el_off_target_and_earth_blocked_controls_match_oracles()
     except (CrossValidationError, LiveConfigError) as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    print("CROSS_VALIDATION_CHECKED=9")
+    print("CROSS_VALIDATION_CHECKED=10")
     print("CROSS_VALIDATION_FAILED=0")
     return 0
 
