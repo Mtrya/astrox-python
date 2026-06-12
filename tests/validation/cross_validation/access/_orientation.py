@@ -424,6 +424,13 @@ def inertial_frame(_: float) -> Frame:
     return np.identity(3)
 
 
+def earth_fixed_frame(offset_s: float) -> Frame:
+    # Columns are Skyfield ITRS/ECEF basis vectors expressed in the local
+    # inertial coordinates used by the two-body oracle. This is a direct
+    # Earth-rotation frame candidate, not a full ASTROX fixed-frame model.
+    return np.array(itrs.rotation_at(time_at_offset(START, offset_s))).T
+
+
 def conic_predicate(half_angle_deg: float, boresight: Vector) -> Callable[[Vector], bool]:
     # ConicSensor outer_half_angle_deg is treated as the half-angle around the
     # sensor boresight. The predicate runs in the observer body axes.
