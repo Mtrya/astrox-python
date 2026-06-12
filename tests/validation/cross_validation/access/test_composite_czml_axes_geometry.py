@@ -5,15 +5,15 @@
 #     - Fixed axes relative to built-in VVLH, LVLH, and VNC: verified with Euler and quaternion rotations
 #     - FixedAtEpoch axes from VVLH and LVLH into ICRF at start epoch and +60 s: verified against frozen-at-epoch local frame derivations
 #     - Composite axes with identity/off-nadir two-interval and identity/off-nadir/identity three-interval layouts: verified for multiple switch points against piecewise local FOV intervals
-#     - CZML axes sampled identity quaternions over short sample spans: verified against inertial-frame oracle for 30 s and 60 s spans, with and without CentralBody
-#     - CZML axes constant, long-span sampled, and non-identity sampled quaternions: unresolved after live probes of constant vs sampled arrays, xyzw/wxyz order, sign, non-identity rotation, interpolation options, CentralBody, and full-span sampling; kept as strict calibration xfail
+#     - CZML axes sampled identity quaternions over short sample spans: verified against inertial-frame oracle for 30 s and 60 s spans, with and without CentralBody, and with LINEAR/LAGRANGE/HERMITE interpolation options
+#     - CZML axes constant, long-span sampled, and non-identity sampled quaternions: unresolved after live probes of constant vs sampled arrays, xyzw/wxyz order, sign, non-identity rotation, and full-span sampling; kept as strict calibration xfail
 #   Fields:
 #     - Passes.AccessStart/AccessStop: verified for Fixed, FixedAtEpoch, and Composite branches
 #     - CZML sampled-identity AccessStart/AccessStop over short spans: verified
 #     - CZML constant, long-span, and non-identity semantic fields: unresolved because constant variants fail and other sampled variants return unexplained interval residuals or component/sign behavior
 #   Parameters:
 #     - reference_axes, FixedOrientation, SourceAxesName, ReferenceAxesName, Epoch, Intervals, Start/Stop: verified with multiple values for covered Fixed/FixedAtEpoch/Composite branches
-#     - unitQuaternion identity samples, interpolationAlgorithm=LINEAR, interpolationDegree=1, CentralBody omission/Earth: verified for short-span CZML sampled identity
+#     - unitQuaternion identity samples, interpolationAlgorithm=LINEAR/LAGRANGE/HERMITE, interpolationDegree=1/3, CentralBody omission/Earth: verified for short-span CZML sampled identity
 #     - unitQuaternion constant arrays, non-identity samples, and longer sampled spans: unresolved after server failures and sampled-array residuals
 #   Comparison:
 #     - External: independent VVLH frame, Euler rotation, frozen source/reference transform, and piecewise composite interval derivation
@@ -363,11 +363,14 @@ def test_czml_sampled_identity_short_spans_match_inertial_oracle() -> None:
         true_anomaly_offset_deg=60.0,
     )
     variants = [
-        ("czml_identity_span_30_earth", 30.0, "Earth"),
-        ("czml_identity_span_60_earth", 60.0, "Earth"),
-        ("czml_identity_span_60_no_central_body", 60.0, None),
+        ("czml_identity_span_30_earth_linear", 30.0, "Earth", "LINEAR", 1),
+        ("czml_identity_span_60_earth_linear", 60.0, "Earth", "LINEAR", 1),
+        ("czml_identity_span_60_no_central_body_linear", 60.0, None, "LINEAR", 1),
+        ("czml_identity_span_60_earth_lagrange_1", 60.0, "Earth", "LAGRANGE", 1),
+        ("czml_identity_span_60_earth_lagrange_3", 60.0, "Earth", "LAGRANGE", 3),
+        ("czml_identity_span_60_earth_hermite_1", 60.0, "Earth", "HERMITE", 1),
     ]
-    for case_id, span_s, central_body in variants:
+    for case_id, span_s, central_body, interpolation_algorithm, interpolation_degree in variants:
         czml = entities.czml_axes(
             epoch=START,
             unit_quaternion_xyzw=[
@@ -383,8 +386,8 @@ def test_czml_sampled_identity_short_spans_match_inertial_oracle() -> None:
                 1.0,
             ],
             central_body=central_body,
-            interpolation_algorithm="LINEAR",
-            interpolation_degree=1,
+            interpolation_algorithm=interpolation_algorithm,
+            interpolation_degree=interpolation_degree,
         )
         case = case_for_orientation(
             case_id=case_id,
