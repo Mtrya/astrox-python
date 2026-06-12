@@ -36,9 +36,13 @@ def landing_zone(
 
     Parameters match the ASTROX ``/LandingZone`` endpoint. ``zone_xys_km`` is a
     flat sequence of local downrange/crossrange offsets in kilometres, given in
-    ``[+X1, +Y1, +X2, +Y2, ...]`` pairs. The ``+X`` axis points forward along
-    the launch-to-impact direction and ``+Y`` points to the right, following the
-    ASTROX wire convention.
+    ``[+X1, +Y1, +X2, +Y2, ...]`` pairs.
+
+    Cross-validation shows ASTROX builds a local right-handed frame at the
+    impact point: ``+X`` is the southward-facing member of the launch-to-impact
+    geodesic azimuth at the impact point and its supplement, and ``+Y`` is
+    ``+X`` rotated 90 degrees clockwise. For cardinal tracks this coincides with
+    the OpenAPI "forward/right" description; for diagonal tracks it does not.
 
     The function returns the raw ASTROX response dict, including ``IsSuccess``,
     ``Message``, and ``cartographicDegrees``.
