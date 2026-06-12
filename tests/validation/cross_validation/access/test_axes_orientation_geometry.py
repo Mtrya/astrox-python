@@ -31,8 +31,13 @@ from astrox import entities
 from astrox.exceptions import AstroxAPIError
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 from tests.validation.cross_validation.access._cases import CrossValidationError
+from tests.validation.cross_validation.access._geometry import compare_intervals
 from tests.validation.cross_validation.access._orientation import (
+    ORIENTATION_INTERVAL_ABS_S,
     az_el_boresight,
+    body_lvlh_frame,
+    body_vnc_frame,
+    body_vvlh_frame,
     compare_sensor_case,
     compute_sensor_access,
     conic_predicate,
@@ -43,6 +48,7 @@ from tests.validation.cross_validation.access._orientation import (
     observer_with_sensor,
     quaternion_rotation,
     lvlh_frame,
+    skyfield_body_state_function,
     state_function,
     subpoint_site,
     target_orbit_entity,
@@ -225,36 +231,38 @@ def test_lvlh_branches_match_radial_and_along_track_frame_candidates() -> None:
 def test_moon_mars_relative_axes_remain_unresolved_after_body_vector_probe() -> None:
     configure_astrox_from_env()
     # Bounded implementation probe, using Skyfield DE421 and the same local FOV
-    # interval oracle, tried:
-    # - VVLH(body): +Z points from observer to the body and +X follows relative
-    #   velocity projected perpendicular to +Z. It matched Moon/Mars interval
-    #   counts, but Moon residuals were 0.91-1.68 s and Mars start residual was
-    #   1.37 s, above ORIENTATION_INTERVAL_ABS_S.
-    # - VNC(body): +X follows body-relative velocity, +Y follows the
-    #   body-relative angular momentum, and +Z completes the triad. It matched
-    #   Moon interval counts but residuals were 1.36-1.77 s; Mars matched only
-    #   the empty interval count.
-    # - LVLH(body): +X is body-relative radial outward, +Z is body-relative
-    #   angular momentum, and +Y completes the triad. Moon/Mars matched only
-    #   empty interval counts.
-    observations: list[str] = []
+    # interval oracle. The local candidates below are intentionally simple:
+    # body positions are geocentric DE421 vectors, and velocities use a central
+    # finite difference around the UTC sample. These candidates test whether the
+    # ASTROX relative_to body variants are just ordinary body-relative orbital
+    # frames. Current live behavior says they are not calibrated enough to
+    # promote.
+    diagnostics: list[str] = []
     for body_name in ("Moon", "Mars"):
+        body_state = skyfield_body_state_function(body_name)
+        target_state = body_state
         target = entities.entity(name=body_name, position=entities.central_body_position(body_name))
-        for axes_name, axes, rotation in (
+        for axes_name, axes, rotation, frame, boresight in (
             (
                 "VVLH",
                 entities.vvlh_axes(relative_to=body_name),
                 entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+                body_vvlh_frame(body_state),
+                quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0) @ [0.0, 0.0, 1.0],
             ),
             (
                 "VNC",
                 entities.vnc_axes(relative_to=body_name),
                 entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
+                body_vnc_frame(body_state),
+                az_el_boresight(azimuth_deg=0.0, elevation_deg=0.0),
             ),
             (
                 "LVLH",
                 entities.lvlh_axes(relative_to=body_name),
                 entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
+                body_lvlh_frame(body_state),
+                az_el_boresight(azimuth_deg=0.0, elevation_deg=0.0),
             ),
         ):
             observer = observer_with_sensor(
@@ -263,12 +271,33 @@ def test_moon_mars_relative_axes_remain_unresolved_after_body_vector_probe() -> 
                 sensor=conic_sensor(20.0),
                 rotation=rotation,
             )
-            intervals = compute_sensor_access(observer, target)
-            observations.append(f"{axes_name}({body_name}) central-body target intervals={intervals}")
+            actual = compute_sensor_access(observer, target)
+            expected = expected_intervals(
+                target_state=target_state,
+                frame=frame,
+                sensor_predicate=conic_predicate(20.0, boresight),
+            )
+            if not expected and not actual:
+                diagnostics.append(
+                    f"{axes_name}({body_name}): expected and actual are both empty; "
+                    "empty-control agreement is not enough to promote body-relative axes"
+                )
+                continue
+            try:
+                compare_intervals(expected, actual, tolerance_s=ORIENTATION_INTERVAL_ABS_S)
+            except CrossValidationError as exc:
+                diagnostics.append(
+                    f"{axes_name}({body_name}): expected {expected}, actual {actual}, residual {exc}"
+                )
+            else:
+                raise AssertionError(
+                    f"{axes_name}({body_name}) matched the Skyfield body-relative candidate; "
+                    "reclassify this branch as verified"
+                )
     raise CrossValidationError(
         "Moon/Mars body-relative axes unresolved after live probes. "
-        "Skyfield DE421 body-vector candidates still do not explain the observed intervals; "
-        + "; ".join(observations)
+        "Skyfield DE421 body-vector candidates still do not explain the observed intervals:\n"
+        + "\n".join(diagnostics)
     )
 
 

@@ -4,6 +4,7 @@
 #   Branches:
 #     - two-body inertial state sampling and WGS84 site target construction: partial
 #     - VVLH, VNC, fixed, fixed-at-epoch, and composite axes local candidates: partial
+#     - Skyfield DE421 body-relative VVLH, VNC, and LVLH frame candidates: partial
 #     - quaternion, Euler, and Az/El fixed-pointing local candidates: partial
 #     - conic and rectangular sensor field-of-view predicates: partial
 #     - VGT aligned-and-constrained TRIAD-style construction: partial
@@ -17,10 +18,13 @@
 from __future__ import annotations
 
 import math
+import os
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
+from skyfield.api import Loader
 from skyfield.framelib import itrs
 
 from astrox import access, entities, orbits
@@ -334,6 +338,73 @@ def state_function(orbit: orbits.KeplerianElements) -> StateFunction:
         return np.array(state_vector[:3]), np.array(state_vector[3:])
 
     return state
+
+
+def skyfield_body_state_function(body_name: str) -> StateFunction:
+    # DE421 is used as an independent geocentric ephemeris candidate for
+    # ASTROX CentralBodyPosition targets. Positions are Earth-to-body vectors in
+    # the same inertial basis Skyfield uses for apparent-free SPICE states.
+    data_dir = Path(os.environ.get("SKYFIELD_DATA_DIR", "/tmp/astrox-python-skyfield"))
+    loader = Loader(str(data_dir))
+    eph = loader("de421.bsp")
+    earth = eph["earth"]
+    body = eph[body_name.lower()]
+
+    def body_position(offset_s: float) -> Vector:
+        instant = time_at_offset(START, offset_s)
+        return np.array(earth.at(instant).observe(body).position.m)
+
+    def state(offset_s: float) -> tuple[Vector, Vector]:
+        delta_s = 1.0
+        position = body_position(offset_s)
+        velocity = (
+            body_position(offset_s + delta_s)
+            - body_position(offset_s - delta_s)
+        ) / (2.0 * delta_s)
+        return position, velocity
+
+    return state
+
+
+def body_vvlh_frame(body_state: StateFunction) -> Callable[[float], Frame]:
+    def frame(offset_s: float) -> Frame:
+        observer_position, observer_velocity = state_function(controlled_orbit())(offset_s)
+        body_position, body_velocity = body_state(offset_s)
+        to_body = unit(body_position - observer_position)
+        relative_velocity = body_velocity - observer_velocity
+        forward = unit(relative_velocity - to_body * float(np.dot(relative_velocity, to_body)))
+        right = unit(np.cross(to_body, forward))
+        return np.column_stack((forward, right, to_body))
+
+    return frame
+
+
+def body_vnc_frame(body_state: StateFunction) -> Callable[[float], Frame]:
+    def frame(offset_s: float) -> Frame:
+        observer_position, observer_velocity = state_function(controlled_orbit())(offset_s)
+        body_position, body_velocity = body_state(offset_s)
+        relative_position = body_position - observer_position
+        relative_velocity = body_velocity - observer_velocity
+        x_axis = unit(relative_velocity)
+        y_axis = unit(np.cross(relative_position, relative_velocity))
+        z_axis = unit(np.cross(x_axis, y_axis))
+        return np.column_stack((x_axis, y_axis, z_axis))
+
+    return frame
+
+
+def body_lvlh_frame(body_state: StateFunction) -> Callable[[float], Frame]:
+    def frame(offset_s: float) -> Frame:
+        observer_position, observer_velocity = state_function(controlled_orbit())(offset_s)
+        body_position, body_velocity = body_state(offset_s)
+        relative_position = body_position - observer_position
+        relative_velocity = body_velocity - observer_velocity
+        x_axis = unit(relative_position)
+        z_axis = unit(np.cross(relative_position, relative_velocity))
+        y_axis = unit(np.cross(z_axis, x_axis))
+        return np.column_stack((x_axis, y_axis, z_axis))
+
+    return frame
 
 
 def subpoint_geodetic_degrees(offset_s: float) -> tuple[float, float]:
