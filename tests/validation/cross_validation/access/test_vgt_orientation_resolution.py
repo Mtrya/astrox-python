@@ -4,19 +4,19 @@
 #   Branches:
 #     - vgt_fixed_vector with built-in VVLH reference axes: verified
 #     - aligned_and_constrained_axes using built-in VVLH fixed vectors: verified against local TRIAD-style alignment for orthogonal, permuted-axis, and non-orthogonal-reference cases
-#     - Vgt.Axes, Vgt.Vectors, Vgt.Angles, and Vgt.Planes provider collections: verified as pass-through containers that do not alter calibrated VVLH sensor access
+#     - Vgt.Axes, Vgt.Vectors, Vgt.Angles, Vgt.Planes, and empty Vgt.Points/Systems provider collections: verified as pass-through containers that do not alter calibrated VVLH sensor access
 #     - custom fixed-axes name resolution inside aligned_and_constrained_axes: verified against the same TRIAD oracle for no-space object and string reference styles
-#     - custom fixed-axes names containing spaces inside aligned_and_constrained_axes: unresolved; live server reports the named axes cannot be found
-#     - Vgt.Points and Vgt.Systems provider collections: unresolved after minimal named provider probes return HTTP 500 before semantic output
+#     - custom fixed-axes names containing spaces inside aligned_and_constrained_axes: unresolved; object and string reference styles both report the named axes cannot be found
+#     - non-empty Vgt.Points and Vgt.Systems provider collections: unresolved after SDK-callable name-only/description/combined provider probes and raw discriminator/default-name probes return HTTP 500 before semantic output
 #   Fields:
 #     - Passes.AccessStart/AccessStop: verified for built-in aligned/VGT container cases
 #     - VGT custom-name semantic fields: verified for no-space names through AccessStart/AccessStop comparison; unresolved for names containing spaces
-#     - VGT Points/Systems semantic fields: unresolved because live server returns errors before semantic output
+#     - VGT non-empty Points/Systems semantic fields: unresolved because live server returns errors before semantic output
 #   Parameters:
 #     - Principal, PrincipalAxis, Reference, ReferenceAxis: verified for +Z/+X, +X/+Y, and -Z/+X axis combinations, including a non-orthogonal reference-vector projection
-#     - VGT collection fields Axes/Vectors/Angles/Planes: verified for no semantic perturbation in the calibrated sensor case
+#     - VGT collection fields Axes/Vectors/Angles/Planes and empty Points/Systems: verified for no semantic perturbation in the calibrated sensor case
 #     - VGT custom axes name/reference fields: verified for no-space EntityAxes object references and string name references
-#     - VGT collection fields Points/Systems: unresolved while server returns HTTP 500
+#     - VGT non-empty collection fields Points/Systems: unresolved while server returns HTTP 500
 #   Comparison:
 #     - External: local TRIAD-style axes construction plus independent VVLH/FOV interval oracle
 #     - Constants: controlled two-body orbit in _orientation.py
@@ -161,7 +161,7 @@ def test_aligned_axes_axis_permutations_match_triad_alignment_oracles() -> None:
         compare_sensor_case(case)
 
 
-def test_vgt_axes_vectors_angles_and_planes_do_not_perturb_calibrated_vvlh_sensor_access() -> None:
+def test_vgt_provider_collections_do_not_perturb_calibrated_vvlh_sensor_access_when_live_callable() -> None:
     configure_astrox_from_env()
     target = subpoint_site()
     expected = expected_site_intervals(
@@ -208,6 +208,14 @@ def test_vgt_axes_vectors_angles_and_planes_do_not_perturb_calibrated_vvlh_senso
         entities.vgt(
             axes=[entities.vvlh_axes(name="OnlyAxes")],
             planes=[entities.vgt_plane(name="Plane", plane_type="Fixed")],
+        ),
+        entities.vgt(
+            axes=[entities.vvlh_axes(name="OnlyAxes")],
+            points=[],
+        ),
+        entities.vgt(
+            axes=[entities.vvlh_axes(name="OnlyAxes")],
+            systems=[],
         ),
     ]
     for index, provider in enumerate(providers):
@@ -280,8 +288,9 @@ def test_custom_vgt_axes_name_resolution_matches_triad_oracle() -> None:
 @pytest.mark.calibration
 @pytest.mark.xfail(
     reason=(
-        "custom VGT axes names containing spaces remain unresolved: live server "
-        "reports the named axes cannot be found before semantic output."
+        "custom VGT axes names containing spaces remain unresolved: object and "
+        "string reference styles both report the named axes cannot be found "
+        "before semantic output."
     ),
     raises=CrossValidationError,
     strict=True,
@@ -289,42 +298,56 @@ def test_custom_vgt_axes_name_resolution_matches_triad_oracle() -> None:
 def test_custom_vgt_axes_name_with_space_remains_unresolved() -> None:
     configure_astrox_from_env()
     target = subpoint_site()
-    body = entities.vvlh_axes(name="Body VVLH")
-    boresight = entities.vgt_fixed_vector(
-        name="Body VVLH Boresight",
-        reference_axes=body,
-        direction=entities.xyz_direction(x=0.0, y=0.0, z=1.0),
+    failures: list[str] = []
+    successes: list[str] = []
+    for reference_kind in ("object", "string"):
+        body = entities.vvlh_axes(name="Body VVLH")
+        reference_value = body if reference_kind == "object" else "Body VVLH"
+        boresight = entities.vgt_fixed_vector(
+            name=f"Body VVLH {reference_kind} Boresight",
+            reference_axes=reference_value,
+            direction=entities.xyz_direction(x=0.0, y=0.0, z=1.0),
+        )
+        hint = entities.vgt_fixed_vector(
+            name=f"Body VVLH {reference_kind} Hint",
+            reference_axes=reference_value,
+            direction=entities.xyz_direction(x=1.0, y=0.0, z=0.0),
+        )
+        aligned = entities.aligned_and_constrained_axes(
+            name=f"Body VVLH {reference_kind} Aligned",
+            principal=boresight,
+            principal_axis="+Z",
+            reference=hint,
+            reference_axis="+X",
+        )
+        observer = observer_with_sensor(
+            name=f"aligned_custom_space_name_{reference_kind}",
+            orientation=aligned,
+            sensor=conic_sensor(8.0),
+            vgt=entities.vgt(axes=[body, aligned], vectors=[boresight, hint]),
+        )
+        try:
+            compute_sensor_access(observer, target)
+        except AstroxAPIError as exc:
+            failures.append(f"{reference_kind}: {exc}")
+        else:
+            successes.append(reference_kind)
+    if successes:
+        raise AssertionError(
+            "space-containing custom VGT axes name partially resolved; reclassify "
+            f"successful reference styles before keeping this xfail: {successes}"
+        )
+    raise CrossValidationError(
+        "space-containing custom VGT axes name unresolved after object and string "
+        "reference probes:\n" + "\n".join(failures)
     )
-    hint = entities.vgt_fixed_vector(
-        name="Body VVLH Hint",
-        reference_axes=body,
-        direction=entities.xyz_direction(x=1.0, y=0.0, z=0.0),
-    )
-    aligned = entities.aligned_and_constrained_axes(
-        name="Body VVLH Aligned",
-        principal=boresight,
-        principal_axis="+Z",
-        reference=hint,
-        reference_axis="+X",
-    )
-    observer = observer_with_sensor(
-        name="aligned_custom_space_name",
-        orientation=aligned,
-        sensor=conic_sensor(8.0),
-        vgt=entities.vgt(axes=[body, aligned], vectors=[boresight, hint]),
-    )
-    try:
-        compute_sensor_access(observer, target)
-    except AstroxAPIError as exc:
-        raise CrossValidationError(f"space-containing custom VGT axes name unresolved: {exc}") from exc
-    return
 
 
 @pytest.mark.calibration
 @pytest.mark.xfail(
     reason=(
-        "VGT Points and Systems remain unresolved: minimal named providers "
-        "return HTTP 500 before semantic output."
+        "non-empty VGT Points and Systems remain unresolved: bounded provider "
+        "variants return HTTP 500 before semantic output."
     ),
     raises=CrossValidationError,
     strict=True,
@@ -332,9 +355,20 @@ def test_custom_vgt_axes_name_with_space_remains_unresolved() -> None:
 def test_vgt_points_and_systems_remain_unresolved_after_named_provider_probes() -> None:
     configure_astrox_from_env()
     target = subpoint_site()
+    # The SDK-callable probes below cover the checked-in CrdnPoint/CrdnSystem
+    # schema shape. A bounded raw-wire live probe also tried {"$type": "Point"},
+    # {"$type": "System"}, and default names Center, SubSatellitePoint, Fixed,
+    # and ICRF; each returned HTTP 500 before semantic output.
     provider_cases = [
         (
-            "point_only",
+            "point_name_only",
+            entities.vgt(
+                axes=[entities.vvlh_axes(name="OnlyAxes")],
+                points=[entities.vgt_point(name="Point")],
+            ),
+        ),
+        (
+            "point_name_desc",
             entities.vgt(
                 axes=[entities.vvlh_axes(name="OnlyAxes")],
                 points=[
@@ -346,7 +380,14 @@ def test_vgt_points_and_systems_remain_unresolved_after_named_provider_probes() 
             ),
         ),
         (
-            "system_only",
+            "system_name_only",
+            entities.vgt(
+                axes=[entities.vvlh_axes(name="OnlyAxes")],
+                systems=[entities.vgt_system(name="System")],
+            ),
+        ),
+        (
+            "system_name_desc",
             entities.vgt(
                 axes=[entities.vvlh_axes(name="OnlyAxes")],
                 systems=[
@@ -367,6 +408,7 @@ def test_vgt_points_and_systems_remain_unresolved_after_named_provider_probes() 
         ),
     ]
     failures: list[str] = []
+    successes: list[str] = []
     for case_id, provider in provider_cases:
         observer = observer_with_sensor(
             name=f"vgt_{case_id}",
@@ -380,9 +422,14 @@ def test_vgt_points_and_systems_remain_unresolved_after_named_provider_probes() 
         except AstroxHTTPError as exc:
             failures.append(f"{case_id}: HTTP {exc.status_code} {exc}")
             continue
-        return
+        successes.append(case_id)
+    if successes:
+        raise AssertionError(
+            "non-empty VGT Points/Systems partially resolved; reclassify "
+            f"successful provider cases before keeping this xfail: {successes}"
+        )
     raise CrossValidationError(
-        "VGT Points/Systems unresolved after named provider probes:\n"
+        "VGT Points/Systems unresolved after bounded named provider probes:\n"
         + "\n".join(failures)
     )
 
@@ -391,7 +438,7 @@ def main() -> int:
     try:
         test_aligned_and_constrained_axes_match_triad_alignment_oracle()
         test_aligned_axes_axis_permutations_match_triad_alignment_oracles()
-        test_vgt_axes_vectors_angles_and_planes_do_not_perturb_calibrated_vvlh_sensor_access()
+        test_vgt_provider_collections_do_not_perturb_calibrated_vvlh_sensor_access_when_live_callable()
         test_custom_vgt_axes_name_resolution_matches_triad_oracle()
     except (CrossValidationError, LiveConfigError, AstroxAPIError, AstroxHTTPError) as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
