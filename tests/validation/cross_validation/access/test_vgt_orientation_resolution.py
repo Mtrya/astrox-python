@@ -4,19 +4,19 @@
 #   Branches:
 #     - vgt_fixed_vector with built-in VVLH reference axes: verified
 #     - aligned_and_constrained_axes using built-in VVLH fixed vectors: verified against local TRIAD-style alignment for orthogonal, permuted-axis, and non-orthogonal-reference cases
-#     - Vgt.Axes, Vgt.Vectors, and Vgt.Planes provider collections: verified as pass-through containers that do not alter calibrated VVLH sensor access
+#     - Vgt.Axes, Vgt.Vectors, Vgt.Angles, and Vgt.Planes provider collections: verified as pass-through containers that do not alter calibrated VVLH sensor access
 #     - custom fixed-axes name resolution inside aligned_and_constrained_axes: verified against the same TRIAD oracle for no-space object and string reference styles
 #     - custom fixed-axes names containing spaces inside aligned_and_constrained_axes: unresolved; live server reports the named axes cannot be found
-#     - Vgt.Points, Vgt.Systems, and Vgt.Angles provider collections: unresolved after minimal named provider probes return HTTP 500 before semantic output
+#     - Vgt.Points and Vgt.Systems provider collections: unresolved after minimal named provider probes return HTTP 500 before semantic output
 #   Fields:
 #     - Passes.AccessStart/AccessStop: verified for built-in aligned/VGT container cases
 #     - VGT custom-name semantic fields: verified for no-space names through AccessStart/AccessStop comparison; unresolved for names containing spaces
-#     - VGT Points/Systems/Angles semantic fields: unresolved because live server returns errors before semantic output
+#     - VGT Points/Systems semantic fields: unresolved because live server returns errors before semantic output
 #   Parameters:
 #     - Principal, PrincipalAxis, Reference, ReferenceAxis: verified for +Z/+X, +X/+Y, and -Z/+X axis combinations, including a non-orthogonal reference-vector projection
-#     - VGT collection fields Axes/Vectors/Planes: verified for no semantic perturbation in the calibrated sensor case
+#     - VGT collection fields Axes/Vectors/Angles/Planes: verified for no semantic perturbation in the calibrated sensor case
 #     - VGT custom axes name/reference fields: verified for no-space EntityAxes object references and string name references
-#     - VGT collection fields Points/Systems/Angles: unresolved while server returns HTTP 500
+#     - VGT collection fields Points/Systems: unresolved while server returns HTTP 500
 #   Comparison:
 #     - External: local TRIAD-style axes construction plus independent VVLH/FOV interval oracle
 #     - Constants: controlled two-body orbit in _orientation.py
@@ -161,7 +161,7 @@ def test_aligned_axes_axis_permutations_match_triad_alignment_oracles() -> None:
         compare_sensor_case(case)
 
 
-def test_vgt_axes_vectors_and_planes_do_not_perturb_calibrated_vvlh_sensor_access() -> None:
+def test_vgt_axes_vectors_angles_and_planes_do_not_perturb_calibrated_vvlh_sensor_access() -> None:
     configure_astrox_from_env()
     target = subpoint_site()
     expected = expected_site_intervals(
@@ -172,6 +172,16 @@ def test_vgt_axes_vectors_and_planes_do_not_perturb_calibrated_vvlh_sensor_acces
             quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0) @ np.array([0.0, 0.0, 1.0]),
         ),
     )
+    angle_from = entities.vgt_fixed_vector(
+        name="AngleFrom",
+        reference_axes="VVLH",
+        direction=entities.xyz_direction(x=0.0, y=0.0, z=1.0),
+    )
+    angle_to = entities.vgt_fixed_vector(
+        name="AngleTo",
+        reference_axes="VVLH",
+        direction=entities.xyz_direction(x=1.0, y=0.0, z=0.0),
+    )
     providers = [
         entities.vgt(axes=[entities.vvlh_axes(name="OnlyAxes")]),
         entities.vgt(
@@ -181,6 +191,17 @@ def test_vgt_axes_vectors_and_planes_do_not_perturb_calibrated_vvlh_sensor_acces
                     name="Vector",
                     reference_axes="VVLH",
                     direction=entities.xyz_direction(x=1.0, y=0.0, z=0.0),
+                )
+            ],
+        ),
+        entities.vgt(
+            axes=[entities.vvlh_axes(name="OnlyAxes")],
+            vectors=[angle_from, angle_to],
+            angles=[
+                entities.vgt_angle(
+                    name="Angle",
+                    from_vector=angle_from,
+                    to_vector="AngleTo",
                 )
             ],
         ),
@@ -302,13 +323,13 @@ def test_custom_vgt_axes_name_with_space_remains_unresolved() -> None:
 @pytest.mark.calibration
 @pytest.mark.xfail(
     reason=(
-        "VGT Points, Systems, and Angles remain unresolved: minimal named providers "
+        "VGT Points and Systems remain unresolved: minimal named providers "
         "return HTTP 500 before semantic output."
     ),
     raises=CrossValidationError,
     strict=True,
 )
-def test_vgt_points_systems_and_angles_remain_unresolved_after_named_provider_probes() -> None:
+def test_vgt_points_and_systems_remain_unresolved_after_named_provider_probes() -> None:
     configure_astrox_from_env()
     target = subpoint_site()
     provider_cases = [
@@ -337,24 +358,11 @@ def test_vgt_points_systems_and_angles_remain_unresolved_after_named_provider_pr
             ),
         ),
         (
-            "angle_only",
-            entities.vgt(
-                axes=[entities.vvlh_axes(name="OnlyAxes")],
-                angles=[
-                    entities.vgt_angle(
-                        name="Angle",
-                        description="minimal named angle probe",
-                    )
-                ],
-            ),
-        ),
-        (
-            "point_system_angle",
+            "point_system",
             entities.vgt(
                 axes=[entities.vvlh_axes(name="OnlyAxes")],
                 points=[entities.vgt_point(name="Point")],
                 systems=[entities.vgt_system(name="System")],
-                angles=[entities.vgt_angle(name="Angle")],
             ),
         ),
     ]
@@ -374,7 +382,7 @@ def test_vgt_points_systems_and_angles_remain_unresolved_after_named_provider_pr
             continue
         return
     raise CrossValidationError(
-        "VGT Points/Systems/Angles unresolved after named provider probes:\n"
+        "VGT Points/Systems unresolved after named provider probes:\n"
         + "\n".join(failures)
     )
 
@@ -383,7 +391,7 @@ def main() -> int:
     try:
         test_aligned_and_constrained_axes_match_triad_alignment_oracle()
         test_aligned_axes_axis_permutations_match_triad_alignment_oracles()
-        test_vgt_axes_vectors_and_planes_do_not_perturb_calibrated_vvlh_sensor_access()
+        test_vgt_axes_vectors_angles_and_planes_do_not_perturb_calibrated_vvlh_sensor_access()
         test_custom_vgt_axes_name_resolution_matches_triad_oracle()
     except (CrossValidationError, LiveConfigError, AstroxAPIError, AstroxHTTPError) as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)

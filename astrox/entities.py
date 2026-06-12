@@ -964,14 +964,27 @@ class VgtSystem:
 
 @dataclass(frozen=True, kw_only=True)
 class VgtAngle:
-    """Named VGT angle definition."""
+    """Named VGT angle between two named vectors."""
 
     name: str
+    from_vector: VgtVector | str
+    to_vector: VgtVector | str
     description: str | None = None
 
     def to_wire(self) -> dict[str, Any]:
         """Lower to an ASTROX VGT angle fragment."""
-        payload: dict[str, Any] = {"Name": self.name}
+        payload: dict[str, Any] = {
+            "$type": "BetweenVectors",
+            "Name": self.name,
+            "FromVectorName": _vector_reference_name(
+                self.from_vector,
+                parameter="from_vector",
+            ),
+            "ToVectorName": _vector_reference_name(
+                self.to_vector,
+                parameter="to_vector",
+            ),
+        }
         _include_if_supplied(payload, "Description", self.description)
         return payload
 
@@ -1707,10 +1720,20 @@ def vgt_system(*, name: str, description: str | None = None) -> VgtSystem:
     )
 
 
-def vgt_angle(*, name: str, description: str | None = None) -> VgtAngle:
-    """Create a named VGT angle definition."""
+def vgt_angle(
+    *,
+    name: str,
+    from_vector: VgtVector | str,
+    to_vector: VgtVector | str,
+    description: str | None = None,
+) -> VgtAngle:
+    """Create a named VGT angle between two named vectors."""
+    _vector_reference_name(from_vector, parameter="from_vector")
+    _vector_reference_name(to_vector, parameter="to_vector")
     return VgtAngle(
         name=_string(name, parameter="name"),
+        from_vector=from_vector,
+        to_vector=to_vector,
         description=_optional_string(description, parameter="description"),
     )
 

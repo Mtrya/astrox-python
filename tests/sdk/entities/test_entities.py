@@ -621,7 +621,13 @@ def test_vgt_provider_lowers_named_geometry_collections() -> None:
         vectors=[vector],
         points=[entities.vgt_point(name="Target Point", description="point")],
         systems=[entities.vgt_system(name="Body System")],
-        angles=[entities.vgt_angle(name="Look Angle")],
+        angles=[
+            entities.vgt_angle(
+                name="Look Angle",
+                from_vector=vector,
+                to_vector="Boresight",
+            )
+        ],
         planes=[entities.vgt_plane(name="Local Plane", plane_type="Fixed")],
     )
 
@@ -640,7 +646,14 @@ def test_vgt_provider_lowers_named_geometry_collections() -> None:
             ],
             "Points": [{"Name": "Target Point", "Description": "point"}],
             "Systems": [{"Name": "Body System"}],
-            "Angles": [{"Name": "Look Angle"}],
+            "Angles": [
+                {
+                    "$type": "BetweenVectors",
+                    "Name": "Look Angle",
+                    "FromVectorName": "Boresight",
+                    "ToVectorName": "Boresight",
+                }
+            ],
             "Planes": [{"Name": "Local Plane", "Type": "Fixed"}],
         },
     )
