@@ -14,6 +14,8 @@ __all__ = [
     "MeanKeplerianElements",
     "cartesian_state",
     "cartesian_to_keplerian",
+    "central_body_frame",
+    "earth_moon_libration",
     "geo",
     "geo_ym_lambert_delta_v",
     "keplerian",
@@ -451,3 +453,47 @@ def lambert_delta_v(
         (result["DV1"][0], result["DV1"][1], result["DV1"][2]),
         (result["DV2"][0], result["DV2"][1], result["DV2"][2]),
     )
+
+
+def central_body_frame(
+    position: entities.CzmlPosition,
+    *,
+    to_central_body: str,
+    target_reference_frame: str | None = None,
+) -> tuple[float, entities.CzmlPosition]:
+    """Transform a sampled CZML position to another central-body frame.
+
+    Returns ``(period_s, transformed_position)``.
+    """
+    if not isinstance(position, entities.CzmlPosition):
+        raise TypeError("position must be a CzmlPosition instance")
+
+    params: dict[str, Any] = {"toCb": to_central_body}
+    _include_if_supplied(params, "referenceFrame", target_reference_frame)
+
+    result = raw.post(
+        "/OrbitSystem/CentralBodyFrame",
+        json=position.to_czml_wire(),
+        params=params,
+    )
+    return result["Period"], entities.CzmlPosition.from_czml_wire(result["Position"])
+
+
+def earth_moon_libration(
+    position: entities.CzmlPosition,
+) -> entities.CzmlPositionSTM:
+    """Transform a sampled CZML position to the Earth-Moon libration frame.
+
+    Wires to ``/OrbitSystem/EarthMoonLibration2``.
+    """
+    if not isinstance(position, entities.CzmlPosition):
+        raise TypeError("position must be a CzmlPosition instance")
+
+    result = raw.post(
+        "/OrbitSystem/EarthMoonLibration2",
+        json=position.to_czml_wire(),
+    )
+    return entities.CzmlPositionSTM.from_czml_wire(result["position"])
+
+
+import astrox.entities as entities  # noqa: E402

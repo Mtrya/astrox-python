@@ -164,4 +164,37 @@ departure_delta_v_m_s, arrival_delta_v_m_s = orbits.geo_ym_lambert_delta_v(
 
 The GEO-YM helper accepts Keplerian input orbits instead of Cartesian endpoint states. ASTROX advances the target orbit's true anomaly linearly by mean motion times `time_of_flight_s` before solving the Lambert transfer, so its result is not the same as first propagating the target orbit through mean anomaly with Kepler's equation. `platform_gravitational_parameter_m3_s2` is optional; when omitted, ASTROX owns the platform orbit default.
 
+## Frame And Libration Transforms
+
+`orbits.central_body_frame(...)` transforms a sampled CZML position from one central-body frame to another. The input must be an `entities.CzmlPosition` and the function returns `(period_s, transformed_position)`:
+
+```python
+from astrox import entities, orbits
+
+position = entities.czml_position(
+    epoch="2024-01-01T00:00:00Z",
+    central_body="Earth",
+    reference_frame="INERTIAL",
+    interpolation_algorithm="LAGRANGE",
+    interpolation_degree=7,
+    cartesian=[0.0, 7000000.0, 0.0, 0.0, 142.857, 6900000.0, 1000000.0, 0.0],
+)
+
+period_s, fixed_position = orbits.central_body_frame(
+    position,
+    to_central_body="Earth",
+    target_reference_frame="FIXED",
+)
+```
+
+`to_central_body` is required. `target_reference_frame` is optional and omitted from the wire request when not supplied. The returned `fixed_position` is an `entities.CzmlPosition` whose `cartesian` samples are in the requested target frame. Cross-validation confirms that static inertial samples rotate to the expected fixed longitude via the Earth Rotation Angle.
+
+`orbits.earth_moon_libration(...)` transforms a sampled CZML position to the Earth-Moon libration frame. It wires to ``/OrbitSystem/EarthMoonLibration2`` and returns an `entities.CzmlPositionSTM`:
+
+```python
+libration_state = orbits.earth_moon_libration(position)
+```
+
+Cross-validation shows that the returned `cartesian` samples are the input state expressed in a Moon-centered libration frame whose x-axis points Earth-to-Moon and whose z-axis is aligned with the Earth-Moon orbital angular momentum. The `unit_quaternion` field is returned by ASTROX but its exact convention has not yet been calibrated; treat it as an unvalidated auxiliary orientation.
+
 See `examples/02_orbits/` for runnable source examples.

@@ -15,6 +15,7 @@ __all__ = [
     "CentralBodyPosition",
     "ConicSensor",
     "CzmlPosition",
+    "CzmlPositionSTM",
     "CzmlPositions",
     "Entity",
     "EntityGroup",
@@ -180,6 +181,54 @@ class CzmlPosition:
         if self.cartesian_velocity is not None:
             payload["cartesianVelocity"] = list(self.cartesian_velocity)
         return payload
+
+    @classmethod
+    def from_czml_wire(cls, payload: dict[str, Any]) -> CzmlPosition:
+        """Build from an ASTROX CZML position-data payload."""
+
+        def _tuple_or_none(key: str) -> tuple[float, ...] | None:
+            value = payload.get(key)
+            return None if value is None else tuple(value)
+
+        return cls(
+            epoch=payload["epoch"],
+            central_body=payload.get("CentralBody"),
+            interpolation_algorithm=payload.get("interpolationAlgorithm"),
+            interpolation_degree=payload.get("interpolationDegree"),
+            reference_frame=payload.get("referenceFrame"),
+            interval=payload.get("interval"),
+            cartesian=tuple(payload["cartesian"]),
+            cartesian_velocity=_tuple_or_none("cartesianVelocity"),
+        )
+
+
+@dataclass(frozen=True, kw_only=True)
+class CzmlPositionSTM(CzmlPosition):
+    """CZML position sample augmented with STM-like orientation and translation."""
+
+    unit_quaternion: tuple[float, ...]
+    cartesian_translation: tuple[float, ...] | None = None
+
+    @classmethod
+    def from_czml_wire(cls, payload: dict[str, Any]) -> CzmlPositionSTM:
+        """Build from the ASTROX CzmlPositionSTM payload."""
+
+        def _tuple_or_none(key: str) -> tuple[float, ...] | None:
+            value = payload.get(key)
+            return None if value is None else tuple(value)
+
+        return cls(
+            epoch=payload["epoch"],
+            central_body=payload.get("CentralBody"),
+            interpolation_algorithm=payload.get("interpolationAlgorithm"),
+            interpolation_degree=payload.get("interpolationDegree"),
+            reference_frame=payload["referenceFrame"],
+            interval=payload.get("interval"),
+            cartesian=tuple(payload["cartesian"]),
+            cartesian_velocity=_tuple_or_none("cartesianVelocity"),
+            unit_quaternion=tuple(payload["unitQuaternion"]),
+            cartesian_translation=_tuple_or_none("cartesianTranslation"),
+        )
 
 
 @dataclass(frozen=True, kw_only=True)
