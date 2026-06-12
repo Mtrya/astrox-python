@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import math
 import sys
 from pathlib import Path
 
@@ -11,7 +10,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrox import entities, orbits
+from astrox import _samples, entities, orbits
 from tests.validation._support import (
     LiveSnapshotCase,
     check_snapshot,
@@ -22,27 +21,7 @@ from tests.validation._support import (
 
 SNAPSHOT_PATH = Path(__file__).with_name("orbit_system.snap.json")
 EPOCH = "2024-01-01T00:00:00Z"
-EARTH_MU_M3_S2 = 398600441500000.0
 ORBIT_RADIUS_M = 7000000.0
-
-
-def circular_leo_samples() -> list[float]:
-    """Build an 8-sample LEO cartesian array for CZML interpolation."""
-    velocity_m_s = math.sqrt(EARTH_MU_M3_S2 / ORBIT_RADIUS_M)
-    period_s = 2 * math.pi * math.sqrt(ORBIT_RADIUS_M**3 / EARTH_MU_M3_S2)
-    n_samples = 8
-    dt_s = period_s / (n_samples - 1)
-    samples: list[float] = []
-    for index in range(n_samples):
-        t_s = index * dt_s
-        angle = velocity_m_s / ORBIT_RADIUS_M * t_s
-        samples += [
-            t_s,
-            ORBIT_RADIUS_M * math.cos(angle),
-            ORBIT_RADIUS_M * math.sin(angle),
-            0.0,
-        ]
-    return samples
 
 
 def sample_inertial_position() -> entities.CzmlPosition:
@@ -52,7 +31,7 @@ def sample_inertial_position() -> entities.CzmlPosition:
         reference_frame="INERTIAL",
         interpolation_algorithm="LAGRANGE",
         interpolation_degree=7,
-        cartesian=circular_leo_samples(),
+        cartesian=_samples.circular_leo_samples(radius_m=ORBIT_RADIUS_M),
     )
 
 

@@ -117,6 +117,32 @@ def _validate_group_restriction(value: str | None, *, parameter: str) -> str | N
     return value
 
 
+def _tuple_or_none(
+    payload: dict[str, Any],
+    key: str,
+) -> tuple[float, ...] | None:
+    value = payload.get(key)
+    return None if value is None else tuple(value)
+
+
+def _czml_position_common_fields(payload: dict[str, Any]) -> dict[str, Any]:
+    """Extract the fields shared by CzmlPosition and CzmlPositionSTM.
+
+    ``cartesian`` is treated as optional so that velocity-only CZML responses
+    are parsed without raising ``KeyError``.
+    """
+    return {
+        "epoch": payload["epoch"],
+        "central_body": payload.get("CentralBody"),
+        "interpolation_algorithm": payload.get("interpolationAlgorithm"),
+        "interpolation_degree": payload.get("interpolationDegree"),
+        "reference_frame": payload.get("referenceFrame"),
+        "interval": payload.get("interval"),
+        "cartesian": _tuple_or_none(payload, "cartesian"),
+        "cartesian_velocity": _tuple_or_none(payload, "cartesianVelocity"),
+    }
+
+
 @dataclass(frozen=True, kw_only=True)
 class SitePosition:
     """Fixed geodetic site position."""
@@ -185,21 +211,7 @@ class CzmlPosition:
     @classmethod
     def from_czml_wire(cls, payload: dict[str, Any]) -> CzmlPosition:
         """Build from an ASTROX CZML position-data payload."""
-
-        def _tuple_or_none(key: str) -> tuple[float, ...] | None:
-            value = payload.get(key)
-            return None if value is None else tuple(value)
-
-        return cls(
-            epoch=payload["epoch"],
-            central_body=payload.get("CentralBody"),
-            interpolation_algorithm=payload.get("interpolationAlgorithm"),
-            interpolation_degree=payload.get("interpolationDegree"),
-            reference_frame=payload.get("referenceFrame"),
-            interval=payload.get("interval"),
-            cartesian=tuple(payload["cartesian"]),
-            cartesian_velocity=_tuple_or_none("cartesianVelocity"),
-        )
+        return cls(**_czml_position_common_fields(payload))
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -212,23 +224,16 @@ class CzmlPositionSTM(CzmlPosition):
     @classmethod
     def from_czml_wire(cls, payload: dict[str, Any]) -> CzmlPositionSTM:
         """Build from the ASTROX CzmlPositionSTM payload."""
-
-        def _tuple_or_none(key: str) -> tuple[float, ...] | None:
-            value = payload.get(key)
-            return None if value is None else tuple(value)
-
-        return cls(
-            epoch=payload["epoch"],
-            central_body=payload.get("CentralBody"),
-            interpolation_algorithm=payload.get("interpolationAlgorithm"),
-            interpolation_degree=payload.get("interpolationDegree"),
-            reference_frame=payload["referenceFrame"],
-            interval=payload.get("interval"),
-            cartesian=tuple(payload["cartesian"]),
-            cartesian_velocity=_tuple_or_none("cartesianVelocity"),
-            unit_quaternion=tuple(payload["unitQuaternion"]),
-            cartesian_translation=_tuple_or_none("cartesianTranslation"),
+        fields = _czml_position_common_fields(payload)
+        # Preserve the stricter required-field semantics for the STM response.
+        fields["reference_frame"] = payload["referenceFrame"]
+        fields["cartesian"] = tuple(payload["cartesian"])
+        fields["unit_quaternion"] = tuple(payload["unitQuaternion"])
+        fields["cartesian_translation"] = _tuple_or_none(
+            payload,
+            "cartesianTranslation",
         )
+        return cls(**fields)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -242,10 +247,7 @@ class CzmlPositions:
         """Lower to a typed ASTROX generic entity-position fragment."""
         payload: dict[str, Any] = {
             "$type": "CzmlPositions",
-            "CzmlPositions": [
-                position.to_czml_wire()
-                for position in self.positions
-            ],
+            "CzmlPositions": [position.to_czml_wire() for position in self.positions],
         }
         _include_if_supplied(payload, "CentralBody", self.central_body)
         return payload
@@ -592,10 +594,7 @@ class EntityGroup:
         payload: dict[str, Any] = {
             "$type": "EntityPathGroup",
             "Name": self.name,
-            "AssignedObjects": [
-                member.to_wire()
-                for member in self.members
-            ],
+            "AssignedObjects": [member.to_wire() for member in self.members],
         }
         _include_if_supplied(payload, "FromAccess_Restriction", self.from_restriction)
         _include_if_supplied(payload, "FromAccess_Number", self.from_number)

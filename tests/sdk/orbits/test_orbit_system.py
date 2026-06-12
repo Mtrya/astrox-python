@@ -153,7 +153,7 @@ def test_orbit_system_functions_reject_raw_fragments(
 
 @pytest.mark.parametrize(
     "missing_field",
-    ["epoch", "cartesian"],
+    ["epoch"],
 )
 def test_central_body_frame_parser_fails_loudly_for_missing_position_fields(
     monkeypatch: pytest.MonkeyPatch,
@@ -168,6 +168,40 @@ def test_central_body_frame_parser_fails_loudly_for_missing_position_fields(
             sample_czml_position(),
             to_central_body="Moon",
         )
+
+
+def test_central_body_frame_parser_accepts_cartesian_velocity_only_response(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    response = central_body_frame_response()
+    del response["Position"]["cartesian"]
+    response["Position"]["cartesianVelocity"] = [
+        0.0,
+        7000000.0,
+        0.0,
+        0.0,
+        1000.0,
+        0.0,
+        0.0,
+    ]
+    record_raw_post(monkeypatch, response)
+
+    period_s, out_position = orbits.central_body_frame(
+        sample_czml_position(),
+        to_central_body="Moon",
+    )
+
+    assert period_s == 6000.0
+    assert out_position.cartesian is None
+    assert out_position.cartesian_velocity == (
+        0.0,
+        7000000.0,
+        0.0,
+        0.0,
+        1000.0,
+        0.0,
+        0.0,
+    )
 
 
 @pytest.mark.parametrize(
@@ -186,6 +220,18 @@ def test_earth_moon_libration_parser_fails_loudly_for_missing_stm_fields(
         orbits.earth_moon_libration(sample_czml_position())
 
 
+def test_earth_moon_libration_parser_preserves_cartesian_translation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    response = libration_response()
+    response["position"]["cartesianTranslation"] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+    record_raw_post(monkeypatch, response)
+
+    state = orbits.earth_moon_libration(sample_czml_position())
+
+    assert state.cartesian_translation == (0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
+
+
 def test_orbit_system_functions_propagate_api_errors(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -202,8 +248,14 @@ def test_orbit_system_functions_propagate_api_errors(
 
 
 def test_orbit_system_return_type_hints_are_curated_values() -> None:
-    assert get_type_hints(orbits.central_body_frame)["return"] == tuple[
-        float,
-        entities.CzmlPosition,
-    ]
-    assert get_type_hints(orbits.earth_moon_libration)["return"] == entities.CzmlPositionSTM
+    assert (
+        get_type_hints(orbits.central_body_frame)["return"]
+        == tuple[
+            float,
+            entities.CzmlPosition,
+        ]
+    )
+    assert (
+        get_type_hints(orbits.earth_moon_libration)["return"]
+        == entities.CzmlPositionSTM
+    )
