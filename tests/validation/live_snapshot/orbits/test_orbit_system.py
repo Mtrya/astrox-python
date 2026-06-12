@@ -56,8 +56,8 @@ def sample_inertial_position() -> entities.CzmlPosition:
     )
 
 
-def central_body_frame_to_earth_fixed() -> tuple[float, entities.CzmlPosition]:
-    return orbits.central_body_frame(
+def transform_frame_to_earth_fixed() -> tuple[float, entities.CzmlPosition]:
+    return orbits.transform_frame(
         sample_inertial_position(),
         to_central_body="Earth",
         target_reference_frame="FIXED",
@@ -70,9 +70,9 @@ def earth_moon_libration_frame() -> entities.CzmlPositionSTM:
 
 CASES = [
     LiveSnapshotCase(
-        id="central_body_frame_to_earth_fixed",
+        id="transform_frame_to_earth_fixed",
         description="Transform an Earth inertial CZML sample to the Earth fixed frame.",
-        run=central_body_frame_to_earth_fixed,
+        run=transform_frame_to_earth_fixed,
     ),
     LiveSnapshotCase(
         id="earth_moon_libration_frame",

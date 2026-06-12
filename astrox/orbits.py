@@ -14,7 +14,7 @@ __all__ = [
     "MeanKeplerianElements",
     "cartesian_state",
     "cartesian_to_keplerian",
-    "central_body_frame",
+    "transform_frame",
     "earth_moon_libration",
     "geo",
     "geo_ym_lambert_delta_v",
@@ -455,7 +455,7 @@ def lambert_delta_v(
     )
 
 
-def central_body_frame(
+def transform_frame(
     position: entities.CzmlPosition,
     *,
     to_central_body: str,

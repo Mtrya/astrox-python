@@ -2,7 +2,7 @@
   "cases": [
     {
       "description": "Transform an Earth inertial CZML sample to the Earth fixed frame.",
-      "id": "central_body_frame_to_earth_fixed",
+      "id": "transform_frame_to_earth_fixed",
       "return": [
         6000,
         {

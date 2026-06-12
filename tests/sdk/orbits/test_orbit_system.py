@@ -42,7 +42,7 @@ def record_raw_post(
     return calls
 
 
-def central_body_frame_response() -> dict[str, Any]:
+def transform_frame_response() -> dict[str, Any]:
     return {
         "IsSuccess": True,
         "Message": "",
@@ -74,13 +74,13 @@ def libration_response() -> dict[str, Any]:
     }
 
 
-def test_central_body_frame_emits_payload_and_returns_position(
+def test_transform_frame_emits_payload_and_returns_position(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    calls = record_raw_post(monkeypatch, central_body_frame_response())
+    calls = record_raw_post(monkeypatch, transform_frame_response())
     position = sample_czml_position()
 
-    period_s, out_position = orbits.central_body_frame(
+    period_s, out_position = orbits.transform_frame(
         position,
         to_central_body="Moon",
         target_reference_frame="J2000",
@@ -99,12 +99,12 @@ def test_central_body_frame_emits_payload_and_returns_position(
     assert out_position.cartesian == (0.0, 7000000.0, 0.0, 0.0)
 
 
-def test_central_body_frame_omits_reference_frame_when_not_supplied(
+def test_transform_frame_omits_reference_frame_when_not_supplied(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    calls = record_raw_post(monkeypatch, central_body_frame_response())
+    calls = record_raw_post(monkeypatch, transform_frame_response())
 
-    orbits.central_body_frame(sample_czml_position(), to_central_body="Moon")
+    orbits.transform_frame(sample_czml_position(), to_central_body="Moon")
 
     assert calls[0]["params"] == {"toCb": "Moon"}
 
@@ -132,7 +132,7 @@ def test_earth_moon_libration_emits_payload_and_returns_stm(
     ("function_name", "kwargs"),
     [
         (
-            "central_body_frame",
+            "transform_frame",
             {"position": [0.0, 7000000.0, 0.0, 0.0], "to_central_body": "Moon"},
         ),
         (
@@ -155,25 +155,25 @@ def test_orbit_system_functions_reject_raw_fragments(
     "missing_field",
     ["epoch"],
 )
-def test_central_body_frame_parser_fails_loudly_for_missing_position_fields(
+def test_transform_frame_parser_fails_loudly_for_missing_position_fields(
     monkeypatch: pytest.MonkeyPatch,
     missing_field: str,
 ) -> None:
-    response = central_body_frame_response()
+    response = transform_frame_response()
     del response["Position"][missing_field]
     record_raw_post(monkeypatch, response)
 
     with pytest.raises(KeyError):
-        orbits.central_body_frame(
+        orbits.transform_frame(
             sample_czml_position(),
             to_central_body="Moon",
         )
 
 
-def test_central_body_frame_parser_accepts_cartesian_velocity_only_response(
+def test_transform_frame_parser_accepts_cartesian_velocity_only_response(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    response = central_body_frame_response()
+    response = transform_frame_response()
     del response["Position"]["cartesian"]
     response["Position"]["cartesianVelocity"] = [
         0.0,
@@ -186,7 +186,7 @@ def test_central_body_frame_parser_accepts_cartesian_velocity_only_response(
     ]
     record_raw_post(monkeypatch, response)
 
-    period_s, out_position = orbits.central_body_frame(
+    period_s, out_position = orbits.transform_frame(
         sample_czml_position(),
         to_central_body="Moon",
     )
@@ -241,7 +241,7 @@ def test_orbit_system_functions_propagate_api_errors(
     monkeypatch.setattr(orbits.raw, "post", fake_post)
 
     with pytest.raises(exceptions.AstroxAPIError, match="bad frame"):
-        orbits.central_body_frame(sample_czml_position(), to_central_body="Moon")
+        orbits.transform_frame(sample_czml_position(), to_central_body="Moon")
 
     with pytest.raises(exceptions.AstroxAPIError, match="bad frame"):
         orbits.earth_moon_libration(sample_czml_position())
@@ -249,7 +249,7 @@ def test_orbit_system_functions_propagate_api_errors(
 
 def test_orbit_system_return_type_hints_are_curated_values() -> None:
     assert (
-        get_type_hints(orbits.central_body_frame)["return"]
+        get_type_hints(orbits.transform_frame)["return"]
         == tuple[
             float,
             entities.CzmlPosition,

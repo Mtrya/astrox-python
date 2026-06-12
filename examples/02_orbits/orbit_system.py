@@ -44,7 +44,7 @@ def main() -> None:
     )
 
     # Transform the inertial Earth position to the Earth fixed frame.
-    period_s, fixed_position = orbits.central_body_frame(
+    period_s, fixed_position = orbits.transform_frame(
         position,
         to_central_body="Earth",
         target_reference_frame="FIXED",
