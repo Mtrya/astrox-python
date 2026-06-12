@@ -41,8 +41,22 @@ def sample_state() -> orbits.CartesianState:
 
 
 def test_public_entity_names_are_exported() -> None:
+    assert "AlignedAndConstrainedAxes" in entities.__all__
+    assert "AzElRotation" in entities.__all__
+    assert "CompositeAxes" in entities.__all__
+    assert "CzmlAxes" in entities.__all__
     assert "Entity" in entities.__all__
+    assert "EntityAxes" in entities.__all__
     assert "EntityGroup" in entities.__all__
+    assert "EulerRotation" in entities.__all__
+    assert "FixedAtEpochAxes" in entities.__all__
+    assert "FixedAxes" in entities.__all__
+    assert "FixedSensorPointing" in entities.__all__
+    assert "LvlhAxes" in entities.__all__
+    assert "QuaternionRotation" in entities.__all__
+    assert "Rotation" in entities.__all__
+    assert "RaDecDirection" in entities.__all__
+    assert "SensorPointing" in entities.__all__
     assert "SitePosition" in entities.__all__
     assert "CentralBodyPosition" in entities.__all__
     assert "J2Position" in entities.__all__
@@ -55,6 +69,17 @@ def test_public_entity_names_are_exported() -> None:
     assert "BallisticPosition" in entities.__all__
     assert "ConicSensor" in entities.__all__
     assert "RectangularSensor" in entities.__all__
+    assert "VgtAngle" in entities.__all__
+    assert "VgtDirection" in entities.__all__
+    assert "VgtFixedVector" in entities.__all__
+    assert "VgtPlane" in entities.__all__
+    assert "VgtPoint" in entities.__all__
+    assert "VgtProvider" in entities.__all__
+    assert "VgtSystem" in entities.__all__
+    assert "VgtVector" in entities.__all__
+    assert "VncAxes" in entities.__all__
+    assert "VvlhAxes" in entities.__all__
+    assert "XyzDirection" in entities.__all__
 
 
 def test_site_position_has_typed_and_site_only_wire_forms() -> None:
@@ -426,6 +451,310 @@ def test_entity_composes_position_and_sensor_metadata() -> None:
     )
 
 
+def test_rotation_fragments_lower_to_inner_orientation_wire_shapes() -> None:
+    assert_canonical_equal(
+        entities.az_el_rotation(azimuth_deg=10.0, elevation_deg=-20.0).to_wire(),
+        {"$type": "AzEl", "Azimuth": 10.0, "Elevation": -20.0},
+    )
+    assert_canonical_equal(
+        entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0).to_wire(),
+        {"$type": "Quaternion", "QS": 1.0, "QX": 0.0, "QY": 0.0, "QZ": 0.0},
+    )
+    assert_canonical_equal(
+        entities.euler_rotation(
+            sequence="321",
+            a_deg=1.0,
+            b_deg=2.0,
+            c_deg=3.0,
+        ).to_wire(),
+        {"$type": "EulerAngles", "Sequence": "321", "A": 1.0, "B": 2.0, "C": 3.0},
+    )
+
+
+def test_orbital_axes_lower_generic_and_relative_variants() -> None:
+    assert_canonical_equal(
+        entities.vvlh_axes(
+            name="Body VVLH",
+            description="body frame",
+            start="2024-01-01T00:00:00.000Z",
+            stop="2024-01-01T00:10:00.000Z",
+        ).to_wire(),
+        {
+            "$type": "VVLH",
+            "Name": "Body VVLH",
+            "Description": "body frame",
+            "Start": "2024-01-01T00:00:00.000Z",
+            "Stop": "2024-01-01T00:10:00.000Z",
+        },
+    )
+    assert_canonical_equal(
+        entities.vvlh_axes(relative_to="Earth").to_wire(),
+        {"$type": "VVLH(Earth)"},
+    )
+    assert_canonical_equal(
+        entities.lvlh_axes(relative_to="CBF").to_wire(),
+        {"$type": "LVLH(CBF)"},
+    )
+    assert_canonical_equal(
+        entities.vnc_axes(relative_to="Sun").to_wire(),
+        {"$type": "VNC(Sun)"},
+    )
+
+
+def test_fixed_and_fixed_at_epoch_axes_lower_named_references() -> None:
+    body_axes = entities.vvlh_axes(name="Body VVLH")
+    fixed = entities.fixed_axes(
+        name="Camera Axes",
+        reference_axes=body_axes,
+        rotation=entities.euler_rotation(
+            sequence="321",
+            a_deg=0.0,
+            b_deg=20.0,
+            c_deg=0.0,
+        ),
+    )
+    frozen = entities.fixed_at_epoch_axes(
+        source_axes=fixed,
+        reference_axes="ICRF",
+        epoch="2024-01-01T00:00:00.000Z",
+    )
+
+    assert_canonical_equal(
+        fixed.to_wire(),
+        {
+            "$type": "Fixed",
+            "Name": "Camera Axes",
+            "ReferenceAxesName": "Body VVLH",
+            "FixedOrientation": {
+                "$type": "EulerAngles",
+                "Sequence": "321",
+                "A": 0.0,
+                "B": 20.0,
+                "C": 0.0,
+            },
+        },
+    )
+    assert_canonical_equal(
+        frozen.to_wire(),
+        {
+            "$type": "FixedAtEpoch",
+            "SourceAxesName": "Camera Axes",
+            "ReferenceAxesName": "ICRF",
+            "Epoch": "2024-01-01T00:00:00.000Z",
+        },
+    )
+
+
+def test_aligned_composite_and_czml_axes_lower_complete_wire_shapes() -> None:
+    body_axes = entities.vvlh_axes(name="Body VVLH")
+    boresight = entities.vgt_fixed_vector(
+        name="Boresight",
+        reference_axes=body_axes,
+        direction=entities.xyz_direction(x=0.0, y=0.0, z=1.0),
+    )
+    sun_hint = entities.vgt_fixed_vector(
+        name="Sun Hint",
+        reference_axes="Body VVLH",
+        direction=entities.ra_dec_direction(
+            ra_deg=15.0,
+            dec_deg=-5.0,
+            magnitude=1.0,
+        ),
+    )
+    aligned = entities.aligned_and_constrained_axes(
+        name="Aligned Camera",
+        principal=boresight,
+        principal_axis="+Z",
+        reference=sun_hint,
+        reference_axis="+X",
+    )
+    czml = entities.czml_axes(
+        epoch="2024-01-01T00:00:00.000Z",
+        unit_quaternion_xyzw=[0.0, 0.0, 0.0, 1.0],
+        central_body="Earth",
+        interpolation_algorithm="LINEAR",
+        interpolation_degree=1,
+    )
+    composite = entities.composite_axes(intervals=[body_axes, aligned, czml])
+
+    assert_canonical_equal(
+        aligned.to_wire(),
+        {
+            "$type": "AlignedAndConstrained",
+            "Name": "Aligned Camera",
+            "Principal": "Boresight",
+            "PrincipalAxis": "+Z",
+            "Reference": "Sun Hint",
+            "ReferenceAxis": "+X",
+        },
+    )
+    assert_canonical_equal(
+        czml.to_wire(),
+        {
+            "$type": "CzmlOrientation",
+            "epoch": "2024-01-01T00:00:00.000Z",
+            "unitQuaternion": [0.0, 0.0, 0.0, 1.0],
+            "CentralBody": "Earth",
+            "interpolationAlgorithm": "LINEAR",
+            "interpolationDegree": 1,
+        },
+    )
+    assert_canonical_equal(
+        composite.to_wire(),
+        {
+            "$type": "Composite",
+            "Intervals": [body_axes.to_wire(), aligned.to_wire(), czml.to_wire()],
+        },
+    )
+
+
+def test_vgt_provider_lowers_named_geometry_collections() -> None:
+    body_axes = entities.vvlh_axes(name="Body VVLH")
+    vector = entities.vgt_fixed_vector(
+        name="Boresight",
+        reference_axes=body_axes,
+        direction=entities.xyz_direction(x=0.0, y=0.0, z=1.0),
+        description="sensor boresight",
+    )
+    provider = entities.vgt(
+        axes=[body_axes],
+        vectors=[vector],
+        points=[entities.vgt_point(name="Target Point", description="point")],
+        systems=[entities.vgt_system(name="Body System")],
+        angles=[
+            entities.vgt_angle(
+                name="Look Angle",
+                from_vector=vector,
+                to_vector="Boresight",
+            )
+        ],
+        planes=[entities.vgt_plane(name="Local Plane", plane_type="Fixed")],
+    )
+
+    assert_canonical_equal(
+        provider.to_wire(),
+        {
+            "Axes": [{"$type": "VVLH", "Name": "Body VVLH"}],
+            "Vectors": [
+                {
+                    "$type": "FixedInAxes",
+                    "Name": "Boresight",
+                    "Description": "sensor boresight",
+                    "ReferenceAxesName": "Body VVLH",
+                    "Direction": {"$type": "XYZ", "X": 0.0, "Y": 0.0, "Z": 1.0},
+                }
+            ],
+            "Points": [{"Name": "Target Point", "Description": "point"}],
+            "Systems": [{"Name": "Body System"}],
+            "Angles": [
+                {
+                    "$type": "BetweenVectors",
+                    "Name": "Look Angle",
+                    "FromVectorName": "Boresight",
+                    "ToVectorName": "Boresight",
+                }
+            ],
+            "Planes": [{"Name": "Local Plane", "Type": "Fixed"}],
+        },
+    )
+
+
+def test_fixed_sensor_pointing_lowers_rotation_without_requiring_sensor() -> None:
+    sat = entities.entity(
+        name="Observer",
+        position=entities.sgp4_position(tle_lines=TLE_LINES),
+        orientation=entities.vvlh_axes(),
+        sensor_pointing=entities.fixed_sensor_pointing(
+            rotation=entities.az_el_rotation(
+                azimuth_deg=0.0,
+                elevation_deg=-20.0,
+            ),
+            text="off-nadir pointing",
+        ),
+    )
+
+    assert_canonical_equal(
+        sat.to_wire(),
+        {
+            "Name": "Observer",
+            "Position": {
+                "$type": "SGP4",
+                "TLEs": list(TLE_LINES),
+            },
+            "Orientation": {"$type": "VVLH"},
+            "SensorPointing": {
+                "$type": "Fixed",
+                "Orientation": {
+                    "$type": "AzEl",
+                    "Azimuth": 0.0,
+                    "Elevation": -20.0,
+                },
+                "Text": "off-nadir pointing",
+            },
+        },
+    )
+
+
+def test_entity_composes_vgt_orientation_sensor_and_pointing_metadata() -> None:
+    body_axes = entities.vvlh_axes(name="Body VVLH")
+    camera_axes = entities.fixed_axes(
+        name="Camera Axes",
+        reference_axes=body_axes,
+        rotation=entities.euler_rotation(
+            sequence="321",
+            a_deg=0.0,
+            b_deg=20.0,
+            c_deg=0.0,
+        ),
+    )
+    sat = entities.entity(
+        name="Observer",
+        description="Representative sensor platform",
+        position=entities.sgp4_position(tle_lines=TLE_LINES),
+        vgt=entities.vgt(axes=[body_axes, camera_axes]),
+        orientation=camera_axes,
+        sensor=entities.conic_sensor(outer_half_angle_deg=8.0),
+        sensor_pointing=entities.fixed_sensor_pointing(
+            rotation=entities.quaternion_rotation(
+                scalar=1.0,
+                x=0.0,
+                y=0.0,
+                z=0.0,
+            ),
+        ),
+    )
+
+    assert_canonical_equal(
+        sat.to_wire(),
+        {
+            "Name": "Observer",
+            "Description": "Representative sensor platform",
+            "Vgt": {
+                "Axes": [body_axes.to_wire(), camera_axes.to_wire()],
+            },
+            "Position": {
+                "$type": "SGP4",
+                "TLEs": list(TLE_LINES),
+            },
+            "Orientation": camera_axes.to_wire(),
+            "Sensor": {
+                "$type": "Conic",
+                "outerHalfAngle": 8.0,
+            },
+            "SensorPointing": {
+                "$type": "Fixed",
+                "Orientation": {
+                    "$type": "Quaternion",
+                    "QS": 1.0,
+                    "QX": 0.0,
+                    "QY": 0.0,
+                    "QZ": 0.0,
+                },
+            },
+        },
+    )
+
+
 def test_entity_group_lowers_grouped_entities() -> None:
     iss = entities.entity(name="ISS", position=entities.sgp4_position(tle_lines=TLE_LINES))
     hubble = entities.entity(
@@ -496,9 +825,80 @@ def test_entity_group_lowers_grouped_entities() -> None:
             "cartesian_velocity must be a sequence of numbers",
         ),
         (
+            entities.az_el_rotation,
+            {"azimuth_deg": "0", "elevation_deg": 0.0},
+            "azimuth_deg must be a number",
+        ),
+        (
+            entities.euler_rotation,
+            {"sequence": 321, "a_deg": 0.0, "b_deg": 0.0, "c_deg": 0.0},
+            "sequence must be a string",
+        ),
+        (
+            entities.fixed_axes,
+            {
+                "reference_axes": entities.vvlh_axes(),
+                "rotation": entities.euler_rotation(
+                    sequence="321",
+                    a_deg=0.0,
+                    b_deg=0.0,
+                    c_deg=0.0,
+                ),
+            },
+            "reference_axes object must have a name",
+        ),
+        (
+            entities.fixed_sensor_pointing,
+            {
+                "rotation": {
+                    "$type": "AzEl",
+                    "Azimuth": 0.0,
+                    "Elevation": 0.0,
+                },
+            },
+            "rotation must be an astrox.entities rotation value",
+        ),
+        (
+            entities.czml_axes,
+            {
+                "epoch": "2024-01-01T00:00:00.000Z",
+                "unit_quaternion_xyzw": [0.0, "0.0", 0.0, 1.0],
+            },
+            "unit_quaternion_xyzw must be a sequence of numbers",
+        ),
+        (
+            entities.vgt,
+            {"axes": [entities.vgt_point(name="not axes")]},
+            "axes contains unsupported item values",
+        ),
+        (
             entities.entity,
             {"name": "bad", "position": {"$type": "SitePosition"}},
             "position must be an astrox.entities position value",
+        ),
+        (
+            entities.entity,
+            {
+                "name": "bad",
+                "position": entities.sgp4_position(tle_lines=TLE_LINES),
+                "orientation": entities.az_el_rotation(
+                    azimuth_deg=0.0,
+                    elevation_deg=0.0,
+                ),
+            },
+            "orientation must be an astrox.entities axes value",
+        ),
+        (
+            entities.entity,
+            {
+                "name": "bad",
+                "position": entities.sgp4_position(tle_lines=TLE_LINES),
+                "sensor_pointing": entities.az_el_rotation(
+                    azimuth_deg=0.0,
+                    elevation_deg=0.0,
+                ),
+            },
+            "sensor_pointing must be an astrox.entities sensor-pointing value",
         ),
         (
             entities.entity_group,
@@ -523,4 +923,19 @@ def test_entity_group_rejects_unknown_restriction() -> None:
                 )
             ],
             to_restriction="AllOf",
+        )
+
+
+def test_axes_reject_unknown_relative_to_variant() -> None:
+    with pytest.raises(ValueError, match="relative_to must be one of"):
+        entities.vvlh_axes(relative_to="earth")
+
+
+def test_aligned_axes_reject_unknown_axis_direction() -> None:
+    with pytest.raises(ValueError, match="principal_axis must be one of"):
+        entities.aligned_and_constrained_axes(
+            principal="Boresight",
+            principal_axis="X",
+            reference="Sun Hint",
+            reference_axis="+Z",
         )

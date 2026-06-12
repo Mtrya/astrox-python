@@ -448,6 +448,33 @@
       }
     },
     {
+      "description": "Direct access from a sensor-bearing two-body satellite to a fixed site, including entity axes and fixed sensor pointing metadata.",
+      "id": "access_compute_sensor_pointing",
+      "return": {
+        "IsSuccess": true,
+        "Message": "OK",
+        "Passes": []
+      }
+    },
+    {
+      "description": "Direct access from a sensor-bearing two-body satellite using fixed axes relative to built-in VVLH axes.",
+      "id": "access_compute_custom_axes_sensor",
+      "return": {
+        "IsSuccess": true,
+        "Message": "OK",
+        "Passes": []
+      }
+    },
+    {
+      "description": "Direct access from a sensor-bearing two-body satellite carrying a VGT provider with a named VVLH axes definition.",
+      "id": "access_compute_vgt_container",
+      "return": {
+        "IsSuccess": true,
+        "Message": "OK",
+        "Passes": []
+      }
+    },
+    {
       "description": "Direct chain access between a site participant and an SGP4 participant.",
       "id": "access_chain_site_sgp4",
       "return": {
@@ -994,6 +1021,6 @@
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-06-12T08:53:13Z"
+    "refreshed_at": "2026-06-12T16:45:12Z"
   }
 }

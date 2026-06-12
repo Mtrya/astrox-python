@@ -94,6 +94,17 @@ def orbit() -> orbits.KeplerianElements:
     )
 
 
+def controlled_sensor_orbit() -> orbits.KeplerianElements:
+    return orbits.keplerian(
+        semi_major_axis_m=6878137.0,
+        eccentricity=0.001,
+        inclination_deg=45.0,
+        argument_of_periapsis_deg=0.0,
+        raan_deg=20.0,
+        true_anomaly_deg=10.0,
+    )
+
+
 def sgp4_entity(
     name: str = "ISS",
     tle_lines: tuple[str, str] = TLE_A,
@@ -101,6 +112,81 @@ def sgp4_entity(
     return entities.entity(
         name=name,
         position=entities.sgp4_position(tle_lines=tle_lines),
+    )
+
+
+def controlled_target_site() -> entities.Entity:
+    return entities.entity(
+        name="TargetSite",
+        position=entities.site_position(
+            longitude_deg=-105.0,
+            latitude_deg=40.0,
+            height_m=1800.0,
+        ),
+    )
+
+
+def two_body_sensor_entity() -> entities.Entity:
+    return entities.entity(
+        name="ObserverSat",
+        position=entities.two_body_position(
+            orbit_epoch=START,
+            orbit=controlled_sensor_orbit(),
+            start=START,
+            stop=STOP,
+            step_s=120.0,
+        ),
+        orientation=entities.vvlh_axes(),
+        sensor=entities.conic_sensor(outer_half_angle_deg=8.0),
+        sensor_pointing=entities.fixed_sensor_pointing(
+            rotation=entities.az_el_rotation(
+                azimuth_deg=0.0,
+                elevation_deg=-20.0,
+            ),
+        ),
+    )
+
+
+def two_body_custom_axes_sensor_entity() -> entities.Entity:
+    # Live access accepts fixed axes when they reference the built-in VVLH axes
+    # name. Custom VGT-defined axes name resolution is left to cross-validation.
+    camera_axes = entities.fixed_axes(
+        reference_axes="VVLH",
+        rotation=entities.euler_rotation(
+            sequence="321",
+            a_deg=0.0,
+            b_deg=20.0,
+            c_deg=0.0,
+        ),
+    )
+    return entities.entity(
+        name="ObserverSat",
+        position=entities.two_body_position(
+            orbit_epoch=START,
+            orbit=controlled_sensor_orbit(),
+            start=START,
+            stop=STOP,
+            step_s=120.0,
+        ),
+        orientation=camera_axes,
+        sensor=entities.conic_sensor(outer_half_angle_deg=8.0),
+    )
+
+
+def two_body_vgt_container_entity() -> entities.Entity:
+    body_axes = entities.vvlh_axes(name="Body VVLH")
+    return entities.entity(
+        name="ObserverSat",
+        position=entities.two_body_position(
+            orbit_epoch=START,
+            orbit=controlled_sensor_orbit(),
+            start=START,
+            stop=STOP,
+            step_s=120.0,
+        ),
+        vgt=entities.vgt(axes=[body_axes]),
+        orientation=entities.vvlh_axes(),
+        sensor=entities.conic_sensor(outer_half_angle_deg=8.0),
     )
 
 
@@ -244,6 +330,39 @@ def access_compute_site_ballistic() -> dict[str, Any]:
     )
 
 
+def access_compute_sensor_pointing() -> dict[str, Any]:
+    return access.compute(
+        start=START,
+        stop=STOP,
+        from_entity=two_body_sensor_entity(),
+        to_entity=controlled_target_site(),
+        step_s=120.0,
+        compute_aer=True,
+    )
+
+
+def access_compute_custom_axes_sensor() -> dict[str, Any]:
+    return access.compute(
+        start=START,
+        stop=STOP,
+        from_entity=two_body_custom_axes_sensor_entity(),
+        to_entity=controlled_target_site(),
+        step_s=120.0,
+        compute_aer=True,
+    )
+
+
+def access_compute_vgt_container() -> dict[str, Any]:
+    return access.compute(
+        start=START,
+        stop=STOP,
+        from_entity=two_body_vgt_container_entity(),
+        to_entity=controlled_target_site(),
+        step_s=120.0,
+        compute_aer=True,
+    )
+
+
 def access_chain_site_sgp4() -> dict[str, Any]:
     ground = site()
     target = sgp4_entity()
@@ -322,6 +441,21 @@ CASES = [
         id="access_compute_site_ballistic",
         description="Direct access from a fixed site to a ballistic entity.",
         run=access_compute_site_ballistic,
+    ),
+    LiveSnapshotCase(
+        id="access_compute_sensor_pointing",
+        description="Direct access from a sensor-bearing two-body satellite to a fixed site, including entity axes and fixed sensor pointing metadata.",
+        run=access_compute_sensor_pointing,
+    ),
+    LiveSnapshotCase(
+        id="access_compute_custom_axes_sensor",
+        description="Direct access from a sensor-bearing two-body satellite using fixed axes relative to built-in VVLH axes.",
+        run=access_compute_custom_axes_sensor,
+    ),
+    LiveSnapshotCase(
+        id="access_compute_vgt_container",
+        description="Direct access from a sensor-bearing two-body satellite carrying a VGT provider with a named VVLH axes definition.",
+        run=access_compute_vgt_container,
     ),
     LiveSnapshotCase(
         id="access_chain_site_sgp4",

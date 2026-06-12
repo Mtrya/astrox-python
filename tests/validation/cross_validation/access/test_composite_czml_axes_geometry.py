@@ -1,0 +1,919 @@
+"""Fixed, frozen, composite, and CZML axes cross-validation."""
+
+# Coverage:
+#   Branches:
+#     - Fixed axes relative to built-in VVLH, LVLH, and VNC: verified with Euler and quaternion rotations
+#     - Fixed axes relative to ICRF/J2000 and inertial/fixed name variants: unresolved after inertial and Earth-fixed local frame candidates plus live reference-name probes; kept as strict calibration xfail
+#     - FixedAtEpoch axes from VVLH and LVLH into ICRF at start epoch and +60 s: verified against frozen-at-epoch local frame derivations
+#     - Composite axes with identity/off-nadir two-interval and identity/off-nadir/identity three-interval layouts: verified for multiple switch points against piecewise local FOV intervals
+#     - CZML axes sampled identity quaternions over short sample spans: verified against inertial-frame oracle for 30 s and 60 s spans, with and without CentralBody, and with LINEAR/LAGRANGE/HERMITE interpolation options
+#     - CZML axes constant, long-span sampled, and non-identity sampled quaternions: unresolved after live probes of constant vs sampled arrays, inertial and Earth-fixed identity candidates, xyzw/wxyz order, sign, X/Y component discriminator, non-identity rotation, and full-span sampling; kept as strict calibration xfail
+#   Fields:
+#     - Passes.AccessStart/AccessStop: verified for Fixed, FixedAtEpoch, and Composite branches listed above; unresolved for Fixed(ICRF/J2000)
+#     - CZML sampled-identity AccessStart/AccessStop over short spans: verified
+#     - CZML constant, long-span, and non-identity semantic fields: unresolved because constant variants fail and other sampled variants return unexplained interval residuals or component/sign behavior
+#   Parameters:
+#     - reference_axes, FixedOrientation, SourceAxesName, ReferenceAxesName, Epoch, Intervals, Start/Stop: verified with multiple values for covered Fixed/FixedAtEpoch/Composite branches; ICRF/J2000 fixed references unresolved; INERTIAL/MeanEclpJ2000/FIXED name variants fail before semantic output
+#     - unitQuaternion identity samples, interpolationAlgorithm=LINEAR/LAGRANGE/HERMITE, interpolationDegree=1/3, CentralBody omission/Earth: verified for short-span CZML sampled identity
+#     - unitQuaternion constant arrays, non-identity X/Y/sign samples, and longer sampled spans: unresolved after server failures, sampled-array residuals against inertial and Earth-fixed candidates, and no matching component-order/sign/passive candidate
+#   Comparison:
+#     - External: independent VVLH frame, Euler rotation, frozen source/reference transform, and piecewise composite interval derivation
+#     - Constants: controlled two-body orbit in _orientation.py, COMPOSITE_SWITCH_S=20 s
+#     - Tolerances: ORIENTATION_INTERVAL_ABS_S=0.5 s
+
+from __future__ import annotations
+
+import sys
+
+import numpy as np
+import pytest
+
+from astrox import entities
+from astrox.exceptions import AstroxAPIError
+from tests.validation._support import LiveConfigError, configure_astrox_from_env
+from tests.validation.cross_validation.access._cases import CrossValidationError, START, STOP
+from tests.validation.cross_validation.access._geometry import compare_intervals
+from tests.validation.cross_validation.access._orientation import (
+    COMPOSITE_SWITCH_S,
+    ORIENTATION_INTERVAL_ABS_S,
+    compare_sensor_case,
+    composite_frame,
+    conic_predicate,
+    conic_sensor,
+    compute_sensor_access,
+    earth_fixed_frame,
+    euler_321_rotation,
+    expected_site_intervals,
+    expected_intervals,
+    fixed_frame,
+    frozen_at_epoch_frame,
+    inertial_frame,
+    lvlh_frame,
+    observer_with_sensor,
+    quaternion_rotation,
+    controlled_orbit,
+    state_function,
+    subpoint_site,
+    target_orbit_entity,
+    vnc_frame,
+    vvlh_frame,
+)
+
+
+def test_fixed_axes_relative_to_vvlh_matches_fixed_rotation_oracle() -> None:
+    configure_astrox_from_env()
+    target = subpoint_site()
+    rotation = euler_321_rotation(a_deg=0.0, b_deg=-20.0, c_deg=0.0)
+    fixed_axes = entities.fixed_axes(
+        reference_axes="VVLH",
+        rotation=entities.euler_rotation(sequence="321", a_deg=0.0, b_deg=-20.0, c_deg=0.0),
+    )
+    case = case_for_orientation(
+        case_id="fixed_vvlh_euler_b_minus_20",
+        orientation=fixed_axes,
+        target=target,
+        expected=expected_site_intervals(
+            site=target,
+            frame=fixed_frame(vvlh_frame, rotation),
+            sensor_predicate=conic_predicate(8.0, np.array([0.0, 0.0, 1.0])),
+        ),
+    )
+    compare_sensor_case(case)
+
+
+def test_fixed_axes_relative_to_lvlh_matches_fixed_rotation_oracle() -> None:
+    configure_astrox_from_env()
+    target = target_orbit_entity(
+        name="FixedLvlhPositive",
+        semi_major_delta_m=100000.0,
+    )
+    fixed_axes = entities.fixed_axes(
+        reference_axes="LVLH",
+        rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+    )
+    case = case_for_orientation(
+        case_id="fixed_lvlh_identity_positive",
+        orientation=fixed_axes,
+        target=target,
+        rotation=entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
+        expected=expected_intervals(
+            target_state=state_function(
+                controlled_orbit(
+                    semi_major_delta_m=100000.0,
+                )
+            ),
+            frame=fixed_frame(
+                lvlh_frame,
+                quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+            ),
+            sensor_predicate=conic_predicate(
+                8.0,
+                np.array([1.0, 0.0, 0.0]),
+            ),
+        ),
+    )
+    compare_sensor_case(case)
+
+
+def test_fixed_axes_relative_to_vnc_matches_fixed_rotation_oracle() -> None:
+    configure_astrox_from_env()
+    target = target_orbit_entity(
+        name="FixedVncRadial",
+        semi_major_delta_m=100000.0,
+    )
+    fixed_axes = entities.fixed_axes(
+        reference_axes="VNC",
+        rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+    )
+    case = case_for_orientation(
+        case_id="fixed_vnc_identity_radial",
+        orientation=fixed_axes,
+        target=target,
+        sensor=conic_sensor(20.0),
+        rotation=entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=90.0),
+        expected=expected_intervals(
+            target_state=state_function(
+                controlled_orbit(
+                    semi_major_delta_m=100000.0,
+                )
+            ),
+            frame=fixed_frame(
+                vnc_frame,
+                quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+            ),
+            sensor_predicate=conic_predicate(
+                20.0,
+                np.array([0.0, 0.0, 1.0]),
+            ),
+        ),
+    )
+    compare_sensor_case(case)
+
+
+@pytest.mark.calibration
+@pytest.mark.xfail(
+    reason=(
+        "Fixed axes relative to ICRF/J2000 remain unresolved: live intervals do "
+        "not match the simple inertial or Skyfield ITRS/Earth-fixed frame "
+        "candidates, while other inertial/fixed names fail before semantic output."
+    ),
+    raises=CrossValidationError,
+    strict=True,
+)
+def test_fixed_axes_inertial_reference_names_remain_unresolved_after_frame_candidates() -> None:
+    configure_astrox_from_env()
+    target = target_orbit_entity(
+        name="FixedIcrfPositive",
+        inclination_delta_deg=-20.0,
+        raan_delta_deg=-60.0,
+        true_anomaly_offset_deg=60.0,
+    )
+    candidate_frames = (
+        ("inertial", inertial_frame),
+        ("skyfield_itrs_fixed", earth_fixed_frame),
+    )
+    expected_by_candidate = {}
+    for candidate_name, frame in candidate_frames:
+        expected = expected_intervals(
+            target_state=state_function(
+                controlled_orbit(
+                    inclination_delta_deg=-20.0,
+                    raan_delta_deg=-60.0,
+                    true_anomaly_offset_deg=60.0,
+                )
+            ),
+            frame=frame,
+            sensor_predicate=conic_predicate(20.0, np.array([0.0, 0.0, 1.0])),
+        )
+        expected_by_candidate[candidate_name] = expected
+    diagnostics: list[str] = []
+    for reference_axes in (
+        "ICRF",
+        "J2000",
+        "INERTIAL",
+        "Inertial",
+        "MeanEclpJ2000",
+        "FIXED",
+        "Fixed",
+    ):
+        observer = observer_with_sensor(
+            name=f"fixed_{reference_axes}_identity",
+            orientation=entities.fixed_axes(
+                reference_axes=reference_axes,
+                rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+            ),
+            sensor=conic_sensor(20.0),
+            rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+        )
+        try:
+            actual = compute_sensor_access(observer, target)
+        except AstroxAPIError as exc:
+            diagnostics.append(f"Fixed({reference_axes}): {exc}")
+            continue
+        for candidate_name, expected in expected_by_candidate.items():
+            try:
+                compare_intervals(expected, actual, tolerance_s=ORIENTATION_INTERVAL_ABS_S)
+            except CrossValidationError as exc:
+                diagnostics.append(
+                    f"Fixed({reference_axes}) vs {candidate_name}: "
+                    f"expected {expected}, actual {actual}, residual {exc}"
+                )
+            else:
+                raise AssertionError(
+                    f"Fixed({reference_axes}) matched {candidate_name}; reclassify this branch as verified"
+                )
+    raise CrossValidationError(
+        "Fixed inertial/fixed reference names unresolved after live name probes "
+        "and inertial/Earth-fixed frame candidates:\n" + "\n".join(diagnostics)
+    )
+
+
+def test_fixed_at_epoch_axes_match_frozen_vvlh_inertial_oracle() -> None:
+    configure_astrox_from_env()
+    target = subpoint_site()
+    frozen = entities.fixed_at_epoch_axes(
+        source_axes="VVLH",
+        reference_axes="ICRF",
+        epoch=START,
+    )
+    case = case_for_orientation(
+        case_id="fixed_at_epoch_vvlh_icrf",
+        orientation=frozen,
+        target=target,
+        expected=expected_site_intervals(
+            site=target,
+            frame=frozen_at_epoch_frame(vvlh_frame, inertial_frame),
+            sensor_predicate=conic_predicate(
+                8.0,
+                quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0)
+                @ np.array([0.0, 0.0, 1.0]),
+            ),
+        ),
+    )
+    compare_sensor_case(case)
+
+
+def test_fixed_at_epoch_axes_match_frozen_lvlh_inertial_oracle() -> None:
+    configure_astrox_from_env()
+    target = target_orbit_entity(name="FixedAtEpochLvlhCrossTrack", inclination_delta_deg=2.0)
+    frozen = entities.fixed_at_epoch_axes(
+        source_axes="LVLH",
+        reference_axes="ICRF",
+        epoch=START,
+    )
+    case = case_for_orientation(
+        case_id="fixed_at_epoch_lvlh_icrf_cross_track",
+        orientation=frozen,
+        target=target,
+        sensor=conic_sensor(20.0),
+        rotation=entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=90.0),
+        expected=expected_intervals(
+            target_state=state_function(controlled_orbit(inclination_delta_deg=2.0)),
+            frame=frozen_at_epoch_frame(lvlh_frame, inertial_frame),
+            sensor_predicate=conic_predicate(
+                20.0,
+                np.array([0.0, 0.0, 1.0]),
+            ),
+        ),
+    )
+    compare_sensor_case(case)
+
+
+def test_fixed_at_epoch_axes_match_later_epoch_oracle() -> None:
+    configure_astrox_from_env()
+    target = subpoint_site()
+    frozen = entities.fixed_at_epoch_axes(
+        source_axes="VVLH",
+        reference_axes="ICRF",
+        epoch="2024-01-01T00:01:00.000Z",
+    )
+    case = case_for_orientation(
+        case_id="fixed_at_epoch_vvlh_icrf_plus_60",
+        orientation=frozen,
+        target=target,
+        expected=expected_site_intervals(
+            site=target,
+            frame=frozen_at_epoch_frame(vvlh_frame, inertial_frame, epoch_s=60.0),
+            sensor_predicate=conic_predicate(
+                8.0,
+                quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0)
+                @ np.array([0.0, 0.0, 1.0]),
+            ),
+        ),
+    )
+    compare_sensor_case(case)
+
+
+def test_composite_axes_match_piecewise_interval_oracle() -> None:
+    configure_astrox_from_env()
+    target = subpoint_site()
+    identity = entities.fixed_axes(
+        reference_axes="VVLH",
+        rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+        start=START,
+        stop="2024-01-01T00:00:20.000Z",
+    )
+    off_nadir = entities.fixed_axes(
+        reference_axes="VVLH",
+        rotation=entities.euler_rotation(sequence="321", a_deg=0.0, b_deg=-20.0, c_deg=0.0),
+        start="2024-01-01T00:00:20.000Z",
+        stop=STOP,
+    )
+    composite = entities.composite_axes(intervals=[identity, off_nadir])
+    frame = composite_frame(
+        first=fixed_frame(
+            vvlh_frame,
+            quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+        ),
+        second=fixed_frame(
+            vvlh_frame,
+            euler_321_rotation(a_deg=0.0, b_deg=-20.0, c_deg=0.0),
+        ),
+        switch_s=COMPOSITE_SWITCH_S,
+    )
+    case = case_for_orientation(
+        case_id="composite_identity_then_off_nadir",
+        orientation=composite,
+        target=target,
+        expected=expected_site_intervals(
+            site=target,
+            frame=frame,
+            sensor_predicate=conic_predicate(8.0, np.array([0.0, 0.0, 1.0])),
+        ),
+    )
+    compare_sensor_case(case)
+
+
+def test_composite_axes_match_three_interval_piecewise_oracle() -> None:
+    configure_astrox_from_env()
+    target = subpoint_site()
+    identity_first = entities.fixed_axes(
+        reference_axes="VVLH",
+        rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+        start=START,
+        stop="2024-01-01T00:00:20.000Z",
+    )
+    off_nadir = entities.fixed_axes(
+        reference_axes="VVLH",
+        rotation=entities.euler_rotation(sequence="321", a_deg=0.0, b_deg=-20.0, c_deg=0.0),
+        start="2024-01-01T00:00:20.000Z",
+        stop="2024-01-01T00:00:40.000Z",
+    )
+    identity_last = entities.fixed_axes(
+        reference_axes="VVLH",
+        rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+        start="2024-01-01T00:00:40.000Z",
+        stop=STOP,
+    )
+    identity_frame = fixed_frame(
+        vvlh_frame,
+        quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+    )
+    off_nadir_frame = fixed_frame(
+        vvlh_frame,
+        euler_321_rotation(a_deg=0.0, b_deg=-20.0, c_deg=0.0),
+    )
+
+    def three_interval_frame(offset_s: float) -> np.ndarray:
+        if offset_s < 20.0:
+            return identity_frame(offset_s)
+        if offset_s < 40.0:
+            return off_nadir_frame(offset_s)
+        return identity_frame(offset_s)
+
+    case = case_for_orientation(
+        case_id="composite_identity_off_nadir_identity",
+        orientation=entities.composite_axes(intervals=[identity_first, off_nadir, identity_last]),
+        target=target,
+        expected=expected_site_intervals(
+            site=target,
+            frame=three_interval_frame,
+            sensor_predicate=conic_predicate(8.0, np.array([0.0, 0.0, 1.0])),
+        ),
+    )
+    compare_sensor_case(case)
+
+
+def test_composite_axes_match_second_switch_point_oracle() -> None:
+    configure_astrox_from_env()
+    target = subpoint_site()
+    identity = entities.fixed_axes(
+        reference_axes="VVLH",
+        rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+        start=START,
+        stop="2024-01-01T00:00:30.000Z",
+    )
+    off_nadir = entities.fixed_axes(
+        reference_axes="VVLH",
+        rotation=entities.euler_rotation(sequence="321", a_deg=0.0, b_deg=-20.0, c_deg=0.0),
+        start="2024-01-01T00:00:30.000Z",
+        stop=STOP,
+    )
+    composite = entities.composite_axes(intervals=[identity, off_nadir])
+    frame = composite_frame(
+        first=fixed_frame(
+            vvlh_frame,
+            quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+        ),
+        second=fixed_frame(
+            vvlh_frame,
+            euler_321_rotation(a_deg=0.0, b_deg=-20.0, c_deg=0.0),
+        ),
+        switch_s=30.0,
+    )
+    case = case_for_orientation(
+        case_id="composite_identity_then_off_nadir_switch_30",
+        orientation=composite,
+        target=target,
+        expected=expected_site_intervals(
+            site=target,
+            frame=frame,
+            sensor_predicate=conic_predicate(8.0, np.array([0.0, 0.0, 1.0])),
+        ),
+    )
+    compare_sensor_case(case)
+
+
+def test_czml_sampled_identity_short_spans_match_inertial_oracle() -> None:
+    configure_astrox_from_env()
+    target = target_orbit_entity(
+        name="CzmlSampledIdentityPositive",
+        inclination_delta_deg=-20.0,
+        raan_delta_deg=-60.0,
+        true_anomaly_offset_deg=60.0,
+    )
+    variants = [
+        ("czml_identity_span_30_earth_linear", 30.0, "Earth", "LINEAR", 1),
+        ("czml_identity_span_60_earth_linear", 60.0, "Earth", "LINEAR", 1),
+        ("czml_identity_span_60_no_central_body_linear", 60.0, None, "LINEAR", 1),
+        ("czml_identity_span_60_earth_lagrange_1", 60.0, "Earth", "LAGRANGE", 1),
+        ("czml_identity_span_60_earth_lagrange_3", 60.0, "Earth", "LAGRANGE", 3),
+        ("czml_identity_span_60_earth_hermite_1", 60.0, "Earth", "HERMITE", 1),
+    ]
+    for case_id, span_s, central_body, interpolation_algorithm, interpolation_degree in variants:
+        czml = entities.czml_axes(
+            epoch=START,
+            unit_quaternion_xyzw=[
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                span_s,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+            ],
+            central_body=central_body,
+            interpolation_algorithm=interpolation_algorithm,
+            interpolation_degree=interpolation_degree,
+        )
+        case = case_for_orientation(
+            case_id=case_id,
+            orientation=czml,
+            target=target,
+            sensor=conic_sensor(20.0),
+            rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+            expected=expected_intervals(
+                target_state=state_function(
+                    controlled_orbit(
+                        inclination_delta_deg=-20.0,
+                        raan_delta_deg=-60.0,
+                        true_anomaly_offset_deg=60.0,
+                    )
+                ),
+                frame=inertial_frame,
+                sensor_predicate=conic_predicate(20.0, np.array([0.0, 0.0, 1.0])),
+                stop_s=span_s,
+            ),
+        )
+        compare_sensor_case(case)
+
+
+@pytest.mark.calibration
+@pytest.mark.xfail(
+    reason=(
+        "CZML axes remain partially unresolved: constant quaternion variants fail before semantic output, "
+        "long-span sampled identity has boundary residuals, and non-identity sampled quaternion "
+        "component/sign behavior does not match any bounded local component-order/sign candidate."
+    ),
+    raises=CrossValidationError,
+    strict=True,
+)
+def test_czml_axes_remain_unresolved_after_variant_probe_matrix() -> None:
+    configure_astrox_from_env()
+    site_target = subpoint_site()
+    positive_target = target_orbit_entity(
+        name="CzmlUnresolvedPositive",
+        inclination_delta_deg=-20.0,
+        raan_delta_deg=-60.0,
+        true_anomaly_offset_deg=60.0,
+    )
+    discriminator_target = target_orbit_entity(
+        name="CzmlComponentDiscriminator",
+        inclination_delta_deg=-20.0,
+        raan_delta_deg=-30.0,
+        true_anomaly_offset_deg=30.0,
+    )
+    constant_variants = [
+        (
+            "constant_xyzw_identity_with_central_body",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[0.0, 0.0, 0.0, 1.0],
+                central_body="Earth",
+            ),
+        ),
+        (
+            "constant_wxyz_identity_probe",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[1.0, 0.0, 0.0, 0.0],
+                central_body="Earth",
+            ),
+        ),
+        (
+            "constant_xyzw_negative_identity_probe",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[0.0, 0.0, 0.0, -1.0],
+                central_body="Earth",
+            ),
+        ),
+        (
+            "constant_xyzw_y_minus_20_probe",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[
+                    0.0,
+                    -0.17364817766693033,
+                    0.0,
+                    0.984807753012208,
+                ],
+                central_body="Earth",
+            ),
+        ),
+    ]
+    sampled_variants = [
+        (
+            "sampled_identity_positive_span_600",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[0.0, 0.0, 0.0, 0.0, 1.0, 600.0, 0.0, 0.0, 0.0, 1.0],
+                central_body="Earth",
+                interpolation_algorithm="LINEAR",
+                interpolation_degree=1,
+            ),
+            [
+                ("inertial_identity", inertial_frame),
+                ("skyfield_itrs_fixed_identity", earth_fixed_frame),
+            ],
+            600.0,
+        ),
+        (
+            "sampled_identity_positive_span_7200",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    7200.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                ],
+                central_body="Earth",
+                interpolation_algorithm="LINEAR",
+                interpolation_degree=1,
+            ),
+            [
+                ("inertial_identity", inertial_frame),
+                ("skyfield_itrs_fixed_identity", earth_fixed_frame),
+            ],
+            7200.0,
+        ),
+        (
+            "sampled_xyzw_y_minus_20_span_60",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[
+                    0.0,
+                    0.0,
+                    -0.17364817766693033,
+                    0.0,
+                    0.984807753012208,
+                    60.0,
+                    0.0,
+                    -0.17364817766693033,
+                    0.0,
+                    0.984807753012208,
+                ],
+                central_body="Earth",
+                interpolation_algorithm="LINEAR",
+                interpolation_degree=1,
+            ),
+            [
+                (
+                    "active_xyzw_y_minus_20",
+                    fixed_frame(
+                        inertial_frame,
+                        quaternion_rotation(
+                            scalar=0.984807753012208,
+                            x=0.0,
+                            y=-0.17364817766693033,
+                            z=0.0,
+                        ),
+                    ),
+                ),
+            ],
+            60.0,
+        ),
+        (
+            "sampled_xyzw_x_minus_20_span_60",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[
+                    0.0,
+                    -0.17364817766693033,
+                    0.0,
+                    0.0,
+                    0.984807753012208,
+                    60.0,
+                    -0.17364817766693033,
+                    0.0,
+                    0.0,
+                    0.984807753012208,
+                ],
+                central_body="Earth",
+                interpolation_algorithm="LINEAR",
+                interpolation_degree=1,
+            ),
+            [
+                (
+                    "active_xyzw_x_minus_20",
+                    fixed_frame(
+                        inertial_frame,
+                        quaternion_rotation(
+                            scalar=0.984807753012208,
+                            x=-0.17364817766693033,
+                            y=0.0,
+                            z=0.0,
+                        ),
+                    ),
+                ),
+            ],
+            60.0,
+        ),
+        (
+            "sampled_wxyz_order_probe_span_7200",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    7200.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                ],
+                central_body="Earth",
+                interpolation_algorithm="LINEAR",
+                interpolation_degree=1,
+            ),
+            [("wxyz_order_as_inertial_probe", inertial_frame)],
+            7200.0,
+        ),
+    ]
+    # Additional discriminator probe:
+    # - The first non-identity samples suggested a possible X/Y component swap,
+    #   because sampled X-20 returned the interval shape predicted by local Y-20.
+    # - A second target was selected where local X/Y and sign variants separate:
+    #   active X-20=[], Y-20=[0,60], X+20=[0,8.605], Y+20=[].
+    # - Live ASTROX returned X-20=[0,60], Y-20=[], X+20=[], Y+20=[].
+    # - A bounded local enumeration of quaternion component permutations,
+    #   component signs, and active/passive transpose variants found no candidate
+    #   matching the combined live signatures, so this branch stays unresolved.
+    component_discriminator_variants = [
+        (
+            "component_discriminator_x_minus_20",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[
+                    0.0,
+                    -0.17364817766693033,
+                    0.0,
+                    0.0,
+                    0.984807753012208,
+                    60.0,
+                    -0.17364817766693033,
+                    0.0,
+                    0.0,
+                    0.984807753012208,
+                ],
+                central_body="Earth",
+                interpolation_algorithm="LINEAR",
+                interpolation_degree=1,
+            ),
+            "full_60",
+        ),
+        (
+            "component_discriminator_y_minus_20",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[
+                    0.0,
+                    0.0,
+                    -0.17364817766693033,
+                    0.0,
+                    0.984807753012208,
+                    60.0,
+                    0.0,
+                    -0.17364817766693033,
+                    0.0,
+                    0.984807753012208,
+                ],
+                central_body="Earth",
+                interpolation_algorithm="LINEAR",
+                interpolation_degree=1,
+            ),
+            "empty",
+        ),
+        (
+            "component_discriminator_x_plus_20",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[
+                    0.0,
+                    0.17364817766693033,
+                    0.0,
+                    0.0,
+                    0.984807753012208,
+                    60.0,
+                    0.17364817766693033,
+                    0.0,
+                    0.0,
+                    0.984807753012208,
+                ],
+                central_body="Earth",
+                interpolation_algorithm="LINEAR",
+                interpolation_degree=1,
+            ),
+            "empty",
+        ),
+        (
+            "component_discriminator_y_plus_20",
+            entities.czml_axes(
+                epoch=START,
+                unit_quaternion_xyzw=[
+                    0.0,
+                    0.0,
+                    0.17364817766693033,
+                    0.0,
+                    0.984807753012208,
+                    60.0,
+                    0.0,
+                    0.17364817766693033,
+                    0.0,
+                    0.984807753012208,
+                ],
+                central_body="Earth",
+                interpolation_algorithm="LINEAR",
+                interpolation_degree=1,
+            ),
+            "empty",
+        ),
+    ]
+    failures: list[str] = []
+    successes: list[str] = []
+    for case_id, czml in constant_variants:
+        observer = observer_with_sensor(
+            name=case_id,
+            orientation=czml,
+            sensor=conic_sensor(8.0),
+            rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+        )
+        try:
+            actual = compute_sensor_access(observer, site_target)
+        except AstroxAPIError as exc:
+            failures.append(f"{case_id}: {exc}")
+            continue
+        successes.append(f"{case_id}: returned intervals {actual}")
+    for case_id, czml, candidate_frames, stop_s in sampled_variants:
+        observer = observer_with_sensor(
+            name=case_id,
+            orientation=czml,
+            sensor=conic_sensor(20.0),
+            rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+        )
+        actual = compute_sensor_access(observer, positive_target)
+        candidate_residuals = []
+        for candidate_name, frame in candidate_frames:
+            expected = expected_intervals(
+                target_state=state_function(
+                    controlled_orbit(
+                        inclination_delta_deg=-20.0,
+                        raan_delta_deg=-60.0,
+                        true_anomaly_offset_deg=60.0,
+                    )
+                ),
+                frame=frame,
+                sensor_predicate=conic_predicate(20.0, np.array([0.0, 0.0, 1.0])),
+                stop_s=stop_s,
+            )
+            try:
+                compare_intervals(expected, actual, tolerance_s=ORIENTATION_INTERVAL_ABS_S)
+            except CrossValidationError as exc:
+                candidate_residuals.append(
+                    f"{candidate_name}: expected {expected}, residual {exc}"
+                )
+            else:
+                successes.append(f"{case_id}: matched {candidate_name} candidate {expected}")
+        if candidate_residuals:
+            failures.append(
+                f"{case_id}: actual {actual}; no sampled candidate matched: "
+                + "; ".join(candidate_residuals)
+            )
+    for case_id, czml, expected_signature in component_discriminator_variants:
+        observer = observer_with_sensor(
+            name=case_id,
+            orientation=czml,
+            sensor=conic_sensor(20.0),
+            rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+        )
+        actual = compute_sensor_access(observer, discriminator_target)
+        signature = interval_signature(actual, full_stop_s=60.0)
+        if signature != expected_signature:
+            raise AssertionError(
+                f"{case_id}: expected unresolved live signature {expected_signature}, "
+                f"but received {signature} from intervals {actual}; re-run CZML convention probes"
+            )
+        failures.append(
+            f"{case_id}: observed live signature {signature} for intervals {actual}; "
+            "no local component-order/sign/passive quaternion candidate matched the combined discriminator matrix"
+        )
+    if successes:
+        raise AssertionError(
+            "CZML unresolved matrix partially resolved; reclassify successful "
+            "cases before keeping this xfail:\n" + "\n".join(successes)
+        )
+    raise CrossValidationError("CZML axes unresolved after variant probes:\n" + "\n".join(failures))
+
+
+def interval_signature(intervals, *, full_stop_s: float) -> str:
+    if not intervals:
+        return "empty"
+    if (
+        len(intervals) == 1
+        and abs(intervals[0].start_s) <= ORIENTATION_INTERVAL_ABS_S
+        and abs(intervals[0].stop_s - full_stop_s) <= ORIENTATION_INTERVAL_ABS_S
+    ):
+        return f"full_{int(full_stop_s)}"
+    return "partial"
+
+
+def case_for_orientation(*, case_id: str, orientation, target, expected, sensor=None, rotation=None):
+    sensor = conic_sensor(8.0) if sensor is None else sensor
+    return type("Case", (), {
+        "id": case_id,
+        "observer": observer_with_sensor(
+            name=case_id,
+            orientation=orientation,
+            sensor=sensor,
+            rotation=rotation,
+        ),
+        "target": target,
+        "expected": expected,
+    })()
+
+
+def main() -> int:
+    try:
+        test_fixed_axes_relative_to_vvlh_matches_fixed_rotation_oracle()
+        test_fixed_axes_relative_to_lvlh_matches_fixed_rotation_oracle()
+        test_fixed_axes_relative_to_vnc_matches_fixed_rotation_oracle()
+        test_fixed_at_epoch_axes_match_frozen_vvlh_inertial_oracle()
+        test_fixed_at_epoch_axes_match_frozen_lvlh_inertial_oracle()
+        test_fixed_at_epoch_axes_match_later_epoch_oracle()
+        test_composite_axes_match_piecewise_interval_oracle()
+        test_composite_axes_match_three_interval_piecewise_oracle()
+        test_composite_axes_match_second_switch_point_oracle()
+        test_czml_sampled_identity_short_spans_match_inertial_oracle()
+    except (CrossValidationError, LiveConfigError, AstroxAPIError) as exc:
+        print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
+        return 1
+    print("CROSS_VALIDATION_CHECKED=10")
+    print("CROSS_VALIDATION_FAILED=0")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

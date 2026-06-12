@@ -110,7 +110,79 @@ ballistic_position = entities.ballistic_position(
 
 Optional ASTROX defaults are omitted unless you supply them. For example, `site_position(...)` does not send `CentralBody` unless `central_body` is provided.
 
-## Sensors
+## Attitude Axes
+
+Use entity attitude axes when an ASTROX workflow needs an object's body frame or a named coordinate frame. The access validation matrix calibrates these axes through sensor-constrained access intervals against an independent two-body, WGS84 obstruction, and field-of-view oracle.
+
+The recommended built-in axes are:
+
+```python
+body_vvlh = entities.vvlh_axes()
+body_lvlh = entities.lvlh_axes()
+body_vnc = entities.vnc_axes()
+```
+
+Current cross-validation establishes the following ASTROX conventions for generic axes and the `relative_to="Earth"` / `relative_to="CBF"` variants:
+
+| Constructor | Calibrated axis convention |
+| --- | --- |
+| `entities.vvlh_axes(...)` | `+Z` points nadir, `+X` is along-track velocity projected into the local horizontal plane, and `+Y` completes the right-side frame |
+| `entities.lvlh_axes(...)` | `+X` is radial outward, `+Z` is orbit angular momentum, and `+Y` is the in-track axis from `Z x X` |
+| `entities.vnc_axes(...)` | `+X` follows inertial velocity, `+Y` follows orbit angular momentum, and `+Z` completes the right-handed triad |
+
+`relative_to="Moon"`, `"Mars"`, and `"Sun"` remain calibrated only as unresolved validation cases. The live calls and Skyfield body-vector probes are recorded under `tests/validation/cross_validation/access/`, but the SDK documentation does not recommend those variants as understood semantics yet.
+
+Use `fixed_axes(...)` to rotate a body frame relative to a calibrated reference frame:
+
+```python
+camera_axes = entities.fixed_axes(
+    reference_axes="VVLH",
+    rotation=entities.euler_rotation(
+        sequence="321",
+        a_deg=0.0,
+        b_deg=-20.0,
+        c_deg=0.0,
+    ),
+)
+```
+
+`fixed_axes(...)` is cross-validated for built-in `VVLH`, `LVLH`, and `VNC` references with Euler and quaternion rotations. `fixed_at_epoch_axes(...)` is cross-validated for freezing `VVLH` and `LVLH` source axes into `ICRF` at multiple epochs, and `composite_axes(...)` is cross-validated for piecewise interval composition:
+
+```python
+frozen = entities.fixed_at_epoch_axes(
+    source_axes=entities.vvlh_axes(),
+    reference_axes="ICRF",
+    epoch="2024-01-01T00:00:00.000Z",
+)
+
+piecewise = entities.composite_axes(
+    intervals=[
+        entities.vvlh_axes(start="2024-01-01T00:00:00.000Z", stop="2024-01-01T00:00:20.000Z"),
+        camera_axes,
+    ],
+)
+```
+
+Do not treat every ASTROX reference-name spelling as calibrated. Fixed axes relative to `ICRF` / `J2000` / inertial and fixed-name variants are still strict unresolved validation cases: live intervals do not match the bounded inertial or Earth-fixed frame candidates, and some names fail before semantic output.
+
+`czml_axes(...)` is available for ASTROX CZML-like sampled attitude input:
+
+```python
+identity_axes = entities.czml_axes(
+    epoch="2024-01-01T00:00:00.000Z",
+    unit_quaternion_xyzw=[
+        0.0, 0.0, 0.0, 0.0, 1.0,
+        60.0, 0.0, 0.0, 0.0, 1.0,
+    ],
+    central_body="Earth",
+    interpolation_algorithm="LINEAR",
+    interpolation_degree=1,
+)
+```
+
+Current validation only recommends short-span sampled identity quaternions as calibrated. Constant arrays, long-span sampled identity, non-identity sampled quaternions, component order/sign behavior, and fixed-coordinate interpretation remain unresolved after bounded probes. Keep CZML attitude use close to server examples or treat it as an advanced raw-surface escape hatch until upstream conventions are clarified.
+
+## Sensor Pointing and Sensors
 
 Create basic sensor metadata with conic or rectangular sensor constructors:
 
@@ -125,7 +197,78 @@ rectangular_sensor = entities.rectangular_sensor(
 )
 ```
 
-These values are metadata fragments. They are useful when an ASTROX workflow accepts a named object with an attached sensor.
+Conic `outer_half_angle_deg` is calibrated as the half-angle around the sensor boresight. Rectangular `x_half_angle_deg` and `y_half_angle_deg` are calibrated as independent X/Z and Y/Z angular limits in the sensor camera axes.
+
+Attach sensor pointing with `fixed_sensor_pointing(...)`:
+
+```python
+nadir_camera = entities.entity(
+    name="Observer",
+    position=two_body_position,
+    orientation=entities.vvlh_axes(),
+    sensor=entities.conic_sensor(outer_half_angle_deg=8.0),
+    sensor_pointing=entities.fixed_sensor_pointing(
+        rotation=entities.quaternion_rotation(
+            scalar=1.0,
+            x=0.0,
+            y=0.0,
+            z=0.0,
+        ),
+    ),
+)
+```
+
+Quaternion and Euler fixed sensor pointing are calibrated as active rotations of the local `+Z` boresight. The SDK uses scalar-first Python arguments for quaternions and lowers them to ASTROX `QS`, `QX`, `QY`, `QZ` fields. Euler sequences `321`, `123`, and `213` are cross-validated for representative single-axis rotations.
+
+`az_el_rotation(...)` has a different calibrated meaning from quaternion or Euler fragments. For sensor pointing, ASTROX treats Az/El as a direct boresight vector in the parent axes: azimuth rotates from `+X` toward `+Y`, and elevation raises toward `+Z`. It is not equivalent to applying a quaternion or Euler rotation to the `+Z` boresight.
+
+```python
+along_track_camera = entities.fixed_sensor_pointing(
+    rotation=entities.az_el_rotation(
+        azimuth_deg=0.0,
+        elevation_deg=0.0,
+    ),
+)
+```
+
+## VGT Orientation Helpers
+
+VGT definitions are advanced ASTROX name-reference objects attached to an entity through `entities.vgt(...)`. The calibrated public path is `vgt_fixed_vector(...)` plus `aligned_and_constrained_axes(...)`, validated against a local TRIAD-style vector-alignment derivation:
+
+```python
+body_axes = entities.vvlh_axes(name="BodyVVLH")
+
+boresight = entities.vgt_fixed_vector(
+    name="Boresight",
+    reference_axes=body_axes,
+    direction=entities.xyz_direction(x=0.0, y=0.0, z=1.0),
+)
+
+clock = entities.vgt_fixed_vector(
+    name="Clock",
+    reference_axes=body_axes,
+    direction=entities.xyz_direction(x=1.0, y=0.0, z=0.0),
+)
+
+sensor_axes = entities.aligned_and_constrained_axes(
+    principal=boresight,
+    principal_axis="+Z",
+    reference=clock,
+    reference_axis="+X",
+)
+
+observer = entities.entity(
+    name="Observer",
+    position=two_body_position,
+    vgt=entities.vgt(
+        axes=[body_axes],
+        vectors=[boresight, clock],
+    ),
+    orientation=sensor_axes,
+)
+```
+
+No-space custom VGT axes names and string references are calibrated for the validated cases. Names containing spaces remain unresolved because the live service reports that the named axes cannot be found. Empty `Axes`, `Vectors`, `Angles`, `Planes`, `Points`, and `Systems` provider collections are pass-through containers in the calibrated VGT access cases, but non-empty `Points` and `Systems` currently return server errors before semantic output; keep them out of recommended examples until upstream behavior is clarified.
 
 ## Named Entities
 
