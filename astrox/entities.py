@@ -27,6 +27,7 @@ __all__ = [
     "ConicSensor",
     "CompositeAxes",
     "CzmlPosition",
+    "CzmlPositionSTM",
     "CzmlPositions",
     "CzmlAxes",
     "Entity",
@@ -289,6 +290,54 @@ class CzmlPosition:
             payload["cartesianVelocity"] = list(self.cartesian_velocity)
         return payload
 
+    @classmethod
+    def from_czml_wire(cls, payload: dict[str, Any]) -> CzmlPosition:
+        """Build from an ASTROX CZML position-data payload."""
+        cartesian = payload.get("cartesian")
+        cartesian_velocity = payload.get("cartesianVelocity")
+        return cls(
+            epoch=payload["epoch"],
+            central_body=payload.get("CentralBody"),
+            interpolation_algorithm=payload.get("interpolationAlgorithm"),
+            interpolation_degree=payload.get("interpolationDegree"),
+            reference_frame=payload.get("referenceFrame"),
+            interval=payload.get("interval"),
+            cartesian=None if cartesian is None else tuple(cartesian),
+            cartesian_velocity=None
+            if cartesian_velocity is None
+            else tuple(cartesian_velocity),
+        )
+
+
+@dataclass(frozen=True, kw_only=True)
+class CzmlPositionSTM(CzmlPosition):
+    """CZML position sample augmented with STM-like orientation and translation."""
+
+    unit_quaternion: tuple[float, ...]
+    cartesian_translation: tuple[float, ...] | None = None
+
+    @classmethod
+    def from_czml_wire(cls, payload: dict[str, Any]) -> CzmlPositionSTM:
+        """Build from the ASTROX CzmlPositionSTM payload."""
+        cartesian_velocity = payload.get("cartesianVelocity")
+        cartesian_translation = payload.get("cartesianTranslation")
+        return cls(
+            epoch=payload["epoch"],
+            central_body=payload.get("CentralBody"),
+            interpolation_algorithm=payload.get("interpolationAlgorithm"),
+            interpolation_degree=payload.get("interpolationDegree"),
+            reference_frame=payload["referenceFrame"],
+            interval=payload.get("interval"),
+            cartesian=tuple(payload["cartesian"]),
+            cartesian_velocity=None
+            if cartesian_velocity is None
+            else tuple(cartesian_velocity),
+            unit_quaternion=tuple(payload["unitQuaternion"]),
+            cartesian_translation=None
+            if cartesian_translation is None
+            else tuple(cartesian_translation),
+        )
+
 
 @dataclass(frozen=True, kw_only=True)
 class CzmlPositions:
@@ -301,10 +350,7 @@ class CzmlPositions:
         """Lower to a typed ASTROX generic entity-position fragment."""
         payload: dict[str, Any] = {
             "$type": "CzmlPositions",
-            "CzmlPositions": [
-                position.to_czml_wire()
-                for position in self.positions
-            ],
+            "CzmlPositions": [position.to_czml_wire() for position in self.positions],
         }
         _include_if_supplied(payload, "CentralBody", self.central_body)
         return payload
@@ -1178,10 +1224,7 @@ class EntityGroup:
         payload: dict[str, Any] = {
             "$type": "EntityPathGroup",
             "Name": self.name,
-            "AssignedObjects": [
-                member.to_wire()
-                for member in self.members
-            ],
+            "AssignedObjects": [member.to_wire() for member in self.members],
         }
         _include_if_supplied(payload, "FromAccess_Restriction", self.from_restriction)
         _include_if_supplied(payload, "FromAccess_Number", self.from_number)
