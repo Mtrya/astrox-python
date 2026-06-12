@@ -21,6 +21,7 @@ import math
 import os
 from collections.abc import Callable
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -230,10 +231,8 @@ def expected_intervals(
     start_s: float = 0.0,
     stop_s: float = 7200.0,
 ) -> list[Interval]:
-    observer_state = state_function(controlled_orbit())
-
     def visible(offset_s: float) -> bool:
-        observer_position, _ = observer_state(offset_s)
+        observer_position, _ = default_observer_state(offset_s)
         target_position, _ = target_state(offset_s)
         observer_ecef = inertial_to_ecef(observer_position, offset_s)
         target_ecef = inertial_to_ecef(target_position, offset_s)
@@ -322,6 +321,7 @@ def state_function(orbit: orbits.KeplerianElements) -> StateFunction:
     mean_motion_rad_s = math.sqrt(EARTH_MU / orbit.semi_major_axis_m**3)
     mean_anomaly_deg = true_to_mean_deg(orbit.true_anomaly_deg, orbit.eccentricity)
 
+    @lru_cache(maxsize=None)
     def state(offset_s: float) -> tuple[Vector, Vector]:
         mean_anomaly_rad = math.radians(mean_anomaly_deg) + mean_motion_rad_s * offset_s
         true_anomaly_deg = mean_to_true_deg(mean_anomaly_rad, orbit.eccentricity)
@@ -340,6 +340,11 @@ def state_function(orbit: orbits.KeplerianElements) -> StateFunction:
     return state
 
 
+@lru_cache(maxsize=None)
+def default_observer_state(offset_s: float) -> tuple[Vector, Vector]:
+    return state_function(controlled_orbit())(offset_s)
+
+
 def skyfield_body_state_function(body_name: str) -> StateFunction:
     # DE421 is used as an independent geocentric ephemeris candidate for
     # ASTROX CentralBodyPosition targets. Positions are Earth-to-body vectors in
@@ -350,10 +355,12 @@ def skyfield_body_state_function(body_name: str) -> StateFunction:
     earth = eph["earth"]
     body = eph[body_name.lower()]
 
+    @lru_cache(maxsize=None)
     def body_position(offset_s: float) -> Vector:
         instant = time_at_offset(START, offset_s)
         return np.array(earth.at(instant).observe(body).position.m)
 
+    @lru_cache(maxsize=None)
     def state(offset_s: float) -> tuple[Vector, Vector]:
         delta_s = 1.0
         position = body_position(offset_s)
@@ -368,7 +375,7 @@ def skyfield_body_state_function(body_name: str) -> StateFunction:
 
 def body_vvlh_frame(body_state: StateFunction) -> Callable[[float], Frame]:
     def frame(offset_s: float) -> Frame:
-        observer_position, observer_velocity = state_function(controlled_orbit())(offset_s)
+        observer_position, observer_velocity = default_observer_state(offset_s)
         body_position, body_velocity = body_state(offset_s)
         to_body = unit(body_position - observer_position)
         relative_velocity = body_velocity - observer_velocity
@@ -381,7 +388,7 @@ def body_vvlh_frame(body_state: StateFunction) -> Callable[[float], Frame]:
 
 def body_vnc_frame(body_state: StateFunction) -> Callable[[float], Frame]:
     def frame(offset_s: float) -> Frame:
-        observer_position, observer_velocity = state_function(controlled_orbit())(offset_s)
+        observer_position, observer_velocity = default_observer_state(offset_s)
         body_position, body_velocity = body_state(offset_s)
         relative_position = body_position - observer_position
         relative_velocity = body_velocity - observer_velocity
@@ -395,7 +402,7 @@ def body_vnc_frame(body_state: StateFunction) -> Callable[[float], Frame]:
 
 def body_lvlh_frame(body_state: StateFunction) -> Callable[[float], Frame]:
     def frame(offset_s: float) -> Frame:
-        observer_position, observer_velocity = state_function(controlled_orbit())(offset_s)
+        observer_position, observer_velocity = default_observer_state(offset_s)
         body_position, body_velocity = body_state(offset_s)
         relative_position = body_position - observer_position
         relative_velocity = body_velocity - observer_velocity
@@ -408,7 +415,7 @@ def body_lvlh_frame(body_state: StateFunction) -> Callable[[float], Frame]:
 
 
 def subpoint_geodetic_degrees(offset_s: float) -> tuple[float, float]:
-    position, _ = state_function(controlled_orbit())(offset_s)
+    position, _ = default_observer_state(offset_s)
     ecef = inertial_to_ecef(position, offset_s)
     radius = float(np.linalg.norm(ecef))
     longitude_deg = math.degrees(math.atan2(float(ecef[1]), float(ecef[0])))
@@ -416,6 +423,7 @@ def subpoint_geodetic_degrees(offset_s: float) -> tuple[float, float]:
     return longitude_deg, latitude_deg
 
 
+@lru_cache(maxsize=None)
 def site_ecef(*, latitude_deg: float, longitude_deg: float, height_m: float) -> Vector:
     return np.array(
         skyfield_site(latitude_deg, longitude_deg, height_m)
@@ -428,18 +436,23 @@ def site_ecef(*, latitude_deg: float, longitude_deg: float, height_m: float) -> 
 def inertial_to_ecef(position_m: Vector, offset_s: float) -> Vector:
     # Local Earth-fixed conversion uses Skyfield ITRS at the ASTROX UTC epoch;
     # the orbital state itself is the independent two-body inertial state.
-    return np.array(itrs.rotation_at(time_at_offset(START, offset_s)) @ position_m)
+    return np.array(itrs_rotation_at(offset_s) @ position_m)
 
 
 def ecef_to_inertial(position_m: Vector, offset_s: float) -> Vector:
-    return np.array(itrs.rotation_at(time_at_offset(START, offset_s)).T @ position_m)
+    return np.array(itrs_rotation_at(offset_s).T @ position_m)
+
+
+@lru_cache(maxsize=None)
+def itrs_rotation_at(offset_s: float) -> Frame:
+    return np.array(itrs.rotation_at(time_at_offset(START, offset_s)))
 
 
 def vvlh_frame(offset_s: float) -> Frame:
     # ASTROX VVLH calibration: +Z points nadir, +X is the along-track velocity
     # projected into the local horizontal plane, and +Y completes the frame to
     # the spacecraft right side.
-    position, velocity = state_function(controlled_orbit())(offset_s)
+    position, velocity = default_observer_state(offset_s)
     down = unit(-position)
     forward = unit(velocity - down * float(np.dot(velocity, down)))
     right = unit(np.cross(down, forward))
@@ -449,7 +462,7 @@ def vvlh_frame(offset_s: float) -> Frame:
 def vnc_frame(offset_s: float) -> Frame:
     # ASTROX VNC calibration: +X follows inertial velocity, +Y follows orbit
     # angular momentum, and +Z completes the right-handed triad.
-    position, velocity = state_function(controlled_orbit())(offset_s)
+    position, velocity = default_observer_state(offset_s)
     x_axis = unit(velocity)
     y_axis = unit(np.cross(position, velocity))
     z_axis = unit(np.cross(x_axis, y_axis))
@@ -459,7 +472,7 @@ def vnc_frame(offset_s: float) -> Frame:
 def lvlh_frame(offset_s: float) -> Frame:
     # ASTROX LVLH calibration: +X is radial outward, +Z is orbit angular
     # momentum, and +Y is the in-track axis produced by Z cross X.
-    position, velocity = state_function(controlled_orbit())(offset_s)
+    position, velocity = default_observer_state(offset_s)
     z_axis = unit(np.cross(position, velocity))
     x_axis = unit(position)
     y_axis = unit(np.cross(z_axis, x_axis))
@@ -499,7 +512,7 @@ def earth_fixed_frame(offset_s: float) -> Frame:
     # Columns are Skyfield ITRS/ECEF basis vectors expressed in the local
     # inertial coordinates used by the two-body oracle. This is a direct
     # Earth-rotation frame candidate, not a full ASTROX fixed-frame model.
-    return np.array(itrs.rotation_at(time_at_offset(START, offset_s))).T
+    return itrs_rotation_at(offset_s).T
 
 
 def conic_predicate(half_angle_deg: float, boresight: Vector) -> Callable[[Vector], bool]:
