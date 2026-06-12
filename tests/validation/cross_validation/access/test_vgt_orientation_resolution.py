@@ -7,7 +7,7 @@
 #     - Vgt.Axes, Vgt.Vectors, Vgt.Angles, Vgt.Planes, and empty Vgt.Points/Systems provider collections: verified as pass-through containers that do not alter calibrated VVLH sensor access
 #     - custom fixed-axes name resolution inside aligned_and_constrained_axes: verified against the same TRIAD oracle for no-space object and string reference styles
 #     - custom fixed-axes names containing spaces inside aligned_and_constrained_axes: unresolved; object and string reference styles both report the named axes cannot be found
-#     - non-empty Vgt.Points and Vgt.Systems provider collections: unresolved after SDK-callable name-only/description/combined provider probes and raw discriminator/default-name probes return HTTP 500 before semantic output
+#     - non-empty Vgt.Points and Vgt.Systems provider collections: unresolved after SDK-callable name-only/description/combined provider probes and executable raw discriminator/default-name probes return HTTP 500 before semantic output
 #   Fields:
 #     - Passes.AccessStart/AccessStop: verified for built-in aligned/VGT container cases
 #     - VGT custom-name semantic fields: verified for no-space names through AccessStart/AccessStop comparison; unresolved for names containing spaces
@@ -29,10 +29,11 @@ import sys
 import numpy as np
 import pytest
 
-from astrox import entities
+from astrox import entities, raw
 from astrox.exceptions import AstroxAPIError, AstroxHTTPError
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
-from tests.validation.cross_validation.access._cases import CrossValidationError
+from tests.validation.cross_validation.access._cases import CrossValidationError, START, STOP
+from tests.validation.cross_validation.access._geometry import intervals_from_access_passes
 from tests.validation.cross_validation.access._orientation import (
     compare_sensor_case,
     conic_predicate,
@@ -356,9 +357,8 @@ def test_vgt_points_and_systems_remain_unresolved_after_named_provider_probes() 
     configure_astrox_from_env()
     target = subpoint_site()
     # The SDK-callable probes below cover the checked-in CrdnPoint/CrdnSystem
-    # schema shape. A bounded raw-wire live probe also tried {"$type": "Point"},
-    # {"$type": "System"}, and default names Center, SubSatellitePoint, Fixed,
-    # and ICRF; each returned HTTP 500 before semantic output.
+    # schema shape. The raw-wire probes cover plausible discriminator additions
+    # and default-name guesses without changing the rest of the access payload.
     provider_cases = [
         (
             "point_name_only",
@@ -423,6 +423,66 @@ def test_vgt_points_and_systems_remain_unresolved_after_named_provider_probes() 
             failures.append(f"{case_id}: HTTP {exc.status_code} {exc}")
             continue
         successes.append(case_id)
+    raw_provider_cases = [
+        (
+            "raw_point_type_point",
+            {"Axes": [entities.vvlh_axes(name="OnlyAxes").to_wire()], "Points": [{"$type": "Point", "Name": "Point"}]},
+        ),
+        (
+            "raw_system_type_system",
+            {"Axes": [entities.vvlh_axes(name="OnlyAxes").to_wire()], "Systems": [{"$type": "System", "Name": "System"}]},
+        ),
+        (
+            "raw_point_default_center",
+            {"Axes": [entities.vvlh_axes(name="OnlyAxes").to_wire()], "Points": [{"Name": "Center"}]},
+        ),
+        (
+            "raw_point_default_subsatellite",
+            {"Axes": [entities.vvlh_axes(name="OnlyAxes").to_wire()], "Points": [{"Name": "SubSatellitePoint"}]},
+        ),
+        (
+            "raw_system_default_fixed",
+            {"Axes": [entities.vvlh_axes(name="OnlyAxes").to_wire()], "Systems": [{"Name": "Fixed"}]},
+        ),
+        (
+            "raw_system_default_icrf",
+            {"Axes": [entities.vvlh_axes(name="OnlyAxes").to_wire()], "Systems": [{"Name": "ICRF"}]},
+        ),
+        (
+            "raw_point_system_typed_combined",
+            {
+                "Axes": [entities.vvlh_axes(name="OnlyAxes").to_wire()],
+                "Points": [{"$type": "Point", "Name": "Point"}],
+                "Systems": [{"$type": "System", "Name": "System"}],
+            },
+        ),
+    ]
+    for case_id, provider in raw_provider_cases:
+        observer = observer_with_sensor(
+            name=f"vgt_{case_id}",
+            orientation=entities.vvlh_axes(),
+            sensor=conic_sensor(8.0),
+            rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+        )
+        observer_payload = observer.to_wire()
+        observer_payload["Vgt"] = provider
+        payload = {
+            "Start": START,
+            "Stop": STOP,
+            "FromObjectPath": observer_payload,
+            "ToObjectPath": target.to_wire(),
+            "OutStep": 120.0,
+            "ComputeAER": True,
+        }
+        try:
+            result = raw.post("/access/AccessComputeV2", json=payload)
+        except AstroxHTTPError as exc:
+            failures.append(f"{case_id}: HTTP {exc.status_code} {exc}")
+            continue
+        except AstroxAPIError as exc:
+            failures.append(f"{case_id}: API {exc}")
+            continue
+        successes.append(f"{case_id}: returned {intervals_from_access_passes(result['Passes'])}")
     if successes:
         raise AssertionError(
             "non-empty VGT Points/Systems partially resolved; reclassify "
