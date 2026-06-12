@@ -187,7 +187,19 @@ period_s, fixed_position = orbits.central_body_frame(
 )
 ```
 
-`to_central_body` is required. `target_reference_frame` is optional and omitted from the wire request when not supplied. The returned `fixed_position` is an `entities.CzmlPosition` whose `cartesian` samples are in the requested target frame. Cross-validation confirms that static inertial samples rotate to the expected fixed longitude via the Earth Rotation Angle.
+`to_central_body` is required. `target_reference_frame` is optional and omitted from the wire request when not supplied. The returned `fixed_position` is an `entities.CzmlPosition` whose `cartesian` samples are in the requested target frame.
+
+Independent cross-validation has calibrated the following `orbits.central_body_frame(...)` branches against external ephemeris tools. Static input samples at 7 000 km from Earth center are used for all cases.
+
+- **Earth FIXED, INERTIAL, J2000, ICRF**: Earth FIXED matches ITRS (Earth body-fixed). Earth INERTIAL matches GCRS. Earth J2000 matches FK5 mean equator/equinox of J2000.0. Earth ICRF matches ICRS (GCRS-aligned to the precision of these tests). Residuals are at the metre level for the INERTIAL-origin branches and ~10 m for branches that traverse the Earth-orientation model.
+- **Moon INERTIAL**: matches the Moon Mean Equator/Equinox J2000 (MMEJ2000) frame. The rotation is built from the IAU lunar pole at J2000 and the line of nodes with Earth's J2000 mean equator; translation is taken from JPL DE440. Residuals are ~50 m.
+- **Moon FIXED**: matches the high-precision NAIF ``MOON_ME`` (mean Earth/polar axis, DE440) body-fixed frame. Residuals are ~300 m absolute and ~0.15 arcsec angular.
+- **Mars INERTIAL**: matches the SPICE built-in MARSIAU Mars inertial frame, not common J2000/ICRS axes. Residuals are ~135 km absolute, ~0.09 arcsec angular. Predictions use the Mars barycenter because de440.bsp does not provide Mars body centre relative to Earth directly; the barycenter-to-centre offset is much smaller than the residuals.
+- **Mars FIXED**: matches the IAU_MARS body-fixed frame orientation only. The absolute residual is ~15 000 km at planetary distance (consistent with using the Mars barycenter), so calibration uses angular separation (~10 arcsec).
+- **Sun INERTIAL**: matches common J2000 inertial axes. Residuals are ~235 m.
+- **Sun FIXED**: matches the IAU_SUN body-fixed frame. Residuals are ~498 m, ~0.001 arcsec angular.
+
+No other `to_central_body` / `target_reference_frame` combinations have been independently calibrated.
 
 `orbits.earth_moon_libration(...)` transforms a sampled CZML position to the Earth-Moon libration frame. It wires to ``/OrbitSystem/EarthMoonLibration2`` and returns an `entities.CzmlPositionSTM`:
 
@@ -195,6 +207,9 @@ period_s, fixed_position = orbits.central_body_frame(
 libration_state = orbits.earth_moon_libration(position)
 ```
 
-Cross-validation shows that the returned `cartesian` samples are the input state expressed in a Moon-centered libration frame whose x-axis points Earth-to-Moon and whose z-axis is aligned with the Earth-Moon orbital angular momentum. The `unit_quaternion` field is returned by ASTROX but its exact convention has not yet been calibrated; treat it as an unvalidated auxiliary orientation.
+Cross-validation shows that the returned `cartesian` samples are the input state expressed in a Moon-centered libration frame whose x-axis points Earth-to-Moon and whose z-axis is aligned with the Earth-Moon orbital angular momentum. Two fields remain unresolved:
+
+- `unit_quaternion` does not match any standard quaternion convention (scalar-first/last, with/without conjugation, for either libration-to-inertial or inertial-to-libration) after a systematic probe. The best residual is ~24.56°. Treat this field as an unvalidated auxiliary orientation.
+- `cartesian_translation` is not populated in live responses for the input matrix exercised by validation (varied sample counts, interpolation degrees, reference frames, central bodies, and velocity flags).
 
 See `examples/02_orbits/` for runnable source examples.

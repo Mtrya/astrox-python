@@ -24,6 +24,8 @@ dev = [
     "lamberthub>=1.0.0",
     "orekit-jpype[jdk4py]>=13.1.5.0",
     "geographiclib>=2.1",
+    "astropy>=6.1.7",
+    "spiceypy>=8.1.0",
 ]
 
 [tool.hatch.build.targets.wheel]
