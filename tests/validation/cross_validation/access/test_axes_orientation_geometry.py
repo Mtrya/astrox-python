@@ -2,9 +2,9 @@
 
 # Coverage:
 #   Branches:
-#     - VVLH, VVLH(Earth), and VVLH(CBF): verified against local front/right/down frame for nadir and along-track targets
-#     - VNC, VNC(Earth), and VNC(CBF): verified against local velocity/normal/co-normal frame for along-track target
-#     - LVLH, LVLH(Earth), and LVLH(CBF): verified against local radial/along-track/angular-momentum frame for radial-out and along-track targets
+#     - VVLH, VVLH(Earth), and VVLH(CBF): verified against local front/right/down frame for nadir, along-track, and cross-track targets
+#     - VNC, VNC(Earth), and VNC(CBF): verified against local velocity/normal/co-normal frame for along-track, radial-out, and cross-track targets
+#     - LVLH, LVLH(Earth), and LVLH(CBF): verified against local radial/along-track/angular-momentum frame for radial-out, along-track, and cross-track targets
 #     - VVLH/LVLH/VNC Moon and Mars variants: unresolved after live central-body target probes and Skyfield body-vector candidate comparison; kept as strict calibration xfail
 #     - VVLH/LVLH/VNC Sun variants: unresolved because live central-body target comparison returns Object reference not set before semantic output; kept as strict calibration xfail
 #   Fields:
@@ -13,7 +13,7 @@
 #     - relative_to: verified for generic, Earth, and CBF where those live variants match the corresponding generic branch
 #     - relative_to Moon/Mars: unresolved; no passing semantic comparison is claimed
 #     - relative_to Sun: unresolved while the matching central-body target fails before semantic output
-#     - sensor orientation: verified with Quaternion identity, AzEl(0,0), and AzEl(90,0) probes
+#     - sensor orientation: verified with Quaternion identity, AzEl(0,0), AzEl(90,0), and AzEl(0,90) probes
 #   Comparison:
 #     - External: independent two-body state sampling, local orbital-frame derivations, WGS84 obstruction, and conic FOV predicates
 #     - Constants: controlled two-body orbit in _orientation.py, EARTH_MU from access cases
@@ -104,6 +104,73 @@ def test_vvlh_and_vnc_along_track_branches_match_local_frame_candidates() -> Non
                 target=target,
                 rotation=rotation,
                 expected=expected_vnc,
+            )
+        )
+
+
+def test_vvlh_vnc_and_lvlh_cross_axis_discriminators_match_local_frame_candidates() -> None:
+    configure_astrox_from_env()
+    cross_track = target_orbit_entity(name="AxesCrossTrackIncPlus2", inclination_delta_deg=2.0)
+    radial = target_orbit_entity(name="AxesRadialOut", semi_major_delta_m=100000.0)
+    vvlh_cross_expected = expected_intervals(
+        target_state=state_function(controlled_orbit(inclination_delta_deg=2.0)),
+        frame=vvlh_frame,
+        sensor_predicate=conic_predicate(20.0, az_el_boresight(azimuth_deg=90.0, elevation_deg=0.0)),
+    )
+    vnc_radial_expected = expected_intervals(
+        target_state=state_function(controlled_orbit(semi_major_delta_m=100000.0)),
+        frame=vnc_frame,
+        sensor_predicate=conic_predicate(20.0, az_el_boresight(azimuth_deg=0.0, elevation_deg=90.0)),
+    )
+    vnc_cross_expected = expected_intervals(
+        target_state=state_function(controlled_orbit(inclination_delta_deg=2.0)),
+        frame=vnc_frame,
+        sensor_predicate=conic_predicate(20.0, az_el_boresight(azimuth_deg=90.0, elevation_deg=0.0)),
+    )
+    lvlh_cross_expected = expected_intervals(
+        target_state=state_function(controlled_orbit(inclination_delta_deg=2.0)),
+        frame=lvlh_frame,
+        sensor_predicate=conic_predicate(20.0, az_el_boresight(azimuth_deg=0.0, elevation_deg=90.0)),
+    )
+    for relative_to in (None, "Earth", "CBF"):
+        compare_sensor_case(
+            case_for_axes(
+                case_id=f"vvlh_{relative_to or 'generic'}_cross_track",
+                axes=entities.vvlh_axes(relative_to=relative_to),
+                target=cross_track,
+                rotation=entities.az_el_rotation(azimuth_deg=90.0, elevation_deg=0.0),
+                expected=vvlh_cross_expected,
+                sensor=conic_sensor(20.0),
+            )
+        )
+        compare_sensor_case(
+            case_for_axes(
+                case_id=f"vnc_{relative_to or 'generic'}_radial",
+                axes=entities.vnc_axes(relative_to=relative_to),
+                target=radial,
+                rotation=entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=90.0),
+                expected=vnc_radial_expected,
+                sensor=conic_sensor(20.0),
+            )
+        )
+        compare_sensor_case(
+            case_for_axes(
+                case_id=f"vnc_{relative_to or 'generic'}_cross_track",
+                axes=entities.vnc_axes(relative_to=relative_to),
+                target=cross_track,
+                rotation=entities.az_el_rotation(azimuth_deg=90.0, elevation_deg=0.0),
+                expected=vnc_cross_expected,
+                sensor=conic_sensor(20.0),
+            )
+        )
+        compare_sensor_case(
+            case_for_axes(
+                case_id=f"lvlh_{relative_to or 'generic'}_cross_track",
+                axes=entities.lvlh_axes(relative_to=relative_to),
+                target=cross_track,
+                rotation=entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=90.0),
+                expected=lvlh_cross_expected,
+                sensor=conic_sensor(20.0),
             )
         )
 
@@ -218,13 +285,14 @@ def test_sun_relative_axes_remain_unresolved_server_failure() -> None:
     return
 
 
-def case_for_axes(*, case_id: str, axes, target, rotation, expected):
+def case_for_axes(*, case_id: str, axes, target, rotation, expected, sensor=None):
+    sensor = conic_sensor(8.0) if sensor is None else sensor
     return type("Case", (), {
         "id": case_id,
         "observer": observer_with_sensor(
             name=case_id,
             orientation=axes,
-            sensor=conic_sensor(8.0),
+            sensor=sensor,
             rotation=rotation,
         ),
         "target": target,
@@ -236,11 +304,12 @@ def main() -> int:
     try:
         test_vvlh_generic_earth_and_cbf_match_local_vvlh_frame()
         test_vvlh_and_vnc_along_track_branches_match_local_frame_candidates()
+        test_vvlh_vnc_and_lvlh_cross_axis_discriminators_match_local_frame_candidates()
         test_lvlh_branches_match_radial_and_along_track_frame_candidates()
     except (CrossValidationError, LiveConfigError, AstroxAPIError) as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    print("CROSS_VALIDATION_CHECKED=3")
+    print("CROSS_VALIDATION_CHECKED=4")
     print("CROSS_VALIDATION_FAILED=0")
     return 0
 
