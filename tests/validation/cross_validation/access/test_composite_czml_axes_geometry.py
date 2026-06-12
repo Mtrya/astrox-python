@@ -2,9 +2,9 @@
 
 # Coverage:
 #   Branches:
-#     - Fixed axes relative to built-in VVLH and LVLH: verified with Euler and quaternion rotations
-#     - FixedAtEpoch axes from VVLH into ICRF at start epoch and +60 s: verified against frozen-at-epoch local frame derivations
-#     - Composite axes with identity first interval and off-nadir second interval: verified for two switch points against piecewise local FOV intervals
+#     - Fixed axes relative to built-in VVLH, LVLH, and VNC: verified with Euler and quaternion rotations
+#     - FixedAtEpoch axes from VVLH and LVLH into ICRF at start epoch and +60 s: verified against frozen-at-epoch local frame derivations
+#     - Composite axes with identity/off-nadir two-interval and identity/off-nadir/identity three-interval layouts: verified for multiple switch points against piecewise local FOV intervals
 #     - CZML axes sampled identity quaternions over short sample spans: verified against inertial-frame oracle for 30 s and 60 s spans, with and without CentralBody
 #     - CZML axes constant, long-span sampled, and non-identity sampled quaternions: unresolved after live probes of constant vs sampled arrays, xyzw/wxyz order, sign, non-identity rotation, interpolation options, CentralBody, and full-span sampling; kept as strict calibration xfail
 #   Fields:
@@ -12,7 +12,7 @@
 #     - CZML sampled-identity AccessStart/AccessStop over short spans: verified
 #     - CZML constant, long-span, and non-identity semantic fields: unresolved because constant variants fail and other sampled variants return unexplained interval residuals or component/sign behavior
 #   Parameters:
-#     - reference_axes, FixedOrientation, SourceAxesName, ReferenceAxesName, Epoch, Intervals, Start/Stop: verified for covered Fixed/FixedAtEpoch/Composite branches
+#     - reference_axes, FixedOrientation, SourceAxesName, ReferenceAxesName, Epoch, Intervals, Start/Stop: verified with multiple values for covered Fixed/FixedAtEpoch/Composite branches
 #     - unitQuaternion identity samples, interpolationAlgorithm=LINEAR, interpolationDegree=1, CentralBody omission/Earth: verified for short-span CZML sampled identity
 #     - unitQuaternion constant arrays, non-identity samples, and longer sampled spans: unresolved after server failures and sampled-array residuals
 #   Comparison:
@@ -53,6 +53,7 @@ from tests.validation.cross_validation.access._orientation import (
     state_function,
     subpoint_site,
     target_orbit_entity,
+    vnc_frame,
     vvlh_frame,
 )
 
@@ -112,6 +113,41 @@ def test_fixed_axes_relative_to_lvlh_matches_fixed_rotation_oracle() -> None:
     compare_sensor_case(case)
 
 
+def test_fixed_axes_relative_to_vnc_matches_fixed_rotation_oracle() -> None:
+    configure_astrox_from_env()
+    target = target_orbit_entity(
+        name="FixedVncRadial",
+        semi_major_delta_m=100000.0,
+    )
+    fixed_axes = entities.fixed_axes(
+        reference_axes="VNC",
+        rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+    )
+    case = case_for_orientation(
+        case_id="fixed_vnc_identity_radial",
+        orientation=fixed_axes,
+        target=target,
+        sensor=conic_sensor(20.0),
+        rotation=entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=90.0),
+        expected=expected_intervals(
+            target_state=state_function(
+                controlled_orbit(
+                    semi_major_delta_m=100000.0,
+                )
+            ),
+            frame=fixed_frame(
+                vnc_frame,
+                quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+            ),
+            sensor_predicate=conic_predicate(
+                20.0,
+                np.array([0.0, 0.0, 1.0]),
+            ),
+        ),
+    )
+    compare_sensor_case(case)
+
+
 def test_fixed_at_epoch_axes_match_frozen_vvlh_inertial_oracle() -> None:
     configure_astrox_from_env()
     target = subpoint_site()
@@ -131,6 +167,32 @@ def test_fixed_at_epoch_axes_match_frozen_vvlh_inertial_oracle() -> None:
                 8.0,
                 quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0)
                 @ np.array([0.0, 0.0, 1.0]),
+            ),
+        ),
+    )
+    compare_sensor_case(case)
+
+
+def test_fixed_at_epoch_axes_match_frozen_lvlh_inertial_oracle() -> None:
+    configure_astrox_from_env()
+    target = target_orbit_entity(name="FixedAtEpochLvlhCrossTrack", inclination_delta_deg=2.0)
+    frozen = entities.fixed_at_epoch_axes(
+        source_axes="LVLH",
+        reference_axes="ICRF",
+        epoch=START,
+    )
+    case = case_for_orientation(
+        case_id="fixed_at_epoch_lvlh_icrf_cross_track",
+        orientation=frozen,
+        target=target,
+        sensor=conic_sensor(20.0),
+        rotation=entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=90.0),
+        expected=expected_intervals(
+            target_state=state_function(controlled_orbit(inclination_delta_deg=2.0)),
+            frame=frozen_at_epoch_frame(lvlh_frame, inertial_frame),
+            sensor_predicate=conic_predicate(
+                20.0,
+                np.array([0.0, 0.0, 1.0]),
             ),
         ),
     )
@@ -196,6 +258,56 @@ def test_composite_axes_match_piecewise_interval_oracle() -> None:
         expected=expected_site_intervals(
             site=target,
             frame=frame,
+            sensor_predicate=conic_predicate(8.0, np.array([0.0, 0.0, 1.0])),
+        ),
+    )
+    compare_sensor_case(case)
+
+
+def test_composite_axes_match_three_interval_piecewise_oracle() -> None:
+    configure_astrox_from_env()
+    target = subpoint_site()
+    identity_first = entities.fixed_axes(
+        reference_axes="VVLH",
+        rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+        start=START,
+        stop="2024-01-01T00:00:20.000Z",
+    )
+    off_nadir = entities.fixed_axes(
+        reference_axes="VVLH",
+        rotation=entities.euler_rotation(sequence="321", a_deg=0.0, b_deg=-20.0, c_deg=0.0),
+        start="2024-01-01T00:00:20.000Z",
+        stop="2024-01-01T00:00:40.000Z",
+    )
+    identity_last = entities.fixed_axes(
+        reference_axes="VVLH",
+        rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+        start="2024-01-01T00:00:40.000Z",
+        stop=STOP,
+    )
+    identity_frame = fixed_frame(
+        vvlh_frame,
+        quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+    )
+    off_nadir_frame = fixed_frame(
+        vvlh_frame,
+        euler_321_rotation(a_deg=0.0, b_deg=-20.0, c_deg=0.0),
+    )
+
+    def three_interval_frame(offset_s: float) -> np.ndarray:
+        if offset_s < 20.0:
+            return identity_frame(offset_s)
+        if offset_s < 40.0:
+            return off_nadir_frame(offset_s)
+        return identity_frame(offset_s)
+
+    case = case_for_orientation(
+        case_id="composite_identity_off_nadir_identity",
+        orientation=entities.composite_axes(intervals=[identity_first, off_nadir, identity_last]),
+        target=target,
+        expected=expected_site_intervals(
+            site=target,
+            frame=three_interval_frame,
             sensor_predicate=conic_predicate(8.0, np.array([0.0, 0.0, 1.0])),
         ),
     )
@@ -546,15 +658,18 @@ def main() -> int:
     try:
         test_fixed_axes_relative_to_vvlh_matches_fixed_rotation_oracle()
         test_fixed_axes_relative_to_lvlh_matches_fixed_rotation_oracle()
+        test_fixed_axes_relative_to_vnc_matches_fixed_rotation_oracle()
         test_fixed_at_epoch_axes_match_frozen_vvlh_inertial_oracle()
+        test_fixed_at_epoch_axes_match_frozen_lvlh_inertial_oracle()
         test_fixed_at_epoch_axes_match_later_epoch_oracle()
         test_composite_axes_match_piecewise_interval_oracle()
+        test_composite_axes_match_three_interval_piecewise_oracle()
         test_composite_axes_match_second_switch_point_oracle()
         test_czml_sampled_identity_short_spans_match_inertial_oracle()
     except (CrossValidationError, LiveConfigError, AstroxAPIError) as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    print("CROSS_VALIDATION_CHECKED=7")
+    print("CROSS_VALIDATION_CHECKED=10")
     print("CROSS_VALIDATION_FAILED=0")
     return 0
 
