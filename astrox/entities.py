@@ -117,32 +117,6 @@ def _validate_group_restriction(value: str | None, *, parameter: str) -> str | N
     return value
 
 
-def _tuple_or_none(
-    payload: dict[str, Any],
-    key: str,
-) -> tuple[float, ...] | None:
-    value = payload.get(key)
-    return None if value is None else tuple(value)
-
-
-def _czml_position_common_fields(payload: dict[str, Any]) -> dict[str, Any]:
-    """Extract the fields shared by CzmlPosition and CzmlPositionSTM.
-
-    ``cartesian`` is treated as optional so that velocity-only CZML responses
-    are parsed without raising ``KeyError``.
-    """
-    return {
-        "epoch": payload["epoch"],
-        "central_body": payload.get("CentralBody"),
-        "interpolation_algorithm": payload.get("interpolationAlgorithm"),
-        "interpolation_degree": payload.get("interpolationDegree"),
-        "reference_frame": payload.get("referenceFrame"),
-        "interval": payload.get("interval"),
-        "cartesian": _tuple_or_none(payload, "cartesian"),
-        "cartesian_velocity": _tuple_or_none(payload, "cartesianVelocity"),
-    }
-
-
 @dataclass(frozen=True, kw_only=True)
 class SitePosition:
     """Fixed geodetic site position."""
@@ -211,7 +185,20 @@ class CzmlPosition:
     @classmethod
     def from_czml_wire(cls, payload: dict[str, Any]) -> CzmlPosition:
         """Build from an ASTROX CZML position-data payload."""
-        return cls(**_czml_position_common_fields(payload))
+        cartesian = payload.get("cartesian")
+        cartesian_velocity = payload.get("cartesianVelocity")
+        return cls(
+            epoch=payload["epoch"],
+            central_body=payload.get("CentralBody"),
+            interpolation_algorithm=payload.get("interpolationAlgorithm"),
+            interpolation_degree=payload.get("interpolationDegree"),
+            reference_frame=payload.get("referenceFrame"),
+            interval=payload.get("interval"),
+            cartesian=None if cartesian is None else tuple(cartesian),
+            cartesian_velocity=None
+            if cartesian_velocity is None
+            else tuple(cartesian_velocity),
+        )
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -224,16 +211,24 @@ class CzmlPositionSTM(CzmlPosition):
     @classmethod
     def from_czml_wire(cls, payload: dict[str, Any]) -> CzmlPositionSTM:
         """Build from the ASTROX CzmlPositionSTM payload."""
-        fields = _czml_position_common_fields(payload)
-        # Preserve the stricter required-field semantics for the STM response.
-        fields["reference_frame"] = payload["referenceFrame"]
-        fields["cartesian"] = tuple(payload["cartesian"])
-        fields["unit_quaternion"] = tuple(payload["unitQuaternion"])
-        fields["cartesian_translation"] = _tuple_or_none(
-            payload,
-            "cartesianTranslation",
+        cartesian_velocity = payload.get("cartesianVelocity")
+        cartesian_translation = payload.get("cartesianTranslation")
+        return cls(
+            epoch=payload["epoch"],
+            central_body=payload.get("CentralBody"),
+            interpolation_algorithm=payload.get("interpolationAlgorithm"),
+            interpolation_degree=payload.get("interpolationDegree"),
+            reference_frame=payload["referenceFrame"],
+            interval=payload.get("interval"),
+            cartesian=tuple(payload["cartesian"]),
+            cartesian_velocity=None
+            if cartesian_velocity is None
+            else tuple(cartesian_velocity),
+            unit_quaternion=tuple(payload["unitQuaternion"]),
+            cartesian_translation=None
+            if cartesian_translation is None
+            else tuple(cartesian_translation),
         )
-        return cls(**fields)
 
 
 @dataclass(frozen=True, kw_only=True)
