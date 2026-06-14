@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import itertools
 import math
+import shutil
 import ssl
 import sys
 import urllib.error
@@ -99,7 +100,8 @@ def _download_kernel(path: Path, url: str) -> None:
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
     try:
-        urllib.request.urlretrieve(url, path, context=context)
+        with urllib.request.urlopen(url, context=context) as response, path.open("wb") as file:
+            shutil.copyfileobj(response, file)
     except urllib.error.URLError as exc:
         raise RuntimeError(
             f"Failed to download SPICE kernel from {url} to {path}: {exc}"
