@@ -115,26 +115,26 @@
         "Datas": [
           {
             "$type": "SolarIntensityScData",
-            "ApparentSolarRange": 147107425.05579448,
+            "ApparentSolarRange": 147107425.05579454,
             "CurrentCondition": "Umbra",
             "Intensity": 0,
             "Obstruction": "Earth",
             "PercentShadow": 1,
-            "RelativeAngle": 41.187932068210856,
-            "SolarDiskHalfAngle": 0.27096404125294393,
-            "SolarGrazingAngle": -29.10976525394802,
+            "RelativeAngle": 41.18793206821086,
+            "SolarDiskHalfAngle": 0.2709640412529439,
+            "SolarGrazingAngle": -29.109765578899825,
             "Time": "2024-01-01T00:00:00.000Z"
           },
           {
             "$type": "SolarIntensityScData",
-            "ApparentSolarRange": 147108745.7326053,
+            "ApparentSolarRange": 147108745.73260534,
             "CurrentCondition": "Umbra",
             "Intensity": 0,
             "Obstruction": "Earth",
             "PercentShadow": 1,
             "RelativeAngle": 18.334914222901872,
-            "SolarDiskHalfAngle": 0.27096160864030805,
-            "SolarGrazingAngle": -51.71977777443133,
+            "SolarDiskHalfAngle": 0.270961608640308,
+            "SolarGrazingAngle": -51.71977772908857,
             "Time": "2024-01-01T00:15:00.000Z"
           },
           {
@@ -146,7 +146,7 @@
             "PercentShadow": 0,
             "RelativeAngle": 75.98575606164016,
             "SolarDiskHalfAngle": 0.270970468949038,
-            "SolarGrazingAngle": 5.918468684297624,
+            "SolarGrazingAngle": 5.918468696803768,
             "Time": "2024-01-01T00:30:00.000Z"
           }
         ],
@@ -161,26 +161,26 @@
         "Datas": [
           {
             "$type": "SolarIntensityScData",
-            "ApparentSolarRange": 147107425.05579433,
+            "ApparentSolarRange": 147107425.05579436,
             "CurrentCondition": "Umbra",
             "Intensity": 0,
             "Obstruction": "Earth",
             "PercentShadow": 1,
-            "RelativeAngle": 41.187932069938576,
-            "SolarDiskHalfAngle": 0.2709640412529442,
-            "SolarGrazingAngle": -29.10976525222764,
+            "RelativeAngle": 41.18793206993856,
+            "SolarDiskHalfAngle": 0.27096404125294415,
+            "SolarGrazingAngle": -29.109765577179463,
             "Time": "2024-01-01T00:00:00.000Z"
           },
           {
             "$type": "SolarIntensityScData",
-            "ApparentSolarRange": 147108749.55327424,
+            "ApparentSolarRange": 147108749.55327427,
             "CurrentCondition": "Umbra",
             "Intensity": 0,
             "Obstruction": "Earth",
             "PercentShadow": 1,
             "RelativeAngle": 18.231832860486612,
-            "SolarDiskHalfAngle": 0.27096160160291355,
-            "SolarGrazingAngle": -51.82236139972229,
+            "SolarDiskHalfAngle": 0.27096160160291344,
+            "SolarGrazingAngle": -51.82236135546807,
             "Time": "2024-01-01T00:15:00.000Z"
           },
           {
@@ -192,7 +192,7 @@
             "PercentShadow": 0,
             "RelativeAngle": 75.77235930818146,
             "SolarDiskHalfAngle": 0.27097042381025604,
-            "SolarGrazingAngle": 5.705015874244342,
+            "SolarGrazingAngle": 5.705015889943305,
             "Time": "2024-01-01T00:30:00.000Z"
           }
         ],
@@ -207,14 +207,14 @@
         "Datas": [
           {
             "$type": "SolarIntensityScData",
-            "ApparentSolarRange": 147105189.4664989,
+            "ApparentSolarRange": 147105189.46649894,
             "CurrentCondition": "SunLight",
             "Intensity": 1,
             "Obstruction": "None",
             "PercentShadow": 0,
             "RelativeAngle": 67.63612250938932,
-            "SolarDiskHalfAngle": 0.2709681591826276,
-            "SolarGrazingAngle": 9.660529413816082,
+            "SolarDiskHalfAngle": 0.2709681591826275,
+            "SolarGrazingAngle": 9.66052929760626,
             "Time": "2024-01-01T00:00:00.000Z"
           },
           {
@@ -224,9 +224,9 @@
             "Intensity": 0,
             "Obstruction": "Earth",
             "PercentShadow": 1,
-            "RelativeAngle": 19.642889458154077,
+            "RelativeAngle": 19.64288945815408,
             "SolarDiskHalfAngle": 0.27096120332787504,
-            "SolarGrazingAngle": -44.827672996615924,
+            "SolarGrazingAngle": -44.827673238531176,
             "Time": "2024-01-01T00:15:00.000Z"
           },
           {
@@ -236,9 +236,9 @@
             "Intensity": 0,
             "Obstruction": "Earth",
             "PercentShadow": 1,
-            "RelativeAngle": 46.454864070370135,
+            "RelativeAngle": 46.45486407037013,
             "SolarDiskHalfAngle": 0.2709646846691417,
-            "SolarGrazingAngle": -20.2763070421524,
+            "SolarGrazingAngle": -20.27630704293481,
             "Time": "2024-01-01T00:30:00.000Z"
           }
         ],
@@ -252,21 +252,21 @@
       "return": {
         "Datas": [
           {
-            "Azimuth": 209.54838978568986,
-            "Elevation": 41.25272429330843,
-            "Range": 147098121.68625876,
+            "Azimuth": 209.5483907713867,
+            "Elevation": 41.252770938585385,
+            "Range": 147098121.68236047,
             "Time": "2024-01-01T00:00:00.000Z"
           },
           {
-            "Azimuth": 213.37568712566716,
-            "Elevation": 39.411816880117584,
-            "Range": 147098260.4064537,
+            "Azimuth": 213.37569385195297,
+            "Elevation": 39.41186716487539,
+            "Range": 147098260.4021348,
             "Time": "2024-01-01T00:15:00.000Z"
           },
           {
-            "Azimuth": 216.93388419190723,
-            "Elevation": 37.38100415146014,
-            "Range": 147098420.19909996,
+            "Azimuth": 216.933896410304,
+            "Elevation": 37.38105762122359,
+            "Range": 147098420.19437656,
             "Time": "2024-01-01T00:30:00.000Z"
           }
         ],
@@ -280,21 +280,21 @@
       "return": {
         "Datas": [
           {
-            "Azimuth": 205.22476720055286,
-            "Elevation": 28.38251489972023,
-            "Range": 147099105.7617966,
+            "Azimuth": 205.22476725276957,
+            "Elevation": 28.382514933806952,
+            "Range": 147099105.76179308,
             "Time": "2024-01-01T00:00:00.000Z"
           },
           {
-            "Azimuth": 204.42722471212355,
-            "Elevation": -25.168639156283117,
-            "Range": 147105207.8129277,
+            "Azimuth": 204.42722474341247,
+            "Elevation": -25.16863910644393,
+            "Range": 147105207.81292236,
             "Time": "2024-01-01T00:15:00.000Z"
           },
           {
-            "Azimuth": 258.87742254177283,
-            "Elevation": -67.62335074012141,
-            "Range": 147108581.98698726,
+            "Azimuth": 258.87742245005575,
+            "Elevation": -67.62335069465453,
+            "Range": 147108581.98698524,
             "Time": "2024-01-01T00:30:00.000Z"
           }
         ],
@@ -305,6 +305,6 @@
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-06-10T05:55:22Z"
+    "refreshed_at": "2026-06-14T08:08:38Z"
   }
 }
