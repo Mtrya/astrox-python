@@ -42,7 +42,7 @@ def record_raw_post(
     return calls
 
 
-def transform_frame_response() -> dict[str, Any]:
+def convert_czml_position_response() -> dict[str, Any]:
     return {
         "IsSuccess": True,
         "Message": "",
@@ -74,24 +74,25 @@ def libration_response() -> dict[str, Any]:
     }
 
 
-def test_transform_frame_emits_payload_and_returns_position(
+def test_convert_czml_position_emits_payload_and_returns_position(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    calls = record_raw_post(monkeypatch, transform_frame_response())
+    calls = record_raw_post(monkeypatch, convert_czml_position_response())
     position = sample_czml_position()
 
-    period_s, out_position = orbits.transform_frame(
+    period_s, out_position = orbits.convert_czml_position(
         position,
         to_central_body="Moon",
         target_reference_frame="J2000",
     )
 
-    assert calls[0]["endpoint"] == "/OrbitSystem/CentralBodyFrame"
-    assert calls[0]["json"] == position.to_czml_wire()
-    assert calls[0]["params"] == {
-        "toCb": "Moon",
-        "referenceFrame": "J2000",
+    assert calls[0]["endpoint"] == "/OrbitSystem/ConvertCzmlPosition"
+    assert calls[0]["json"] == {
+        "Position": position.to_czml_wire(),
+        "TargetCbName": "Moon",
+        "TargetFrame": "J2000",
     }
+    assert calls[0]["params"] is None
     assert period_s == 6000.0
     assert isinstance(out_position, entities.CzmlPosition)
     assert out_position.epoch == EPOCH
@@ -99,14 +100,9 @@ def test_transform_frame_emits_payload_and_returns_position(
     assert out_position.cartesian == (0.0, 7000000.0, 0.0, 0.0)
 
 
-def test_transform_frame_omits_reference_frame_when_not_supplied(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    calls = record_raw_post(monkeypatch, transform_frame_response())
-
-    orbits.transform_frame(sample_czml_position(), to_central_body="Moon")
-
-    assert calls[0]["params"] == {"toCb": "Moon"}
+def test_convert_czml_position_requires_target_reference_frame() -> None:
+    with pytest.raises(TypeError):
+        orbits.convert_czml_position(sample_czml_position(), to_central_body="Moon")
 
 
 def test_earth_moon_libration_emits_payload_and_returns_stm(
@@ -132,8 +128,12 @@ def test_earth_moon_libration_emits_payload_and_returns_stm(
     ("function_name", "kwargs"),
     [
         (
-            "transform_frame",
-            {"position": [0.0, 7000000.0, 0.0, 0.0], "to_central_body": "Moon"},
+            "convert_czml_position",
+            {
+                "position": [0.0, 7000000.0, 0.0, 0.0],
+                "to_central_body": "Moon",
+                "target_reference_frame": "J2000",
+            },
         ),
         (
             "earth_moon_libration",
@@ -155,25 +155,26 @@ def test_orbit_system_functions_reject_raw_fragments(
     "missing_field",
     ["epoch"],
 )
-def test_transform_frame_parser_fails_loudly_for_missing_position_fields(
+def test_convert_czml_position_parser_fails_loudly_for_missing_position_fields(
     monkeypatch: pytest.MonkeyPatch,
     missing_field: str,
 ) -> None:
-    response = transform_frame_response()
+    response = convert_czml_position_response()
     del response["Position"][missing_field]
     record_raw_post(monkeypatch, response)
 
     with pytest.raises(KeyError):
-        orbits.transform_frame(
+        orbits.convert_czml_position(
             sample_czml_position(),
             to_central_body="Moon",
+            target_reference_frame="J2000",
         )
 
 
-def test_transform_frame_parser_accepts_cartesian_velocity_only_response(
+def test_convert_czml_position_parser_accepts_cartesian_velocity_only_response(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    response = transform_frame_response()
+    response = convert_czml_position_response()
     del response["Position"]["cartesian"]
     response["Position"]["cartesianVelocity"] = [
         0.0,
@@ -186,9 +187,10 @@ def test_transform_frame_parser_accepts_cartesian_velocity_only_response(
     ]
     record_raw_post(monkeypatch, response)
 
-    period_s, out_position = orbits.transform_frame(
+    period_s, out_position = orbits.convert_czml_position(
         sample_czml_position(),
         to_central_body="Moon",
+        target_reference_frame="J2000",
     )
 
     assert period_s == 6000.0
@@ -241,7 +243,11 @@ def test_orbit_system_functions_propagate_api_errors(
     monkeypatch.setattr(orbits.raw, "post", fake_post)
 
     with pytest.raises(exceptions.AstroxAPIError, match="bad frame"):
-        orbits.transform_frame(sample_czml_position(), to_central_body="Moon")
+        orbits.convert_czml_position(
+            sample_czml_position(),
+            to_central_body="Moon",
+            target_reference_frame="J2000",
+        )
 
     with pytest.raises(exceptions.AstroxAPIError, match="bad frame"):
         orbits.earth_moon_libration(sample_czml_position())
@@ -249,7 +255,7 @@ def test_orbit_system_functions_propagate_api_errors(
 
 def test_orbit_system_return_type_hints_are_curated_values() -> None:
     assert (
-        get_type_hints(orbits.transform_frame)["return"]
+        get_type_hints(orbits.convert_czml_position)["return"]
         == tuple[
             float,
             entities.CzmlPosition,

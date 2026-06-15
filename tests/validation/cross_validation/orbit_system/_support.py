@@ -608,7 +608,7 @@ def _check_earth_inertial_to_fixed(inertial_longitude_deg: float) -> None:
         inertial_longitude_deg=inertial_longitude_deg,
         reference_frame="INERTIAL",
     )
-    _period, fixed = orbits.transform_frame(
+    _period, fixed = orbits.convert_czml_position(
         position,
         to_central_body="Earth",
         target_reference_frame="FIXED",
@@ -645,7 +645,7 @@ def _check_earth_fixed_to_inertial(fixed_longitude_deg: float) -> None:
         inertial_longitude_deg=fixed_longitude_deg,
         reference_frame="FIXED",
     )
-    _period, inertial = orbits.transform_frame(
+    _period, inertial = orbits.convert_czml_position(
         position,
         to_central_body="Earth",
         target_reference_frame="INERTIAL",
@@ -684,7 +684,7 @@ def _check_earth_inertial_to_target(
         inertial_longitude_deg=inertial_longitude_deg,
         reference_frame="INERTIAL",
     )
-    _period, output = orbits.transform_frame(
+    _period, output = orbits.convert_czml_position(
         position,
         to_central_body="Earth",
         target_reference_frame=target_frame,
@@ -709,7 +709,7 @@ def _check_moon_inertial(inertial_longitude_deg: float) -> None:
         inertial_longitude_deg=inertial_longitude_deg,
         reference_frame="INERTIAL",
     )
-    _period, output = orbits.transform_frame(
+    _period, output = orbits.convert_czml_position(
         position,
         to_central_body="Moon",
         target_reference_frame="INERTIAL",
@@ -727,7 +727,7 @@ def _check_moon_inertial(inertial_longitude_deg: float) -> None:
 def _check_moon_inertial_origin() -> None:
     """Earth INERTIAL origin maps to the Moon center in MMEJ2000."""
     position = _sample_origin_position(reference_frame="INERTIAL")
-    _period, output = orbits.transform_frame(
+    _period, output = orbits.convert_czml_position(
         position,
         to_central_body="Moon",
         target_reference_frame="INERTIAL",
@@ -748,7 +748,7 @@ def _check_moon_fixed(inertial_longitude_deg: float) -> None:
         inertial_longitude_deg=inertial_longitude_deg,
         reference_frame="INERTIAL",
     )
-    _period, output = orbits.transform_frame(
+    _period, output = orbits.convert_czml_position(
         position,
         to_central_body="Moon",
         target_reference_frame="FIXED",
@@ -776,7 +776,7 @@ def _check_mars_inertial(inertial_longitude_deg: float) -> None:
         inertial_longitude_deg=inertial_longitude_deg,
         reference_frame="INERTIAL",
     )
-    _period, output = orbits.transform_frame(
+    _period, output = orbits.convert_czml_position(
         position,
         to_central_body="Mars",
         target_reference_frame="INERTIAL",
@@ -806,7 +806,7 @@ def _check_mars_fixed_orientation(inertial_longitude_deg: float) -> None:
         inertial_longitude_deg=inertial_longitude_deg,
         reference_frame="INERTIAL",
     )
-    _period, output = orbits.transform_frame(
+    _period, output = orbits.convert_czml_position(
         position,
         to_central_body="Mars",
         target_reference_frame="FIXED",
@@ -830,7 +830,7 @@ def _check_sun_inertial(inertial_longitude_deg: float) -> None:
         inertial_longitude_deg=inertial_longitude_deg,
         reference_frame="INERTIAL",
     )
-    _period, output = orbits.transform_frame(
+    _period, output = orbits.convert_czml_position(
         position,
         to_central_body="Sun",
         target_reference_frame="INERTIAL",
@@ -854,7 +854,7 @@ def _check_sun_fixed(inertial_longitude_deg: float) -> None:
         inertial_longitude_deg=inertial_longitude_deg,
         reference_frame="INERTIAL",
     )
-    _period, output = orbits.transform_frame(
+    _period, output = orbits.convert_czml_position(
         position,
         to_central_body="Sun",
         target_reference_frame="FIXED",
