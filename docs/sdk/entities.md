@@ -317,6 +317,7 @@ entities.entity(
     name="Ground",
     position=entities.site_position(longitude_deg=0.0, latitude_deg=0.0, height_m=0.0),
     constraints=[
+        # AzEl masks are only meaningful for SitePosition participants.
         entities.az_el_mask_constraint(
             az_el_mask_rad=[
                 0.0, 0.17453292519943295,
@@ -324,7 +325,6 @@ entities.entity(
                 3.141592653589793, 0.17453292519943295,
                 4.71238898038469, 0.17453292519943295,
             ],
-            max_range_km=3000.0,
         ),
     ],
 )
