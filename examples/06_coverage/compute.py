@@ -32,10 +32,6 @@ def main() -> None:
         grid=grid,
         assets=[relay],
         minimum_assets=1,
-        grid_point_sensor=entities.conic_sensor(outer_half_angle_deg=45.0),
-        grid_point_constraints=[
-            entities.elevation_constraint(minimum_deg=10.0),
-        ],
         include_asset_access_results=True,
         include_coverage_points=True,
         step_s=60.0,

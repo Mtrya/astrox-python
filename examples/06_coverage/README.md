@@ -13,7 +13,7 @@ The user-facing guide is [docs/sdk/coverage.md](../../docs/sdk/coverage.md).
 | Example | Public API shown |
 | --- | --- |
 | `grid_points.py` | `coverage.lat_lon_grid(...)` and `coverage.grid_points(...)` |
-| `compute.py` | `coverage.compute(...)`, entity assets, grid-point sensors, shared constraints, and output flags |
+| `compute.py` | `coverage.compute(...)`, SGP4 entity assets, resource-count options, and output flags |
 | `reports.py` | `coverage.percent_coverage(...)` and `coverage.coverage_by_asset(...)` |
 
 Install the development environment once, then run examples from the repository root:

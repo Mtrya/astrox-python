@@ -33,7 +33,11 @@ The available constructors are:
 
 Bounded constructors require their latitude or latitude/longitude bounds. Optional settings such as `central_body`, `resolution_deg`, `height_m`, and `use_cell_surface_area_for_weight` are omitted unless supplied, leaving ASTROX defaults server-owned.
 
-`cb_lat_lon_grid(...)` is exposed because it is a real ASTROX grid branch. Current cross-validation shows it does not generate the same point set as `lat_lon_grid(...)`; its exact point-generation rule is still a calibration target, so do not treat it as an alias.
+Validated `lat_lon_grid(...)` cases generate cell centers and boundary vertices in radians. For the covered bounded grids, each axis is split into `floor(span / resolution_deg) + 1` cells, including spans that are not evenly divisible by the resolution. Validated `latitude_grid(...)` cases generate latitude cells across the requested latitude band and longitude cells around the full globe, with the first longitude cell centered at 180 degrees across the seam.
+
+`use_cell_surface_area_for_weight=False` is validated to return weight `1` for every grid point in representative bounded grids. With the default area-weighted behavior, `Weight` is a positive area-like value used by the report routes, but the exact area formula is not yet documented as a public guarantee. `height_m` is validated to echo back in grid-point responses; its effect on coverage membership is not yet claimed.
+
+`global_grid(...)` and `cb_lat_lon_grid(...)` are exposed because they are real ASTROX grid branches. `cb_lat_lon_grid(...)` does not generate the same point set as `lat_lon_grid(...)`; tested cases show latitude-dependent behavior that is not explained by direct box subdivision. Treat both branches as callable but not yet recommended when exact point-generation semantics matter.
 
 ## Grid Points
 
@@ -46,7 +50,7 @@ points = coverage.grid_points(
 )
 ```
 
-For representative `lat_lon_grid(...)` inputs, cross-validation checks returned point centers and cell boundaries against a local cell-subdivision derivation. The response `Weight` field is preserved but its exact weighting/area semantics are not yet calibrated.
+For representative `lat_lon_grid(...)` and `latitude_grid(...)` inputs, validation checks returned point centers and cell boundaries against local derivations. The response `Weight` field is preserved unchanged.
 
 ## Compute
 
@@ -70,11 +74,13 @@ result = coverage.compute(
 )
 ```
 
-`assets` accepts a sequence of `entities.Entity` values. Strings and raw dictionaries are not accepted because coverage assets lower to full ASTROX entity objects, not name references. An empty asset list lowers deterministically, but live ASTROX currently rejects it.
+`assets` accepts a sequence of `entities.Entity` values. Strings and raw dictionaries are not accepted because coverage assets lower to full ASTROX entity objects, not name references. SGP4 satellite assets are the validated path for the examples below. An empty asset list lowers deterministically, but live ASTROX currently rejects it. Fixed-site assets currently reduce to a server worker error in the smallest tested coverage-compute case, so do not rely on fixed-site coverage assets until that server behavior is clarified.
 
-Use `minimum_assets=N` for the ASTROX `AtLeastN` resource-count rule, or `exactly_assets=N` for `ExactlyN`. Supplying both is rejected by the SDK because it cannot lower to one unambiguous request. The detailed coverage semantics of those two server rules are a cross-validation target.
+Use `minimum_assets=N` for the ASTROX `AtLeastN` resource-count rule, or `exactly_assets=N` for `ExactlyN`. Supplying both is rejected by the SDK because it cannot lower to one unambiguous request. In validated coverage-compute cases, ASTROX returns `SatisfactionIntervalsWithNumberOfAssets` as a per-grid-point count trace: intervals below the requested count are reported as zero, and intervals meeting the requested count preserve the actual simultaneous asset count. The returned trace includes zero-asset intervals. In the covered cases, `exactly_assets` behaves like the same at-least threshold rather than strict equality, so do not use it when strict equality is required.
 
-`grid_point_sensor` accepts `entities.conic_sensor(...)` or `entities.rectangular_sensor(...)`. `grid_point_constraints` accepts shared `entities.Constraint` values such as `entities.elevation_constraint(...)` and `entities.range_constraint(...)`. These fragments reuse SDK dataclasses, but their grid-point role is calibrated separately from entity/access constraints.
+`include_asset_access_results=True` returns per-grid-point, per-asset intervals. Validated cases show those intervals compose back into `SatisfactionIntervalsWithNumberOfAssets`, and duplicate identical assets are preserved as separate asset entries.
+
+`grid_point_sensor` accepts `entities.conic_sensor(...)` or `entities.rectangular_sensor(...)`. `grid_point_constraints` accepts shared `entities.Constraint` values such as `entities.elevation_constraint(...)` and `entities.range_constraint(...)`. These fragments reuse SDK dataclasses, but their coverage grid-point role is not yet recommended as understood behavior. Representative elevation/range constraints are live-callable; representative sensor use has returned a server worker error during probing.
 
 `include_asset_access_results`, `include_coverage_points`, `step_s`, and `description` are optional and omitted unless supplied.
 
@@ -102,10 +108,10 @@ by_asset = coverage.coverage_by_asset(
 )
 ```
 
-Both report functions accept the same core coverage input options as `compute(...)` and return raw ASTROX dictionaries. FOM routes and metric-specific `ComputeType` options are intentionally not part of this coverage core surface.
+Both report functions accept the same core coverage input options as `compute(...)` and return raw ASTROX dictionaries. For validated one-asset cases, `percent_coverage(...)` samples at `step_s` seconds from the report epoch. `PercentCovered` is the grid-weighted percentage of currently covered points at each sample. `PercentAccumulated` is the grid-weighted percentage of points that have been covered at least once up to that sample. For the same one-asset cases, `coverage_by_asset(...)` returns minimum, maximum, average, and accumulated percentages that match the corresponding percent-coverage samples. FOM routes and metric-specific `ComputeType` options are intentionally not part of this coverage core surface.
 
 ## Validation Scope
 
 SDK behavior tests cover exact request lowering, optional-key omission, type rejection, public imports, and raw response pass-through. Live snapshots cover representative callability and response shape for grid generation, compute, elevation/range grid-point constraints, and the two reports.
 
-Cross-validation currently verifies representative `LatLonBounds` grid point centers and cell boundaries, plus the invariant that `ComputeCoverage` with `include_coverage_points=True` echoes the same point ordering as `GetGridPoints` for the covered grid. `CbLatLonBounds`, `Global`, `LatitudeBounds`, resource-count semantics, grid-point sensor behavior, grid-point constraint membership semantics, `Step`, and report aggregation remain calibration targets.
+Validation currently verifies representative `LatLonBounds` and `LatitudeBounds` grid point centers and cell boundaries, the invariant that `ComputeCoverage` with `include_coverage_points=True` echoes the same point ordering as `GetGridPoints`, resource-count composition from per-asset intervals, weighted percent-coverage samples, and one-asset coverage-by-asset summaries. `Global`, `CbLatLonBounds`, strict equality resource semantics, fixed-site assets, grid-point sensor behavior, grid-point constraint membership semantics, and the physical model behind SGP4-to-grid visibility remain caveated.
