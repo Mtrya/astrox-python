@@ -213,7 +213,6 @@ def az_el_mask_predicate(
     start: str,
     origin: str,
     az_el_mask_rad: tuple[float, ...],
-    max_range_km: float | None,
 ) -> bool:
     """Evaluate an AzElMask constraint predicate at ``offset_s``.
 
@@ -222,10 +221,11 @@ def az_el_mask_predicate(
     north-zero/east-positive convention as the access AER rows.  Elevation is
     considered satisfied when the line-of-sight elevation is greater than or
     equal to the interpolated mask elevation.
+
+    ``AzElMask.MaxRange`` is forwarded by the SDK but is not enforced by ASTROX,
+    so this predicate intentionally does not apply a range filter.
     """
     aer = _aer_at(offset_s, start=start, origin=origin)
-    if max_range_km is not None and aer.range_m / 1000.0 > max_range_km:
-        return False
     mask_elevation_deg = _interpolate_mask_elevation(aer.azimuth_deg, az_el_mask_rad)
     if mask_elevation_deg is None:
         return False

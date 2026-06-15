@@ -169,7 +169,6 @@ def _expected_range_intervals(
 def _expected_az_el_mask_intervals(
     *,
     az_el_mask_rad: tuple[float, ...],
-    max_range_km: float | None = None,
     start: str = START,
     stop: str = DAY_STOP,
     origin: str = "ground",
@@ -182,7 +181,6 @@ def _expected_az_el_mask_intervals(
             start=start,
             origin=origin,
             az_el_mask_rad=az_el_mask_rad,
-            max_range_km=max_range_km,
         ),
         sample_step_s=DENSE_SAMPLE_STEP_S,
     )
