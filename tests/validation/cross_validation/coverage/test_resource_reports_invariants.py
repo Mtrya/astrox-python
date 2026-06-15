@@ -18,7 +18,7 @@
 #     - CoverageByAssetDatas[].Minimum/Maximum/Average/AccumulatedCoveragePercent: verified against PercentCoverageDatas summary for one asset
 #   Parameters:
 #     - minimum_assets: verified for N=1 and N=2
-#     - exactly_assets: partial; covered cases show at-least behavior for N=1, but non-overlapping exact-only semantics remain unresolved
+#     - exactly_assets: verified for duplicate two-asset N=1 case to behave as an at-least threshold, not strict equality
 #     - include_asset_access_results: verified as required evidence for per-asset composition
 #     - step_s: verified for report sampling; not claimed to affect interval boundary precision
 #   Comparison:
@@ -28,7 +28,7 @@
 #   Findings:
 #     - ComputeCoverage keeps zero-asset intervals in SatisfactionIntervalsWithNumberOfAssets.
 #     - Aggregate intervals include the actual number of simultaneously covering assets when that count meets the requested threshold; segments below the threshold are returned as zero.
-#     - In the covered cases, ExactlyN is not strict equality. It behaves like the same NumberOfAssets threshold used by AtLeastN.
+#     - ExactlyN is not strict equality in the duplicate two-asset N=1 case. It preserves NumberOfAssets=2 intervals, matching AtLeastN=1 and differing from a strict ExactlyN=1 local composition.
 #     - PercentCoverage uses grid-point Weight values, not a simple point count, for representative LatLonBounds grids.
 
 from __future__ import annotations
@@ -111,6 +111,7 @@ def test_compute_resource_counts_match_asset_interval_composition() -> None:
             "assets": [sgp4_asset("RelayA"), sgp4_asset("RelayA2")],
             "kwargs": {"exactly_assets": 1},
             "threshold": 1,
+            "must_exceed_threshold": True,
         },
     ]
     for case in cases:
@@ -127,6 +128,64 @@ def test_compute_resource_counts_match_asset_interval_composition() -> None:
             label=case["label"],
             result=result,
             threshold=case["threshold"],
+        )
+        if case.get("must_exceed_threshold"):
+            assert_actual_trace_exceeds_threshold(
+                label=case["label"],
+                result=result,
+                threshold=case["threshold"],
+            )
+
+
+def test_exactly_assets_matches_at_least_threshold_not_strict_equality() -> None:
+    configure_astrox_from_env()
+    assets = [sgp4_asset("RelayA"), sgp4_asset("RelayA2")]
+    at_least = coverage.compute(
+        start=START,
+        stop=STOP,
+        grid=sample_grid(),
+        assets=assets,
+        minimum_assets=1,
+        include_asset_access_results=True,
+        step_s=60.0,
+    )
+    exactly = coverage.compute(
+        start=START,
+        stop=STOP,
+        grid=sample_grid(),
+        assets=assets,
+        exactly_assets=1,
+        include_asset_access_results=True,
+        step_s=60.0,
+    )
+    strict_expected_by_point = [
+        expected_exact_intervals(point_assets, exact_count=1)
+        for point_assets in exactly["AssetAccessResults"]
+    ]
+    threshold_expected_by_point = [
+        expected_thresholded_intervals(point_assets, threshold=1)
+        for point_assets in exactly["AssetAccessResults"]
+    ]
+    if strict_expected_by_point == threshold_expected_by_point:
+        raise CrossValidationError(
+            "duplicate ExactlyN=1 case does not distinguish strict equality from at-least behavior"
+        )
+    assert_same_interval_traces(
+        "exactly_1_matches_at_least_1",
+        at_least["SatisfactionIntervalsWithNumberOfAssets"],
+        exactly["SatisfactionIntervalsWithNumberOfAssets"],
+    )
+    if all(
+        interval_traces_equal(expected, actual)
+        for expected, actual in zip(
+            strict_expected_by_point,
+            exactly["SatisfactionIntervalsWithNumberOfAssets"],
+            strict=True,
+        )
+    ):
+        raise CrossValidationError(
+            "exactly_1_strict_rejection: ASTROX ExactlyN=1 unexpectedly "
+            "matched strict equality intervals"
         )
 
 
@@ -298,6 +357,49 @@ def expected_thresholded_intervals(
     return segments
 
 
+def expected_exact_intervals(
+    point_assets: list[list[dict[str, Any]]],
+    *,
+    exact_count: int,
+) -> list[dict[str, float | int]]:
+    start_s = seconds_since_start(START)
+    stop_s = seconds_since_start(STOP)
+    boundaries = {start_s, stop_s}
+    for asset_intervals in point_assets:
+        for interval in asset_intervals:
+            boundaries.add(seconds_since_start(interval["Start"]))
+            boundaries.add(seconds_since_start(interval["Stop"]))
+    ordered = sorted(boundaries)
+    segments: list[dict[str, float | int]] = []
+    for left, right in zip(ordered, ordered[1:], strict=False):
+        if right <= left:
+            continue
+        midpoint = (left + right) / 2.0
+        active_count = sum(
+            any(
+                seconds_since_start(interval["Start"])
+                <= midpoint
+                < seconds_since_start(interval["Stop"])
+                for interval in asset_intervals
+            )
+            for asset_intervals in point_assets
+        )
+        count = active_count if active_count == exact_count else 0
+        if segments and segments[-1]["NumberOfAssets"] == count:
+            segments[-1]["StopSeconds"] = right
+            segments[-1]["Duration"] = right - segments[-1]["StartSeconds"]
+        else:
+            segments.append(
+                {
+                    "NumberOfAssets": count,
+                    "StartSeconds": left,
+                    "StopSeconds": right,
+                    "Duration": right - left,
+                }
+            )
+    return segments
+
+
 def compare_interval_trace(
     label: str,
     point_index: int,
@@ -341,6 +443,79 @@ def compare_interval_trace(
             expected_interval["Duration"],
             actual_interval["Duration"],
         )
+
+
+def assert_actual_trace_exceeds_threshold(
+    *,
+    label: str,
+    result: dict[str, Any],
+    threshold: int,
+) -> None:
+    if not any(
+        interval["NumberOfAssets"] > threshold
+        for point_intervals in result["SatisfactionIntervalsWithNumberOfAssets"]
+        for interval in point_intervals
+    ):
+        raise CrossValidationError(
+            f"{label}: expected at least one returned interval with "
+            f"NumberOfAssets greater than {threshold}"
+        )
+
+
+def assert_same_interval_traces(
+    label: str,
+    left: list[list[dict[str, Any]]],
+    right: list[list[dict[str, Any]]],
+) -> None:
+    if len(left) != len(right):
+        raise CrossValidationError(
+            f"{label}: expected {len(left)} point traces, got {len(right)}"
+        )
+    for point_index, (left_trace, right_trace) in enumerate(
+        zip(left, right, strict=True)
+    ):
+        if not interval_traces_equal(left_trace, right_trace):
+            raise CrossValidationError(
+                f"{label}: point {point_index} AtLeastN and ExactlyN traces differ"
+            )
+
+
+def interval_traces_equal(
+    expected: list[dict[str, Any]],
+    actual: list[dict[str, Any]],
+) -> bool:
+    if len(expected) != len(actual):
+        return False
+    try:
+        for expected_interval, actual_interval in zip(expected, actual, strict=True):
+            if actual_interval["NumberOfAssets"] != expected_interval["NumberOfAssets"]:
+                return False
+            expected_start = interval_start_seconds(expected_interval)
+            expected_stop = interval_stop_seconds(expected_interval)
+            expected_duration = float(expected_interval["Duration"])
+            actual_start = interval_start_seconds(actual_interval)
+            actual_stop = interval_stop_seconds(actual_interval)
+            if abs(expected_start - actual_start) > TIME_ABS_S:
+                return False
+            if abs(expected_stop - actual_stop) > TIME_ABS_S:
+                return False
+            if abs(expected_duration - float(actual_interval["Duration"])) > TIME_ABS_S:
+                return False
+    except KeyError:
+        return False
+    return True
+
+
+def interval_start_seconds(interval: dict[str, Any]) -> float:
+    if "StartSeconds" in interval:
+        return float(interval["StartSeconds"])
+    return seconds_since_start(interval["Start"])
+
+
+def interval_stop_seconds(interval: dict[str, Any]) -> float:
+    if "StopSeconds" in interval:
+        return float(interval["StopSeconds"])
+    return seconds_since_start(interval["Stop"])
 
 
 def weighted_current_percent(
