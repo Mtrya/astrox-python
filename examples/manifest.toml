@@ -1,0 +1,16 @@
+# Example CI manifest.
+#
+# Each section names an example file (relative path under examples/) and
+# declares whether it should be skipped when `run_examples.py` executes
+# examples in CI.
+#
+#   skip   = true   — do not run this example in CI
+#   reason = "..."  — required when skip is true; explains why
+
+["01_propagation/ballistic_delta_v.py"]
+skip = true
+reason = "calls plt.show() which blocks in headless CI"
+
+["01_propagation/ballistic_apogee_alt.py"]
+skip = true
+reason = "calls plt.show() which blocks in headless CI"

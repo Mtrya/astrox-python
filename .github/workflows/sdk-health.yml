@@ -70,11 +70,19 @@ jobs:
           assert hasattr(astrox, "raw")
           PY
 
-      - name: Check example and validation syntax
-        id: example_syntax
+      - name: Run examples (live server smoke)
+        id: run_examples
         if: steps.install.outcome == 'success'
         continue-on-error: true
-        run: uv run python -m compileall -q examples tests/validation .github/containers/gmat-validation
+        env:
+          ASTROX_BASE_URL: http://astrox.cn:8765
+        run: uv run python scripts/run_examples.py
+
+      - name: Check validation syntax
+        id: validation_syntax
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        run: uv run python -m compileall -q tests/validation .github/containers/gmat-validation
 
       - name: Run pytest
         id: pytest
@@ -152,7 +160,8 @@ jobs:
             "${{ steps.install.outcome }}" \
             "${{ steps.build.outcome }}" \
             "${{ steps.import_check.outcome }}" \
-            "${{ steps.example_syntax.outcome }}" \
+            "${{ steps.run_examples.outcome }}" \
+            "${{ steps.validation_syntax.outcome }}" \
             "${{ steps.pytest.outcome }}" \
             "${{ steps.live_smoke.outcome }}" \
             "${{ steps.prepare_gmat.outcome }}" \
@@ -171,7 +180,8 @@ jobs:
             echo "- install dependencies: ${{ steps.install.outcome }}"
             echo "- build package: ${{ steps.build.outcome }}"
             echo "- verify built package import: ${{ steps.import_check.outcome }}"
-            echo "- example and validation syntax: ${{ steps.example_syntax.outcome }}"
+            echo "- run examples: ${{ steps.run_examples.outcome }}"
+            echo "- validation syntax: ${{ steps.validation_syntax.outcome }}"
             echo "- pytest: ${{ steps.pytest.outcome }}"
             echo "- live smoke: ${{ steps.live_smoke.outcome }}"
             echo "- GMAT preparation: ${{ steps.prepare_gmat.outcome }}"
