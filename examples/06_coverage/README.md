@@ -16,6 +16,8 @@ The user-facing guide is [docs/sdk/coverage.md](../../docs/sdk/coverage.md).
 | `compute.py` | `coverage.compute(...)`, SGP4 entity assets, resource-count options, and output flags |
 | `reports.py` | `coverage.percent_coverage(...)` and `coverage.coverage_by_asset(...)` |
 
+The examples use SGP4 satellite entities as coverage assets because that is the calibrated path for this SDK surface. Use `minimum_assets` for the demonstrated resource-count rule; `exactly_assets` is available, but current ASTROX behavior in the validated duplicate-asset case matches the same threshold style rather than strict equality.
+
 Install the development environment once, then run examples from the repository root:
 
 ```bash

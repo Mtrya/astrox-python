@@ -38,9 +38,20 @@ def main() -> None:
     )
 
     intervals_by_point = result["SatisfactionIntervalsWithNumberOfAssets"]
+    asset_intervals_by_point = result["AssetAccessResults"]
+    points = result["CoverageOutput"]["Points"]["GridPoints"]
     print(f"Grid points with interval lists: {len(intervals_by_point)}")
     if intervals_by_point:
+        covering_intervals = [
+            interval
+            for point_intervals in intervals_by_point
+            for interval in point_intervals
+            if interval["NumberOfAssets"] > 0
+        ]
+        print(f"Grid points echoed in response: {len(points)}")
+        print(f"Per-point asset interval lists: {len(asset_intervals_by_point)}")
         print(f"Intervals for first point: {len(intervals_by_point[0])}")
+        print(f"Intervals with at least one asset: {len(covering_intervals)}")
 
 
 if __name__ == "__main__":

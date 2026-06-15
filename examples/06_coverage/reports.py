@@ -43,7 +43,13 @@ def main() -> None:
         step_s=60.0,
     )
 
-    print(f"Percent coverage samples: {len(percent['PercentCoverageDatas'])}")
+    samples = percent["PercentCoverageDatas"]
+    print(f"Percent coverage samples: {len(samples)}")
+    if samples:
+        first = samples[0]
+        last = samples[-1]
+        print(f"First sample covered percent: {first['PercentCovered']:.6f}")
+        print(f"Final accumulated percent: {last['PercentAccumulated']:.6f}")
     print(f"Per-asset rows: {len(by_asset['CoverageByAssetDatas'])}")
 
 
