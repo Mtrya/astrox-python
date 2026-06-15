@@ -144,7 +144,7 @@ def main() -> int:
         configure_astrox_from_env()
         checked = run_all_checks()
     except (CrossValidationError, LiveConfigError) as exc:
-        print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}")
+        print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
     print(f"CROSS_VALIDATION_CHECKED={checked}")
     return 0

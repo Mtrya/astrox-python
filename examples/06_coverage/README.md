@@ -27,4 +27,4 @@ uv run python examples/06_coverage/compute.py
 uv run python examples/06_coverage/reports.py
 ```
 
-These examples call the ASTROX API through the package default client configuration. Running them end to end requires access to a compatible ASTROX server.
+These examples call the ASTROX API through the package's default client configuration. Running them end to end requires access to a compatible ASTROX server.

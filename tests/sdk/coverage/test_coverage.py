@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import FrozenInstanceError, is_dataclass
 from inspect import signature
-from typing import Any
+from typing import Any, Callable
 
 import pytest
 
@@ -413,23 +413,33 @@ def test_coverage_functions_return_malformed_raw_response_without_parsing(
     assert actual is response
 
 
+@pytest.mark.parametrize(
+    ("func", "endpoint"),
+    (
+        (coverage.compute, "/Coverage/ComputeCoverage"),
+        (coverage.percent_coverage, "/Coverage/Report/PercentCoverage"),
+        (coverage.coverage_by_asset, "/Coverage/Report/CoverageByAsset"),
+    ),
+)
 def test_coverage_functions_propagate_api_errors_unchanged(
+    func: Callable[..., dict[str, Any]],
+    endpoint: str,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     error = exceptions.AstroxAPIError(
         "bad coverage",
-        "/Coverage/ComputeCoverage",
+        endpoint,
         response=None,
     )
 
-    def fake_post(endpoint: str, *, json: object) -> dict[str, Any]:
-        assert endpoint == "/Coverage/ComputeCoverage"
+    def fake_post(actual_endpoint: str, *, json: object) -> dict[str, Any]:
+        assert actual_endpoint == endpoint
         raise error
 
     monkeypatch.setattr(coverage.raw, "post", fake_post)
 
     with pytest.raises(exceptions.AstroxAPIError) as exc_info:
-        coverage.compute(
+        func(
             start="2024-01-01T00:00:00.000Z",
             stop="2024-01-01T03:00:00.000Z",
             grid=sample_grid(),
