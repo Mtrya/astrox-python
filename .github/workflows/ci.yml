@@ -63,6 +63,10 @@ jobs:
           ASTROX_BASE_URL: http://astrox.cn:8765
         run: uv run python scripts/run_examples.py
 
+      - name: Check examples syntax
+        if: github.event_name == 'pull_request'
+        run: uv run python -m compileall -q examples
+
       - name: Check validation syntax
         run: uv run python -m compileall -q tests/validation .github/containers/gmat-validation
 

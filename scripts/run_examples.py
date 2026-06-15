@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import py_compile
 import subprocess
 import sys
 import time
@@ -44,11 +45,17 @@ def load_manifest(examples_dir: Path) -> dict[str, dict]:
         return {}
     with manifest_path.open("rb") as f:
         data = tomllib.load(f)
-    return {k: v for k, v in data.items() if isinstance(v, dict)}
+    manifest: dict[str, dict] = {}
+    for k, v in data.items():
+        if isinstance(v, dict):
+            manifest[k] = v
+        else:
+            print(f"manifest: ignoring non-table top-level key: {k!r}", file=sys.stderr)
+    return manifest
 
 
 def relative_path(example: Path, examples_dir: Path) -> str:
-    return str(example.relative_to(examples_dir))
+    return example.relative_to(examples_dir).as_posix()
 
 
 def run_example(
@@ -101,9 +108,25 @@ def main() -> int:
 
     for example in examples:
         rel = relative_path(example, examples_dir)
+        try:
+            example.resolve().relative_to(examples_dir)
+        except ValueError:
+            print(f"security: example resolves outside examples dir: {example}", file=sys.stderr)
+            return 2
+
         entry = manifest.get(rel)
         if entry and entry.get("skip"):
-            reason = entry.get("reason", "no reason given")
+            reason = entry.get("reason", "")
+            if not reason.strip():
+                print(f"manifest: {rel!r} marked skip but missing a non-empty reason", file=sys.stderr)
+                return 2
+            try:
+                py_compile.compile(str(example), doraise=True)
+            except py_compile.PyCompileError as exc:
+                print(f"  FAIL  {rel}  (skipped example fails syntax check: {exc})")
+                results.append((rel, "fail", str(exc), 0.0))
+                unexpected_failures += 1
+                continue
             print(f"  SKIP  {rel}  ({reason})")
             results.append((rel, "skip", reason, 0.0))
             continue
@@ -112,9 +135,14 @@ def main() -> int:
         status, detail = "", ""
         try:
             status, detail = run_example(example, timeout=args.timeout)
-        except subprocess.TimeoutExpired:
+        except subprocess.TimeoutExpired as exc:
             status = "timeout"
+            output = (exc.stderr or exc.stdout or b"").strip()
             detail = f"exceeded {args.timeout}s"
+            if output:
+                detail += "; last output:"
+                for line in output.decode("utf-8", errors="replace").splitlines()[-10:]:
+                    detail += f"\n        {line}"
         elapsed = time.monotonic() - t0
 
         if status == "pass":
