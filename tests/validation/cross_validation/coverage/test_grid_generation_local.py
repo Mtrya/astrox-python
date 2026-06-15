@@ -6,11 +6,12 @@
 #     - LatLonBounds grid point centers and cell boundaries: verified for divisible and non-divisible bounded grids against local cell subdivision derivation
 #     - LatitudeBounds grid point centers and cell boundaries: verified for a symmetric latitude band against local full-longitude cell derivation
 #     - Global grid point centers and cell boundaries: verified for divisible, non-divisible, and half-step resolutions against local variable-row derivation
-#     - CbLatLonBounds grid point centers and cell boundaries: unresolved (direct subdivision hypothesis fails; targeted probes show latitude-dependent clipped-grid behavior)
+#     - CbLatLonBounds grid tiling bounds: partial (returned cells tile the requested latitude/longitude box in representative cases; exact row/column count rule remains unresolved)
+#     - CbLatLonBounds exact count rule: unresolved (direct subdivision, clipped parent-grid, span-only, and weight-option hypotheses fail)
 #     - ComputeCoverage ContainCoveragePoints grid echo: verified against GetGridPoints ordering and geometry for LatLonBounds representative grid
 #   Fields:
-#     - Points.GridPoints[].Position: verified for LatLonBounds, LatitudeBounds, and Global representative cases; unresolved for CbLatLonBounds
-#     - Points.GridPoints[].GridCellBoundaryVertices: verified for LatLonBounds, LatitudeBounds, and Global representative cases; unresolved for CbLatLonBounds
+#     - Points.GridPoints[].Position: verified for LatLonBounds, LatitudeBounds, and Global representative cases; verified as cell midpoints for CbLatLonBounds representative cases
+#     - Points.GridPoints[].GridCellBoundaryVertices: verified for LatLonBounds, LatitudeBounds, and Global representative cases; verified to tile the requested box for CbLatLonBounds representative cases
 #     - Points.GridPoints[].Weight: partial (positive and present for area weighting; equal-weight branch verified to return 1 for all points)
 #     - Points.Height: verified to echo supplied height_m for LatLonBounds representative grid
 #     - CoverageOutput.Points.GridPoints: verified to match GetGridPoints for the representative LatLonBounds grid when ContainCoveragePoints=True
@@ -28,7 +29,7 @@
 #     - LatLonBounds subdivides each axis into floor(span/resolution)+1 cells in the covered cases
 #     - LatitudeBounds uses latitude cells spanning the requested latitude band and longitude cells around the full globe, with the first longitude cell centered at 180 deg across the seam
 #     - Global uses round-half-up(180/resolution) latitude intervals, collapses pole rows to one point, and uses round-half-up(360*cos(latitude)/resolution) longitude cells on interior rows
-#     - CbLatLonBounds does not follow direct box subdivision in all covered cases. For 0-5 deg latitude and 0-10 deg longitude at 5 deg resolution it returns one latitude row and two longitude columns; for 20-25 deg latitude with the same longitude/resolution it returns two latitude rows and two longitude columns.
+#     - CbLatLonBounds tiles the requested latitude/longitude rectangle exactly in representative cases, but its count rule remains unresolved. Rejected hypotheses: direct LatLonBounds-style subdivision, clipped LatitudeBounds/Global parent grids, span-only ceil/floor rules, and UseCellSurfaceAreaForWeight-driven topology.
 
 from __future__ import annotations
 
@@ -377,14 +378,55 @@ def test_equal_weight_and_height_echo_branches_are_explicit() -> None:
         )
 
 
+def test_cb_lat_lon_cells_tile_requested_bounds() -> None:
+    configure_astrox_from_env()
+    cases = (
+        ("cb_equator", 0.0, 10.0, 0.0, 20.0, 5.0),
+        ("cb_mid_latitude", 20.0, 30.0, -120.0, -100.0, 5.0),
+        ("cb_cross_equator", -10.0, 10.0, 0.0, 20.0, 5.0),
+        ("cb_high_latitude", 40.0, 45.0, 0.0, 10.0, 5.0),
+    )
+    failures: list[str] = []
+    for label, min_lat, max_lat, min_lon, max_lon, resolution in cases:
+        grid = coverage.cb_lat_lon_grid(
+            min_latitude_deg=min_lat,
+            max_latitude_deg=max_lat,
+            min_longitude_deg=min_lon,
+            max_longitude_deg=max_lon,
+            resolution_deg=resolution,
+        )
+        actual = coverage.grid_points(grid=grid)["Points"]["GridPoints"]
+        failures.extend(
+            assert_grid_tiles_requested_box(
+                label,
+                actual,
+                min_latitude_deg=min_lat,
+                max_latitude_deg=max_lat,
+                min_longitude_deg=min_lon,
+                max_longitude_deg=max_lon,
+            )
+        )
+    if failures:
+        raise CrossValidationError("\n".join(failures))
+
+
 @pytest.mark.xfail(
     strict=True,
     reason=(
-        "CbLatLonBounds is not explained by direct box subdivision; targeted probes "
-        "show latitude-dependent clipped-grid behavior that needs a separate oracle."
+        "CbLatLonBounds exact count rule is unresolved after rejected direct "
+        "subdivision, clipped parent-grid, span-only, and weight-option hypotheses."
     ),
 )
 def test_cb_lat_lon_direct_subdivision_hypothesis_remains_unresolved() -> None:
+    # Investigation notes:
+    # - Direct subdivision fails: 0..5 lat, 0..10 lon, res=5 returns one latitude
+    #   row and two longitude columns, unlike LatLonBounds' two rows by three columns.
+    # - Clipped parent grids fail: 0..10 lat, 0..20 lon, res=5 returns eight
+    #   cells, while the matching LatitudeBounds slice has six and Global slice has
+    #   three cells with different centers/boundaries.
+    # - Span-only rules fail: 20..24.99 lat has one row, 20..25 lat has two rows,
+    #   but 25..30 lat has one row for the same resolution and longitude span.
+    # - UseCellSurfaceAreaForWeight changes weights only, not topology.
     configure_astrox_from_env()
     failures: list[str] = []
     for case in cb_lat_lon_cases():
@@ -459,6 +501,108 @@ def compare_grid_points(
         weight = actual_point.get("Weight")
         if not isinstance(weight, int | float) or weight <= 0.0:
             failures.append(f"{label}: point {index} has non-positive Weight {weight!r}")
+    return failures
+
+
+def assert_grid_tiles_requested_box(
+    label: str,
+    actual: list[dict[str, object]],
+    *,
+    min_latitude_deg: float,
+    max_latitude_deg: float,
+    min_longitude_deg: float,
+    max_longitude_deg: float,
+) -> list[str]:
+    failures: list[str] = []
+    cells = [cell_bounds_degrees(point) for point in actual]
+    lat_bands: dict[tuple[float, float], list[tuple[float, float]]] = {}
+    for index, (lat0, lat1, lon0, lon1) in enumerate(cells):
+        if lat0 < min_latitude_deg - 1.0e-10 or lat1 > max_latitude_deg + 1.0e-10:
+            failures.append(
+                f"{label}: point {index} latitude bounds {(lat0, lat1)!r} exceed requested bounds"
+            )
+        if lon0 < min_longitude_deg - 1.0e-10 or lon1 > max_longitude_deg + 1.0e-10:
+            failures.append(
+                f"{label}: point {index} longitude bounds {(lon0, lon1)!r} exceed requested bounds"
+            )
+        center_lat, center_lon = position_degrees(actual[index])
+        midpoint_lat = (lat0 + lat1) / 2.0
+        midpoint_lon = (lon0 + lon1) / 2.0
+        if abs(center_lat - midpoint_lat) > 1.0e-10:
+            failures.append(
+                f"{label}: point {index} latitude center {center_lat} "
+                f"is not cell midpoint {midpoint_lat}"
+            )
+        if abs(center_lon - midpoint_lon) > 1.0e-10:
+            failures.append(
+                f"{label}: point {index} longitude center {center_lon} "
+                f"is not cell midpoint {midpoint_lon}"
+            )
+        lat_bands.setdefault((lat0, lat1), []).append((lon0, lon1))
+    failures.extend(
+        assert_contiguous_intervals(
+            label,
+            "latitude",
+            sorted(lat_bands),
+            min_latitude_deg,
+            max_latitude_deg,
+        )
+    )
+    for lat_band, lon_intervals in lat_bands.items():
+        failures.extend(
+            assert_contiguous_intervals(
+                f"{label} lat_band={lat_band}",
+                "longitude",
+                sorted(lon_intervals),
+                min_longitude_deg,
+                max_longitude_deg,
+            )
+        )
+    return failures
+
+
+def cell_bounds_degrees(point: dict[str, object]) -> tuple[float, float, float, float]:
+    vertices = point["GridCellBoundaryVertices"]
+    if not isinstance(vertices, list):
+        raise CrossValidationError(f"expected boundary vertex list, got {vertices!r}")
+    flat = [[math.degrees(value) for value in vertex] for vertex in vertices]
+    latitudes = [vertex[0] for vertex in flat]
+    longitudes = [vertex[1] for vertex in flat]
+    return min(latitudes), max(latitudes), min(longitudes), max(longitudes)
+
+
+def position_degrees(point: dict[str, object]) -> tuple[float, float]:
+    position = point["Position"]
+    if not isinstance(position, list) or len(position) != 2:
+        raise CrossValidationError(f"expected two-value position, got {position!r}")
+    return math.degrees(position[0]), math.degrees(position[1])
+
+
+def assert_contiguous_intervals(
+    label: str,
+    axis: str,
+    intervals: list[tuple[float, float]],
+    expected_start: float,
+    expected_stop: float,
+) -> list[str]:
+    failures: list[str] = []
+    if not intervals:
+        return [f"{label}: no {axis} intervals"]
+    cursor = expected_start
+    for index, (left, right) in enumerate(intervals):
+        if abs(left - cursor) > 1.0e-10:
+            failures.append(
+                f"{label}: {axis} interval {index} starts at {left}, expected {cursor}"
+            )
+        if right <= left:
+            failures.append(
+                f"{label}: {axis} interval {index} has non-positive span {(left, right)!r}"
+            )
+        cursor = right
+    if abs(cursor - expected_stop) > 1.0e-10:
+        failures.append(
+            f"{label}: {axis} intervals end at {cursor}, expected {expected_stop}"
+        )
     return failures
 
 
