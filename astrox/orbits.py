@@ -14,7 +14,7 @@ __all__ = [
     "MeanKeplerianElements",
     "cartesian_state",
     "cartesian_to_keplerian",
-    "transform_frame",
+    "convert_czml_position",
     "earth_moon_libration",
     "geo",
     "geo_ym_lambert_delta_v",
@@ -455,11 +455,11 @@ def lambert_delta_v(
     )
 
 
-def transform_frame(
+def convert_czml_position(
     position: entities.CzmlPosition,
     *,
     to_central_body: str,
-    target_reference_frame: str | None = None,
+    target_reference_frame: str,
 ) -> tuple[float, entities.CzmlPosition]:
     """Transform a sampled CZML position to another central-body frame.
 
@@ -468,13 +468,13 @@ def transform_frame(
     if not isinstance(position, entities.CzmlPosition):
         raise TypeError("position must be a CzmlPosition instance")
 
-    params: dict[str, Any] = {"toCb": to_central_body}
-    _include_if_supplied(params, "referenceFrame", target_reference_frame)
-
     result = raw.post(
-        "/OrbitSystem/CentralBodyFrame",
-        json=position.to_czml_wire(),
-        params=params,
+        "/OrbitSystem/ConvertCzmlPosition",
+        json={
+            "Position": position.to_czml_wire(),
+            "TargetCbName": to_central_body,
+            "TargetFrame": target_reference_frame,
+        },
     )
     return result["Period"], entities.CzmlPosition.from_czml_wire(result["Position"])
 

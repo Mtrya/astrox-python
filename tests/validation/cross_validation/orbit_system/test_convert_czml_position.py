@@ -1,4 +1,4 @@
-"""Cross-validation for orbits.transform_frame."""
+"""Cross-validation for orbits.convert_czml_position."""
 
 from __future__ import annotations
 
@@ -157,7 +157,7 @@ def test_sun_fixed_to_fixed_matches_iau_sun(
 
 
 def main() -> int:
-    """Run transform_frame cross-checks and report counts."""
+    """Run convert_czml_position cross-checks and report counts."""
     try:
         configure_astrox_from_env()
         checked = 0
