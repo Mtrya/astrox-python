@@ -32,6 +32,7 @@ dev = [
 packages = ["astrox"]
 
 [tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]
 markers = [
     "calibration: nonblocking live investigations that document unresolved external-tool mismatches",
 ]
