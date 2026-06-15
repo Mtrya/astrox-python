@@ -12,7 +12,6 @@ on:
         type: choice
         options:
           - testpypi
-          - pypi
 
 jobs:
   build:
@@ -20,12 +19,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v8.2.0
         with:
           enable-cache: true
+
+      - name: Install build backend
+        run: uv pip install hatchling
 
       - name: Build package
         run: uv build --no-build-isolation
@@ -40,7 +42,7 @@ jobs:
     name: Publish to TestPyPI
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi'
+    if: github.event_name == 'workflow_dispatch'
     environment:
       name: testpypi
       url: https://test.pypi.org/p/astrox-python

@@ -65,21 +65,22 @@ packages = ["astrox"]
 
 [tool.hatch.build.targets.sdist]
 exclude = [
-    "/.git",
-    "/.github",
-    "/.venv",
-    "/.pytest_cache",
-    "/.ruff_cache",
-    "/build",
-    "/dist",
-    "/vendor",
-    "/wheels",
-    "/roadmap",
-    "/scripts",
-    "/openapi",
+    ".git",
+    ".github",
+    ".venv",
+    ".pytest_cache",
+    ".ruff_cache",
+    "build",
+    "dist",
+    "vendor",
+    "wheels",
+    "roadmap",
+    "scripts",
+    "openapi",
 ]
 
 [tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]
 markers = [
     "calibration: nonblocking live investigations that document unresolved external-tool mismatches",
 ]
