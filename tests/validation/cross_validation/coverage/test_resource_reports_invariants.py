@@ -9,7 +9,6 @@
 #     - ComputeCoverage ExactlyN: verified for covered cases to behave as an at-least threshold, not strict equality; this is an observed ASTROX convention, not the SDK changing the wire name
 #     - PercentCoverage report: verified against weighted grid-point membership sampled at Step seconds
 #     - CoverageByAsset report: verified against summary statistics from the matching percent-coverage report for a one-asset case
-#     - Fixed-site asset role: unresolved server behavior; smallest repro returns worker "Index was out of range" instead of coverage intervals
 #   Fields:
 #     - SatisfactionIntervalsWithNumberOfAssets: verified as thresholded count trace derived from AssetAccessResults in covered cases
 #     - AssetAccessResults: verified to preserve per-grid-point, per-asset intervals and duplicate identical assets independently
@@ -39,8 +38,6 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-
-import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
@@ -235,36 +232,6 @@ def test_coverage_by_asset_matches_percent_report_summary_for_one_asset() -> Non
     }
     for key, expected_value in expected.items():
         assert_close_percent(key, 0.0, expected_value, summary[key])
-
-
-def test_fixed_site_asset_role_reduces_to_server_worker_error() -> None:
-    configure_astrox_from_env()
-    site_asset = entities.entity(
-        name="GroundAsset",
-        position=entities.site_position(
-            latitude_deg=0.0,
-            longitude_deg=0.0,
-            height_m=0.0,
-        ),
-    )
-    grid = coverage.lat_lon_grid(
-        min_latitude_deg=-0.5,
-        max_latitude_deg=0.5,
-        min_longitude_deg=-0.5,
-        max_longitude_deg=0.5,
-        resolution_deg=10.0,
-    )
-    with pytest.raises(exceptions.AstroxAPIError, match="Index was out of range"):
-        coverage.compute(
-            start=START,
-            stop="2024-01-01T00:10:00.000Z",
-            grid=grid,
-            assets=[site_asset],
-            minimum_assets=1,
-            include_asset_access_results=True,
-            include_coverage_points=True,
-            step_s=60.0,
-        )
 
 
 def assert_satisfaction_matches_asset_composition(

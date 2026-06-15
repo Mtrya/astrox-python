@@ -33,11 +33,11 @@ The available constructors are:
 
 Bounded constructors require their latitude or latitude/longitude bounds. Optional settings such as `central_body`, `resolution_deg`, `height_m`, and `use_cell_surface_area_for_weight` are omitted unless supplied, leaving ASTROX defaults server-owned.
 
-Validated `lat_lon_grid(...)` cases generate cell centers and boundary vertices in radians. For the covered bounded grids, each axis is split into `floor(span / resolution_deg) + 1` cells, including spans that are not evenly divisible by the resolution. Validated `latitude_grid(...)` cases generate latitude cells across the requested latitude band and longitude cells around the full globe, with the first longitude cell centered at 180 degrees across the seam.
+Validated `lat_lon_grid(...)` cases generate cell centers and boundary vertices in radians. For the covered bounded grids, each axis is split into `floor(span / resolution_deg) + 1` cells, including spans that are not evenly divisible by the resolution. Validated `latitude_grid(...)` cases generate latitude cells across the requested latitude band and longitude cells around the full globe, with the first longitude cell centered at 180 degrees across the seam. Validated `global_grid(...)` cases use latitude rows from south pole to north pole, collapse each pole row to one point, and vary the longitude count by latitude using ASTROX's rounded `360 * cos(latitude) / resolution_deg` rule.
 
 `use_cell_surface_area_for_weight=False` is validated to return weight `1` for every grid point in representative bounded grids. With the default area-weighted behavior, `Weight` is a positive area-like value used by the report routes, but the exact area formula is not yet documented as a public guarantee. `height_m` is validated to echo back in grid-point responses; its effect on coverage membership is not yet claimed.
 
-`global_grid(...)` and `cb_lat_lon_grid(...)` are exposed because they are real ASTROX grid branches. `cb_lat_lon_grid(...)` does not generate the same point set as `lat_lon_grid(...)`; tested cases show latitude-dependent behavior that is not explained by direct box subdivision. Treat both branches as callable but not yet recommended when exact point-generation semantics matter.
+`cb_lat_lon_grid(...)` is exposed because it is a real ASTROX grid branch, but it does not generate the same point set as `lat_lon_grid(...)`; tested cases show latitude-dependent behavior that is not explained by direct box subdivision. Treat this branch as callable but not yet recommended when exact point-generation semantics matter.
 
 ## Grid Points
 
@@ -50,7 +50,7 @@ points = coverage.grid_points(
 )
 ```
 
-For representative `lat_lon_grid(...)` and `latitude_grid(...)` inputs, validation checks returned point centers and cell boundaries against local derivations. The response `Weight` field is preserved unchanged.
+For representative `lat_lon_grid(...)`, `latitude_grid(...)`, and `global_grid(...)` inputs, validation checks returned point centers and cell boundaries against local derivations. The response `Weight` field is preserved unchanged.
 
 ## Compute
 
@@ -86,7 +86,7 @@ Use `minimum_assets=N` for the ASTROX `AtLeastN` resource-count rule, or `exactl
 
 ## Reports
 
-PR-09B covers the two non-FOM coverage reports:
+The coverage core surface includes the two non-FOM coverage reports:
 
 ```python
 percent = coverage.percent_coverage(
@@ -114,4 +114,4 @@ Both report functions accept the same core coverage input options as `compute(..
 
 SDK behavior tests cover exact request lowering, optional-key omission, type rejection, public imports, and raw response pass-through. Live snapshots cover representative callability and response shape for grid generation, compute, elevation/range grid-point constraints, and the two reports.
 
-Validation currently verifies representative `LatLonBounds` and `LatitudeBounds` grid point centers and cell boundaries, the invariant that `ComputeCoverage` with `include_coverage_points=True` echoes the same point ordering as `GetGridPoints`, resource-count composition from per-asset intervals, weighted percent-coverage samples, and one-asset coverage-by-asset summaries. `Global`, `CbLatLonBounds`, strict equality resource semantics, fixed-site assets, grid-point sensor behavior, grid-point constraint membership semantics, and the physical model behind SGP4-to-grid visibility remain caveated.
+Validation currently verifies representative `LatLonBounds`, `LatitudeBounds`, and `Global` grid point centers and cell boundaries, the invariant that `ComputeCoverage` with `include_coverage_points=True` echoes the same point ordering as `GetGridPoints`, resource-count composition from per-asset intervals, weighted percent-coverage samples, and one-asset coverage-by-asset summaries. `CbLatLonBounds`, strict equality resource semantics, fixed-site assets, grid-point sensor behavior, grid-point constraint membership semantics, and the physical model behind SGP4-to-grid visibility remain caveated.

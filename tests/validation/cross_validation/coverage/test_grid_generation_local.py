@@ -5,18 +5,18 @@
 #   Branches:
 #     - LatLonBounds grid point centers and cell boundaries: verified for divisible and non-divisible bounded grids against local cell subdivision derivation
 #     - LatitudeBounds grid point centers and cell boundaries: verified for a symmetric latitude band against local full-longitude cell derivation
+#     - Global grid point centers and cell boundaries: verified for divisible, non-divisible, and half-step resolutions against local variable-row derivation
 #     - CbLatLonBounds grid point centers and cell boundaries: unresolved (direct subdivision hypothesis fails; targeted probes show latitude-dependent clipped-grid behavior)
 #     - ComputeCoverage ContainCoveragePoints grid echo: verified against GetGridPoints ordering and geometry for LatLonBounds representative grid
-#     - Global grids: partial (callable in runtime, but point spacing is not yet derived here)
 #   Fields:
-#     - Points.GridPoints[].Position: verified for LatLonBounds and LatitudeBounds representative cases; unresolved for CbLatLonBounds
-#     - Points.GridPoints[].GridCellBoundaryVertices: verified for LatLonBounds and LatitudeBounds representative cases; unresolved for CbLatLonBounds
+#     - Points.GridPoints[].Position: verified for LatLonBounds, LatitudeBounds, and Global representative cases; unresolved for CbLatLonBounds
+#     - Points.GridPoints[].GridCellBoundaryVertices: verified for LatLonBounds, LatitudeBounds, and Global representative cases; unresolved for CbLatLonBounds
 #     - Points.GridPoints[].Weight: partial (positive and present for area weighting; equal-weight branch verified to return 1 for all points)
 #     - Points.Height: verified to echo supplied height_m for LatLonBounds representative grid
 #     - CoverageOutput.Points.GridPoints: verified to match GetGridPoints for the representative LatLonBounds grid when ContainCoveragePoints=True
 #   Parameters:
 #     - min/max latitude/longitude: verified for representative positive, negative, and non-divisible longitude bounds
-#     - resolution_deg: verified for LatLonBounds and LatitudeBounds representative resolutions; unresolved for CbLatLonBounds
+#     - resolution_deg: verified for LatLonBounds, LatitudeBounds, and Global representative resolutions; unresolved for CbLatLonBounds
 #     - use_cell_surface_area_for_weight: partial (False branch verified as equal weights; area formula not calibrated)
 #     - height_m: partial (response echo verified; access/coverage effect not calibrated)
 #     - central_body: partial (Earth default observed; non-Earth values not calibrated)
@@ -27,6 +27,7 @@
 #   Findings:
 #     - LatLonBounds subdivides each axis into floor(span/resolution)+1 cells in the covered cases
 #     - LatitudeBounds uses latitude cells spanning the requested latitude band and longitude cells around the full globe, with the first longitude cell centered at 180 deg across the seam
+#     - Global uses round-half-up(180/resolution) latitude intervals, collapses pole rows to one point, and uses round-half-up(360*cos(latitude)/resolution) longitude cells on interior rows
 #     - CbLatLonBounds does not follow direct box subdivision in all covered cases. For 0-5 deg latitude and 0-10 deg longitude at 5 deg resolution it returns one latitude row and two longitude columns; for 20-25 deg latitude with the same longitude/resolution it returns two latitude rows and two longitude columns.
 
 from __future__ import annotations
@@ -239,6 +240,60 @@ def expected_latitude_points(
     return points
 
 
+def expected_global_points(*, resolution_deg: float) -> list[dict[str, object]]:
+    lat_divisions = max(1, round_half_up(180.0 / resolution_deg))
+    lat_step = 180.0 / lat_divisions
+    points: list[dict[str, object]] = []
+    for lat_index in range(lat_divisions + 1):
+        center_lat = -90.0 + lat_index * lat_step
+        is_south_pole = lat_index == 0
+        is_north_pole = lat_index == lat_divisions
+        if is_south_pole or is_north_pole:
+            if is_south_pole:
+                boundary_lat = center_lat + lat_step / 2.0
+            else:
+                boundary_lat = center_lat - lat_step / 2.0
+            points.append(
+                {
+                    "Position": [math.radians(center_lat), 0.0],
+                    "GridCellBoundaryVertices": [
+                        [math.radians(boundary_lat), math.radians(-180.0)],
+                        [math.radians(boundary_lat), math.radians(-90.0)],
+                        [math.radians(boundary_lat), math.radians(0.0)],
+                        [math.radians(boundary_lat), math.radians(90.0)],
+                    ],
+                }
+            )
+            continue
+        lat0 = center_lat - lat_step / 2.0
+        lat1 = center_lat + lat_step / 2.0
+        lon_count = max(
+            1,
+            round_half_up(360.0 * math.cos(math.radians(center_lat)) / resolution_deg),
+        )
+        lon_step = 360.0 / lon_count
+        for lon_index in range(lon_count):
+            center_lon = -180.0 + lon_index * lon_step
+            lon0 = normalize_longitude_deg(center_lon - lon_step / 2.0)
+            lon1 = normalize_longitude_deg(center_lon + lon_step / 2.0)
+            points.append(
+                {
+                    "Position": [math.radians(center_lat), math.radians(center_lon)],
+                    "GridCellBoundaryVertices": [
+                        [math.radians(lat1), math.radians(lon0)],
+                        [math.radians(lat1), math.radians(lon1)],
+                        [math.radians(lat0), math.radians(lon1)],
+                        [math.radians(lat0), math.radians(lon0)],
+                    ],
+                }
+            )
+    return points
+
+
+def round_half_up(value: float) -> int:
+    return math.floor(value + 0.5)
+
+
 def normalize_longitude_deg(value: float) -> float:
     return ((value + 180.0) % 360.0) - 180.0
 
@@ -270,6 +325,24 @@ def test_latitude_grid_points_match_local_full_longitude_derivation() -> None:
         ),
         actual,
     )
+    if failures:
+        raise CrossValidationError("\n".join(failures))
+
+
+def test_global_grid_points_match_local_variable_row_derivation() -> None:
+    configure_astrox_from_env()
+    failures: list[str] = []
+    for resolution_deg in (30.0, 40.0, 50.0):
+        actual = coverage.grid_points(
+            grid=coverage.global_grid(resolution_deg=resolution_deg)
+        )["Points"]["GridPoints"]
+        failures.extend(
+            compare_grid_points(
+                f"global_{resolution_deg:g}",
+                expected_global_points(resolution_deg=resolution_deg),
+                actual,
+            )
+        )
     if failures:
         raise CrossValidationError("\n".join(failures))
 

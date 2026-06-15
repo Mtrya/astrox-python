@@ -7,11 +7,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrox import coverage, entities
+from astrox import coverage, entities, exceptions
 from tests.validation._support import (
     LiveSnapshotCase,
     check_snapshot,
@@ -53,6 +55,17 @@ def relay() -> entities.Entity:
     return entities.entity(
         name="Relay",
         position=entities.sgp4_position(tle_lines=TLE_LINES),
+    )
+
+
+def ground_asset() -> entities.Entity:
+    return entities.entity(
+        name="GroundAsset",
+        position=entities.site_position(
+            latitude_deg=0.0,
+            longitude_deg=0.0,
+            height_m=0.0,
+        ),
     )
 
 
@@ -153,6 +166,31 @@ CASES = [
 def test_coverage_live_snapshot() -> None:
     configure_astrox_from_env()
     check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
+
+
+def test_site_entity_as_coverage_asset_currently_returns_worker_error() -> None:
+    configure_astrox_from_env()
+    # This is a live drift guard, not semantic proof. Coverage assets appear to be
+    # satellite-like resources in practice, but the schema accepts broad Entity
+    # objects. If ASTROX adds a clear validation error for site assets, this test
+    # should fail so the stale worker-error expectation can be removed.
+    with pytest.raises(exceptions.AstroxAPIError, match="Index was out of range"):
+        coverage.compute(
+            start=START,
+            stop="2024-01-01T00:10:00.000Z",
+            grid=coverage.lat_lon_grid(
+                min_latitude_deg=-0.5,
+                max_latitude_deg=0.5,
+                min_longitude_deg=-0.5,
+                max_longitude_deg=0.5,
+                resolution_deg=10.0,
+            ),
+            assets=[ground_asset()],
+            minimum_assets=1,
+            include_asset_access_results=True,
+            include_coverage_points=True,
+            step_s=60.0,
+        )
 
 
 if __name__ == "__main__":
