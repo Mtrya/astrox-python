@@ -280,6 +280,94 @@ def access_compute_site_sgp4() -> dict[str, Any]:
     )
 
 
+def constrained_site(*, constraints: list[Any]) -> entities.Entity:
+    return entities.entity(
+        name="ConstrainedGround",
+        position=entities.site_position(
+            longitude_deg=-155.468,
+            latitude_deg=19.821,
+            height_m=4205.0,
+        ),
+        constraints=constraints,
+    )
+
+
+def access_compute_site_sgp4_elevation_range_constraints() -> dict[str, Any]:
+    return access.compute(
+        start=START,
+        stop=DAY_STOP,
+        from_entity=constrained_site(
+            constraints=[
+                entities.elevation_constraint(minimum_deg=10.0),
+                entities.range_constraint(maximum_km=2500.0, maximum_enabled=True),
+            ],
+        ),
+        to_entity=sgp4_entity(),
+        step_s=600.0,
+        compute_aer=True,
+    )
+
+
+def access_compute_site_sgp4_az_el_mask_constraint() -> dict[str, Any]:
+    return access.compute(
+        start=START,
+        stop=DAY_STOP,
+        from_entity=constrained_site(
+            constraints=[
+                entities.az_el_mask_constraint(
+                    az_el_mask_rad=[
+                        0.0,
+                        0.17453292519943295,
+                        1.5707963267948966,
+                        0.17453292519943295,
+                        3.141592653589793,
+                        0.17453292519943295,
+                        4.71238898038469,
+                        0.17453292519943295,
+                    ],
+                ),
+            ],
+        ),
+        to_entity=sgp4_entity(),
+        step_s=600.0,
+        compute_aer=True,
+    )
+
+
+def access_compute_site_sgp4_az_el_mask_constraint_with_max_range() -> dict[str, Any]:
+    """AzElMask with a tiny MaxRange.
+
+    ASTROX currently forwards MaxRange but does not enforce it, so this request
+    returns the same intervals as ``access_compute_site_sgp4_az_el_mask_constraint``.
+    If a future upstream version starts enforcing MaxRange, this snapshot will
+    mismatch because a 1 km limit would eliminate all ISS passes.
+    """
+    return access.compute(
+        start=START,
+        stop=DAY_STOP,
+        from_entity=constrained_site(
+            constraints=[
+                entities.az_el_mask_constraint(
+                    az_el_mask_rad=[
+                        0.0,
+                        0.17453292519943295,
+                        1.5707963267948966,
+                        0.17453292519943295,
+                        3.141592653589793,
+                        0.17453292519943295,
+                        4.71238898038469,
+                        0.17453292519943295,
+                    ],
+                    max_range_km=1.0,
+                ),
+            ],
+        ),
+        to_entity=sgp4_entity(),
+        step_s=600.0,
+        compute_aer=True,
+    )
+
+
 def access_compute_site_central_body() -> dict[str, Any]:
     return access.compute(
         start=START,
@@ -416,6 +504,21 @@ CASES = [
         id="access_compute_site_sgp4",
         description="Direct access from a fixed site to an SGP4 entity, including AER output.",
         run=access_compute_site_sgp4,
+    ),
+    LiveSnapshotCase(
+        id="access_compute_site_sgp4_elevation_range_constraints",
+        description="Direct access from a fixed site with elevation and range constraints to an SGP4 entity.",
+        run=access_compute_site_sgp4_elevation_range_constraints,
+    ),
+    LiveSnapshotCase(
+        id="access_compute_site_sgp4_az_el_mask_constraint",
+        description="Direct access from a fixed site with an azimuth/elevation mask constraint to an SGP4 entity.",
+        run=access_compute_site_sgp4_az_el_mask_constraint,
+    ),
+    LiveSnapshotCase(
+        id="access_compute_site_sgp4_az_el_mask_constraint_with_max_range",
+        description="Direct access from a fixed site with an AzElMask constraint that includes a tiny MaxRange. ASTROX currently forwards MaxRange without enforcing it; this snapshot freezes that behavior.",
+        run=access_compute_site_sgp4_az_el_mask_constraint_with_max_range,
     ),
     LiveSnapshotCase(
         id="access_compute_site_central_body",

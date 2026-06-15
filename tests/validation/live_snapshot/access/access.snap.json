@@ -403,6 +403,414 @@
       }
     },
     {
+      "description": "Direct access from a fixed site with elevation and range constraints to an SGP4 entity.",
+      "id": "access_compute_site_sgp4_elevation_range_constraints",
+      "return": {
+        "IsSuccess": true,
+        "Message": "OK",
+        "Passes": [
+          {
+            "AccessBeginData": {
+              "Azimuth": -151.88342429838136,
+              "Elevation": 10.000012653164767,
+              "Range": 1477833.5484862048,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:08:41.105Z"
+            },
+            "AccessEndData": {
+              "Azimuth": 47.01178695045798,
+              "Elevation": 10.000242219301096,
+              "Range": 1480983.1731927807,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:15:14.394Z"
+            },
+            "AccessStart": "2024-01-01T03:08:41.105Z",
+            "AccessStop": "2024-01-01T03:15:14.394Z",
+            "AllDatas": [
+              {
+                "Azimuth": -151.88342429838136,
+                "Elevation": 10.000012653164767,
+                "Range": 1477833.5484862048,
+                "RangeDot": 0,
+                "Time": "2024-01-01T03:08:41.105Z"
+              },
+              {
+                "Azimuth": 47.01178695045798,
+                "Elevation": 10.000242219301096,
+                "Range": 1480983.1731927807,
+                "RangeDot": 0,
+                "Time": "2024-01-01T03:15:14.394Z"
+              }
+            ],
+            "Duration": 393.28952947798825,
+            "MaxElevationData": {
+              "Azimuth": 127.48519055728569,
+              "Elevation": 59.91520029603322,
+              "Range": 474699.80879287765,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:11:57.579Z"
+            },
+            "MaxRangeData": {
+              "Azimuth": 47.01178695045798,
+              "Elevation": 10.000242219301096,
+              "Range": 1480983.1731927807,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:15:14.394Z"
+            },
+            "MinElevationData": {
+              "Azimuth": 47.01178695045798,
+              "Elevation": 10.000242219301096,
+              "Range": 1480983.1731927807,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:15:14.394Z"
+            },
+            "MinRangeData": {
+              "Azimuth": 127.56120363583636,
+              "Elevation": 59.915195863005835,
+              "Range": 474699.680300375,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:11:57.536Z"
+            }
+          },
+          {
+            "AccessBeginData": {
+              "Azimuth": -39.87089871588607,
+              "Elevation": 10.000053722626168,
+              "Range": 1483227.1424088515,
+              "RangeDot": 0,
+              "Time": "2024-01-01T12:59:47.705Z"
+            },
+            "AccessEndData": {
+              "Azimuth": 143.06418738907874,
+              "Elevation": 10.00027064054957,
+              "Range": 1480648.3094671008,
+              "RangeDot": 0,
+              "Time": "2024-01-01T13:06:27.112Z"
+            },
+            "AccessStart": "2024-01-01T12:59:47.705Z",
+            "AccessStop": "2024-01-01T13:06:27.112Z",
+            "AllDatas": [
+              {
+                "Azimuth": -39.87089871588607,
+                "Elevation": 10.000053722626168,
+                "Range": 1483227.1424088515,
+                "RangeDot": 0,
+                "Time": "2024-01-01T12:59:47.705Z"
+              },
+              {
+                "Azimuth": 143.06418738907874,
+                "Elevation": 10.00027064054957,
+                "Range": 1480648.3094671008,
+                "RangeDot": 0,
+                "Time": "2024-01-01T13:06:27.112Z"
+              }
+            ],
+            "Duration": 399.40643451763435,
+            "MaxElevationData": {
+              "Azimuth": -128.70967697674484,
+              "Elevation": 85.74571183494659,
+              "Range": 416983.0935445493,
+              "RangeDot": 0,
+              "Time": "2024-01-01T13:03:07.612Z"
+            },
+            "MaxRangeData": {
+              "Azimuth": 143.06418738907874,
+              "Elevation": 10.00027064054957,
+              "Range": 1480648.3094671008,
+              "RangeDot": 0,
+              "Time": "2024-01-01T13:06:27.112Z"
+            },
+            "MinElevationData": {
+              "Azimuth": 143.06418738907874,
+              "Elevation": 10.00027064054957,
+              "Range": 1480648.3094671008,
+              "RangeDot": 0,
+              "Time": "2024-01-01T13:06:27.112Z"
+            },
+            "MinRangeData": {
+              "Azimuth": -128.7763385698223,
+              "Elevation": 85.74567857372696,
+              "Range": 416983.0985618605,
+              "RangeDot": 0,
+              "Time": "2024-01-01T13:03:07.617Z"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "Direct access from a fixed site with an azimuth/elevation mask constraint to an SGP4 entity.",
+      "id": "access_compute_site_sgp4_az_el_mask_constraint",
+      "return": {
+        "IsSuccess": true,
+        "Message": "OK",
+        "Passes": [
+          {
+            "AccessBeginData": {
+              "Azimuth": -151.8834188128344,
+              "Elevation": 10.00000000197697,
+              "Range": 1477834.3404856182,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:08:41.104Z"
+            },
+            "AccessEndData": {
+              "Azimuth": 47.01168412743999,
+              "Elevation": 10.000000022917401,
+              "Range": 1480998.385857691,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:15:14.396Z"
+            },
+            "AccessStart": "2024-01-01T03:08:41.104Z",
+            "AccessStop": "2024-01-01T03:15:14.396Z",
+            "AllDatas": [
+              {
+                "Azimuth": -151.8834188128344,
+                "Elevation": 10.00000000197697,
+                "Range": 1477834.3404856182,
+                "RangeDot": 0,
+                "Time": "2024-01-01T03:08:41.104Z"
+              },
+              {
+                "Azimuth": 47.01168412743999,
+                "Elevation": 10.000000022917401,
+                "Range": 1480998.385857691,
+                "RangeDot": 0,
+                "Time": "2024-01-01T03:15:14.396Z"
+              }
+            ],
+            "Duration": 393.29190962082066,
+            "MaxElevationData": {
+              "Azimuth": 127.48518793272156,
+              "Elevation": 59.91520029541543,
+              "Range": 474699.8088007217,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:11:57.579Z"
+            },
+            "MaxRangeData": {
+              "Azimuth": 47.01168412743999,
+              "Elevation": 10.000000022917401,
+              "Range": 1480998.385857691,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:15:14.396Z"
+            },
+            "MinElevationData": {
+              "Azimuth": 47.01168412743999,
+              "Elevation": 10.000000022917401,
+              "Range": 1480998.385857691,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:15:14.396Z"
+            },
+            "MinRangeData": {
+              "Azimuth": 127.5612035436484,
+              "Elevation": 59.91519586303863,
+              "Range": 474699.68030041154,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:11:57.536Z"
+            }
+          },
+          {
+            "AccessBeginData": {
+              "Azimuth": -39.87089661847249,
+              "Elevation": 10.000000219328996,
+              "Range": 1483230.5040848393,
+              "RangeDot": 0,
+              "Time": "2024-01-01T12:59:47.705Z"
+            },
+            "AccessEndData": {
+              "Azimuth": 143.06417989068512,
+              "Elevation": 10.000113773673252,
+              "Range": 1480658.1392951915,
+              "RangeDot": 0,
+              "Time": "2024-01-01T13:06:27.113Z"
+            },
+            "AccessStart": "2024-01-01T12:59:47.705Z",
+            "AccessStop": "2024-01-01T13:06:27.113Z",
+            "AllDatas": [
+              {
+                "Azimuth": -39.87089661847249,
+                "Elevation": 10.000000219328996,
+                "Range": 1483230.5040848393,
+                "RangeDot": 0,
+                "Time": "2024-01-01T12:59:47.705Z"
+              },
+              {
+                "Azimuth": 143.06417989068512,
+                "Elevation": 10.000113773673252,
+                "Range": 1480658.1392951915,
+                "RangeDot": 0,
+                "Time": "2024-01-01T13:06:27.113Z"
+              }
+            ],
+            "Duration": 399.40837269375834,
+            "MaxElevationData": {
+              "Azimuth": -128.710573119595,
+              "Elevation": 85.74571142588134,
+              "Range": 416983.09359265276,
+              "RangeDot": 0,
+              "Time": "2024-01-01T13:03:07.612Z"
+            },
+            "MaxRangeData": {
+              "Azimuth": 143.06417989068512,
+              "Elevation": 10.000113773673252,
+              "Range": 1480658.1392951915,
+              "RangeDot": 0,
+              "Time": "2024-01-01T13:06:27.113Z"
+            },
+            "MinElevationData": {
+              "Azimuth": 143.06417989068512,
+              "Elevation": 10.000113773673252,
+              "Range": 1480658.1392951915,
+              "RangeDot": 0,
+              "Time": "2024-01-01T13:06:27.113Z"
+            },
+            "MinRangeData": {
+              "Azimuth": -128.7763401305708,
+              "Elevation": 85.74567857288079,
+              "Range": 416983.0985620139,
+              "RangeDot": 0,
+              "Time": "2024-01-01T13:03:07.617Z"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "Direct access from a fixed site with an AzElMask constraint that includes a tiny MaxRange. ASTROX currently forwards MaxRange without enforcing it; this snapshot freezes that behavior.",
+      "id": "access_compute_site_sgp4_az_el_mask_constraint_with_max_range",
+      "return": {
+        "IsSuccess": true,
+        "Message": "OK",
+        "Passes": [
+          {
+            "AccessBeginData": {
+              "Azimuth": -151.8834188128344,
+              "Elevation": 10.00000000197697,
+              "Range": 1477834.3404856182,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:08:41.104Z"
+            },
+            "AccessEndData": {
+              "Azimuth": 47.01168412743999,
+              "Elevation": 10.000000022917401,
+              "Range": 1480998.385857691,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:15:14.396Z"
+            },
+            "AccessStart": "2024-01-01T03:08:41.104Z",
+            "AccessStop": "2024-01-01T03:15:14.396Z",
+            "AllDatas": [
+              {
+                "Azimuth": -151.8834188128344,
+                "Elevation": 10.00000000197697,
+                "Range": 1477834.3404856182,
+                "RangeDot": 0,
+                "Time": "2024-01-01T03:08:41.104Z"
+              },
+              {
+                "Azimuth": 47.01168412743999,
+                "Elevation": 10.000000022917401,
+                "Range": 1480998.385857691,
+                "RangeDot": 0,
+                "Time": "2024-01-01T03:15:14.396Z"
+              }
+            ],
+            "Duration": 393.29190962082066,
+            "MaxElevationData": {
+              "Azimuth": 127.48518793272156,
+              "Elevation": 59.91520029541543,
+              "Range": 474699.8088007217,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:11:57.579Z"
+            },
+            "MaxRangeData": {
+              "Azimuth": 47.01168412743999,
+              "Elevation": 10.000000022917401,
+              "Range": 1480998.385857691,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:15:14.396Z"
+            },
+            "MinElevationData": {
+              "Azimuth": 47.01168412743999,
+              "Elevation": 10.000000022917401,
+              "Range": 1480998.385857691,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:15:14.396Z"
+            },
+            "MinRangeData": {
+              "Azimuth": 127.5612035436484,
+              "Elevation": 59.91519586303863,
+              "Range": 474699.68030041154,
+              "RangeDot": 0,
+              "Time": "2024-01-01T03:11:57.536Z"
+            }
+          },
+          {
+            "AccessBeginData": {
+              "Azimuth": -39.87089661847249,
+              "Elevation": 10.000000219328996,
+              "Range": 1483230.5040848393,
+              "RangeDot": 0,
+              "Time": "2024-01-01T12:59:47.705Z"
+            },
+            "AccessEndData": {
+              "Azimuth": 143.06417989068512,
+              "Elevation": 10.000113773673252,
+              "Range": 1480658.1392951915,
+              "RangeDot": 0,
+              "Time": "2024-01-01T13:06:27.113Z"
+            },
+            "AccessStart": "2024-01-01T12:59:47.705Z",
+            "AccessStop": "2024-01-01T13:06:27.113Z",
+            "AllDatas": [
+              {
+                "Azimuth": -39.87089661847249,
+                "Elevation": 10.000000219328996,
+                "Range": 1483230.5040848393,
+                "RangeDot": 0,
+                "Time": "2024-01-01T12:59:47.705Z"
+              },
+              {
+                "Azimuth": 143.06417989068512,
+                "Elevation": 10.000113773673252,
+                "Range": 1480658.1392951915,
+                "RangeDot": 0,
+                "Time": "2024-01-01T13:06:27.113Z"
+              }
+            ],
+            "Duration": 399.40837269375834,
+            "MaxElevationData": {
+              "Azimuth": -128.710573119595,
+              "Elevation": 85.74571142588134,
+              "Range": 416983.09359265276,
+              "RangeDot": 0,
+              "Time": "2024-01-01T13:03:07.612Z"
+            },
+            "MaxRangeData": {
+              "Azimuth": 143.06417989068512,
+              "Elevation": 10.000113773673252,
+              "Range": 1480658.1392951915,
+              "RangeDot": 0,
+              "Time": "2024-01-01T13:06:27.113Z"
+            },
+            "MinElevationData": {
+              "Azimuth": 143.06417989068512,
+              "Elevation": 10.000113773673252,
+              "Range": 1480658.1392951915,
+              "RangeDot": 0,
+              "Time": "2024-01-01T13:06:27.113Z"
+            },
+            "MinRangeData": {
+              "Azimuth": -128.7763401305708,
+              "Elevation": 85.74567857288079,
+              "Range": 416983.0985620139,
+              "RangeDot": 0,
+              "Time": "2024-01-01T13:03:07.617Z"
+            }
+          }
+        ]
+      }
+    },
+    {
       "description": "Direct access from a fixed site to a central-body entity.",
       "id": "access_compute_site_central_body",
       "return": {
@@ -1021,6 +1429,6 @@
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-06-12T16:45:12Z"
+    "refreshed_at": "2026-06-15T10:03:13Z"
   }
 }

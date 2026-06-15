@@ -54,6 +54,49 @@ For SGP4-to-ground role reversal, current cross-validation confirms interval sym
 
 `use_light_time_delay=True` is exercised for the representative ground-to-SGP4 case. The observed access-boundary shifts are consistent with a simple range-over-speed-of-light estimate at millisecond scale for that case; this validates the option is wired and produces physically plausible timing shifts, not that every model pair has been calibrated.
 
+## Entity Constraints
+
+Attach shared ASTROX constraints to the `from_entity` or `to_entity` participant through the entity `constraints` list:
+
+```python
+ground = entities.entity(
+    name="Ground",
+    position=entities.site_position(
+        longitude_deg=-155.468,
+        latitude_deg=19.821,
+        height_m=4205.0,
+    ),
+    constraints=[
+        entities.elevation_constraint(minimum_deg=10.0),
+        entities.range_constraint(maximum_km=2500.0, maximum_enabled=True),
+    ],
+)
+
+result = access.compute(
+    start="2024-01-01T00:00:00.000Z",
+    stop="2024-01-02T00:00:00.000Z",
+    from_entity=ground,
+    to_entity=iss,
+    step_s=600.0,
+    compute_aer=True,
+)
+```
+
+`access.compute(...)` does not accept a separate `constraints=` argument. Constraints are participant metadata, so they travel with the entity through `FromObjectPath` and `ToObjectPath`. The SDK rejects raw constraint dictionaries at the entity boundary; use `entities.elevation_constraint(...)`, `entities.range_constraint(...)`, or `entities.az_el_mask_constraint(...)`.
+
+The supported constraint types are elevation-angle limits in degrees, range limits in kilometers, and azimuth/elevation mask samples in radians. Cross-validation in `tests/validation/cross_validation/access/test_compute_constraints_skyfield.py` establishes the following for representative fixed-site to SGP4 and SGP4-to-fixed-site cases:
+
+- `ElevationAngle.MinimumValue` is a lower bound in degrees at the constrained participant, evaluated in the participant's local topocentric frame. The boundary is inclusive within the calibration tolerance.
+- `ElevationAngle.MaximumValue` is active only when `IsMaximumEnabled=True` and uses the same frame and units as the minimum.
+- `Range.MinimumValue` and `Range.MaximumValue` are evaluated in kilometers on the geometric range between the two participants. `MinimumValue` is active whenever supplied; `MaximumValue` is active only when `IsMaximumEnabled=True`.
+- `use_light_time_delay=True` shifts access interval boundaries but the range constraint threshold is still evaluated on geometric range.
+- Multiple constraints on the same participant produce the intersection of their predicates. When both participants have elevation minima, the result is the intersection of the two independent local-frame predicates.
+- Constraints attached to the satellite participant are evaluated in the satellite's Earth-fixed geodetic local frame (the same convention used for satellite-origin AER rows), not in a spacecraft body frame and not ignored.
+- `compute_aer=True` returns AER rows that satisfy the active elevation constraint.
+- `AzElMask.AzElMaskData` is a flat sequence of alternating azimuth and elevation samples in radians. The mask is interpolated piecewise-linearly in azimuth using the same north-zero/east-positive convention as access AER rows, with the first sample closing across the 0/360 boundary. AzEl masks are only meaningful for `SitePosition` participants; attaching one to a moving position source returns a server error.
+- `AzElMask.MaxRange` is forwarded but not enforced by ASTROX. The OpenAPI description and live behavior both treat it as documentation-only.
+- Ordered but impossible thresholds, such as a minimum elevation of 90 degrees, return empty `Passes`. Supplying `minimum > maximum` while `IsMaximumEnabled=True` raises a server validation error (`maximum value cannot be less than the minimum value`).
+
 ## Sensor-Constrained Access
 
 Attach `orientation`, `sensor`, and optional `sensor_pointing` metadata to the `from_entity` when an access computation should be constrained by a spacecraft sensor:
