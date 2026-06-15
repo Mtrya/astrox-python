@@ -25,12 +25,9 @@ jobs:
         uses: astral-sh/setup-uv@v8.2.0
         with:
           enable-cache: true
-
-      - name: Install build backend
-        run: uv pip install hatchling
-
+          
       - name: Build package
-        run: uv build --no-build-isolation
+        run: uv build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
