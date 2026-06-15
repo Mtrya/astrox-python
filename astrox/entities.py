@@ -24,12 +24,15 @@ __all__ = [
     "AzElRotation",
     "BallisticPosition",
     "CentralBodyPosition",
+    "AzElMaskConstraint",
     "ConicSensor",
     "CompositeAxes",
+    "Constraint",
     "CzmlPosition",
     "CzmlPositionSTM",
     "CzmlPositions",
     "CzmlAxes",
+    "ElevationConstraint",
     "Entity",
     "EntityAxes",
     "EntityGroup",
@@ -43,6 +46,7 @@ __all__ = [
     "J2Position",
     "LvlhAxes",
     "QuaternionRotation",
+    "RangeConstraint",
     "RectangularSensor",
     "Rotation",
     "RaDecDirection",
@@ -64,6 +68,7 @@ __all__ = [
     "XyzDirection",
     "aligned_and_constrained_axes",
     "az_el_rotation",
+    "az_el_mask_constraint",
     "ballistic_position",
     "central_body_position",
     "conic_sensor",
@@ -74,6 +79,7 @@ __all__ = [
     "entity",
     "entity_group",
     "euler_rotation",
+    "elevation_constraint",
     "fixed_axes",
     "fixed_at_epoch_axes",
     "fixed_sensor_pointing",
@@ -81,6 +87,7 @@ __all__ = [
     "j2_position",
     "lvlh_axes",
     "quaternion_rotation",
+    "range_constraint",
     "ra_dec_direction",
     "rectangular_sensor",
     "vgt",
@@ -1149,6 +1156,63 @@ class RectangularSensor:
         return payload
 
 
+@dataclass(frozen=True, kw_only=True)
+class ElevationConstraint:
+    """Elevation-angle constraint fragment shared by ASTROX entity and coverage inputs."""
+
+    minimum_deg: float | None = None
+    maximum_deg: float | None = None
+    maximum_enabled: bool | None = None
+    text: str | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to an ASTROX elevation-angle constraint fragment."""
+        payload: dict[str, Any] = {"$type": "ElevationAngle"}
+        _include_if_supplied(payload, "MinimumValue", self.minimum_deg)
+        _include_if_supplied(payload, "MaximumValue", self.maximum_deg)
+        _include_if_supplied(payload, "IsMaximumEnabled", self.maximum_enabled)
+        _include_if_supplied(payload, "Text", self.text)
+        return payload
+
+
+@dataclass(frozen=True, kw_only=True)
+class RangeConstraint:
+    """Range constraint fragment shared by ASTROX entity and coverage inputs."""
+
+    minimum_km: float | None = None
+    maximum_km: float | None = None
+    maximum_enabled: bool | None = None
+    text: str | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to an ASTROX range constraint fragment."""
+        payload: dict[str, Any] = {"$type": "Range"}
+        _include_if_supplied(payload, "MinimumValue", self.minimum_km)
+        _include_if_supplied(payload, "MaximumValue", self.maximum_km)
+        _include_if_supplied(payload, "IsMaximumEnabled", self.maximum_enabled)
+        _include_if_supplied(payload, "Text", self.text)
+        return payload
+
+
+@dataclass(frozen=True, kw_only=True)
+class AzElMaskConstraint:
+    """Azimuth/elevation mask constraint fragment shared by ASTROX entity and coverage inputs."""
+
+    az_el_mask_rad: tuple[float, ...]
+    max_range_km: float | None = None
+    text: str | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to an ASTROX azimuth/elevation mask constraint fragment."""
+        payload: dict[str, Any] = {
+            "$type": "AzElMask",
+            "AzElMaskData": list(self.az_el_mask_rad),
+        }
+        _include_if_supplied(payload, "MaxRange", self.max_range_km)
+        _include_if_supplied(payload, "Text", self.text)
+        return payload
+
+
 EntityPosition: TypeAlias = (
     SitePosition
     | CzmlPosition
@@ -1162,6 +1226,7 @@ EntityPosition: TypeAlias = (
     | BallisticPosition
 )
 EntitySensor: TypeAlias = ConicSensor | RectangularSensor
+Constraint: TypeAlias = ElevationConstraint | RangeConstraint | AzElMaskConstraint
 
 _POSITION_TYPES = (
     SitePosition,
@@ -1176,6 +1241,7 @@ _POSITION_TYPES = (
     BallisticPosition,
 )
 _SENSOR_TYPES = (ConicSensor, RectangularSensor)
+_CONSTRAINT_TYPES = (ElevationConstraint, RangeConstraint, AzElMaskConstraint)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1189,6 +1255,7 @@ class Entity:
     orientation: EntityAxes | None = None
     sensor: EntitySensor | None = None
     sensor_pointing: SensorPointing | None = None
+    constraints: tuple[Constraint, ...] | None = None
 
     def to_wire(self) -> dict[str, Any]:
         """Lower to the common ASTROX entity body."""
@@ -1205,6 +1272,11 @@ class Entity:
             payload["Sensor"] = _sensor_to_wire(self.sensor)
         if self.sensor_pointing is not None:
             payload["SensorPointing"] = _sensor_pointing_to_wire(self.sensor_pointing)
+        if self.constraints is not None:
+            payload["Constraints"] = [
+                _constraint_to_wire(constraint)
+                for constraint in self.constraints
+            ]
         return payload
 
 
@@ -1870,6 +1942,57 @@ def rectangular_sensor(
     )
 
 
+def elevation_constraint(
+    *,
+    minimum_deg: float | None = None,
+    maximum_deg: float | None = None,
+    maximum_enabled: bool | None = None,
+    text: str | None = None,
+) -> ElevationConstraint:
+    """Create an elevation-angle constraint fragment."""
+    return ElevationConstraint(
+        minimum_deg=minimum_deg,
+        maximum_deg=maximum_deg,
+        maximum_enabled=maximum_enabled,
+        text=text,
+    )
+
+
+def range_constraint(
+    *,
+    minimum_km: float | None = None,
+    maximum_km: float | None = None,
+    maximum_enabled: bool | None = None,
+    text: str | None = None,
+) -> RangeConstraint:
+    """Create a range constraint fragment."""
+    return RangeConstraint(
+        minimum_km=minimum_km,
+        maximum_km=maximum_km,
+        maximum_enabled=maximum_enabled,
+        text=text,
+    )
+
+
+def az_el_mask_constraint(
+    *,
+    az_el_mask_rad: Sequence[float],
+    max_range_km: float | None = None,
+    text: str | None = None,
+) -> AzElMaskConstraint:
+    """Create an azimuth/elevation mask constraint fragment."""
+    return AzElMaskConstraint(
+        az_el_mask_rad=tuple(
+            _number_sequence_to_list(
+                az_el_mask_rad,
+                parameter="az_el_mask_rad",
+            )
+        ),
+        max_range_km=max_range_km,
+        text=text,
+    )
+
+
 def entity(
     *,
     name: str,
@@ -1879,6 +2002,7 @@ def entity(
     orientation: EntityAxes | None = None,
     sensor: EntitySensor | None = None,
     sensor_pointing: SensorPointing | None = None,
+    constraints: Sequence[Constraint] | None = None,
 ) -> Entity:
     """Create a named ASTROX analysis object."""
     if not isinstance(position, _POSITION_TYPES):
@@ -1896,6 +2020,11 @@ def entity(
         raise TypeError(
             "sensor_pointing must be an astrox.entities sensor-pointing value"
         )
+    constraint_items = (
+        _typed_tuple(constraints, _CONSTRAINT_TYPES, parameter="constraints")
+        if constraints is not None
+        else None
+    )
     return Entity(
         name=name,
         position=position,
@@ -1904,6 +2033,7 @@ def entity(
         orientation=orientation,
         sensor=sensor,
         sensor_pointing=sensor_pointing,
+        constraints=constraint_items,
     )
 
 
@@ -1949,6 +2079,12 @@ def _sensor_to_wire(sensor: EntitySensor) -> dict[str, Any]:
     if not isinstance(sensor, _SENSOR_TYPES):
         raise TypeError("sensor must be an astrox.entities sensor value")
     return sensor.to_wire()
+
+
+def _constraint_to_wire(constraint: Constraint) -> dict[str, Any]:
+    if not isinstance(constraint, _CONSTRAINT_TYPES):
+        raise TypeError("constraint must be an astrox.entities constraint value")
+    return constraint.to_wire()
 
 
 def _rotation_to_wire(rotation: Rotation) -> dict[str, Any]:

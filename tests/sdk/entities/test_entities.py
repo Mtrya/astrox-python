@@ -42,18 +42,22 @@ def sample_state() -> orbits.CartesianState:
 
 def test_public_entity_names_are_exported() -> None:
     assert "AlignedAndConstrainedAxes" in entities.__all__
+    assert "AzElMaskConstraint" in entities.__all__
     assert "AzElRotation" in entities.__all__
     assert "CompositeAxes" in entities.__all__
+    assert "Constraint" in entities.__all__
     assert "CzmlAxes" in entities.__all__
     assert "Entity" in entities.__all__
     assert "EntityAxes" in entities.__all__
     assert "EntityGroup" in entities.__all__
+    assert "ElevationConstraint" in entities.__all__
     assert "EulerRotation" in entities.__all__
     assert "FixedAtEpochAxes" in entities.__all__
     assert "FixedAxes" in entities.__all__
     assert "FixedSensorPointing" in entities.__all__
     assert "LvlhAxes" in entities.__all__
     assert "QuaternionRotation" in entities.__all__
+    assert "RangeConstraint" in entities.__all__
     assert "Rotation" in entities.__all__
     assert "RaDecDirection" in entities.__all__
     assert "SensorPointing" in entities.__all__
@@ -80,6 +84,9 @@ def test_public_entity_names_are_exported() -> None:
     assert "VncAxes" in entities.__all__
     assert "VvlhAxes" in entities.__all__
     assert "XyzDirection" in entities.__all__
+    assert "az_el_mask_constraint" in entities.__all__
+    assert "elevation_constraint" in entities.__all__
+    assert "range_constraint" in entities.__all__
 
 
 def test_site_position_has_typed_and_site_only_wire_forms() -> None:
@@ -424,6 +431,52 @@ def test_sensor_constructors_lower_discriminated_fragments() -> None:
     )
 
 
+def test_constraint_constructors_lower_discriminated_fragments() -> None:
+    assert_canonical_equal(
+        entities.elevation_constraint(
+            minimum_deg=10.0,
+            maximum_deg=80.0,
+            maximum_enabled=True,
+            text="minimum elevation",
+        ).to_wire(),
+        {
+            "$type": "ElevationAngle",
+            "MinimumValue": 10.0,
+            "MaximumValue": 80.0,
+            "IsMaximumEnabled": True,
+            "Text": "minimum elevation",
+        },
+    )
+    assert_canonical_equal(
+        entities.range_constraint(
+            minimum_km=100.0,
+            maximum_km=2500.0,
+            maximum_enabled=True,
+            text="range gate",
+        ).to_wire(),
+        {
+            "$type": "Range",
+            "MinimumValue": 100.0,
+            "MaximumValue": 2500.0,
+            "IsMaximumEnabled": True,
+            "Text": "range gate",
+        },
+    )
+    assert_canonical_equal(
+        entities.az_el_mask_constraint(
+            az_el_mask_rad=[0.0, 0.1, 1.57079632679, 0.2],
+            max_range_km=5000.0,
+            text="terrain mask",
+        ).to_wire(),
+        {
+            "$type": "AzElMask",
+            "AzElMaskData": [0.0, 0.1, 1.57079632679, 0.2],
+            "MaxRange": 5000.0,
+            "Text": "terrain mask",
+        },
+    )
+
+
 def test_entity_composes_position_and_sensor_metadata() -> None:
     sat = entities.entity(
         name="ISS",
@@ -447,6 +500,47 @@ def test_entity_composes_position_and_sensor_metadata() -> None:
                 "$type": "Conic",
                 "outerHalfAngle": 30.0,
             },
+        },
+    )
+
+
+def test_entity_composes_constraints_metadata() -> None:
+    site = entities.entity(
+        name="Ground",
+        position=entities.site_position(
+            longitude_deg=-155.468,
+            latitude_deg=19.821,
+            height_m=4205.0,
+        ),
+        constraints=[
+            entities.elevation_constraint(minimum_deg=5.0),
+            entities.range_constraint(maximum_km=3000.0, maximum_enabled=True),
+        ],
+    )
+
+    assert site.constraints == (
+        entities.elevation_constraint(minimum_deg=5.0),
+        entities.range_constraint(maximum_km=3000.0, maximum_enabled=True),
+    )
+    assert_canonical_equal(
+        site.to_wire(),
+        {
+            "Name": "Ground",
+            "Position": {
+                "$type": "SitePosition",
+                "cartographicDegrees": [-155.468, 19.821, 4205.0],
+            },
+            "Constraints": [
+                {
+                    "$type": "ElevationAngle",
+                    "MinimumValue": 5.0,
+                },
+                {
+                    "$type": "Range",
+                    "MaximumValue": 3000.0,
+                    "IsMaximumEnabled": True,
+                },
+            ],
         },
     )
 
@@ -867,6 +961,11 @@ def test_entity_group_lowers_grouped_entities() -> None:
             "unit_quaternion_xyzw must be a sequence of numbers",
         ),
         (
+            entities.az_el_mask_constraint,
+            {"az_el_mask_rad": [0.0, "0.1"]},
+            "az_el_mask_rad must be a sequence of numbers",
+        ),
+        (
             entities.vgt,
             {"axes": [entities.vgt_point(name="not axes")]},
             "axes contains unsupported item values",
@@ -887,6 +986,15 @@ def test_entity_group_lowers_grouped_entities() -> None:
                 ),
             },
             "orientation must be an astrox.entities axes value",
+        ),
+        (
+            entities.entity,
+            {
+                "name": "bad",
+                "position": entities.sgp4_position(tle_lines=TLE_LINES),
+                "constraints": [{"$type": "ElevationAngle"}],
+            },
+            "constraints contains unsupported item values",
         ),
         (
             entities.entity,
