@@ -8,8 +8,8 @@ Coverage:
     - Range constraint on from_entity (ground site): verified
     - Range constraint on to_entity (satellite): verified
     - Range minimum_only/maximum_only/minimum_and_maximum: verified
-    - AzElMask constraint on from_entity (ground site): verified for flat masks; partial for sector masks
-    - AzElMask constraint on to_entity (satellite): unresolved
+    - AzElMask constraint on from_entity (ground site): verified
+    - AzElMask constraint on to_entity (satellite): verified site-only (server rejects)
     - Combined elevation + range constraints: verified
     - Both participants constrained: verified for elevation minima
     - ground-to-SGP4 access role: verified for constraints on from_entity
@@ -18,11 +18,11 @@ Coverage:
     - use_light_time_delay=True with range constraint: verified
     - Sharp boundary cases: verified
     - Contradictory/no-access cases: verified
-    - Server error behavior for unsupported combinations: unresolved
+    - Server error behavior for min>max when maximum enabled: verified
   Fields:
     - Passes.AccessStart/AccessStop under elevation constraint: verified
     - Passes.AccessStart/AccessStop under range constraint: verified
-    - Passes.AccessStart/AccessStop under AzElMask constraint: verified for flat masks; partial for sector masks
+    - Passes.AccessStart/AccessStop under AzElMask constraint: verified
     - AllDatas.Azimuth/Elevation/Range with elevation constraint: verified
     - Passes with no access for contradictory thresholds: verified
   Parameters:
@@ -31,8 +31,8 @@ Coverage:
     - Range.MinimumValue: verified (kilometers, geometric range)
     - Range.MaximumValue: verified (active only if IsMaximumEnabled True, kilometers)
     - Range.MinimumValue always active when supplied: verified
-    - AzElMask.AzElMaskData: verified for flat masks and north-zero/east-positive convention; partial for sector interpolation
-    - AzElMask.MaxRange: partial
+    - AzElMask.AzElMaskData: verified (north-zero/east-positive, piecewise-linear in azimuth with 0/360 closure)
+    - AzElMask.MaxRange: verified documentation-only (not enforced)
     - use_light_time_delay: verified (constraint evaluated on geometric range)
   Comparison:
     - External: Skyfield SGP4 topocentric geometry
@@ -42,17 +42,14 @@ Coverage:
         AER_DENSE_AZIMUTH_ABS_DEG=3.0e-3 deg
         AER_DENSE_ELEVATION_ABS_DEG=1.5e-3 deg
         AER_CONVENTION_RANGE_ABS_M=25.0 m
-  Unresolved:
-    - AzElMask semantics when attached to the satellite side.
-    - Exact AzElMask interpolation rule for non-flat sector masks.
-    - AzElMask.MaxRange semantics.
-    - Server error classification for contradictory constraint combinations.
 
 Satellite-side elevation and range constraints match the same Earth-fixed
 geodetic local-frame convention already established for satellite-origin AER
-rows, not a spacecraft body frame. AzElMask on the satellite side and exact
-sector-mask interpolation remain unresolved and are left visible for future
-slices.
+rows, not a spacecraft body frame. AzElMask is meaningful only on a SitePosition
+participant; the server rejects the constraint when it is attached to a moving
+position source. AzElMask samples are interpolated piecewise-linearly in azimuth
+using the same north-zero/east-positive convention as access AER rows, with the
+first sample duplicated across the 0/360 boundary to close the circle.
 """
 
 from __future__ import annotations
@@ -63,20 +60,18 @@ import sys
 import pytest
 
 from astrox import entities
+from astrox.exceptions import AstroxAPIError
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 from tests.validation.cross_validation.access._aer import (
     compare_ground_origin_aer_rows_with_skyfield,
     first_aer_rows,
 )
 from tests.validation.cross_validation.access._cases import (
-    AER_CONVENTION_AZIMUTH_ABS_DEG,
-    AER_CONVENTION_ELEVATION_ABS_DEG,
     AER_CONVENTION_RANGE_ABS_M,
     AER_DENSE_AZIMUTH_ABS_DEG,
     AER_DENSE_ELEVATION_ABS_DEG,
     CrossValidationError,
     DAY_STOP,
-    INTERVAL_ABS_S,
     START,
     TLE_A,
     compute_access,
@@ -328,8 +323,12 @@ def test_elevation_maximum_active_only_when_enabled() -> None:
     disabled_expected = _expected_constrained_intervals(
         _expected_elevation_intervals(minimum_deg=minimum_deg)
     )
-    compare_intervals(enabled_expected, enabled_actual, tolerance_s=CONSTRAINT_TOLERANCE_S)
-    compare_intervals(disabled_expected, disabled_actual, tolerance_s=CONSTRAINT_TOLERANCE_S)
+    compare_intervals(
+        enabled_expected, enabled_actual, tolerance_s=CONSTRAINT_TOLERANCE_S
+    )
+    compare_intervals(
+        disabled_expected, disabled_actual, tolerance_s=CONSTRAINT_TOLERANCE_S
+    )
 
 
 def test_elevation_sharp_boundary_matches_independent_crossing() -> None:
@@ -357,11 +356,15 @@ def test_elevation_sharp_boundary_matches_independent_crossing() -> None:
         aer = ground_origin_aer_at(offset_s, start=pass_start)
         samples.append((offset_s, aer.elevation_deg))
     if len(samples) < 2:
-        raise CrossValidationError("first unconstrained pass produced fewer than 2 samples")
+        raise CrossValidationError(
+            "first unconstrained pass produced fewer than 2 samples"
+        )
     min_elevation = min(item[1] for item in samples)
     max_elevation = max(item[1] for item in samples)
     if max_elevation - min_elevation < 0.1:
-        raise CrossValidationError("first pass elevation range too small for a sharp boundary test")
+        raise CrossValidationError(
+            "first pass elevation range too small for a sharp boundary test"
+        )
     threshold_deg = min_elevation + 0.25 * (max_elevation - min_elevation)
     ground = _constrained_site(
         constraints=[entities.elevation_constraint(minimum_deg=threshold_deg)],
@@ -488,9 +491,7 @@ def test_range_contradictory_maximum_returns_no_access() -> None:
     """A maximum below the minimum possible range yields no passes."""
     configure_astrox_from_env()
     ground = _constrained_site(
-        constraints=[
-            entities.range_constraint(maximum_km=100.0, maximum_enabled=True)
-        ],
+        constraints=[entities.range_constraint(maximum_km=100.0, maximum_enabled=True)],
     )
     result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
     actual = intervals_from_access_passes(result["Passes"])
@@ -594,9 +595,7 @@ def test_az_el_mask_contradictory_returns_no_access() -> None:
     result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
     actual = intervals_from_access_passes(result["Passes"])
     if actual:
-        raise CrossValidationError(
-            "expected no access for 90 deg AzElMask, got passes"
-        )
+        raise CrossValidationError("expected no access for 90 deg AzElMask, got passes")
 
 
 def test_elevation_constraint_returns_matching_aer_rows() -> None:
@@ -643,7 +642,9 @@ def test_elevation_minimum_on_satellite_matches_geodetic_local_frame() -> None:
     )
     result = compute_access(site(), satellite, start=START, stop=DAY_STOP)
     actual = intervals_from_access_passes(result["Passes"])
-    expected = _expected_elevation_intervals(minimum_deg=minimum_deg, origin="satellite")
+    expected = _expected_elevation_intervals(
+        minimum_deg=minimum_deg, origin="satellite"
+    )
     compare_intervals(expected, actual, tolerance_s=CONSTRAINT_TOLERANCE_S)
 
 
@@ -678,8 +679,12 @@ def test_both_participants_elevation_constrained_matches_intersection() -> None:
     )
     result = compute_access(ground, satellite, start=START, stop=DAY_STOP)
     actual = intervals_from_access_passes(result["Passes"])
-    ground_expected = _expected_elevation_intervals(minimum_deg=minimum_deg, origin="ground")
-    satellite_expected = _expected_elevation_intervals(minimum_deg=minimum_deg, origin="satellite")
+    ground_expected = _expected_elevation_intervals(
+        minimum_deg=minimum_deg, origin="ground"
+    )
+    satellite_expected = _expected_elevation_intervals(
+        minimum_deg=minimum_deg, origin="satellite"
+    )
     from tests.validation.cross_validation.access._geometry import intersect_intervals
 
     expected = _expected_constrained_intervals(
@@ -714,6 +719,179 @@ def test_range_maximum_with_light_time_delay_uses_geometric_range() -> None:
     compare_intervals(expected, actual, tolerance_s=CONSTRAINT_TOLERANCE_S)
 
 
+def test_az_el_mask_on_satellite_is_rejected_as_site_only() -> None:
+    """AzElMask is meaningful only for SitePosition participants.
+
+    The server rejects the constraint with a clear error when it is attached to a
+    moving position source such as SGP4.
+    """
+    configure_astrox_from_env()
+    mask_rad = (
+        0.0,
+        math.radians(10.0),
+        math.radians(90.0),
+        math.radians(10.0),
+        math.radians(180.0),
+        math.radians(10.0),
+        math.radians(270.0),
+        math.radians(10.0),
+    )
+    satellite = _constrained_satellite(
+        constraints=[entities.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
+    )
+    with pytest.raises(AstroxAPIError, match="AzElMask"):
+        compute_access(site(), satellite, start=START, stop=DAY_STOP)
+
+
+def test_az_el_mask_max_range_is_documentation_only() -> None:
+    """AzElMask.MaxRange is forwarded but not enforced by ASTROX."""
+    configure_astrox_from_env()
+    mask_rad = (
+        0.0,
+        math.radians(10.0),
+        math.radians(90.0),
+        math.radians(10.0),
+        math.radians(180.0),
+        math.radians(10.0),
+        math.radians(270.0),
+        math.radians(10.0),
+    )
+    without = compute_access(
+        _constrained_site(
+            constraints=[entities.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
+        ),
+        sgp4_entity(),
+        start=START,
+        stop=DAY_STOP,
+    )
+    with_range = compute_access(
+        _constrained_site(
+            constraints=[
+                entities.az_el_mask_constraint(
+                    az_el_mask_rad=mask_rad,
+                    max_range_km=1.0,
+                )
+            ],
+        ),
+        sgp4_entity(),
+        start=START,
+        stop=DAY_STOP,
+    )
+    compare_intervals(
+        intervals_from_access_passes(without["Passes"]),
+        intervals_from_access_passes(with_range["Passes"]),
+        tolerance_s=CONSTRAINT_TOLERANCE_S,
+    )
+
+
+def test_az_el_mask_piecewise_linear_interpolation_matches_multiple_masks() -> None:
+    """Non-flat masks match a piecewise-linear azimuth interpolation model."""
+    configure_astrox_from_env()
+    masks: list[tuple[str, tuple[float, ...]]] = [
+        (
+            "ramp",
+            (
+                0.0,
+                0.0,
+                math.radians(90.0),
+                math.radians(60.0),
+                math.radians(180.0),
+                0.0,
+                math.radians(270.0),
+                math.radians(60.0),
+            ),
+        ),
+        (
+            "narrow_sector",
+            (
+                math.radians(-15.0),
+                math.radians(90.0),
+                math.radians(15.0),
+                math.radians(90.0),
+                math.radians(15.0),
+                0.0,
+                math.radians(345.0),
+                0.0,
+            ),
+        ),
+        (
+            "three_sample_closed",
+            (
+                0.0,
+                0.0,
+                math.radians(120.0),
+                math.radians(60.0),
+                math.radians(240.0),
+                math.radians(60.0),
+            ),
+        ),
+    ]
+    for _label, mask_rad in masks:
+        ground = _constrained_site(
+            constraints=[entities.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
+        )
+        result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
+        actual = intervals_from_access_passes(result["Passes"])
+        expected = _expected_constrained_intervals(
+            _expected_az_el_mask_intervals(az_el_mask_rad=mask_rad)
+        )
+        compare_intervals(expected, actual, tolerance_s=CONSTRAINT_TOLERANCE_S)
+
+
+def test_elevation_min_exceeding_max_with_maximum_enabled_raises() -> None:
+    """A minimum elevation above the maximum elevation is rejected by the server."""
+    configure_astrox_from_env()
+    ground = _constrained_site(
+        constraints=[
+            entities.elevation_constraint(
+                minimum_deg=80.0,
+                maximum_deg=10.0,
+                maximum_enabled=True,
+            )
+        ],
+    )
+    with pytest.raises(
+        AstroxAPIError,
+        match="maximum value cannot be less than the minimum value",
+    ):
+        compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
+
+
+def test_range_min_exceeding_max_with_maximum_enabled_raises() -> None:
+    """A minimum range above the maximum range is rejected by the server."""
+    configure_astrox_from_env()
+    ground = _constrained_site(
+        constraints=[
+            entities.range_constraint(
+                minimum_km=2000.0,
+                maximum_km=1000.0,
+                maximum_enabled=True,
+            )
+        ],
+    )
+    with pytest.raises(
+        AstroxAPIError,
+        match="maximum value cannot be less than the minimum value",
+    ):
+        compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
+
+
+def test_ordered_contradictory_constraints_return_no_access() -> None:
+    """Ordered but impossible thresholds return empty passes rather than an error."""
+    configure_astrox_from_env()
+    ground = _constrained_site(
+        constraints=[
+            entities.elevation_constraint(minimum_deg=90.0),
+            entities.range_constraint(maximum_km=100.0, maximum_enabled=True),
+        ],
+    )
+    result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
+    if intervals_from_access_passes(result["Passes"]):
+        raise CrossValidationError(
+            "expected no access for ordered contradictory constraints"
+        )
+
+
 def main() -> int:
     cases = [
         test_elevation_minimum_on_ground_matches_skyfield_topocentric_predicate,
@@ -735,6 +913,12 @@ def main() -> int:
         test_range_maximum_on_satellite_matches_geodetic_local_frame,
         test_both_participants_elevation_constrained_matches_intersection,
         test_range_maximum_with_light_time_delay_uses_geometric_range,
+        test_az_el_mask_on_satellite_is_rejected_as_site_only,
+        test_az_el_mask_max_range_is_documentation_only,
+        test_az_el_mask_piecewise_linear_interpolation_matches_multiple_masks,
+        test_elevation_min_exceeding_max_with_maximum_enabled_raises,
+        test_range_min_exceeding_max_with_maximum_enabled_raises,
+        test_ordered_contradictory_constraints_return_no_access,
     ]
     checked = 0
     try:

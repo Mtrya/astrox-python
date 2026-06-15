@@ -848,10 +848,7 @@ class CompositeAxes:
         """Lower to an ASTROX Composite CrdnAxes fragment."""
         payload: dict[str, Any] = {
             "$type": "Composite",
-            "Intervals": [
-                interval.to_wire()
-                for interval in self.intervals
-            ],
+            "Intervals": [interval.to_wire() for interval in self.intervals],
         }
         _include_axes_metadata(
             payload,
@@ -1079,10 +1076,7 @@ class VgtProvider:
     def to_wire(self) -> dict[str, Any]:
         """Lower to an ASTROX CrdnProvider fragment."""
         payload: dict[str, Any] = {
-            "Axes": [
-                axes.to_wire()
-                for axes in self.axes
-            ],
+            "Axes": [axes.to_wire() for axes in self.axes],
         }
         if self.vectors is not None:
             payload["Vectors"] = [vector.to_wire() for vector in self.vectors]
@@ -1274,8 +1268,7 @@ class Entity:
             payload["SensorPointing"] = _sensor_pointing_to_wire(self.sensor_pointing)
         if self.constraints is not None:
             payload["Constraints"] = [
-                _constraint_to_wire(constraint)
-                for constraint in self.constraints
+                _constraint_to_wire(constraint) for constraint in self.constraints
             ]
         return payload
 
@@ -1980,7 +1973,17 @@ def az_el_mask_constraint(
     max_range_km: float | None = None,
     text: str | None = None,
 ) -> AzElMaskConstraint:
-    """Create an azimuth/elevation mask constraint fragment."""
+    """Create an azimuth/elevation mask constraint fragment.
+
+    ``az_el_mask_rad`` is a flat sequence of alternating azimuth and elevation
+    samples in radians. ASTROX interpolates the mask piecewise-linearly in
+    azimuth and applies it at the constrained participant. Live validation shows
+    this constraint is only meaningful for ``SitePosition`` participants; the
+    server rejects it for moving position sources.
+
+    ``max_range_km`` is forwarded but is not enforced by ASTROX. The live
+    OpenAPI description and server behavior both treat it as documentation-only.
+    """
     return AzElMaskConstraint(
         az_el_mask_rad=tuple(
             _number_sequence_to_list(
@@ -2124,7 +2127,9 @@ def _axes_reference_name(value: EntityAxes | str, *, parameter: str) -> str:
         return value
     if isinstance(value, _AXES_TYPES):
         if value.name is None:
-            raise TypeError(f"{parameter} object must have a name before it can be referenced")
+            raise TypeError(
+                f"{parameter} object must have a name before it can be referenced"
+            )
         return value.name
     raise TypeError(f"{parameter} must be an astrox.entities axes value or string name")
 
@@ -2134,9 +2139,13 @@ def _vector_reference_name(value: VgtVector | str, *, parameter: str) -> str:
         return value
     if isinstance(value, _VGT_VECTOR_TYPES):
         if value.name is None:
-            raise TypeError(f"{parameter} object must have a name before it can be referenced")
+            raise TypeError(
+                f"{parameter} object must have a name before it can be referenced"
+            )
         return value.name
-    raise TypeError(f"{parameter} must be an astrox.entities VGT vector value or string name")
+    raise TypeError(
+        f"{parameter} must be an astrox.entities VGT vector value or string name"
+    )
 
 
 def _typed_tuple(
@@ -2153,5 +2162,7 @@ def _typed_tuple(
     return items
 
 
-def _axes_tuple(values: Sequence[EntityAxes], *, parameter: str) -> tuple[EntityAxes, ...]:
+def _axes_tuple(
+    values: Sequence[EntityAxes], *, parameter: str
+) -> tuple[EntityAxes, ...]:
     return _typed_tuple(values, _AXES_TYPES, parameter=parameter)

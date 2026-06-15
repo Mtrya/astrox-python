@@ -2,20 +2,22 @@
 
 Coverage:
   Branches:
-    - ground-origin elevation/range/AzElMask predicate intervals: partial
-    - satellite-origin elevation/range/AzElMask predicate intervals: partial
-    - combined predicate intersection: partial
-    - light-time-shifted range predicate: partial
+    - ground-origin elevation/range/AzElMask predicate intervals: verified
+    - satellite-origin elevation/range predicate intervals: verified
+    - satellite-origin AzElMask predicate intervals: verified site-only (server rejects)
+    - combined predicate intersection: verified
+    - light-time-shifted range predicate: verified
   Fields:
-    - predicate interval start/stop times: partial
+    - predicate interval start/stop times: verified
   Parameters:
-    - elevation minimum/maximum thresholds: partial
-    - range minimum/maximum thresholds: partial
-    - AzElMask sample azimuth/elevation in radians: partial
+    - elevation minimum/maximum thresholds: verified
+    - range minimum/maximum thresholds: verified
+    - AzElMask sample azimuth/elevation in radians: verified
+    - AzElMask.MaxRange: verified documentation-only (not enforced)
   Comparison:
     - External: Skyfield SGP4 topocentric geometry
     - Constants: TLE_A, WGS84 ellipsoid via Skyfield
-    - Tolerances: shared INTERVAL_ABS_S for boundary precision; dense sampling at 5-10 s
+    - Tolerances: shared INTERVAL_ABS_S for boundary precision; dense sampling at 5-15 s
 """
 
 from __future__ import annotations
@@ -36,7 +38,6 @@ from tests.validation.cross_validation.access._cases import (
 )
 from tests.validation.cross_validation.access._geometry import (
     Interval,
-    bisect_transition,
     skyfield_satellite,
     skyfield_site,
     time_at_offset,

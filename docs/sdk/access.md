@@ -93,8 +93,9 @@ The supported constraint types are elevation-angle limits in degrees, range limi
 - Multiple constraints on the same participant produce the intersection of their predicates. When both participants have elevation minima, the result is the intersection of the two independent local-frame predicates.
 - Constraints attached to the satellite participant are evaluated in the satellite's Earth-fixed geodetic local frame (the same convention used for satellite-origin AER rows), not in a spacecraft body frame and not ignored.
 - `compute_aer=True` returns AER rows that satisfy the active elevation constraint.
-
-AzEl mask interpolation for non-flat sector masks, `AzElMask.MaxRange` semantics, AzEl masks attached to a satellite participant, and server error behavior for some contradictory combinations remain unresolved. Consult the cross-validation matrix for the current evidence state of each branch.
+- `AzElMask.AzElMaskData` is a flat sequence of alternating azimuth and elevation samples in radians. The mask is interpolated piecewise-linearly in azimuth using the same north-zero/east-positive convention as access AER rows, with the first sample closing across the 0/360 boundary. AzEl masks are only meaningful for `SitePosition` participants; attaching one to a moving position source returns a server error.
+- `AzElMask.MaxRange` is forwarded but not enforced by ASTROX. The OpenAPI description and live behavior both treat it as documentation-only.
+- Ordered but impossible thresholds, such as a minimum elevation of 90 degrees, return empty `Passes`. Supplying `minimum > maximum` while `IsMaximumEnabled=True` raises a server validation error (`maximum value cannot be less than the minimum value`).
 
 ## Sensor-Constrained Access
 
