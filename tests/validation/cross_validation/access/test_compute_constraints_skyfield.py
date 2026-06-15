@@ -95,6 +95,46 @@ from tests.validation.cross_validation.access._geometry import (
 
 CONSTRAINT_TOLERANCE_S = 0.25
 
+_AZ_EL_MASK_INTERPOLATION_MASKS: list[tuple[str, tuple[float, ...]]] = [
+    (
+        "ramp",
+        (
+            0.0,
+            0.0,
+            math.radians(90.0),
+            math.radians(60.0),
+            math.radians(180.0),
+            0.0,
+            math.radians(270.0),
+            math.radians(60.0),
+        ),
+    ),
+    (
+        "narrow_sector",
+        (
+            math.radians(-15.0),
+            math.radians(90.0),
+            math.radians(15.0),
+            math.radians(90.0),
+            math.radians(15.0),
+            0.0,
+            math.radians(345.0),
+            0.0,
+        ),
+    ),
+    (
+        "three_sample_closed",
+        (
+            0.0,
+            0.0,
+            math.radians(120.0),
+            math.radians(60.0),
+            math.radians(240.0),
+            math.radians(60.0),
+        ),
+    ),
+]
+
 
 def _constrained_site(
     *,
@@ -782,58 +822,36 @@ def test_az_el_mask_max_range_is_documentation_only() -> None:
     )
 
 
-def test_az_el_mask_piecewise_linear_interpolation_matches_multiple_masks() -> None:
-    """Non-flat masks match a piecewise-linear azimuth interpolation model."""
+def _check_az_el_mask_interpolation(label: str, mask_rad: tuple[float, ...]) -> None:
+    """Compare one AzElMask against the piecewise-linear oracle."""
     configure_astrox_from_env()
-    masks: list[tuple[str, tuple[float, ...]]] = [
-        (
-            "ramp",
-            (
-                0.0,
-                0.0,
-                math.radians(90.0),
-                math.radians(60.0),
-                math.radians(180.0),
-                0.0,
-                math.radians(270.0),
-                math.radians(60.0),
-            ),
-        ),
-        (
-            "narrow_sector",
-            (
-                math.radians(-15.0),
-                math.radians(90.0),
-                math.radians(15.0),
-                math.radians(90.0),
-                math.radians(15.0),
-                0.0,
-                math.radians(345.0),
-                0.0,
-            ),
-        ),
-        (
-            "three_sample_closed",
-            (
-                0.0,
-                0.0,
-                math.radians(120.0),
-                math.radians(60.0),
-                math.radians(240.0),
-                math.radians(60.0),
-            ),
-        ),
-    ]
-    for _label, mask_rad in masks:
-        ground = _constrained_site(
-            constraints=[entities.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
-        )
-        result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
-        actual = intervals_from_access_passes(result["Passes"])
-        expected = _expected_constrained_intervals(
-            _expected_az_el_mask_intervals(az_el_mask_rad=mask_rad)
-        )
+    ground = _constrained_site(
+        constraints=[entities.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
+    )
+    result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
+    actual = intervals_from_access_passes(result["Passes"])
+    expected = _expected_constrained_intervals(
+        _expected_az_el_mask_intervals(az_el_mask_rad=mask_rad)
+    )
+    try:
         compare_intervals(expected, actual, tolerance_s=CONSTRAINT_TOLERANCE_S)
+    except Exception:
+        raise CrossValidationError(
+            f"AzElMask interpolation mismatch for mask={label!r}"
+        ) from None
+
+
+@pytest.mark.parametrize(
+    "label, mask_rad",
+    _AZ_EL_MASK_INTERPOLATION_MASKS,
+    ids=[label for label, _ in _AZ_EL_MASK_INTERPOLATION_MASKS],
+)
+def test_az_el_mask_piecewise_linear_interpolation_matches_multiple_masks(
+    label: str,
+    mask_rad: tuple[float, ...],
+) -> None:
+    """Non-flat masks match a piecewise-linear azimuth interpolation model."""
+    _check_az_el_mask_interpolation(label, mask_rad)
 
 
 def test_elevation_min_exceeding_max_with_maximum_enabled_raises() -> None:
@@ -890,6 +908,12 @@ def test_ordered_contradictory_constraints_return_no_access() -> None:
         )
 
 
+def _main_az_el_mask_interpolation() -> None:
+    """Run the AzElMask interpolation probes from the script entry point."""
+    for label, mask_rad in _AZ_EL_MASK_INTERPOLATION_MASKS:
+        _check_az_el_mask_interpolation(label, mask_rad)
+
+
 def main() -> int:
     cases = [
         test_elevation_minimum_on_ground_matches_skyfield_topocentric_predicate,
@@ -913,7 +937,7 @@ def main() -> int:
         test_range_maximum_with_light_time_delay_uses_geometric_range,
         test_az_el_mask_on_satellite_is_rejected_as_site_only,
         test_az_el_mask_max_range_is_documentation_only,
-        test_az_el_mask_piecewise_linear_interpolation_matches_multiple_masks,
+        _main_az_el_mask_interpolation,
         test_elevation_min_exceeding_max_with_maximum_enabled_raises,
         test_range_min_exceeding_max_with_maximum_enabled_raises,
         test_ordered_contradictory_constraints_return_no_access,

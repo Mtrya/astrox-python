@@ -498,6 +498,17 @@ def test_constraints_omit_unsupplied_optional_keys() -> None:
         entities.az_el_mask_constraint(az_el_mask_rad=[0.0, 0.1]).to_wire(),
         {"$type": "AzElMask", "AzElMaskData": [0.0, 0.1]},
     )
+    assert_canonical_equal(
+        entities.az_el_mask_constraint(
+            az_el_mask_rad=[0.0, 0.1],
+            max_range_km=123.0,
+        ).to_wire(),
+        {
+            "$type": "AzElMask",
+            "AzElMaskData": [0.0, 0.1],
+            "MaxRange": 123.0,
+        },
+    )
 
 
 def test_entity_composes_position_and_sensor_metadata() -> None:
@@ -887,7 +898,9 @@ def test_entity_composes_vgt_orientation_sensor_and_pointing_metadata() -> None:
 
 
 def test_entity_group_lowers_grouped_entities() -> None:
-    iss = entities.entity(name="ISS", position=entities.sgp4_position(tle_lines=TLE_LINES))
+    iss = entities.entity(
+        name="ISS", position=entities.sgp4_position(tle_lines=TLE_LINES)
+    )
     hubble = entities.entity(
         name="Hubble",
         position=entities.sgp4_position(tle_lines=TLE_LINES),
@@ -1052,7 +1065,9 @@ def test_entity_group_lowers_grouped_entities() -> None:
         ),
     ],
 )
-def test_constructors_reject_unsupported_shapes(factory: object, kwargs: dict[str, object], match: str) -> None:
+def test_constructors_reject_unsupported_shapes(
+    factory: object, kwargs: dict[str, object], match: str
+) -> None:
     with pytest.raises(TypeError, match=match):
         factory(**kwargs)
 
