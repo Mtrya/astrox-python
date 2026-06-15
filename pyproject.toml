@@ -5,12 +5,44 @@ build-backend = "hatchling.build"
 [project]
 name = "astrox-python"
 version = "0.1.0"
-description = "Add your description here"
+description = "Python SDK for the ASTROX Web API."
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.10"
+authors = [
+    { name = "Mtrya", email = "erchanmion20@outlook.com" },
+]
+keywords = [
+    "astrox",
+    "sdk",
+    "astrodynamics",
+    "orbit",
+    "propagation",
+    "space",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = [
     "requests>=2.34.2",
 ]
+
+[project.urls]
+Homepage = "https://github.com/Mtrya/astrox-python"
+Repository = "https://github.com/Mtrya/astrox-python.git"
+Issues = "https://github.com/Mtrya/astrox-python/issues"
+Documentation = "https://github.com/Mtrya/astrox-python/tree/main/docs"
 
 [dependency-groups]
 dev = [
@@ -30,6 +62,22 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["astrox"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/.git",
+    "/.github",
+    "/.venv",
+    "/.pytest_cache",
+    "/.ruff_cache",
+    "/build",
+    "/dist",
+    "/vendor",
+    "/wheels",
+    "/roadmap",
+    "/scripts",
+    "/openapi",
+]
 
 [tool.pytest.ini_options]
 markers = [

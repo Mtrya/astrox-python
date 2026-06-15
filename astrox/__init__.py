@@ -24,10 +24,12 @@ Raw route access is available for advanced callers:
     result = astrox.raw.post("/Propagator/J2", json={...})
 """
 
+from importlib.metadata import version
+
 from astrox import access, entities, lighting, orbits, propagator, rocket
 from astrox._http import Client, configure, get_session, raw
 
-__version__ = "0.1.0"
+__version__ = version("astrox-python")
 
 __all__ = [
     "Client",
