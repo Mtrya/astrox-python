@@ -477,6 +477,29 @@ def test_constraint_constructors_lower_discriminated_fragments() -> None:
     )
 
 
+def test_constraints_omit_unsupplied_optional_keys() -> None:
+    assert_canonical_equal(
+        entities.elevation_constraint(minimum_deg=5.0).to_wire(),
+        {"$type": "ElevationAngle", "MinimumValue": 5.0},
+    )
+    assert_canonical_equal(
+        entities.elevation_constraint(maximum_deg=80.0).to_wire(),
+        {"$type": "ElevationAngle", "MaximumValue": 80.0},
+    )
+    assert_canonical_equal(
+        entities.range_constraint(minimum_km=100.0).to_wire(),
+        {"$type": "Range", "MinimumValue": 100.0},
+    )
+    assert_canonical_equal(
+        entities.range_constraint(maximum_km=2500.0).to_wire(),
+        {"$type": "Range", "MaximumValue": 2500.0},
+    )
+    assert_canonical_equal(
+        entities.az_el_mask_constraint(az_el_mask_rad=[0.0, 0.1]).to_wire(),
+        {"$type": "AzElMask", "AzElMaskData": [0.0, 0.1]},
+    )
+
+
 def test_entity_composes_position_and_sensor_metadata() -> None:
     sat = entities.entity(
         name="ISS",
@@ -543,6 +566,20 @@ def test_entity_composes_constraints_metadata() -> None:
             ],
         },
     )
+
+
+def test_entity_omits_constraints_when_none() -> None:
+    site = entities.entity(
+        name="Ground",
+        position=entities.site_position(
+            longitude_deg=-155.468,
+            latitude_deg=19.821,
+            height_m=4205.0,
+        ),
+    )
+
+    assert site.constraints is None
+    assert "Constraints" not in site.to_wire()
 
 
 def test_rotation_fragments_lower_to_inner_orientation_wire_shapes() -> None:

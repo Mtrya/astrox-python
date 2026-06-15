@@ -285,6 +285,55 @@ satellite = entities.entity(
 
 An entity is a position source plus object metadata such as name, description, and sensor. Some ASTROX routes accept only a position source rather than a full named object. For example, lighting functions consume position sources directly because the server schema asks for `Position` or `sitePosition`.
 
+## Constraints
+
+Attach shared ASTROX constraints to an entity through the `constraints` argument of `entities.entity(...)`:
+
+```python
+ground = entities.entity(
+    name="Ground",
+    position=entities.site_position(
+        longitude_deg=-155.468,
+        latitude_deg=19.821,
+        height_m=4205.0,
+    ),
+    constraints=[
+        entities.elevation_constraint(minimum_deg=10.0),
+        entities.range_constraint(maximum_km=2500.0, maximum_enabled=True),
+    ],
+)
+```
+
+The supported constraint constructors are:
+
+- `entities.elevation_constraint(minimum_deg=..., maximum_deg=..., maximum_enabled=..., text=...)` lowers to an ASTROX `ElevationAngle` constraint. Values are in degrees. `maximum_deg` is only forwarded when `maximum_enabled=True` is also supplied.
+- `entities.range_constraint(minimum_km=..., maximum_km=..., maximum_enabled=..., text=...)` lowers to an ASTROX `Range` constraint. Values are in kilometers. `maximum_km` is only forwarded when `maximum_enabled=True` is also supplied.
+- `entities.az_el_mask_constraint(az_el_mask_rad=..., max_range_km=..., text=...)` lowers to an ASTROX `AzElMask` constraint. `az_el_mask_rad` is a flat sequence of alternating azimuth and elevation samples in radians.
+
+Omitted optional fields are left out of the request so that ASTROX server defaults remain owned by the server. Raw constraint dictionaries are rejected at the public boundary; pass SDK-owned constraint values instead.
+
+```python
+entities.entity(
+    name="Ground",
+    position=entities.site_position(longitude_deg=0.0, latitude_deg=0.0, height_m=0.0),
+    constraints=[
+        entities.az_el_mask_constraint(
+            az_el_mask_rad=[
+                0.0, 0.17453292519943295,
+                1.5707963267948966, 0.17453292519943295,
+                3.141592653589793, 0.17453292519943295,
+                4.71238898038469, 0.17453292519943295,
+            ],
+            max_range_km=3000.0,
+        ),
+    ],
+)
+```
+
+Access workflows carry entity constraints through `FromObjectPath` and `ToObjectPath` automatically. The SDK does not add a separate `constraints=` argument to `access.compute(...)` because constraints are participant metadata on `Entity`.
+
+Current cross-validation in `tests/validation/cross_validation/access/test_compute_constraints_skyfield.py` calibrates these constraints against independent Skyfield/WGS84 topocentric geometry. Verified behavior for representative fixed-site to SGP4 and SGP4-to-fixed-site cases includes elevation and range limits in the participant's local topocentric frame, geometric range evaluation even with light-time delay enabled, intersection semantics for multiple constraints and both-participant constraints, and evaluation of satellite-side constraints in the satellite's Earth-fixed geodetic local frame. AzEl mask sector interpolation, `MaxRange` semantics, satellite-side AzEl masks, and some server error branches remain unresolved; consult the cross-validation matrix for the current evidence state.
+
 ## Entity Groups
 
 Use `entities.entity_group(...)` when an ASTROX workflow accepts a named group of entities:

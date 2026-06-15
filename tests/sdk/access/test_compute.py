@@ -246,6 +246,78 @@ def test_compute_embeds_orientation_sensor_and_pointing_metadata(
     )
 
 
+def test_compute_embeds_constraints_in_from_and_to_paths(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(monkeypatch, ACCESS_RESPONSE)
+    ground_entity = entities.entity(
+        name="Ground",
+        position=entities.site_position(
+            longitude_deg=-155.468,
+            latitude_deg=19.821,
+            height_m=4205.0,
+        ),
+        constraints=[
+            entities.elevation_constraint(minimum_deg=10.0),
+            entities.range_constraint(maximum_km=2500.0, maximum_enabled=True),
+        ],
+    )
+    satellite = entities.entity(
+        name="ISS",
+        position=entities.sgp4_position(tle_lines=list(iss().position.tle_lines)),
+        constraints=[
+            entities.elevation_constraint(minimum_deg=5.0, maximum_deg=85.0, maximum_enabled=True),
+        ],
+    )
+
+    access.compute(
+        start="2024-01-01T00:00:00.000Z",
+        stop="2024-01-02T00:00:00.000Z",
+        from_entity=ground_entity,
+        to_entity=satellite,
+        step_s=600.0,
+    )
+
+    assert_canonical_equal(
+        calls[0]["json"],
+        {
+            "Start": "2024-01-01T00:00:00.000Z",
+            "Stop": "2024-01-02T00:00:00.000Z",
+            "FromObjectPath": {
+                "Name": "Ground",
+                "Position": {
+                    "$type": "SitePosition",
+                    "cartographicDegrees": [-155.468, 19.821, 4205.0],
+                },
+                "Constraints": [
+                    {"$type": "ElevationAngle", "MinimumValue": 10.0},
+                    {
+                        "$type": "Range",
+                        "MaximumValue": 2500.0,
+                        "IsMaximumEnabled": True,
+                    },
+                ],
+            },
+            "ToObjectPath": {
+                "Name": "ISS",
+                "Position": {
+                    "$type": "SGP4",
+                    "TLEs": list(iss().position.tle_lines),
+                },
+                "Constraints": [
+                    {
+                        "$type": "ElevationAngle",
+                        "MinimumValue": 5.0,
+                        "MaximumValue": 85.0,
+                        "IsMaximumEnabled": True,
+                    },
+                ],
+            },
+            "OutStep": 600.0,
+        },
+    )
+
+
 @pytest.mark.parametrize(
     ("kwargs", "match"),
     [

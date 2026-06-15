@@ -160,12 +160,14 @@ def visibility_intervals(
     start: str,
     stop: str,
     visible: Callable[[float], bool],
+    sample_step_s: float = SAMPLE_STEP_S,
+    bracket_abs_s: float = BRACKET_ABS_S,
 ) -> list[Interval]:
     total_s = (parse_time(stop) - parse_time(start)).total_seconds()
     samples = [0.0]
     current = 0.0
     while current < total_s:
-        current = min(total_s, current + SAMPLE_STEP_S)
+        current = min(total_s, current + sample_step_s)
         samples.append(current)
     intervals: list[Interval] = []
     previous_offset = samples[0]
@@ -174,7 +176,9 @@ def visibility_intervals(
     for offset in samples[1:]:
         value = visible(offset)
         if value != previous_value:
-            transition = bisect_transition(previous_offset, offset, visible)
+            transition = bisect_transition(
+                previous_offset, offset, visible, bracket_abs_s=bracket_abs_s
+            )
             if value:
                 current_start = transition
             elif current_start is not None:
@@ -191,9 +195,10 @@ def bisect_transition(
     low_s: float,
     high_s: float,
     visible: Callable[[float], bool],
+    bracket_abs_s: float = BRACKET_ABS_S,
 ) -> float:
     low_value = visible(low_s)
-    while high_s - low_s > BRACKET_ABS_S:
+    while high_s - low_s > bracket_abs_s:
         mid_s = (low_s + high_s) / 2.0
         if visible(mid_s) == low_value:
             low_s = mid_s
