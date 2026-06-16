@@ -1241,10 +1241,609 @@
         "IsSuccess": true,
         "Message": "Success"
       }
+    },
+    {
+      "description": "FOM simple coverage values by grid point.",
+      "id": "fom_simple_coverage_by_grid_point",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM simple coverage values by grid point at one time.",
+      "id": "fom_simple_coverage_by_grid_point_at_time",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM simple coverage grid statistics.",
+      "id": "fom_simple_coverage_grid_stats",
+      "return": {
+        "Average": 1,
+        "IsSuccess": true,
+        "Maximum": 1,
+        "Message": "Success",
+        "Minimum": 1
+      }
+    },
+    {
+      "description": "FOM simple coverage grid statistics over time.",
+      "id": "fom_simple_coverage_grid_stats_over_time",
+      "return": {
+        "Datas": [
+          {
+            "Average": 0,
+            "EpochSeconds": 0,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 1,
+            "EpochSeconds": 300,
+            "Maximum": 1,
+            "Minimum": 1
+          },
+          {
+            "Average": 0.6666666666666666,
+            "EpochSeconds": 600,
+            "Maximum": 1,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 900,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 1200,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 1500,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 1800,
+            "Maximum": 0,
+            "Minimum": 0
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM coverage time values by grid point.",
+      "id": "fom_coverage_time_by_grid_point",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 558.1281962310604,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 599.4616952254655,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 627.4162131673947,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 528.562586010943,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 577.8878650298211,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 612.4264286217003,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM coverage time grid statistics.",
+      "id": "fom_coverage_time_grid_stats",
+      "return": {
+        "Average": 583.9804973810642,
+        "IsSuccess": true,
+        "Maximum": 627.4162131673947,
+        "Message": "Success",
+        "Minimum": 528.562586010943
+      }
+    },
+    {
+      "description": "FOM number of assets values by grid point.",
+      "id": "fom_number_of_assets_by_grid_point",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 0.3100712201283669,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0.3330342751252586,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0.34856456287077486,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0.2936458811171906,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0.3210488139054562,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0.34023690478983354,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM number of assets values by grid point at one time.",
+      "id": "fom_number_of_assets_by_grid_point_at_time",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM number of assets grid statistics.",
+      "id": "fom_number_of_assets_grid_stats",
+      "return": {
+        "Average": 0.32443360965614676,
+        "IsSuccess": true,
+        "Maximum": 0.34856456287077486,
+        "Message": "Success",
+        "Minimum": 0.2936458811171906
+      }
+    },
+    {
+      "description": "FOM number of assets grid statistics over time.",
+      "id": "fom_number_of_assets_grid_stats_over_time",
+      "return": {
+        "Datas": [
+          {
+            "Average": 0,
+            "EpochSeconds": 0,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 1,
+            "EpochSeconds": 300,
+            "Maximum": 1,
+            "Minimum": 1
+          },
+          {
+            "Average": 0.6666666666666666,
+            "EpochSeconds": 600,
+            "Maximum": 1,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 900,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 1200,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 1500,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 1800,
+            "Maximum": 0,
+            "Minimum": 0
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM response time values by grid point.",
+      "id": "fom_response_time_by_grid_point",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 1222.7189759791509,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1173.2621595787787,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1129.874997218889,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1203.7723853855568,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1150.9733368192828,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1104.907395022099,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM response time at-time route currently returns an ASTROX HTTP 500 for the representative case.",
+      "id": "fom_response_time_by_grid_point_at_time",
+      "return": {
+        "endpoint": "/Coverage/FOM/ValueByGridPointAtTime/ResponseTime",
+        "error": "AstroxHTTPError",
+        "message": "Internal Server Error",
+        "status_code": 500
+      }
+    },
+    {
+      "description": "FOM response time grid statistics.",
+      "id": "fom_response_time_grid_stats",
+      "return": {
+        "Average": 1164.251541667293,
+        "IsSuccess": true,
+        "Maximum": 1222.7189759791509,
+        "Message": "Success",
+        "Minimum": 1104.907395022099
+      }
+    },
+    {
+      "description": "FOM response time over-time route currently returns an ASTROX HTTP 500 for the representative case.",
+      "id": "fom_response_time_grid_stats_over_time",
+      "return": {
+        "endpoint": "/Coverage/FOM/GridStatsOverTime/ResponseTime",
+        "error": "AstroxHTTPError",
+        "message": "Internal Server Error",
+        "status_code": 500
+      }
+    },
+    {
+      "description": "FOM revisit time values by grid point.",
+      "id": "fom_revisit_time_by_grid_point",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 620.9359018844698,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 600.2691523872672,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 586.2918934163026,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 635.7187069945285,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 611.0560674850894,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 593.7867856891498,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM revisit time values by grid point at one time.",
+      "id": "fom_revisit_time_by_grid_point_at_time",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 1222.7189759791509,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1203.7723853855568,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM revisit time grid statistics.",
+      "id": "fom_revisit_time_grid_stats",
+      "return": {
+        "Average": 608.0097513094679,
+        "IsSuccess": true,
+        "Maximum": 635.7187069945285,
+        "Message": "Success",
+        "Minimum": 586.2918934163026
+      }
+    },
+    {
+      "description": "FOM revisit time grid statistics over time.",
+      "id": "fom_revisit_time_grid_stats_over_time",
+      "return": {
+        "Datas": [
+          {
+            "Average": 51.76796095164294,
+            "EpochSeconds": 0,
+            "Maximum": 82.6661763562006,
+            "Minimum": 19.152827789788716
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 300,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 404.41522689411795,
+            "EpochSeconds": 600,
+            "Maximum": 1222.7189759791509,
+            "Minimum": 0
+          },
+          {
+            "Average": 1164.251541667293,
+            "EpochSeconds": 900,
+            "Maximum": 1222.7189759791509,
+            "Minimum": 1104.907395022099
+          },
+          {
+            "Average": 1164.251541667293,
+            "EpochSeconds": 1200,
+            "Maximum": 1222.7189759791509,
+            "Minimum": 1104.907395022099
+          },
+          {
+            "Average": 1164.251541667293,
+            "EpochSeconds": 1500,
+            "Maximum": 1222.7189759791509,
+            "Minimum": 1104.907395022099
+          },
+          {
+            "Average": 1164.251541667293,
+            "EpochSeconds": 1800,
+            "Maximum": 1222.7189759791509,
+            "Minimum": 1104.907395022099
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
     }
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-06-15T07:46:04Z"
+    "refreshed_at": "2026-06-16T15:37:48Z"
   }
 }

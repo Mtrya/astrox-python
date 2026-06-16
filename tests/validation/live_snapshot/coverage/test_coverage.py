@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import pytest
 
@@ -129,6 +129,42 @@ def coverage_by_asset() -> dict[str, Any]:
     )
 
 
+def fom_route(
+    func: Callable[..., dict[str, Any]],
+    *,
+    compute_type: str | None = None,
+    time: str | None = None,
+    expect_http_error: bool = False,
+) -> dict[str, Any]:
+    kwargs: dict[str, Any] = {
+        "start": START,
+        "stop": STOP,
+        "grid": small_grid(),
+        "assets": [relay()],
+        "minimum_assets": 1,
+        "step_s": 300.0,
+    }
+    if compute_type is not None:
+        kwargs["compute_type"] = compute_type
+    if time is not None:
+        kwargs["time"] = time
+    if not expect_http_error:
+        return func(**kwargs)
+    try:
+        result = func(**kwargs)
+    except exceptions.AstroxHTTPError as exc:
+        return {
+            "error": type(exc).__name__,
+            "endpoint": exc.endpoint,
+            "status_code": exc.status_code,
+            "message": exc.message,
+        }
+    return result
+
+
+FOM_TIME = "2024-01-01T00:10:00.000Z"
+
+
 CASES = [
     LiveSnapshotCase(
         id="grid_points_lat_lon",
@@ -159,6 +195,136 @@ CASES = [
         id="coverage_by_asset",
         description="Coverage-by-asset report for one SGP4 asset.",
         run=coverage_by_asset,
+    ),
+    LiveSnapshotCase(
+        id="fom_simple_coverage_by_grid_point",
+        description="FOM simple coverage values by grid point.",
+        run=lambda: fom_route(coverage.simple_coverage.by_grid_point),
+    ),
+    LiveSnapshotCase(
+        id="fom_simple_coverage_by_grid_point_at_time",
+        description="FOM simple coverage values by grid point at one time.",
+        run=lambda: fom_route(
+            coverage.simple_coverage.by_grid_point_at_time,
+            time=FOM_TIME,
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_simple_coverage_grid_stats",
+        description="FOM simple coverage grid statistics.",
+        run=lambda: fom_route(coverage.simple_coverage.grid_stats),
+    ),
+    LiveSnapshotCase(
+        id="fom_simple_coverage_grid_stats_over_time",
+        description="FOM simple coverage grid statistics over time.",
+        run=lambda: fom_route(coverage.simple_coverage.grid_stats_over_time),
+    ),
+    LiveSnapshotCase(
+        id="fom_coverage_time_by_grid_point",
+        description="FOM coverage time values by grid point.",
+        run=lambda: fom_route(
+            coverage.coverage_time.by_grid_point,
+            compute_type="TotalTimeAbove",
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_coverage_time_grid_stats",
+        description="FOM coverage time grid statistics.",
+        run=lambda: fom_route(
+            coverage.coverage_time.grid_stats,
+            compute_type="TotalTimeAbove",
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_number_of_assets_by_grid_point",
+        description="FOM number of assets values by grid point.",
+        run=lambda: fom_route(
+            coverage.number_of_assets.by_grid_point,
+            compute_type="Average",
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_number_of_assets_by_grid_point_at_time",
+        description="FOM number of assets values by grid point at one time.",
+        run=lambda: fom_route(
+            coverage.number_of_assets.by_grid_point_at_time,
+            time=FOM_TIME,
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_number_of_assets_grid_stats",
+        description="FOM number of assets grid statistics.",
+        run=lambda: fom_route(
+            coverage.number_of_assets.grid_stats,
+            compute_type="Average",
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_number_of_assets_grid_stats_over_time",
+        description="FOM number of assets grid statistics over time.",
+        run=lambda: fom_route(coverage.number_of_assets.grid_stats_over_time),
+    ),
+    LiveSnapshotCase(
+        id="fom_response_time_by_grid_point",
+        description="FOM response time values by grid point.",
+        run=lambda: fom_route(
+            coverage.response_time.by_grid_point,
+            compute_type="Maximum",
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_response_time_by_grid_point_at_time",
+        description="FOM response time at-time route currently returns an ASTROX HTTP 500 for the representative case.",
+        run=lambda: fom_route(
+            coverage.response_time.by_grid_point_at_time,
+            time=FOM_TIME,
+            expect_http_error=True,
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_response_time_grid_stats",
+        description="FOM response time grid statistics.",
+        run=lambda: fom_route(
+            coverage.response_time.grid_stats,
+            compute_type="Maximum",
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_response_time_grid_stats_over_time",
+        description="FOM response time over-time route currently returns an ASTROX HTTP 500 for the representative case.",
+        run=lambda: fom_route(
+            coverage.response_time.grid_stats_over_time,
+            expect_http_error=True,
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_revisit_time_by_grid_point",
+        description="FOM revisit time values by grid point.",
+        run=lambda: fom_route(
+            coverage.revisit_time.by_grid_point,
+            compute_type="Average",
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_revisit_time_by_grid_point_at_time",
+        description="FOM revisit time values by grid point at one time.",
+        run=lambda: fom_route(
+            coverage.revisit_time.by_grid_point_at_time,
+            time=FOM_TIME,
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_revisit_time_grid_stats",
+        description="FOM revisit time grid statistics.",
+        run=lambda: fom_route(
+            coverage.revisit_time.grid_stats,
+            compute_type="Average",
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_revisit_time_grid_stats_over_time",
+        description="FOM revisit time grid statistics over time.",
+        run=lambda: fom_route(coverage.revisit_time.grid_stats_over_time),
     ),
 ]
 

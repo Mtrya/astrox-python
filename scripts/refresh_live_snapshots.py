@@ -34,6 +34,11 @@ SNAPSHOT_SCRIPTS = [
         snapshot=Path("tests/validation/live_snapshot/lighting/lighting.snap.json"),
     ),
     SnapshotScript(
+        label="coverage",
+        path=Path("tests/validation/live_snapshot/coverage/test_coverage.py"),
+        snapshot=Path("tests/validation/live_snapshot/coverage/coverage.snap.json"),
+    ),
+    SnapshotScript(
         label="orbits/conversions",
         path=Path("tests/validation/live_snapshot/orbits/test_conversions.py"),
         snapshot=Path("tests/validation/live_snapshot/orbits/conversions.snap.json"),
