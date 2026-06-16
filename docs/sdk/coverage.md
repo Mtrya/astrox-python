@@ -110,10 +110,58 @@ by_asset = coverage.coverage_by_asset(
 )
 ```
 
-Both report functions accept the same core coverage input options as `compute(...)` and return raw ASTROX dictionaries. For validated one-asset cases, `percent_coverage(...)` samples at `step_s` seconds from the report epoch. `PercentCovered` is the grid-weighted percentage of currently covered points at each sample. `PercentAccumulated` is the grid-weighted percentage of points that have been covered at least once up to that sample. For the same one-asset cases, `coverage_by_asset(...)` returns minimum, maximum, average, and accumulated percentages that match the corresponding percent-coverage samples. FOM routes and metric-specific `ComputeType` options are intentionally not part of this coverage core surface.
+Both report functions accept the same core coverage input options as `compute(...)` and return raw ASTROX dictionaries. For validated one-asset cases, `percent_coverage(...)` samples at `step_s` seconds from the report epoch. `PercentCovered` is the grid-weighted percentage of currently covered points at each sample. `PercentAccumulated` is the grid-weighted percentage of points that have been covered at least once up to that sample. For the same one-asset cases, `coverage_by_asset(...)` returns minimum, maximum, average, and accumulated percentages that match the corresponding percent-coverage samples.
+
+## Figure Of Merit
+
+Coverage figure-of-merit routes are grouped by metric namespace. Each function returns the raw ASTROX dictionary for its route.
+
+| Metric namespace | By grid point | By grid point at time | Grid stats | Grid stats over time |
+| --- | --- | --- | --- | --- |
+| `coverage.simple_coverage` | `by_grid_point(...)` | `by_grid_point_at_time(...)` | `grid_stats(...)` | `grid_stats_over_time(...)` |
+| `coverage.coverage_time` | `by_grid_point(...)` | — | `grid_stats(...)` | — |
+| `coverage.number_of_assets` | `by_grid_point(...)` | `by_grid_point_at_time(...)` | `grid_stats(...)` | `grid_stats_over_time(...)` |
+| `coverage.response_time` | `by_grid_point(...)` | `by_grid_point_at_time(...)` | `grid_stats(...)` | `grid_stats_over_time(...)` |
+| `coverage.revisit_time` | `by_grid_point(...)` | `by_grid_point_at_time(...)` | `grid_stats(...)` | `grid_stats_over_time(...)` |
+
+The FOM functions accept the same shared coverage options as `compute(...)`: `start`, `stop`, `grid`, `assets`, `minimum_assets`, `exactly_assets`, `grid_point_sensor`, `grid_point_constraints`, `include_asset_access_results`, `include_coverage_points`, `step_s`, and `description`. At-time functions require `time`. Routes that expose ASTROX `ComputeType` accept optional `compute_type`; the SDK sends the supplied string unchanged and omits `ComputeType` when `compute_type=None`.
+
+```python
+values = coverage.simple_coverage.by_grid_point(
+    start="2024-01-01T00:00:00.000Z",
+    stop="2024-01-01T00:30:00.000Z",
+    grid=grid,
+    assets=[asset],
+    minimum_assets=1,
+)
+
+asset_count_now = coverage.number_of_assets.by_grid_point_at_time(
+    time="2024-01-01T00:10:00.000Z",
+    start="2024-01-01T00:00:00.000Z",
+    stop="2024-01-01T00:30:00.000Z",
+    grid=grid,
+    assets=[asset],
+    minimum_assets=1,
+)
+
+duration_stats = coverage.coverage_time.grid_stats(
+    start="2024-01-01T00:00:00.000Z",
+    stop="2024-01-01T00:30:00.000Z",
+    grid=grid,
+    assets=[asset],
+    minimum_assets=1,
+    compute_type="TotalTimeAbove",
+)
+```
+
+Validated one-asset FOM cases currently show these ASTROX conventions. `simple_coverage.by_grid_point(...)` returns `1` for a grid point covered at least once during the analysis window and `0` otherwise; the at-time variant returns current coverage at `time`. `coverage_time.by_grid_point(..., compute_type="TotalTimeAbove")` returns total covered duration in seconds. `number_of_assets.by_grid_point(...)` supports `Average`, `Maximum`, and `Minimum` over the asset-count trace; the at-time variant returns the current count. FOM `grid_stats(...)` routes use simple arithmetic minimum, maximum, and average over the returned grid-point values, not grid weights. `grid_stats_over_time(...)` routes sample from `start` through `stop` at `step_s` increments and match the corresponding at-time route statistics for the validated simple-coverage, number-of-assets, and revisit-time cases.
+
+For validated one-asset static cases, `response_time.by_grid_point(..., compute_type="Maximum")` returns the maximum uncovered gap duration, including gaps at the start or end of the analysis window. `response_time.by_grid_point(..., compute_type="Minimum")` returns `0` for grid points that are covered at least once in the representative case; do not read it as the shortest uncovered boundary gap. The response-time at-time and over-time routes are exposed because ASTROX exposes them, but the representative live cases currently return HTTP 500 server errors, and the SDK preserves those errors.
+
+For validated one-asset cases, `revisit_time.by_grid_point(...)` returns uncovered-gap duration statistics for `Average`, `Maximum`, and `Minimum`, including boundary gaps. `revisit_time.by_grid_point_at_time(...)` returns `0` when the point is covered at `time`; when the point is uncovered, it returns the whole containing uncovered gap duration, not just the remaining time until the next access.
 
 ## Validation Scope
 
 SDK behavior tests cover exact request lowering, optional-key omission, type rejection, public imports, and raw response pass-through. Live snapshots cover representative callability and response shape for grid generation, compute, elevation/range grid-point constraints, and the two reports.
 
-Validation currently verifies representative `LatLonBounds`, `LatitudeBounds`, and `Global` grid point centers and cell boundaries, representative `CbLatLonBounds` box-tiling invariants, the invariant that `ComputeCoverage` with `include_coverage_points=True` echoes the same point ordering as `GetGridPoints`, representative SGP4-to-grid membership against independent Skyfield/WGS84 line-of-sight geometry, resource-count composition from per-asset intervals, ASTROX `ExactlyN` threshold behavior in a duplicate two-asset case, grid-point sensor and range/elevation constraint interval-filter invariants, weighted percent-coverage samples, and one-asset coverage-by-asset summaries. The exact `CbLatLonBounds` count rule, fixed-site assets, and `AzElMask` coverage-role support remain caveated.
+Validation currently verifies representative `LatLonBounds`, `LatitudeBounds`, and `Global` grid point centers and cell boundaries, representative `CbLatLonBounds` box-tiling invariants, the invariant that `ComputeCoverage` with `include_coverage_points=True` echoes the same point ordering as `GetGridPoints`, representative SGP4-to-grid membership against independent Skyfield/WGS84 line-of-sight geometry, resource-count composition from per-asset intervals, ASTROX `ExactlyN` threshold behavior in a duplicate two-asset case, grid-point sensor and range/elevation constraint interval-filter invariants, weighted percent-coverage samples, one-asset coverage-by-asset summaries, and the FOM interval/gap conventions described above. The exact `CbLatLonBounds` count rule, fixed-site assets, `AzElMask` coverage-role support, no-coverage FOM edge cases, multi-asset FOM edge cases beyond the existing resource-count trace checks, and the current response-time dynamic-route HTTP 500 behavior remain caveated.
