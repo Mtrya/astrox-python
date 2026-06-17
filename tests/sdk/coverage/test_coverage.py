@@ -10,6 +10,7 @@ import pytest
 
 import astrox
 from astrox import coverage, entities, exceptions
+from astrox.coverage import _core
 from tests.sdk.helpers import assert_canonical_equal
 
 
@@ -53,7 +54,7 @@ def record_raw_post(
         calls.append({"endpoint": endpoint, "json": json})
         return response
 
-    monkeypatch.setattr(coverage.raw, "post", fake_post)
+    monkeypatch.setattr(_core.raw, "post", fake_post)
     return calls
 
 
@@ -88,11 +89,16 @@ def test_public_coverage_names_are_exported() -> None:
     assert "cb_lat_lon_grid" in coverage.__all__
     assert "compute" in coverage.__all__
     assert "coverage_by_asset" in coverage.__all__
+    assert "coverage_time" in coverage.__all__
     assert "global_grid" in coverage.__all__
     assert "grid_points" in coverage.__all__
     assert "lat_lon_grid" in coverage.__all__
     assert "latitude_grid" in coverage.__all__
+    assert "number_of_assets" in coverage.__all__
     assert "percent_coverage" in coverage.__all__
+    assert "response_time" in coverage.__all__
+    assert "revisit_time" in coverage.__all__
+    assert "simple_coverage" in coverage.__all__
 
 
 def test_grid_constructors_lower_discriminated_fragments() -> None:
@@ -436,7 +442,7 @@ def test_coverage_functions_propagate_api_errors_unchanged(
         assert actual_endpoint == endpoint
         raise error
 
-    monkeypatch.setattr(coverage.raw, "post", fake_post)
+    monkeypatch.setattr(_core.raw, "post", fake_post)
 
     with pytest.raises(exceptions.AstroxAPIError) as exc_info:
         func(
