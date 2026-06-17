@@ -21,7 +21,6 @@
 from __future__ import annotations
 
 import math
-import os
 import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -32,10 +31,15 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from skyfield.api import EarthSatellite, Loader
+from skyfield.api import EarthSatellite
 
 from astrox import components, lighting
-from tests.validation._support import LiveConfigError, configure_astrox_from_env
+from tests.validation._support import (
+    LiveConfigError,
+    configure_astrox_from_env,
+    load_skyfield_ephemeris,
+    skyfield_loader_from_env,
+)
 
 
 EARTH_EQUATORIAL_RADIUS_KM = 6378.137
@@ -104,10 +108,9 @@ ISS_SGP4_LIGHTING_TIMES = SpacecraftLightingTimesCase(
 
 
 def skyfield_context(tle_lines: tuple[str, str]) -> SkyfieldSpacecraftContext:
-    data_dir = Path(os.environ.get("SKYFIELD_DATA_DIR", "/tmp/astrox-python-skyfield"))
-    loader = Loader(str(data_dir))
+    loader = skyfield_loader_from_env()
     timescale = loader.timescale(builtin=True)
-    eph = loader("de421.bsp")
+    eph = load_skyfield_ephemeris(loader, "de421.bsp")
     satellite = EarthSatellite(*tle_lines, "spacecraft", timescale)
     earth = eph["earth"]
     return SkyfieldSpacecraftContext(

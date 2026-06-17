@@ -23,7 +23,6 @@
 from __future__ import annotations
 
 import math
-import os
 import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -36,7 +35,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import pytest
-from skyfield.api import Loader, wgs84
+from skyfield.api import wgs84
 
 try:
     from skyfield.positionlib import _to_altaz as _skyfield_astrometric_to_altaz
@@ -44,7 +43,12 @@ except ImportError:
     _skyfield_astrometric_to_altaz = None
 
 from astrox import components, lighting
-from tests.validation._support import LiveConfigError, configure_astrox_from_env
+from tests.validation._support import (
+    LiveConfigError,
+    configure_astrox_from_env,
+    load_skyfield_ephemeris,
+    skyfield_loader_from_env,
+)
 
 
 EARTH_EQUATORIAL_RADIUS_M = 6378137.0
@@ -184,10 +188,9 @@ def site_position(case: SiteCase) -> components.SitePosition:
 
 
 def skyfield_context(case: SiteCase) -> SkyfieldContext:
-    data_dir = Path(os.environ.get("SKYFIELD_DATA_DIR", "/tmp/astrox-python-skyfield"))
-    loader = Loader(str(data_dir))
+    loader = skyfield_loader_from_env()
     timescale = loader.timescale(builtin=True)
-    eph = loader("de421.bsp")
+    eph = load_skyfield_ephemeris(loader, "de421.bsp")
     observer = eph["earth"] + wgs84.latlon(
         latitude_degrees=case.latitude_deg,
         longitude_degrees=case.longitude_deg,

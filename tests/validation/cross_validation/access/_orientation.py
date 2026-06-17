@@ -18,17 +18,15 @@
 from __future__ import annotations
 
 import math
-import os
 from collections.abc import Callable
 from dataclasses import dataclass
 from functools import lru_cache
-from pathlib import Path
 
 import numpy as np
-from skyfield.api import Loader
 from skyfield.framelib import itrs
 
 from astrox import access, components, orbits
+from tests.validation._support import load_skyfield_ephemeris, skyfield_loader_from_env
 from tests.validation.cross_validation.access._cases import (
     EARTH_MU,
     START,
@@ -349,9 +347,8 @@ def skyfield_body_state_function(body_name: str) -> StateFunction:
     # DE421 is used as an independent geocentric ephemeris candidate for
     # ASTROX CentralBodyPosition targets. Positions are Earth-to-body vectors in
     # the same inertial basis Skyfield uses for apparent-free SPICE states.
-    data_dir = Path(os.environ.get("SKYFIELD_DATA_DIR", "/tmp/astrox-python-skyfield"))
-    loader = Loader(str(data_dir))
-    eph = loader("de421.bsp")
+    loader = skyfield_loader_from_env()
+    eph = load_skyfield_ephemeris(loader, "de421.bsp")
     earth = eph["earth"]
     body = eph[body_name.lower()]
 
