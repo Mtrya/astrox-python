@@ -29,7 +29,7 @@ import sys
 import numpy as np
 import pytest
 
-from astrox import entities, raw
+from astrox import components, raw
 from astrox.exceptions import AstroxAPIError, AstroxHTTPError
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 from tests.validation.cross_validation.access._cases import CrossValidationError, START, STOP
@@ -52,17 +52,17 @@ from tests.validation.cross_validation.access._orientation import (
 def test_aligned_and_constrained_axes_match_triad_alignment_oracle() -> None:
     configure_astrox_from_env()
     target = subpoint_site()
-    boresight = entities.vgt_fixed_vector(
+    boresight = components.vgt_fixed_vector(
         name="Boresight",
         reference_axes="VVLH",
-        direction=entities.xyz_direction(x=0.0, y=0.0, z=1.0),
+        direction=components.xyz_direction(x=0.0, y=0.0, z=1.0),
     )
-    hint = entities.vgt_fixed_vector(
+    hint = components.vgt_fixed_vector(
         name="Hint",
         reference_axes="VVLH",
-        direction=entities.xyz_direction(x=1.0, y=0.0, z=0.0),
+        direction=components.xyz_direction(x=1.0, y=0.0, z=0.0),
     )
-    aligned = entities.aligned_and_constrained_axes(
+    aligned = components.aligned_and_constrained_axes(
         name="AlignedBuiltin",
         principal=boresight,
         principal_axis="+Z",
@@ -81,7 +81,7 @@ def test_aligned_and_constrained_axes_match_triad_alignment_oracle() -> None:
             name="aligned_builtin_vvlh",
             orientation=aligned,
             sensor=conic_sensor(8.0),
-            vgt=entities.vgt(axes=[aligned], vectors=[boresight, hint]),
+            vgt=components.vgt(axes=[aligned], vectors=[boresight, hint]),
         ),
         "target": target,
         "expected": expected_site_intervals(
@@ -113,25 +113,25 @@ def test_aligned_axes_axis_permutations_match_triad_alignment_oracles() -> None:
         ),
     ]
     for case_id, principal_vector, principal_axis, reference_vector, reference_axis in variants:
-        boresight = entities.vgt_fixed_vector(
+        boresight = components.vgt_fixed_vector(
             name=f"{case_id}_principal",
             reference_axes="VVLH",
-            direction=entities.xyz_direction(
+            direction=components.xyz_direction(
                 x=float(principal_vector[0]),
                 y=float(principal_vector[1]),
                 z=float(principal_vector[2]),
             ),
         )
-        hint = entities.vgt_fixed_vector(
+        hint = components.vgt_fixed_vector(
             name=f"{case_id}_reference",
             reference_axes="VVLH",
-            direction=entities.xyz_direction(
+            direction=components.xyz_direction(
                 x=float(reference_vector[0]),
                 y=float(reference_vector[1]),
                 z=float(reference_vector[2]),
             ),
         )
-        aligned = entities.aligned_and_constrained_axes(
+        aligned = components.aligned_and_constrained_axes(
             name=f"{case_id}_axes",
             principal=boresight,
             principal_axis=principal_axis,
@@ -150,7 +150,7 @@ def test_aligned_axes_axis_permutations_match_triad_alignment_oracles() -> None:
                 name=case_id,
                 orientation=aligned,
                 sensor=conic_sensor(20.0),
-                vgt=entities.vgt(axes=[aligned], vectors=[boresight, hint]),
+                vgt=components.vgt(axes=[aligned], vectors=[boresight, hint]),
             ),
             "target": target,
             "expected": expected_site_intervals(
@@ -173,49 +173,49 @@ def test_vgt_provider_collections_do_not_perturb_calibrated_vvlh_sensor_access_w
             quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0) @ np.array([0.0, 0.0, 1.0]),
         ),
     )
-    angle_from = entities.vgt_fixed_vector(
+    angle_from = components.vgt_fixed_vector(
         name="AngleFrom",
         reference_axes="VVLH",
-        direction=entities.xyz_direction(x=0.0, y=0.0, z=1.0),
+        direction=components.xyz_direction(x=0.0, y=0.0, z=1.0),
     )
-    angle_to = entities.vgt_fixed_vector(
+    angle_to = components.vgt_fixed_vector(
         name="AngleTo",
         reference_axes="VVLH",
-        direction=entities.xyz_direction(x=1.0, y=0.0, z=0.0),
+        direction=components.xyz_direction(x=1.0, y=0.0, z=0.0),
     )
     providers = [
-        entities.vgt(axes=[entities.vvlh_axes(name="OnlyAxes")]),
-        entities.vgt(
-            axes=[entities.vvlh_axes(name="OnlyAxes")],
+        components.vgt(axes=[components.vvlh_axes(name="OnlyAxes")]),
+        components.vgt(
+            axes=[components.vvlh_axes(name="OnlyAxes")],
             vectors=[
-                entities.vgt_fixed_vector(
+                components.vgt_fixed_vector(
                     name="Vector",
                     reference_axes="VVLH",
-                    direction=entities.xyz_direction(x=1.0, y=0.0, z=0.0),
+                    direction=components.xyz_direction(x=1.0, y=0.0, z=0.0),
                 )
             ],
         ),
-        entities.vgt(
-            axes=[entities.vvlh_axes(name="OnlyAxes")],
+        components.vgt(
+            axes=[components.vvlh_axes(name="OnlyAxes")],
             vectors=[angle_from, angle_to],
             angles=[
-                entities.vgt_angle(
+                components.vgt_angle(
                     name="Angle",
                     from_vector=angle_from,
                     to_vector="AngleTo",
                 )
             ],
         ),
-        entities.vgt(
-            axes=[entities.vvlh_axes(name="OnlyAxes")],
-            planes=[entities.vgt_plane(name="Plane", plane_type="Fixed")],
+        components.vgt(
+            axes=[components.vvlh_axes(name="OnlyAxes")],
+            planes=[components.vgt_plane(name="Plane", plane_type="Fixed")],
         ),
-        entities.vgt(
-            axes=[entities.vvlh_axes(name="OnlyAxes")],
+        components.vgt(
+            axes=[components.vvlh_axes(name="OnlyAxes")],
             points=[],
         ),
-        entities.vgt(
-            axes=[entities.vvlh_axes(name="OnlyAxes")],
+        components.vgt(
+            axes=[components.vvlh_axes(name="OnlyAxes")],
             systems=[],
         ),
     ]
@@ -224,9 +224,9 @@ def test_vgt_provider_collections_do_not_perturb_calibrated_vvlh_sensor_access_w
             "id": f"vgt_container_{index}",
             "observer": observer_with_sensor(
                 name=f"vgt_container_{index}",
-                orientation=entities.vvlh_axes(),
+                orientation=components.vvlh_axes(),
                 sensor=conic_sensor(8.0),
-                rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+                rotation=components.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
                 vgt=provider,
             ),
             "target": target,
@@ -242,19 +242,19 @@ def test_custom_vgt_axes_name_resolution_matches_triad_oracle() -> None:
         ("BodyFixedObject", "object"),
         ("BodyFixedString", "string"),
     ):
-        body = entities.vvlh_axes(name=axes_name)
+        body = components.vvlh_axes(name=axes_name)
         reference_value = body if reference_kind == "object" else axes_name
-        boresight = entities.vgt_fixed_vector(
+        boresight = components.vgt_fixed_vector(
             name=f"{axes_name} Boresight",
             reference_axes=reference_value,
-            direction=entities.xyz_direction(x=0.0, y=0.0, z=1.0),
+            direction=components.xyz_direction(x=0.0, y=0.0, z=1.0),
         )
-        hint = entities.vgt_fixed_vector(
+        hint = components.vgt_fixed_vector(
             name=f"{axes_name} Hint",
             reference_axes=reference_value,
-            direction=entities.xyz_direction(x=1.0, y=0.0, z=0.0),
+            direction=components.xyz_direction(x=1.0, y=0.0, z=0.0),
         )
-        aligned = entities.aligned_and_constrained_axes(
+        aligned = components.aligned_and_constrained_axes(
             name=f"{axes_name} Aligned",
             principal=boresight,
             principal_axis="+Z",
@@ -265,7 +265,7 @@ def test_custom_vgt_axes_name_resolution_matches_triad_oracle() -> None:
             name=f"aligned_custom_{axes_name}",
             orientation=aligned,
             sensor=conic_sensor(8.0),
-            vgt=entities.vgt(axes=[body, aligned], vectors=[boresight, hint]),
+            vgt=components.vgt(axes=[body, aligned], vectors=[boresight, hint]),
         )
         triad = triad_aligned_frame(
             principal_vector=np.array([0.0, 0.0, 1.0]),
@@ -302,19 +302,19 @@ def test_custom_vgt_axes_name_with_space_remains_unresolved() -> None:
     failures: list[str] = []
     successes: list[str] = []
     for reference_kind in ("object", "string"):
-        body = entities.vvlh_axes(name="Body VVLH")
+        body = components.vvlh_axes(name="Body VVLH")
         reference_value = body if reference_kind == "object" else "Body VVLH"
-        boresight = entities.vgt_fixed_vector(
+        boresight = components.vgt_fixed_vector(
             name=f"Body VVLH {reference_kind} Boresight",
             reference_axes=reference_value,
-            direction=entities.xyz_direction(x=0.0, y=0.0, z=1.0),
+            direction=components.xyz_direction(x=0.0, y=0.0, z=1.0),
         )
-        hint = entities.vgt_fixed_vector(
+        hint = components.vgt_fixed_vector(
             name=f"Body VVLH {reference_kind} Hint",
             reference_axes=reference_value,
-            direction=entities.xyz_direction(x=1.0, y=0.0, z=0.0),
+            direction=components.xyz_direction(x=1.0, y=0.0, z=0.0),
         )
-        aligned = entities.aligned_and_constrained_axes(
+        aligned = components.aligned_and_constrained_axes(
             name=f"Body VVLH {reference_kind} Aligned",
             principal=boresight,
             principal_axis="+Z",
@@ -325,7 +325,7 @@ def test_custom_vgt_axes_name_with_space_remains_unresolved() -> None:
             name=f"aligned_custom_space_name_{reference_kind}",
             orientation=aligned,
             sensor=conic_sensor(8.0),
-            vgt=entities.vgt(axes=[body, aligned], vectors=[boresight, hint]),
+            vgt=components.vgt(axes=[body, aligned], vectors=[boresight, hint]),
         )
         try:
             compute_sensor_access(observer, target)
@@ -362,17 +362,17 @@ def test_vgt_points_and_systems_remain_unresolved_after_named_provider_probes() 
     provider_cases = [
         (
             "point_name_only",
-            entities.vgt(
-                axes=[entities.vvlh_axes(name="OnlyAxes")],
-                points=[entities.vgt_point(name="Point")],
+            components.vgt(
+                axes=[components.vvlh_axes(name="OnlyAxes")],
+                points=[components.vgt_point(name="Point")],
             ),
         ),
         (
             "point_name_desc",
-            entities.vgt(
-                axes=[entities.vvlh_axes(name="OnlyAxes")],
+            components.vgt(
+                axes=[components.vvlh_axes(name="OnlyAxes")],
                 points=[
-                    entities.vgt_point(
+                    components.vgt_point(
                         name="Point",
                         description="minimal named point probe",
                     )
@@ -381,17 +381,17 @@ def test_vgt_points_and_systems_remain_unresolved_after_named_provider_probes() 
         ),
         (
             "system_name_only",
-            entities.vgt(
-                axes=[entities.vvlh_axes(name="OnlyAxes")],
-                systems=[entities.vgt_system(name="System")],
+            components.vgt(
+                axes=[components.vvlh_axes(name="OnlyAxes")],
+                systems=[components.vgt_system(name="System")],
             ),
         ),
         (
             "system_name_desc",
-            entities.vgt(
-                axes=[entities.vvlh_axes(name="OnlyAxes")],
+            components.vgt(
+                axes=[components.vvlh_axes(name="OnlyAxes")],
                 systems=[
-                    entities.vgt_system(
+                    components.vgt_system(
                         name="System",
                         description="minimal named system probe",
                     )
@@ -400,10 +400,10 @@ def test_vgt_points_and_systems_remain_unresolved_after_named_provider_probes() 
         ),
         (
             "point_system",
-            entities.vgt(
-                axes=[entities.vvlh_axes(name="OnlyAxes")],
-                points=[entities.vgt_point(name="Point")],
-                systems=[entities.vgt_system(name="System")],
+            components.vgt(
+                axes=[components.vvlh_axes(name="OnlyAxes")],
+                points=[components.vgt_point(name="Point")],
+                systems=[components.vgt_system(name="System")],
             ),
         ),
     ]
@@ -412,9 +412,9 @@ def test_vgt_points_and_systems_remain_unresolved_after_named_provider_probes() 
     for case_id, provider in provider_cases:
         observer = observer_with_sensor(
             name=f"vgt_{case_id}",
-            orientation=entities.vvlh_axes(),
+            orientation=components.vvlh_axes(),
             sensor=conic_sensor(8.0),
-            rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+            rotation=components.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
             vgt=provider,
         )
         try:
@@ -426,32 +426,32 @@ def test_vgt_points_and_systems_remain_unresolved_after_named_provider_probes() 
     raw_provider_cases = [
         (
             "raw_point_type_point",
-            {"Axes": [entities.vvlh_axes(name="OnlyAxes").to_wire()], "Points": [{"$type": "Point", "Name": "Point"}]},
+            {"Axes": [components.vvlh_axes(name="OnlyAxes").to_wire()], "Points": [{"$type": "Point", "Name": "Point"}]},
         ),
         (
             "raw_system_type_system",
-            {"Axes": [entities.vvlh_axes(name="OnlyAxes").to_wire()], "Systems": [{"$type": "System", "Name": "System"}]},
+            {"Axes": [components.vvlh_axes(name="OnlyAxes").to_wire()], "Systems": [{"$type": "System", "Name": "System"}]},
         ),
         (
             "raw_point_default_center",
-            {"Axes": [entities.vvlh_axes(name="OnlyAxes").to_wire()], "Points": [{"Name": "Center"}]},
+            {"Axes": [components.vvlh_axes(name="OnlyAxes").to_wire()], "Points": [{"Name": "Center"}]},
         ),
         (
             "raw_point_default_subsatellite",
-            {"Axes": [entities.vvlh_axes(name="OnlyAxes").to_wire()], "Points": [{"Name": "SubSatellitePoint"}]},
+            {"Axes": [components.vvlh_axes(name="OnlyAxes").to_wire()], "Points": [{"Name": "SubSatellitePoint"}]},
         ),
         (
             "raw_system_default_fixed",
-            {"Axes": [entities.vvlh_axes(name="OnlyAxes").to_wire()], "Systems": [{"Name": "Fixed"}]},
+            {"Axes": [components.vvlh_axes(name="OnlyAxes").to_wire()], "Systems": [{"Name": "Fixed"}]},
         ),
         (
             "raw_system_default_icrf",
-            {"Axes": [entities.vvlh_axes(name="OnlyAxes").to_wire()], "Systems": [{"Name": "ICRF"}]},
+            {"Axes": [components.vvlh_axes(name="OnlyAxes").to_wire()], "Systems": [{"Name": "ICRF"}]},
         ),
         (
             "raw_point_system_typed_combined",
             {
-                "Axes": [entities.vvlh_axes(name="OnlyAxes").to_wire()],
+                "Axes": [components.vvlh_axes(name="OnlyAxes").to_wire()],
                 "Points": [{"$type": "Point", "Name": "Point"}],
                 "Systems": [{"$type": "System", "Name": "System"}],
             },
@@ -460,9 +460,9 @@ def test_vgt_points_and_systems_remain_unresolved_after_named_provider_probes() 
     for case_id, provider in raw_provider_cases:
         observer = observer_with_sensor(
             name=f"vgt_{case_id}",
-            orientation=entities.vvlh_axes(),
+            orientation=components.vvlh_axes(),
             sensor=conic_sensor(8.0),
-            rotation=entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+            rotation=components.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
         )
         observer_payload = observer.to_wire()
         observer_payload["Vgt"] = provider

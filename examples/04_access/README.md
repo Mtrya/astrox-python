@@ -3,19 +3,19 @@
 This directory contains runnable access examples. The curated access examples use this public SDK style:
 
 ```python
-from astrox import access, entities
+from astrox import access, components
 ```
 
-The user-facing guides are [docs/sdk/entities.md](../../docs/sdk/entities.md) and [docs/sdk/access.md](../../docs/sdk/access.md). They document named entities, entity groups, access functions, arguments, units, return shape, and caveats.
+The user-facing guides are [docs/sdk/components.md](../../docs/sdk/components.md) and [docs/sdk/access.md](../../docs/sdk/access.md). They document named entities, entity groups, access functions, arguments, units, return shape, and caveats.
 
 ## Curated Access Examples
 
 | Example | Public API shown |
 | --- | --- |
-| `compute.py` | `entities.entity(...)`, `entities.site_position(...)`, `entities.sgp4_position(...)`, and `access.compute(...)` |
-| `chain.py` | `entities.entity_group(...)`, `access.connection(...)`, and `access.chain(...)` |
-| `sensor_pointing.py` | `entities.vvlh_axes(...)`, `entities.conic_sensor(...)`, `entities.fixed_sensor_pointing(...)`, quaternion sensor pointing, and `access.compute(...)` |
-| `custom_axes.py` | `entities.fixed_axes(...)`, `entities.euler_rotation(...)`, calibrated VVLH-relative sensor frames, and `access.compute(...)` |
+| `compute.py` | `components.entity(...)`, `components.site_position(...)`, `components.sgp4_position(...)`, and `access.compute(...)` |
+| `chain.py` | `components.entity_group(...)`, `access.connection(...)`, and `access.chain(...)` |
+| `sensor_pointing.py` | `components.vvlh_axes(...)`, `components.conic_sensor(...)`, `components.fixed_sensor_pointing(...)`, quaternion sensor pointing, and `access.compute(...)` |
+| `custom_axes.py` | `components.fixed_axes(...)`, `components.euler_rotation(...)`, calibrated VVLH-relative sensor frames, and `access.compute(...)` |
 
 Install the development environment once, then run examples from the repository root:
 

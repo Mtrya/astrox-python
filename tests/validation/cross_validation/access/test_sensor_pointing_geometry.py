@@ -29,7 +29,7 @@ import sys
 
 import numpy as np
 
-from astrox import entities
+from astrox import components
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 from tests.validation.cross_validation.access._cases import CrossValidationError, STOP
 from tests.validation.cross_validation.access._geometry import Interval
@@ -354,18 +354,18 @@ def sensor_case_for_satellite(*, case_id: str, target, sensor, rotation, expecte
 
 def rotation_from_kwargs(quaternion_kwargs, euler_kwargs):
     if quaternion_kwargs is not None:
-        return entities.quaternion_rotation(**quaternion_kwargs)
+        return components.quaternion_rotation(**quaternion_kwargs)
     if euler_kwargs is not None:
-        return entities.euler_rotation(**euler_kwargs)
+        return components.euler_rotation(**euler_kwargs)
     raise TypeError("rotation kwargs required")
 
 
 def az_el_rotation(azimuth_deg: float, elevation_deg: float):
-    return entities.az_el_rotation(azimuth_deg=azimuth_deg, elevation_deg=elevation_deg)
+    return components.az_el_rotation(azimuth_deg=azimuth_deg, elevation_deg=elevation_deg)
 
 
 def entities_vvlh():
-    return entities.vvlh_axes()
+    return components.vvlh_axes()
 
 
 def main() -> int:

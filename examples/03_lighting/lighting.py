@@ -4,7 +4,7 @@
 # ///
 """Lighting calculations from entity position sources."""
 
-from astrox import entities, lighting
+from astrox import components, lighting
 
 
 ISS_TLE = (
@@ -14,12 +14,12 @@ ISS_TLE = (
 
 
 def main() -> None:
-    site = entities.site_position(
+    site = components.site_position(
         longitude_deg=-155.468,
         latitude_deg=19.821,
         height_m=4205.0,
     )
-    iss = entities.sgp4_position(tle_lines=ISS_TLE)
+    iss = components.sgp4_position(tle_lines=ISS_TLE)
 
     intervals = lighting.lighting_times(
         start="2024-01-01T00:00:00.000Z",

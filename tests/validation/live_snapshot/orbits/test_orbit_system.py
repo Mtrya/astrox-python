@@ -11,7 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrox import entities, orbits
+from astrox import components, orbits
 from tests.validation._support import (
     LiveSnapshotCase,
     check_snapshot,
@@ -45,8 +45,8 @@ def circular_leo_samples() -> list[float]:
     return samples
 
 
-def sample_inertial_position() -> entities.CzmlPosition:
-    return entities.czml_position(
+def sample_inertial_position() -> components.CzmlPosition:
+    return components.czml_position(
         epoch=EPOCH,
         central_body="Earth",
         reference_frame="INERTIAL",
@@ -56,7 +56,7 @@ def sample_inertial_position() -> entities.CzmlPosition:
     )
 
 
-def convert_czml_position_to_earth_fixed() -> tuple[float, entities.CzmlPosition]:
+def convert_czml_position_to_earth_fixed() -> tuple[float, components.CzmlPosition]:
     return orbits.convert_czml_position(
         sample_inertial_position(),
         to_central_body="Earth",
@@ -64,7 +64,7 @@ def convert_czml_position_to_earth_fixed() -> tuple[float, entities.CzmlPosition
     )
 
 
-def earth_moon_libration_frame() -> entities.CzmlPositionSTM:
+def earth_moon_libration_frame() -> components.CzmlPositionSTM:
     return orbits.earth_moon_libration(sample_inertial_position())
 
 

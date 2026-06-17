@@ -6,7 +6,7 @@
 
 import math
 
-from astrox import entities, orbits
+from astrox import components, orbits
 
 
 EPOCH = "2024-01-01T00:00:00Z"
@@ -34,7 +34,7 @@ def circular_leo_samples() -> list[float]:
 
 
 def main() -> None:
-    position = entities.czml_position(
+    position = components.czml_position(
         epoch=EPOCH,
         central_body="Earth",
         reference_frame="INERTIAL",

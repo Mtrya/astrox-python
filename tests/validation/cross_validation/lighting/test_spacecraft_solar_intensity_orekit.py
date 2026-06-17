@@ -29,7 +29,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrox import entities, lighting
+from astrox import components, lighting
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 
 
@@ -171,8 +171,8 @@ def ensure_orekit_data() -> Path:
     return OREKIT_DATA_PATH
 
 
-def czml_position(case: CzmlCase) -> entities.CzmlPosition:
-    return entities.czml_position(
+def czml_position(case: CzmlCase) -> components.CzmlPosition:
+    return components.czml_position(
         epoch=START,
         reference_frame="INERTIAL",
         interpolation_algorithm="LAGRANGE",

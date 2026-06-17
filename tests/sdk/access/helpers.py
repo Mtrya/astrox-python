@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from astrox import access, entities
+from astrox import access, components
 
 
 TLE_A = (
@@ -33,10 +33,10 @@ def record_raw_post(
     return calls
 
 
-def ground() -> entities.Entity:
-    return entities.entity(
+def ground() -> components.Entity:
+    return components.entity(
         name="Ground",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-155.468,
             latitude_deg=19.821,
             height_m=4205.0,
@@ -44,15 +44,15 @@ def ground() -> entities.Entity:
     )
 
 
-def iss() -> entities.Entity:
-    return entities.entity(
+def iss() -> components.Entity:
+    return components.entity(
         name="ISS",
-        position=entities.sgp4_position(tle_lines=TLE_A),
+        position=components.sgp4_position(tle_lines=TLE_A),
     )
 
 
-def hubble() -> entities.Entity:
-    return entities.entity(
+def hubble() -> components.Entity:
+    return components.entity(
         name="Hubble",
-        position=entities.sgp4_position(tle_lines=TLE_B),
+        position=components.sgp4_position(tle_lines=TLE_B),
     )

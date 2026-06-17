@@ -28,7 +28,7 @@ import sys
 
 import pytest
 
-from astrox import access, entities
+from astrox import access, components
 from astrox.exceptions import AstroxAPIError
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 from tests.validation.cross_validation.access._aer import compare_light_time_interval_shift
@@ -66,10 +66,10 @@ from tests.validation.cross_validation.access._geometry import (
 )
 
 
-def target_site(name: str = "GroundB") -> entities.Entity:
-    return entities.entity(
+def target_site(name: str = "GroundB") -> components.Entity:
+    return components.entity(
         name=name,
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-150.0,
             latitude_deg=22.0,
             height_m=0.0,
@@ -80,7 +80,7 @@ def target_site(name: str = "GroundB") -> entities.Entity:
 def two_satellite_chain(
     *,
     use_light_time_delay: bool | None = None,
-) -> tuple[dict[str, object], entities.Entity, entities.Entity, entities.Entity]:
+) -> tuple[dict[str, object], components.Entity, components.Entity, components.Entity]:
     ground = site("GroundA")
     relay_a = sgp4_entity("RelayA", TLE_A)
     relay_b = sgp4_entity("RelayB", TLE_B)
@@ -102,7 +102,7 @@ def two_satellite_chain(
 def full_two_relay_ground_chain(
     *,
     use_light_time_delay: bool | None = None,
-) -> tuple[dict[str, object], entities.Entity, entities.Entity, entities.Entity, entities.Entity]:
+) -> tuple[dict[str, object], components.Entity, components.Entity, components.Entity, components.Entity]:
     ground = site("GroundA")
     relay_a = sgp4_entity("RelayA", TLE_A)
     relay_b = sgp4_entity("RelayB", TLE_B)

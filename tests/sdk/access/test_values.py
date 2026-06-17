@@ -6,7 +6,7 @@ from dataclasses import FrozenInstanceError, is_dataclass
 
 import pytest
 
-from astrox import access, entities
+from astrox import access, components
 from tests.sdk.helpers import assert_canonical_equal
 
 
@@ -16,10 +16,10 @@ TLE_LINES = (
 )
 
 
-def ground() -> entities.Entity:
-    return entities.entity(
+def ground() -> components.Entity:
+    return components.entity(
         name="Ground",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-155.468,
             latitude_deg=19.821,
             height_m=4205.0,
@@ -27,10 +27,10 @@ def ground() -> entities.Entity:
     )
 
 
-def iss() -> entities.Entity:
-    return entities.entity(
+def iss() -> components.Entity:
+    return components.entity(
         name="ISS",
-        position=entities.sgp4_position(tle_lines=TLE_LINES),
+        position=components.sgp4_position(tle_lines=TLE_LINES),
     )
 
 
@@ -41,12 +41,12 @@ def test_public_access_value_names_are_exported() -> None:
     assert "connection" in access.__all__
     assert "AccessParticipant" not in access.__all__
     assert "AccessParticipantRef" not in access.__all__
-    assert "EntityGroup" in entities.__all__
-    assert "entity_group" in entities.__all__
+    assert "EntityGroup" in components.__all__
+    assert "entity_group" in components.__all__
 
 
 def test_connection_lowers_participants_to_name_references() -> None:
-    target_group = entities.entity_group(name="Targets", members=[iss()])
+    target_group = components.entity_group(name="Targets", members=[iss()])
 
     link = access.connection(
         ground(),

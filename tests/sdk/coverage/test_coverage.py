@@ -9,7 +9,7 @@ from typing import Any, Callable
 import pytest
 
 import astrox
-from astrox import coverage, entities, exceptions
+from astrox import coverage, components, exceptions
 from tests.sdk.helpers import assert_canonical_equal
 
 
@@ -67,10 +67,10 @@ def sample_grid() -> coverage.LatLonGrid:
     )
 
 
-def sample_asset(name: str = "Relay") -> entities.Entity:
-    return entities.entity(
+def sample_asset(name: str = "Relay") -> components.Entity:
+    return components.entity(
         name=name,
-        position=entities.sgp4_position(tle_lines=TLE_LINES),
+        position=components.sgp4_position(tle_lines=TLE_LINES),
     )
 
 
@@ -225,10 +225,10 @@ def test_compute_emits_complete_coverage_payload_and_returns_raw_response(
         grid=sample_grid(),
         assets=[asset],
         minimum_assets=1,
-        grid_point_sensor=entities.conic_sensor(outer_half_angle_deg=45.0),
+        grid_point_sensor=components.conic_sensor(outer_half_angle_deg=45.0),
         grid_point_constraints=[
-            entities.elevation_constraint(minimum_deg=10.0),
-            entities.range_constraint(maximum_km=2500.0, maximum_enabled=True),
+            components.elevation_constraint(minimum_deg=10.0),
+            components.range_constraint(maximum_km=2500.0, maximum_enabled=True),
         ],
         include_asset_access_results=True,
         include_coverage_points=True,
@@ -351,12 +351,12 @@ def test_reports_emit_shared_coverage_payload_to_report_routes(
         grid=sample_grid(),
         assets=[asset],
         minimum_assets=0,
-        grid_point_sensor=entities.rectangular_sensor(
+        grid_point_sensor=components.rectangular_sensor(
             x_half_angle_deg=30.0,
             y_half_angle_deg=20.0,
         ),
         grid_point_constraints=[
-            entities.az_el_mask_constraint(az_el_mask_rad=[0.0, 0.1, 3.14, 0.2]),
+            components.az_el_mask_constraint(az_el_mask_rad=[0.0, 0.1, 3.14, 0.2]),
         ],
         include_asset_access_results=True,
         description="by asset",
@@ -480,7 +480,7 @@ def test_coverage_functions_propagate_api_errors_unchanged(
                 "grid": sample_grid(),
                 "assets": ["Relay"],
             },
-            "assets must be a sequence of astrox.entities.Entity values",
+            "assets must be a sequence of astrox.components.Entity values",
         ),
         (
             coverage.compute,
@@ -491,7 +491,7 @@ def test_coverage_functions_propagate_api_errors_unchanged(
                 "assets": [sample_asset()],
                 "grid_point_sensor": {"$type": "Conic"},
             },
-            "grid_point_sensor must be an astrox.entities sensor value",
+            "grid_point_sensor must be an astrox.components sensor value",
         ),
         (
             coverage.compute,
@@ -502,7 +502,7 @@ def test_coverage_functions_propagate_api_errors_unchanged(
                 "assets": [sample_asset()],
                 "grid_point_constraints": [{"$type": "ElevationAngle"}],
             },
-            "grid_point_constraints must be a sequence of astrox.entities constraint values",
+            "grid_point_constraints must be a sequence of astrox.components constraint values",
         ),
         (
             coverage.compute,

@@ -1,12 +1,12 @@
-# Entities
+# Components
 
-This page documents the reusable ASTROX Python entity and position-source vocabulary. The intended import style is:
+This page documents the reusable ASTROX Python component and entity vocabulary. The intended import style is:
 
 ```python
-from astrox import entities
+from astrox import components
 ```
 
-ASTROX uses object-like schemas for spacecraft, sites, sensors, and other analysis objects. The Python SDK keeps the reusable parts of that vocabulary in `astrox.entities`.
+ASTROX uses object-like schemas for spacecraft, sites, sensors, and other analysis objects. The Python SDK keeps the reusable parts of that vocabulary in `astrox.components`.
 
 ## Position Sources
 
@@ -15,7 +15,7 @@ Most spatial workflows start from a position source. A position source describes
 Create a fixed geodetic site:
 
 ```python
-site = entities.site_position(
+site = components.site_position(
     longitude_deg=-155.468,
     latitude_deg=19.821,
     height_m=4205.0,
@@ -25,7 +25,7 @@ site = entities.site_position(
 Create an SGP4 position source from two-line element data:
 
 ```python
-iss = entities.sgp4_position(
+iss = components.sgp4_position(
     tle_lines=(
         "1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9995",
         "2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456",
@@ -47,12 +47,12 @@ orbit = orbits.keplerian(
     true_anomaly_deg=45.0,
 )
 
-j2_position = entities.j2_position(
+j2_position = components.j2_position(
     orbit_epoch="2024-01-01T00:00:00.000Z",
     orbit=orbit,
 )
 
-two_body_position = entities.two_body_position(
+two_body_position = components.two_body_position(
     orbit_epoch="2024-01-01T00:00:00.000Z",
     orbit=orbit,
 )
@@ -61,7 +61,7 @@ two_body_position = entities.two_body_position(
 Create a CZML-like sampled position source when you already have sampled position or position-velocity data:
 
 ```python
-sampled_position = entities.czml_position(
+sampled_position = components.czml_position(
     epoch="2024-01-01T00:00:00.000Z",
     reference_frame="INERTIAL",
     cartesian_velocity=[
@@ -74,22 +74,22 @@ sampled_position = entities.czml_position(
 Create a composite CZML-like position source when ASTROX expects a sequence of sampled position blocks:
 
 ```python
-track = entities.czml_positions([sampled_position])
+track = components.czml_positions([sampled_position])
 ```
 
-Create propagated or special position sources for workflows that need reusable named entities:
+Create propagated or special position sources for workflows that need reusable position components:
 
 ```python
-central_body = entities.central_body_position("Sun")
+central_body = components.central_body_position("Sun")
 
-hpop_position = entities.hpop_position(
+hpop_position = components.hpop_position(
     start="2024-01-01T00:00:00.000Z",
     stop="2024-01-01T00:10:00.000Z",
     orbit_epoch="2024-01-01T00:00:00.000Z",
     orbit=orbit,
 )
 
-ascent_position = entities.simple_ascent_position(
+ascent_position = components.simple_ascent_position(
     start="2024-01-01T00:00:00.000Z",
     stop="2024-01-01T00:30:00.000Z",
     launch_latitude_deg=40.0,
@@ -101,7 +101,7 @@ ascent_position = entities.simple_ascent_position(
     burnout_altitude_m=200000.0,
 )
 
-ballistic_position = entities.ballistic_position(
+ballistic_position = components.ballistic_position(
     start="2024-01-01T00:00:00.000Z",
     ballistic_type="DeltaV",
     ballistic_type_value=5000.0,
@@ -117,27 +117,27 @@ Use entity attitude axes when an ASTROX workflow needs an object's body frame or
 The recommended built-in axes are:
 
 ```python
-body_vvlh = entities.vvlh_axes()
-body_lvlh = entities.lvlh_axes()
-body_vnc = entities.vnc_axes()
+body_vvlh = components.vvlh_axes()
+body_lvlh = components.lvlh_axes()
+body_vnc = components.vnc_axes()
 ```
 
 Current cross-validation establishes the following ASTROX conventions for generic axes and the `relative_to="Earth"` / `relative_to="CBF"` variants:
 
 | Constructor | Calibrated axis convention |
 | --- | --- |
-| `entities.vvlh_axes(...)` | `+Z` points nadir, `+X` is along-track velocity projected into the local horizontal plane, and `+Y` completes the right-side frame |
-| `entities.lvlh_axes(...)` | `+X` is radial outward, `+Z` is orbit angular momentum, and `+Y` is the in-track axis from `Z x X` |
-| `entities.vnc_axes(...)` | `+X` follows inertial velocity, `+Y` follows orbit angular momentum, and `+Z` completes the right-handed triad |
+| `components.vvlh_axes(...)` | `+Z` points nadir, `+X` is along-track velocity projected into the local horizontal plane, and `+Y` completes the right-side frame |
+| `components.lvlh_axes(...)` | `+X` is radial outward, `+Z` is orbit angular momentum, and `+Y` is the in-track axis from `Z x X` |
+| `components.vnc_axes(...)` | `+X` follows inertial velocity, `+Y` follows orbit angular momentum, and `+Z` completes the right-handed triad |
 
 `relative_to="Moon"`, `"Mars"`, and `"Sun"` remain calibrated only as unresolved validation cases. The live calls and Skyfield body-vector probes are recorded under `tests/validation/cross_validation/access/`, but the SDK documentation does not recommend those variants as understood semantics yet.
 
 Use `fixed_axes(...)` to rotate a body frame relative to a calibrated reference frame:
 
 ```python
-camera_axes = entities.fixed_axes(
+camera_axes = components.fixed_axes(
     reference_axes="VVLH",
-    rotation=entities.euler_rotation(
+    rotation=components.euler_rotation(
         sequence="321",
         a_deg=0.0,
         b_deg=-20.0,
@@ -149,15 +149,15 @@ camera_axes = entities.fixed_axes(
 `fixed_axes(...)` is cross-validated for built-in `VVLH`, `LVLH`, and `VNC` references with Euler and quaternion rotations. `fixed_at_epoch_axes(...)` is cross-validated for freezing `VVLH` and `LVLH` source axes into `ICRF` at multiple epochs, and `composite_axes(...)` is cross-validated for piecewise interval composition:
 
 ```python
-frozen = entities.fixed_at_epoch_axes(
-    source_axes=entities.vvlh_axes(),
+frozen = components.fixed_at_epoch_axes(
+    source_axes=components.vvlh_axes(),
     reference_axes="ICRF",
     epoch="2024-01-01T00:00:00.000Z",
 )
 
-piecewise = entities.composite_axes(
+piecewise = components.composite_axes(
     intervals=[
-        entities.vvlh_axes(start="2024-01-01T00:00:00.000Z", stop="2024-01-01T00:00:20.000Z"),
+        components.vvlh_axes(start="2024-01-01T00:00:00.000Z", stop="2024-01-01T00:00:20.000Z"),
         camera_axes,
     ],
 )
@@ -168,7 +168,7 @@ Do not treat every ASTROX reference-name spelling as calibrated. Fixed axes rela
 `czml_axes(...)` is available for ASTROX CZML-like sampled attitude input:
 
 ```python
-identity_axes = entities.czml_axes(
+identity_axes = components.czml_axes(
     epoch="2024-01-01T00:00:00.000Z",
     unit_quaternion_xyzw=[
         0.0, 0.0, 0.0, 0.0, 1.0,
@@ -187,11 +187,11 @@ Current validation only recommends short-span sampled identity quaternions as ca
 Create basic sensor metadata with conic or rectangular sensor constructors:
 
 ```python
-camera = entities.conic_sensor(
+camera = components.conic_sensor(
     outer_half_angle_deg=30.0,
 )
 
-rectangular_sensor = entities.rectangular_sensor(
+rectangular_sensor = components.rectangular_sensor(
     x_half_angle_deg=5.0,
     y_half_angle_deg=10.0,
 )
@@ -202,13 +202,13 @@ Conic `outer_half_angle_deg` is calibrated as the half-angle around the sensor b
 Attach sensor pointing with `fixed_sensor_pointing(...)`:
 
 ```python
-nadir_camera = entities.entity(
+nadir_camera = components.entity(
     name="Observer",
     position=two_body_position,
-    orientation=entities.vvlh_axes(),
-    sensor=entities.conic_sensor(outer_half_angle_deg=8.0),
-    sensor_pointing=entities.fixed_sensor_pointing(
-        rotation=entities.quaternion_rotation(
+    orientation=components.vvlh_axes(),
+    sensor=components.conic_sensor(outer_half_angle_deg=8.0),
+    sensor_pointing=components.fixed_sensor_pointing(
+        rotation=components.quaternion_rotation(
             scalar=1.0,
             x=0.0,
             y=0.0,
@@ -223,8 +223,8 @@ Quaternion and Euler fixed sensor pointing are calibrated as active rotations of
 `az_el_rotation(...)` has a different calibrated meaning from quaternion or Euler fragments. For sensor pointing, ASTROX treats Az/El as a direct boresight vector in the parent axes: azimuth rotates from `+X` toward `+Y`, and elevation raises toward `+Z`. It is not equivalent to applying a quaternion or Euler rotation to the `+Z` boresight.
 
 ```python
-along_track_camera = entities.fixed_sensor_pointing(
-    rotation=entities.az_el_rotation(
+along_track_camera = components.fixed_sensor_pointing(
+    rotation=components.az_el_rotation(
         azimuth_deg=0.0,
         elevation_deg=0.0,
     ),
@@ -233,34 +233,34 @@ along_track_camera = entities.fixed_sensor_pointing(
 
 ## VGT Orientation Helpers
 
-VGT definitions are advanced ASTROX name-reference objects attached to an entity through `entities.vgt(...)`. The calibrated public path is `vgt_fixed_vector(...)` plus `aligned_and_constrained_axes(...)`, validated against a local TRIAD-style vector-alignment derivation:
+VGT definitions are advanced ASTROX name-reference objects attached to an entity through `components.vgt(...)`. The calibrated public path is `vgt_fixed_vector(...)` plus `aligned_and_constrained_axes(...)`, validated against a local TRIAD-style vector-alignment derivation:
 
 ```python
-body_axes = entities.vvlh_axes(name="BodyVVLH")
+body_axes = components.vvlh_axes(name="BodyVVLH")
 
-boresight = entities.vgt_fixed_vector(
+boresight = components.vgt_fixed_vector(
     name="Boresight",
     reference_axes=body_axes,
-    direction=entities.xyz_direction(x=0.0, y=0.0, z=1.0),
+    direction=components.xyz_direction(x=0.0, y=0.0, z=1.0),
 )
 
-clock = entities.vgt_fixed_vector(
+clock = components.vgt_fixed_vector(
     name="Clock",
     reference_axes=body_axes,
-    direction=entities.xyz_direction(x=1.0, y=0.0, z=0.0),
+    direction=components.xyz_direction(x=1.0, y=0.0, z=0.0),
 )
 
-sensor_axes = entities.aligned_and_constrained_axes(
+sensor_axes = components.aligned_and_constrained_axes(
     principal=boresight,
     principal_axis="+Z",
     reference=clock,
     reference_axis="+X",
 )
 
-observer = entities.entity(
+observer = components.entity(
     name="Observer",
     position=two_body_position,
-    vgt=entities.vgt(
+    vgt=components.vgt(
         axes=[body_axes],
         vectors=[boresight, clock],
     ),
@@ -272,10 +272,10 @@ No-space custom VGT axes names and string references are calibrated for the vali
 
 ## Named Entities
 
-Use `entities.entity(...)` when an ASTROX workflow asks for a named analysis object:
+Use `components.entity(...)` when an ASTROX workflow asks for a named analysis object:
 
 ```python
-satellite = entities.entity(
+satellite = components.entity(
     name="ISS",
     position=iss,
     sensor=camera,
@@ -287,38 +287,38 @@ An entity is a position source plus object metadata such as name, description, a
 
 ## Constraints
 
-Attach shared ASTROX constraints to an entity through the `constraints` argument of `entities.entity(...)`:
+Attach shared ASTROX constraints to an entity through the `constraints` argument of `components.entity(...)`:
 
 ```python
-ground = entities.entity(
+ground = components.entity(
     name="Ground",
-    position=entities.site_position(
+    position=components.site_position(
         longitude_deg=-155.468,
         latitude_deg=19.821,
         height_m=4205.0,
     ),
     constraints=[
-        entities.elevation_constraint(minimum_deg=10.0),
-        entities.range_constraint(maximum_km=2500.0, maximum_enabled=True),
+        components.elevation_constraint(minimum_deg=10.0),
+        components.range_constraint(maximum_km=2500.0, maximum_enabled=True),
     ],
 )
 ```
 
 The supported constraint constructors are:
 
-- `entities.elevation_constraint(minimum_deg=..., maximum_deg=..., maximum_enabled=..., text=...)` lowers to an ASTROX `ElevationAngle` constraint. Values are in degrees. `maximum_deg` is only forwarded when `maximum_enabled=True` is also supplied.
-- `entities.range_constraint(minimum_km=..., maximum_km=..., maximum_enabled=..., text=...)` lowers to an ASTROX `Range` constraint. Values are in kilometers. `maximum_km` is only forwarded when `maximum_enabled=True` is also supplied.
-- `entities.az_el_mask_constraint(az_el_mask_rad=..., max_range_km=..., text=...)` lowers to an ASTROX `AzElMask` constraint. `az_el_mask_rad` is a flat sequence of alternating azimuth and elevation samples in radians.
+- `components.elevation_constraint(minimum_deg=..., maximum_deg=..., maximum_enabled=..., text=...)` lowers to an ASTROX `ElevationAngle` constraint. Values are in degrees. `maximum_deg` is only forwarded when `maximum_enabled=True` is also supplied.
+- `components.range_constraint(minimum_km=..., maximum_km=..., maximum_enabled=..., text=...)` lowers to an ASTROX `Range` constraint. Values are in kilometers. `maximum_km` is only forwarded when `maximum_enabled=True` is also supplied.
+- `components.az_el_mask_constraint(az_el_mask_rad=..., max_range_km=..., text=...)` lowers to an ASTROX `AzElMask` constraint. `az_el_mask_rad` is a flat sequence of alternating azimuth and elevation samples in radians.
 
 Omitted optional fields are left out of the request so that ASTROX server defaults remain owned by the server. Raw constraint dictionaries are rejected at the public boundary; pass SDK-owned constraint values instead.
 
 ```python
-entities.entity(
+components.entity(
     name="Ground",
-    position=entities.site_position(longitude_deg=0.0, latitude_deg=0.0, height_m=0.0),
+    position=components.site_position(longitude_deg=0.0, latitude_deg=0.0, height_m=0.0),
     constraints=[
         # AzEl masks are only meaningful for SitePosition participants.
-        entities.az_el_mask_constraint(
+        components.az_el_mask_constraint(
             az_el_mask_rad=[
                 0.0, 0.17453292519943295,
                 1.5707963267948966, 0.17453292519943295,
@@ -336,10 +336,10 @@ Current cross-validation in `tests/validation/cross_validation/access/test_compu
 
 ## Entity Groups
 
-Use `entities.entity_group(...)` when an ASTROX workflow accepts a named group of entities:
+Use `components.entity_group(...)` when an ASTROX workflow accepts a named group of entities:
 
 ```python
-targets = entities.entity_group(
+targets = components.entity_group(
     name="Targets",
     members=[satellite],
     to_restriction="AnyOf",

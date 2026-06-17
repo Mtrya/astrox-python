@@ -1,0 +1,673 @@
+"""Position-source component value objects."""
+
+from __future__ import annotations
+
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+from typing import Any, TypeAlias
+
+from astrox.orbits import CartesianState, KeplerianElements
+from astrox.propagator import HpopConfig
+
+from ._common import (
+    _cartesian_state_to_wire,
+    _hpop_config_to_wire,
+    _include_if_supplied,
+    _number_sequence_to_list,
+    _orbit_elements_to_wire,
+    _tle_lines_to_list,
+)
+
+@dataclass(frozen=True, kw_only=True)
+class SitePosition:
+    """Fixed geodetic site position."""
+
+    longitude_deg: float
+    latitude_deg: float
+    height_m: float
+    central_body: str | None = None
+    clamp_to_ground: bool | None = None
+    height_above_ground_m: float | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to a typed ASTROX generic entity-position fragment."""
+        return {"$type": "SitePosition", **self.to_site_wire()}
+
+    def to_site_wire(self) -> dict[str, Any]:
+        """Lower to ASTROX site-only position shape."""
+        payload: dict[str, Any] = {
+            "cartographicDegrees": [
+                self.longitude_deg,
+                self.latitude_deg,
+                self.height_m,
+            ],
+        }
+        _include_if_supplied(payload, "CentralBody", self.central_body)
+        _include_if_supplied(payload, "clampToGround", self.clamp_to_ground)
+        _include_if_supplied(payload, "HeightAboveGround", self.height_above_ground_m)
+        return payload
+
+
+@dataclass(frozen=True, kw_only=True)
+class CzmlPosition:
+    """CZML-like sampled position source."""
+
+    epoch: str
+    central_body: str | None = None
+    interpolation_algorithm: str | None = None
+    interpolation_degree: int | None = None
+    reference_frame: str | None = None
+    interval: str | None = None
+    cartesian: tuple[float, ...] | None = None
+    cartesian_velocity: tuple[float, ...] | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to a typed ASTROX generic entity-position fragment."""
+        return {"$type": "CzmlPosition", **self.to_czml_wire()}
+
+    def to_czml_wire(self) -> dict[str, Any]:
+        """Lower to an ASTROX CZML position-data fragment."""
+        payload: dict[str, Any] = {"epoch": self.epoch}
+        _include_if_supplied(payload, "CentralBody", self.central_body)
+        _include_if_supplied(
+            payload,
+            "interpolationAlgorithm",
+            self.interpolation_algorithm,
+        )
+        _include_if_supplied(payload, "interpolationDegree", self.interpolation_degree)
+        _include_if_supplied(payload, "referenceFrame", self.reference_frame)
+        _include_if_supplied(payload, "interval", self.interval)
+        if self.cartesian is not None:
+            payload["cartesian"] = list(self.cartesian)
+        if self.cartesian_velocity is not None:
+            payload["cartesianVelocity"] = list(self.cartesian_velocity)
+        return payload
+
+    @classmethod
+    def from_czml_wire(cls, payload: dict[str, Any]) -> CzmlPosition:
+        """Build from an ASTROX CZML position-data payload."""
+        cartesian = payload.get("cartesian")
+        cartesian_velocity = payload.get("cartesianVelocity")
+        return cls(
+            epoch=payload["epoch"],
+            central_body=payload.get("CentralBody"),
+            interpolation_algorithm=payload.get("interpolationAlgorithm"),
+            interpolation_degree=payload.get("interpolationDegree"),
+            reference_frame=payload.get("referenceFrame"),
+            interval=payload.get("interval"),
+            cartesian=None if cartesian is None else tuple(cartesian),
+            cartesian_velocity=None
+            if cartesian_velocity is None
+            else tuple(cartesian_velocity),
+        )
+
+
+@dataclass(frozen=True, kw_only=True)
+class CzmlPositionSTM(CzmlPosition):
+    """CZML position sample augmented with STM-like orientation and translation."""
+
+    unit_quaternion: tuple[float, ...]
+    cartesian_translation: tuple[float, ...] | None = None
+
+    @classmethod
+    def from_czml_wire(cls, payload: dict[str, Any]) -> CzmlPositionSTM:
+        """Build from the ASTROX CzmlPositionSTM payload."""
+        cartesian_velocity = payload.get("cartesianVelocity")
+        cartesian_translation = payload.get("cartesianTranslation")
+        return cls(
+            epoch=payload["epoch"],
+            central_body=payload.get("CentralBody"),
+            interpolation_algorithm=payload.get("interpolationAlgorithm"),
+            interpolation_degree=payload.get("interpolationDegree"),
+            reference_frame=payload["referenceFrame"],
+            interval=payload.get("interval"),
+            cartesian=tuple(payload["cartesian"]),
+            cartesian_velocity=None
+            if cartesian_velocity is None
+            else tuple(cartesian_velocity),
+            unit_quaternion=tuple(payload["unitQuaternion"]),
+            cartesian_translation=None
+            if cartesian_translation is None
+            else tuple(cartesian_translation),
+        )
+
+
+@dataclass(frozen=True, kw_only=True)
+class CzmlPositions:
+    """Composite CZML-like sampled position source."""
+
+    positions: tuple[CzmlPosition, ...]
+    central_body: str | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to a typed ASTROX generic entity-position fragment."""
+        payload: dict[str, Any] = {
+            "$type": "CzmlPositions",
+            "CzmlPositions": [position.to_czml_wire() for position in self.positions],
+        }
+        _include_if_supplied(payload, "CentralBody", self.central_body)
+        return payload
+
+
+@dataclass(frozen=True, kw_only=True)
+class CentralBodyPosition:
+    """Central-body position source."""
+
+    name: str
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to a typed ASTROX generic entity-position fragment."""
+        return {"$type": "CentralBody", "Name": self.name}
+
+
+@dataclass(frozen=True, kw_only=True)
+class J2Position:
+    """J2-propagated Keplerian position source."""
+
+    orbit_epoch: str
+    orbit: KeplerianElements
+    start: str | None = None
+    stop: str | None = None
+    step_s: float | None = None
+    central_body: str | None = None
+    gravitational_parameter_m3_s2: float | None = None
+    coord_system: str | None = None
+    j2_normalized_value: float | None = None
+    ref_distance_m: float | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to a typed ASTROX generic entity-position fragment."""
+        payload: dict[str, Any] = {
+            "$type": "J2",
+            "OrbitEpoch": self.orbit_epoch,
+            "CoordType": "Classical",
+            "OrbitalElements": _orbit_elements_to_wire(self.orbit, parameter="orbit"),
+        }
+        _include_if_supplied(payload, "Start", self.start)
+        _include_if_supplied(payload, "Stop", self.stop)
+        _include_if_supplied(payload, "Step", self.step_s)
+        _include_if_supplied(payload, "CentralBody", self.central_body)
+        _include_if_supplied(
+            payload,
+            "GravitationalParameter",
+            self.gravitational_parameter_m3_s2,
+        )
+        _include_if_supplied(payload, "CoordSystem", self.coord_system)
+        _include_if_supplied(payload, "J2NormalizedValue", self.j2_normalized_value)
+        _include_if_supplied(payload, "RefDistance", self.ref_distance_m)
+        return payload
+
+
+@dataclass(frozen=True, kw_only=True)
+class TwoBodyPosition:
+    """Two-body propagated Keplerian position source."""
+
+    orbit_epoch: str
+    orbit: KeplerianElements
+    start: str | None = None
+    stop: str | None = None
+    step_s: float | None = None
+    central_body: str | None = None
+    gravitational_parameter_m3_s2: float | None = None
+    coord_system: str | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to a typed ASTROX generic entity-position fragment."""
+        payload: dict[str, Any] = {
+            "$type": "TwoBody",
+            "OrbitEpoch": self.orbit_epoch,
+            "CoordType": "Classical",
+            "OrbitalElements": _orbit_elements_to_wire(self.orbit, parameter="orbit"),
+        }
+        _include_if_supplied(payload, "Start", self.start)
+        _include_if_supplied(payload, "Stop", self.stop)
+        _include_if_supplied(payload, "Step", self.step_s)
+        _include_if_supplied(payload, "CentralBody", self.central_body)
+        _include_if_supplied(
+            payload,
+            "GravitationalParameter",
+            self.gravitational_parameter_m3_s2,
+        )
+        _include_if_supplied(payload, "CoordSystem", self.coord_system)
+        return payload
+
+
+@dataclass(frozen=True, kw_only=True)
+class Sgp4Position:
+    """SGP4 TLE position source."""
+
+    tle_lines: tuple[str, str]
+    start: str | None = None
+    stop: str | None = None
+    step_s: float | None = None
+    satellite_number: str | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to a typed ASTROX generic entity-position fragment."""
+        payload: dict[str, Any] = {
+            "$type": "SGP4",
+            "TLEs": list(self.tle_lines),
+        }
+        _include_if_supplied(payload, "Start", self.start)
+        _include_if_supplied(payload, "Stop", self.stop)
+        _include_if_supplied(payload, "Step", self.step_s)
+        _include_if_supplied(payload, "SatelliteNumber", self.satellite_number)
+        return payload
+
+
+@dataclass(frozen=True, kw_only=True)
+class HpopPosition:
+    """HPOP-propagated position source."""
+
+    start: str
+    stop: str
+    orbit_epoch: str
+    orbital_elements: tuple[float, ...]
+    coord_type: str
+    config: HpopConfig | Mapping[str, Any] | None = None
+    coord_epoch: str | None = None
+    coord_system: str | None = None
+    gravitational_parameter_m3_s2: float | None = None
+    coefficient_of_drag: float | None = None
+    area_mass_ratio_drag_m2_kg: float | None = None
+    coefficient_of_srp: float | None = None
+    area_mass_ratio_srp_m2_kg: float | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to a typed ASTROX generic entity-position fragment."""
+        payload: dict[str, Any] = {
+            "$type": "HPOP",
+            "Start": self.start,
+            "Stop": self.stop,
+            "OrbitEpoch": self.orbit_epoch,
+            "CoordType": self.coord_type,
+            "OrbitalElements": list(self.orbital_elements),
+        }
+        _include_if_supplied(payload, "CoordEpoch", self.coord_epoch)
+        _include_if_supplied(payload, "CoordSystem", self.coord_system)
+        _include_if_supplied(
+            payload,
+            "GravitationalParameter",
+            self.gravitational_parameter_m3_s2,
+        )
+        _include_if_supplied(payload, "CoefficientOfDrag", self.coefficient_of_drag)
+        _include_if_supplied(
+            payload,
+            "AreaMassRatioDrag",
+            self.area_mass_ratio_drag_m2_kg,
+        )
+        _include_if_supplied(payload, "CoefficientOfSRP", self.coefficient_of_srp)
+        _include_if_supplied(
+            payload,
+            "AreaMassRatioSRP",
+            self.area_mass_ratio_srp_m2_kg,
+        )
+        if self.config is not None:
+            payload["HpopPropagator"] = _hpop_config_to_wire(
+                self.config,
+                parameter="config",
+            )
+        return payload
+
+
+@dataclass(frozen=True, kw_only=True)
+class SimpleAscentPosition:
+    """Simple ascent position source."""
+
+    start: str
+    stop: str
+    launch_latitude_deg: float
+    launch_longitude_deg: float
+    launch_altitude_m: float
+    burnout_velocity_m_s: float
+    burnout_latitude_deg: float
+    burnout_longitude_deg: float
+    burnout_altitude_m: float
+    step_s: float | None = None
+    central_body: str | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to a typed ASTROX generic entity-position fragment."""
+        payload: dict[str, Any] = {
+            "$type": "SimpleAscent",
+            "Start": self.start,
+            "Stop": self.stop,
+            "LaunchLatitude": self.launch_latitude_deg,
+            "LaunchLongitude": self.launch_longitude_deg,
+            "LaunchAltitude": self.launch_altitude_m,
+            "BurnoutVelocity": self.burnout_velocity_m_s,
+            "BurnoutLatitude": self.burnout_latitude_deg,
+            "BurnoutLongitude": self.burnout_longitude_deg,
+            "BurnoutAltitude": self.burnout_altitude_m,
+        }
+        _include_if_supplied(payload, "Step", self.step_s)
+        _include_if_supplied(payload, "CentralBody", self.central_body)
+        return payload
+
+
+@dataclass(frozen=True, kw_only=True)
+class BallisticPosition:
+    """Ballistic flight position source."""
+
+    start: str
+    ballistic_type: str
+    ballistic_type_value: float
+    step_s: float | None = None
+    central_body: str | None = None
+    gravitational_parameter_m3_s2: float | None = None
+    launch_latitude_deg: float | None = None
+    launch_longitude_deg: float | None = None
+    launch_altitude_m: float | None = None
+    impact_latitude_deg: float | None = None
+    impact_longitude_deg: float | None = None
+    impact_altitude_m: float | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to a typed ASTROX generic entity-position fragment."""
+        payload: dict[str, Any] = {
+            "$type": "Ballistic",
+            "Start": self.start,
+            "BallisticType": self.ballistic_type,
+            "BallisticTypeValue": self.ballistic_type_value,
+        }
+        _include_if_supplied(payload, "Step", self.step_s)
+        _include_if_supplied(payload, "CentralBody", self.central_body)
+        _include_if_supplied(
+            payload,
+            "GravitationalParameter",
+            self.gravitational_parameter_m3_s2,
+        )
+        _include_if_supplied(payload, "LaunchLatitude", self.launch_latitude_deg)
+        _include_if_supplied(payload, "LaunchLongitude", self.launch_longitude_deg)
+        _include_if_supplied(payload, "LaunchAltitude", self.launch_altitude_m)
+        _include_if_supplied(payload, "ImpactLatitude", self.impact_latitude_deg)
+        _include_if_supplied(payload, "ImpactLongitude", self.impact_longitude_deg)
+        _include_if_supplied(payload, "ImpactAltitude", self.impact_altitude_m)
+        return payload
+
+
+EntityPosition: TypeAlias = (
+    SitePosition
+    | CzmlPosition
+    | CzmlPositions
+    | CentralBodyPosition
+    | J2Position
+    | TwoBodyPosition
+    | Sgp4Position
+    | HpopPosition
+    | SimpleAscentPosition
+    | BallisticPosition
+)
+
+
+_POSITION_TYPES = (
+    SitePosition,
+    CzmlPosition,
+    CzmlPositions,
+    CentralBodyPosition,
+    J2Position,
+    TwoBodyPosition,
+    Sgp4Position,
+    HpopPosition,
+    SimpleAscentPosition,
+    BallisticPosition,
+)
+
+
+def site_position(
+    *,
+    longitude_deg: float,
+    latitude_deg: float,
+    height_m: float,
+    central_body: str | None = None,
+    clamp_to_ground: bool | None = None,
+    height_above_ground_m: float | None = None,
+) -> SitePosition:
+    """Create a fixed geodetic site position."""
+    return SitePosition(
+        longitude_deg=longitude_deg,
+        latitude_deg=latitude_deg,
+        height_m=height_m,
+        central_body=central_body,
+        clamp_to_ground=clamp_to_ground,
+        height_above_ground_m=height_above_ground_m,
+    )
+
+
+def czml_position(
+    *,
+    epoch: str,
+    central_body: str | None = None,
+    interpolation_algorithm: str | None = None,
+    interpolation_degree: int | None = None,
+    reference_frame: str | None = None,
+    interval: str | None = None,
+    cartesian: Sequence[float] | None = None,
+    cartesian_velocity: Sequence[float] | None = None,
+) -> CzmlPosition:
+    """Create a CZML-like sampled position source."""
+    return CzmlPosition(
+        epoch=epoch,
+        central_body=central_body,
+        interpolation_algorithm=interpolation_algorithm,
+        interpolation_degree=interpolation_degree,
+        reference_frame=reference_frame,
+        interval=interval,
+        cartesian=tuple(_number_sequence_to_list(cartesian, parameter="cartesian"))
+        if cartesian is not None
+        else None,
+        cartesian_velocity=tuple(
+            _number_sequence_to_list(cartesian_velocity, parameter="cartesian_velocity")
+        )
+        if cartesian_velocity is not None
+        else None,
+    )
+
+
+def czml_positions(
+    positions: Sequence[CzmlPosition],
+    *,
+    central_body: str | None = None,
+) -> CzmlPositions:
+    """Create a composite CZML-like sampled position source."""
+    if isinstance(positions, (str, bytes)) or not isinstance(positions, Sequence):
+        raise TypeError("positions must be a sequence of CzmlPosition values")
+    items = tuple(positions)
+    if not all(isinstance(position, CzmlPosition) for position in items):
+        raise TypeError("positions must be a sequence of CzmlPosition values")
+    return CzmlPositions(positions=items, central_body=central_body)
+
+
+def central_body_position(name: str) -> CentralBodyPosition:
+    """Create a central-body position source."""
+    return CentralBodyPosition(name=name)
+
+
+def j2_position(
+    *,
+    orbit_epoch: str,
+    orbit: KeplerianElements,
+    start: str | None = None,
+    stop: str | None = None,
+    step_s: float | None = None,
+    central_body: str | None = None,
+    gravitational_parameter_m3_s2: float | None = None,
+    coord_system: str | None = None,
+    j2_normalized_value: float | None = None,
+    ref_distance_m: float | None = None,
+) -> J2Position:
+    """Create a J2-propagated Keplerian position source."""
+    _orbit_elements_to_wire(orbit, parameter="orbit")
+    return J2Position(
+        orbit_epoch=orbit_epoch,
+        orbit=orbit,
+        start=start,
+        stop=stop,
+        step_s=step_s,
+        central_body=central_body,
+        gravitational_parameter_m3_s2=gravitational_parameter_m3_s2,
+        coord_system=coord_system,
+        j2_normalized_value=j2_normalized_value,
+        ref_distance_m=ref_distance_m,
+    )
+
+
+def two_body_position(
+    *,
+    orbit_epoch: str,
+    orbit: KeplerianElements,
+    start: str | None = None,
+    stop: str | None = None,
+    step_s: float | None = None,
+    central_body: str | None = None,
+    gravitational_parameter_m3_s2: float | None = None,
+    coord_system: str | None = None,
+) -> TwoBodyPosition:
+    """Create a two-body propagated Keplerian position source."""
+    _orbit_elements_to_wire(orbit, parameter="orbit")
+    return TwoBodyPosition(
+        orbit_epoch=orbit_epoch,
+        orbit=orbit,
+        start=start,
+        stop=stop,
+        step_s=step_s,
+        central_body=central_body,
+        gravitational_parameter_m3_s2=gravitational_parameter_m3_s2,
+        coord_system=coord_system,
+    )
+
+
+def sgp4_position(
+    *,
+    tle_lines: tuple[str, str] | list[str],
+    start: str | None = None,
+    stop: str | None = None,
+    step_s: float | None = None,
+    satellite_number: str | None = None,
+) -> Sgp4Position:
+    """Create an SGP4 TLE position source."""
+    return Sgp4Position(
+        tle_lines=tuple(_tle_lines_to_list(tle_lines)),
+        start=start,
+        stop=stop,
+        step_s=step_s,
+        satellite_number=satellite_number,
+    )
+
+
+def hpop_position(
+    *,
+    start: str,
+    stop: str,
+    orbit_epoch: str,
+    orbit: KeplerianElements | None = None,
+    state: CartesianState | None = None,
+    config: HpopConfig | Mapping[str, Any] | None = None,
+    coord_epoch: str | None = None,
+    coord_system: str | None = None,
+    gravitational_parameter_m3_s2: float | None = None,
+    coefficient_of_drag: float | None = None,
+    area_mass_ratio_drag_m2_kg: float | None = None,
+    coefficient_of_srp: float | None = None,
+    area_mass_ratio_srp_m2_kg: float | None = None,
+) -> HpopPosition:
+    """Create an HPOP-propagated position source."""
+    if (orbit is None) == (state is None):
+        raise ValueError("exactly one of orbit or state must be provided")
+    if orbit is not None:
+        coord_type = "Classical"
+        orbital_elements = tuple(_orbit_elements_to_wire(orbit, parameter="orbit"))
+    else:
+        coord_type = "Cartesian"
+        orbital_elements = tuple(_cartesian_state_to_wire(state, parameter="state"))
+    if config is not None:
+        _hpop_config_to_wire(config, parameter="config")
+    return HpopPosition(
+        start=start,
+        stop=stop,
+        orbit_epoch=orbit_epoch,
+        orbital_elements=orbital_elements,
+        coord_type=coord_type,
+        config=config,
+        coord_epoch=coord_epoch,
+        coord_system=coord_system,
+        gravitational_parameter_m3_s2=gravitational_parameter_m3_s2,
+        coefficient_of_drag=coefficient_of_drag,
+        area_mass_ratio_drag_m2_kg=area_mass_ratio_drag_m2_kg,
+        coefficient_of_srp=coefficient_of_srp,
+        area_mass_ratio_srp_m2_kg=area_mass_ratio_srp_m2_kg,
+    )
+
+
+def simple_ascent_position(
+    *,
+    start: str,
+    stop: str,
+    launch_latitude_deg: float,
+    launch_longitude_deg: float,
+    launch_altitude_m: float,
+    burnout_velocity_m_s: float,
+    burnout_latitude_deg: float,
+    burnout_longitude_deg: float,
+    burnout_altitude_m: float,
+    step_s: float | None = None,
+    central_body: str | None = None,
+) -> SimpleAscentPosition:
+    """Create a simple ascent position source."""
+    return SimpleAscentPosition(
+        start=start,
+        stop=stop,
+        launch_latitude_deg=launch_latitude_deg,
+        launch_longitude_deg=launch_longitude_deg,
+        launch_altitude_m=launch_altitude_m,
+        burnout_velocity_m_s=burnout_velocity_m_s,
+        burnout_latitude_deg=burnout_latitude_deg,
+        burnout_longitude_deg=burnout_longitude_deg,
+        burnout_altitude_m=burnout_altitude_m,
+        step_s=step_s,
+        central_body=central_body,
+    )
+
+
+def ballistic_position(
+    *,
+    start: str,
+    ballistic_type: str,
+    ballistic_type_value: float,
+    step_s: float | None = None,
+    central_body: str | None = None,
+    gravitational_parameter_m3_s2: float | None = None,
+    launch_latitude_deg: float | None = None,
+    launch_longitude_deg: float | None = None,
+    launch_altitude_m: float | None = None,
+    impact_latitude_deg: float | None = None,
+    impact_longitude_deg: float | None = None,
+    impact_altitude_m: float | None = None,
+) -> BallisticPosition:
+    """Create a ballistic flight position source."""
+    return BallisticPosition(
+        start=start,
+        ballistic_type=ballistic_type,
+        ballistic_type_value=ballistic_type_value,
+        step_s=step_s,
+        central_body=central_body,
+        gravitational_parameter_m3_s2=gravitational_parameter_m3_s2,
+        launch_latitude_deg=launch_latitude_deg,
+        launch_longitude_deg=launch_longitude_deg,
+        launch_altitude_m=launch_altitude_m,
+        impact_latitude_deg=impact_latitude_deg,
+        impact_longitude_deg=impact_longitude_deg,
+        impact_altitude_m=impact_altitude_m,
+    )
+
+
+def _position_to_wire(position: EntityPosition) -> dict[str, Any]:
+    if not isinstance(position, _POSITION_TYPES):
+        raise TypeError("position must be an astrox.components position value")
+    return position.to_wire()
+
+
+def _site_position_to_wire(position: SitePosition) -> dict[str, Any]:
+    if not isinstance(position, SitePosition):
+        raise TypeError("site_position must be an astrox.components.SitePosition value")
+    return position.to_site_wire()

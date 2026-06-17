@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from numbers import Integral, Real
 from typing import Any, TypeAlias
 
-from astrox import entities
+from astrox import components
 from astrox._http import raw
 
 __all__ = [
@@ -202,11 +202,11 @@ class CbLatLonGrid:
 
 CoverageGrid: TypeAlias = GlobalGrid | LatitudeGrid | LatLonGrid | CbLatLonGrid
 _GRID_TYPES = (GlobalGrid, LatitudeGrid, LatLonGrid, CbLatLonGrid)
-_SENSOR_TYPES = (entities.ConicSensor, entities.RectangularSensor)
+_SENSOR_TYPES = (components.ConicSensor, components.RectangularSensor)
 _CONSTRAINT_TYPES = (
-    entities.ElevationConstraint,
-    entities.RangeConstraint,
-    entities.AzElMaskConstraint,
+    components.ElevationConstraint,
+    components.RangeConstraint,
+    components.AzElMaskConstraint,
 )
 
 
@@ -352,11 +352,11 @@ def compute(
     start: str,
     stop: str,
     grid: CoverageGrid,
-    assets: Sequence[entities.Entity],
+    assets: Sequence[components.Entity],
     minimum_assets: int | None = None,
     exactly_assets: int | None = None,
-    grid_point_sensor: entities.EntitySensor | None = None,
-    grid_point_constraints: Sequence[entities.Constraint] | None = None,
+    grid_point_sensor: components.EntitySensor | None = None,
+    grid_point_constraints: Sequence[components.Constraint] | None = None,
     include_asset_access_results: bool | None = None,
     include_coverage_points: bool | None = None,
     step_s: float | None = None,
@@ -385,11 +385,11 @@ def percent_coverage(
     start: str,
     stop: str,
     grid: CoverageGrid,
-    assets: Sequence[entities.Entity],
+    assets: Sequence[components.Entity],
     minimum_assets: int | None = None,
     exactly_assets: int | None = None,
-    grid_point_sensor: entities.EntitySensor | None = None,
-    grid_point_constraints: Sequence[entities.Constraint] | None = None,
+    grid_point_sensor: components.EntitySensor | None = None,
+    grid_point_constraints: Sequence[components.Constraint] | None = None,
     include_asset_access_results: bool | None = None,
     include_coverage_points: bool | None = None,
     step_s: float | None = None,
@@ -418,11 +418,11 @@ def coverage_by_asset(
     start: str,
     stop: str,
     grid: CoverageGrid,
-    assets: Sequence[entities.Entity],
+    assets: Sequence[components.Entity],
     minimum_assets: int | None = None,
     exactly_assets: int | None = None,
-    grid_point_sensor: entities.EntitySensor | None = None,
-    grid_point_constraints: Sequence[entities.Constraint] | None = None,
+    grid_point_sensor: components.EntitySensor | None = None,
+    grid_point_constraints: Sequence[components.Constraint] | None = None,
     include_asset_access_results: bool | None = None,
     include_coverage_points: bool | None = None,
     step_s: float | None = None,
@@ -451,11 +451,11 @@ def _coverage_input_payload(
     start: str,
     stop: str,
     grid: CoverageGrid,
-    assets: Sequence[entities.Entity],
+    assets: Sequence[components.Entity],
     minimum_assets: int | None,
     exactly_assets: int | None,
-    grid_point_sensor: entities.EntitySensor | None,
-    grid_point_constraints: Sequence[entities.Constraint] | None,
+    grid_point_sensor: components.EntitySensor | None,
+    grid_point_constraints: Sequence[components.Constraint] | None,
     include_asset_access_results: bool | None,
     include_coverage_points: bool | None,
     step_s: float | None,
@@ -522,31 +522,31 @@ def _grid_to_wire(grid: CoverageGrid) -> dict[str, Any]:
     return grid.to_wire()
 
 
-def _assets_to_wire(values: Sequence[entities.Entity]) -> list[dict[str, Any]]:
+def _assets_to_wire(values: Sequence[components.Entity]) -> list[dict[str, Any]]:
     if isinstance(values, (str, bytes)) or not isinstance(values, Sequence):
-        raise TypeError("assets must be a sequence of astrox.entities.Entity values")
+        raise TypeError("assets must be a sequence of astrox.components.Entity values")
     items = tuple(values)
-    if not all(isinstance(item, entities.Entity) for item in items):
-        raise TypeError("assets must be a sequence of astrox.entities.Entity values")
+    if not all(isinstance(item, components.Entity) for item in items):
+        raise TypeError("assets must be a sequence of astrox.components.Entity values")
     return [item.to_wire() for item in items]
 
 
-def _sensor_to_wire(sensor: entities.EntitySensor) -> dict[str, Any]:
+def _sensor_to_wire(sensor: components.EntitySensor) -> dict[str, Any]:
     if not isinstance(sensor, _SENSOR_TYPES):
-        raise TypeError("grid_point_sensor must be an astrox.entities sensor value")
+        raise TypeError("grid_point_sensor must be an astrox.components sensor value")
     return sensor.to_wire()
 
 
 def _constraints_to_wire(
-    values: Sequence[entities.Constraint],
+    values: Sequence[components.Constraint],
 ) -> list[dict[str, Any]]:
     if isinstance(values, (str, bytes)) or not isinstance(values, Sequence):
         raise TypeError(
-            "grid_point_constraints must be a sequence of astrox.entities constraint values"
+            "grid_point_constraints must be a sequence of astrox.components constraint values"
         )
     items = tuple(values)
     if not all(isinstance(item, _CONSTRAINT_TYPES) for item in items):
         raise TypeError(
-            "grid_point_constraints must be a sequence of astrox.entities constraint values"
+            "grid_point_constraints must be a sequence of astrox.components constraint values"
         )
     return [item.to_wire() for item in items]

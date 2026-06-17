@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from numbers import Real
 from typing import Any
 
-from astrox import entities
+from astrox import components
 from astrox._http import raw
 
 __all__ = [
@@ -43,7 +43,7 @@ def lighting_times(
     *,
     start: str,
     stop: str,
-    position: entities.EntityPosition,
+    position: components.EntityPosition,
     description: str | None = None,
     az_el_mask_data: Sequence[float] | None = None,
     occultation_bodies: Sequence[str] | None = None,
@@ -52,7 +52,7 @@ def lighting_times(
     payload: dict[str, Any] = {
         "Start": start,
         "Stop": stop,
-        "Position": entities._position_to_wire(position),
+        "Position": components._position_to_wire(position),
     }
     _include_if_supplied(payload, "Description", description)
     if az_el_mask_data is not None:
@@ -73,7 +73,7 @@ def solar_intensity(
     *,
     start: str,
     stop: str,
-    position: entities.EntityPosition,
+    position: components.EntityPosition,
     description: str | None = None,
     az_el_mask_data: Sequence[float] | None = None,
     step_s: float | None = None,
@@ -83,7 +83,7 @@ def solar_intensity(
     payload: dict[str, Any] = {
         "Start": start,
         "Stop": stop,
-        "Position": entities._position_to_wire(position),
+        "Position": components._position_to_wire(position),
     }
     _include_if_supplied(payload, "Description", description)
     _include_if_supplied(payload, "TimeStepSec", step_s)
@@ -105,7 +105,7 @@ def solar_aer(
     *,
     start: str,
     stop: str,
-    position: entities.EntityPosition,
+    position: components.EntityPosition,
     text: str | None = None,
     step_s: int | None = None,
 ) -> dict[str, Any]:
@@ -113,7 +113,7 @@ def solar_aer(
     payload: dict[str, Any] = {
         "Start": start,
         "Stop": stop,
-        "Position": entities._position_to_wire(position),
+        "Position": components._position_to_wire(position),
     }
     _include_if_supplied(payload, "Text", text)
     _include_if_supplied(payload, "TimeStepSec", step_s)

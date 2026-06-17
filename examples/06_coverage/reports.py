@@ -4,7 +4,7 @@
 # ///
 """Coverage report routes for percent coverage and per-asset coverage."""
 
-from astrox import coverage, entities
+from astrox import coverage, components
 
 
 ISS_TLE = (
@@ -21,9 +21,9 @@ def main() -> None:
         max_longitude_deg=-100.0,
         resolution_deg=5.0,
     )
-    relay = entities.entity(
+    relay = components.entity(
         name="Relay",
-        position=entities.sgp4_position(tle_lines=ISS_TLE),
+        position=components.sgp4_position(tle_lines=ISS_TLE),
     )
 
     percent = coverage.percent_coverage(

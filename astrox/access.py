@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from astrox import entities
+from astrox import components
 from astrox._http import raw
 
 __all__ = [
@@ -22,20 +22,20 @@ def _include_if_supplied(payload: dict[str, Any], wire_key: str, value: Any) -> 
         payload[wire_key] = value
 
 
-def _entity_to_wire(entity: entities.Entity, *, parameter: str) -> dict[str, Any]:
-    if not isinstance(entity, entities.Entity):
-        raise TypeError(f"{parameter} must be an astrox.entities.Entity value")
+def _entity_to_wire(entity: components.Entity, *, parameter: str) -> dict[str, Any]:
+    if not isinstance(entity, components.Entity):
+        raise TypeError(f"{parameter} must be an astrox.components.Entity value")
     return entity.to_wire()
 
 
 def _participant_name(
-    value: entities.Entity | entities.EntityGroup | str,
+    value: components.Entity | components.EntityGroup | str,
     *,
     parameter: str,
 ) -> str:
-    if isinstance(value, entities.Entity):
+    if isinstance(value, components.Entity):
         return value.name
-    if isinstance(value, entities.EntityGroup):
+    if isinstance(value, components.EntityGroup):
         return value.name
     if isinstance(value, str):
         return value
@@ -43,19 +43,19 @@ def _participant_name(
 
 
 def _participant_to_wire(
-    value: entities.Entity | entities.EntityGroup,
+    value: components.Entity | components.EntityGroup,
     *,
     parameter: str,
 ) -> dict[str, Any]:
-    if isinstance(value, entities.Entity):
+    if isinstance(value, components.Entity):
         return {"$type": "EntityPath", **value.to_wire()}
-    if isinstance(value, entities.EntityGroup):
+    if isinstance(value, components.EntityGroup):
         return value.to_wire()
     raise TypeError(f"{parameter} items must be Entity or EntityGroup values")
 
 
 def _participants_to_wire(
-    values: Sequence[entities.Entity | entities.EntityGroup],
+    values: Sequence[components.Entity | components.EntityGroup],
 ) -> list[dict[str, Any]]:
     if isinstance(values, (str, bytes)) or not isinstance(values, Sequence):
         raise TypeError("participants must be a sequence of Entity or EntityGroup values")
@@ -78,8 +78,8 @@ def _connections_to_wire(values: Sequence[Connection]) -> list[dict[str, Any]]:
 class Connection:
     """Explicit access-chain connection between named participants."""
 
-    from_participant: entities.Entity | entities.EntityGroup | str
-    to_participant: entities.Entity | entities.EntityGroup | str
+    from_participant: components.Entity | components.EntityGroup | str
+    to_participant: components.Entity | components.EntityGroup | str
     min_uses: int | None = None
     max_uses: int | None = None
 
@@ -101,8 +101,8 @@ class Connection:
 
 
 def connection(
-    from_participant: entities.Entity | entities.EntityGroup | str,
-    to_participant: entities.Entity | entities.EntityGroup | str,
+    from_participant: components.Entity | components.EntityGroup | str,
+    to_participant: components.Entity | components.EntityGroup | str,
     *,
     min_uses: int | None = None,
     max_uses: int | None = None,
@@ -122,8 +122,8 @@ def compute(
     *,
     start: str,
     stop: str,
-    from_entity: entities.Entity,
-    to_entity: entities.Entity,
+    from_entity: components.Entity,
+    to_entity: components.Entity,
     step_s: float | None = None,
     compute_aer: bool | None = None,
     use_light_time_delay: bool | None = None,
@@ -146,9 +146,9 @@ def chain(
     *,
     start: str,
     stop: str,
-    participants: Sequence[entities.Entity | entities.EntityGroup],
-    start_participant: entities.Entity | entities.EntityGroup | str,
-    end_participant: entities.Entity | entities.EntityGroup | str,
+    participants: Sequence[components.Entity | components.EntityGroup],
+    start_participant: components.Entity | components.EntityGroup | str,
+    end_participant: components.Entity | components.EntityGroup | str,
     connections: Sequence[Connection] | None = None,
     use_light_time_delay: bool | None = None,
 ) -> dict[str, Any]:

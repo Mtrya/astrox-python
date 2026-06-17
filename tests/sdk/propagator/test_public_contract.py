@@ -92,10 +92,10 @@ def install_recording_client() -> RecordingSession:
 
 
 def test_public_modules_and_names_are_available() -> None:
-    from astrox import access, entities, orbits, propagator
+    from astrox import access, components, orbits, propagator
 
     assert "access" in astrox.__all__
-    assert "entities" in astrox.__all__
+    assert "components" in astrox.__all__
     assert "orbits" in astrox.__all__
     assert "propagator" in astrox.__all__
 
@@ -103,10 +103,10 @@ def test_public_modules_and_names_are_available() -> None:
     assert hasattr(access, "chain")
     assert hasattr(access, "compute")
     assert hasattr(access, "connection")
-    assert hasattr(entities, "Entity")
-    assert hasattr(entities, "EntityGroup")
-    assert hasattr(entities, "entity")
-    assert hasattr(entities, "entity_group")
+    assert hasattr(components, "Entity")
+    assert hasattr(components, "EntityGroup")
+    assert hasattr(components, "entity")
+    assert hasattr(components, "entity_group")
     assert hasattr(orbits, "KeplerianElements")
     assert hasattr(orbits, "CartesianState")
     assert hasattr(orbits, "keplerian")
@@ -138,6 +138,9 @@ def test_public_modules_and_names_are_available() -> None:
     assert hasattr(propagator, "hpop")
     assert hasattr(propagator, "hpop_config")
     assert hasattr(propagator, "hpop_rkf78")
+
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("astrox.entities")
     assert hasattr(propagator, "hpop_two_body_gravity")
     assert hasattr(propagator, "hpop_gravity_field")
     assert hasattr(propagator, "hpop_jacchia_roberts")
