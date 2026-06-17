@@ -5,7 +5,7 @@
 #   Branches:
 #     - no-coverage grid with one SGP4 asset: verified for all static FOM routes and supported at-time/over-time routes; ComputeCoverage worker-error behavior is recorded separately
 #     - continuous-coverage grid/window with one SGP4 asset: verified for all static, at-time, and over-time FOM routes, including response-time dynamic routes
-#     - ResponseTime ValueByGridPointAtTime/GridStatsOverTime: partial; verified to succeed for continuous coverage and to return HTTP 500 for no-coverage and intermittent representative cases
+#     - ResponseTime ValueByGridPointAtTime/GridStatsOverTime: partial; verified to succeed for continuous coverage; current no-coverage HTTP 500 behavior is guarded in live snapshots
 #   Fields:
 #     - Datas[].Latitude/Longitude/Altitude: verified against GetGridPoints for no-coverage and continuous-coverage cases
 #     - Datas[].FOM_Value: verified against all-zero/all-window/all-covered local derivations where ComputeCoverage has worker-error edge behavior
@@ -21,7 +21,7 @@
 #     - Tolerances: VALUE_ABS=1e-6 for endpoint-to-endpoint floating values; POSITION_ABS_DEG=1e-10 for grid coordinate echoes
 #   Findings:
 #     - ComputeCoverage currently returns a worker "Index was out of range" error for all-zero and all-covered edge cases, but most FOM routes return meaningful edge-case values.
-#     - No-coverage FOM routes return 0 for SimpleCoverage, CoverageTime, and NumberOfAssets; full-window duration for ResponseTime and RevisitTime; response-time dynamic routes return HTTP 500.
+#     - No-coverage FOM routes return 0 for SimpleCoverage, CoverageTime, and NumberOfAssets; full-window duration for ResponseTime and RevisitTime; response-time dynamic HTTP 500 cases are drift-guarded in live snapshots.
 #     - Continuous-coverage FOM routes return 1 for SimpleCoverage and NumberOfAssets, full-window duration for CoverageTime, and 0 for ResponseTime and RevisitTime; response-time dynamic routes succeed in this regime.
 
 from __future__ import annotations
@@ -111,35 +111,6 @@ def test_no_coverage_fom_routes_match_edge_case_conventions() -> None:
         assert_epoch_series(label, report["Datas"], expected_offsets)
         for row in report["Datas"]:
             assert_stats(f"{label}@{row['EpochSeconds']}", row, expected)
-
-
-@pytest.mark.parametrize(
-    "func",
-    [
-        coverage.response_time.by_grid_point_at_time,
-        coverage.response_time.grid_stats_over_time,
-    ],
-)
-def test_no_coverage_response_time_dynamic_routes_keep_current_server_error(func) -> None:
-    configure_astrox_from_env()
-    kwargs = {}
-    if func is coverage.response_time.by_grid_point_at_time:
-        kwargs["time"] = "2024-01-01T00:10:00.000Z"
-        expected_endpoint = "/Coverage/FOM/ValueByGridPointAtTime/ResponseTime"
-    else:
-        expected_endpoint = "/Coverage/FOM/GridStatsOverTime/ResponseTime"
-    with pytest.raises(exceptions.AstroxHTTPError) as error:
-        func(
-            start=START,
-            stop=STOP,
-            grid=no_coverage_grid(),
-            assets=[primary_asset()],
-            minimum_assets=1,
-            step_s=60.0,
-            **kwargs,
-        )
-    assert error.value.status_code == 500
-    assert error.value.endpoint == expected_endpoint
 
 
 def test_continuous_coverage_fom_routes_match_edge_case_conventions() -> None:
@@ -242,13 +213,8 @@ def assert_continuous_window_is_inside_positive_intervals(trace: dict) -> None:
 
 def run_all_checks() -> int:
     test_no_coverage_fom_routes_match_edge_case_conventions()
-    for func in [
-        coverage.response_time.by_grid_point_at_time,
-        coverage.response_time.grid_stats_over_time,
-    ]:
-        test_no_coverage_response_time_dynamic_routes_keep_current_server_error(func)
     test_continuous_coverage_fom_routes_match_edge_case_conventions()
-    return 4
+    return 2
 
 
 def main() -> int:

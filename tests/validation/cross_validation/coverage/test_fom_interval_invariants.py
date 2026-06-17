@@ -15,8 +15,8 @@
 #     - NumberOfAssets GridStatsOverTime: verified as arithmetic min/max/average of ValueByGridPointAtTime at Step samples
 #     - ResponseTime ValueByGridPoint: verified for ComputeType=Maximum as max zero-asset gap duration, including boundary gaps; verified for ComputeType=Minimum as 0 for grid points covered at least once in the representative case
 #     - ResponseTime GridStats: verified as arithmetic min/max/average of ResponseTime ValueByGridPoint
-#     - ResponseTime ValueByGridPointAtTime: partial; live route currently returns HTTP 500 for the representative case
-#     - ResponseTime GridStatsOverTime: partial; live route currently returns HTTP 500 for the representative case
+#     - ResponseTime ValueByGridPointAtTime: partial; representative HTTP 500 behavior is guarded in live snapshots
+#     - ResponseTime GridStatsOverTime: partial; representative HTTP 500 behavior is guarded in live snapshots
 #     - RevisitTime ValueByGridPoint: verified for ComputeType=Average/Maximum/Minimum as average/max/min zero-asset gap duration, including boundary gaps
 #     - RevisitTime ValueByGridPointAtTime: verified as the containing zero-asset gap duration, or 0 when covered at Time
 #     - RevisitTime GridStats: verified as arithmetic min/max/average of RevisitTime ValueByGridPoint values
@@ -49,8 +49,6 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-
-import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
@@ -313,33 +311,6 @@ def test_fom_over_time_stats_match_at_time_routes() -> None:
             assert_stats(f"{label}_over_time_at_{epoch_s}", sample, expected_values)
 
 
-def test_response_time_dynamic_routes_currently_return_http_500() -> None:
-    configure_astrox_from_env()
-    with pytest.raises(exceptions.AstroxHTTPError) as at_time_error:
-        coverage.response_time.by_grid_point_at_time(
-            time="2024-01-01T00:10:00.000Z",
-            start=START,
-            stop=STOP,
-            grid=sample_grid(),
-            assets=[sample_asset()],
-            minimum_assets=1,
-            step_s=STEP_S,
-        )
-    assert at_time_error.value.status_code == 500
-    assert at_time_error.value.endpoint == "/Coverage/FOM/ValueByGridPointAtTime/ResponseTime"
-    with pytest.raises(exceptions.AstroxHTTPError) as over_time_error:
-        coverage.response_time.grid_stats_over_time(
-            start=START,
-            stop=STOP,
-            grid=sample_grid(),
-            assets=[sample_asset()],
-            minimum_assets=1,
-            step_s=STEP_S,
-        )
-    assert over_time_error.value.status_code == 500
-    assert over_time_error.value.endpoint == "/Coverage/FOM/GridStatsOverTime/ResponseTime"
-
-
 def total_positive_duration(intervals: list[dict[str, Any]]) -> float:
     return sum(interval["Duration"] for interval in intervals if interval["NumberOfAssets"] > 0)
 
@@ -431,8 +402,7 @@ def run_all_checks() -> int:
     test_fom_coverage_time_and_number_of_assets_match_interval_derivation()
     test_fom_response_and_revisit_time_match_gap_derivation()
     test_fom_over_time_stats_match_at_time_routes()
-    test_response_time_dynamic_routes_currently_return_http_500()
-    return 5
+    return 4
 
 
 def main() -> int:

@@ -41,6 +41,16 @@ def small_grid() -> coverage.LatLonGrid:
     )
 
 
+def no_coverage_grid() -> coverage.LatLonGrid:
+    return coverage.lat_lon_grid(
+        min_latitude_deg=80.0,
+        max_latitude_deg=85.0,
+        min_longitude_deg=0.0,
+        max_longitude_deg=10.0,
+        resolution_deg=5.0,
+    )
+
+
 def cb_grid() -> coverage.CbLatLonGrid:
     return coverage.cb_lat_lon_grid(
         min_latitude_deg=20.0,
@@ -135,14 +145,24 @@ def fom_route(
     compute_type: str | None = None,
     time: str | None = None,
     expect_http_error: bool = False,
+    grid: coverage.CoverageGrid | None = None,
+    step_s: float = 300.0,
+    http_error_marker: str | None = None,
 ) -> dict[str, Any]:
+    """Call one FOM route, optionally freezing a current HTTP 500 response.
+
+    The ``expect_http_error`` path is a live drift guard. If ASTROX starts
+    returning a successful payload, this helper returns that payload and the
+    snapshot comparison fails. If ASTROX changes to a non-HTTP API validation
+    error, the exception bubbles and the live snapshot test fails immediately.
+    """
     kwargs: dict[str, Any] = {
         "start": START,
         "stop": STOP,
-        "grid": small_grid(),
+        "grid": grid or small_grid(),
         "assets": [relay()],
         "minimum_assets": 1,
-        "step_s": 300.0,
+        "step_s": step_s,
     }
     if compute_type is not None:
         kwargs["compute_type"] = compute_type
@@ -154,6 +174,7 @@ def fom_route(
         result = func(**kwargs)
     except exceptions.AstroxHTTPError as exc:
         return {
+            "expected_current_behavior": http_error_marker or "live_http_500_drift_guard",
             "error": type(exc).__name__,
             "endpoint": exc.endpoint,
             "status_code": exc.status_code,
@@ -163,6 +184,7 @@ def fom_route(
 
 
 FOM_TIME = "2024-01-01T00:10:00.000Z"
+FOM_NO_NEXT_ACCESS_TIME = "2024-01-01T00:29:00.000Z"
 
 
 CASES = [
@@ -274,11 +296,49 @@ CASES = [
     ),
     LiveSnapshotCase(
         id="fom_response_time_by_grid_point_at_time",
-        description="FOM response time at-time route currently returns an ASTROX HTTP 500 for the representative case.",
+        description=(
+            "Drift guard: FOM response-time at-time currently returns ASTROX "
+            "HTTP 500 when the representative intermittent case includes a "
+            "grid point with no later access inside the analysis window."
+        ),
         run=lambda: fom_route(
             coverage.response_time.by_grid_point_at_time,
             time=FOM_TIME,
             expect_http_error=True,
+            http_error_marker="response_time_at_time_no_next_access_http_500",
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_response_time_by_grid_point_at_time_all_no_next_access_http_500",
+        description=(
+            "Drift guard: FOM response-time at-time currently returns ASTROX "
+            "HTTP 500 late in the representative window, when all points are "
+            "uncovered and have no later access. If ASTROX returns a value or "
+            "a clearer validation error, this snapshot must fail so we can "
+            "recalibrate the SDK docs and cross-validation."
+        ),
+        run=lambda: fom_route(
+            coverage.response_time.by_grid_point_at_time,
+            time=FOM_NO_NEXT_ACCESS_TIME,
+            expect_http_error=True,
+            step_s=60.0,
+            http_error_marker="response_time_at_time_all_no_next_access_http_500",
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_response_time_by_grid_point_at_time_no_coverage_http_500",
+        description=(
+            "Drift guard: FOM response-time at-time currently returns ASTROX "
+            "HTTP 500 for a never-covered grid. A future success or clearer "
+            "server validation error should force this snapshot to change."
+        ),
+        run=lambda: fom_route(
+            coverage.response_time.by_grid_point_at_time,
+            time=FOM_TIME,
+            expect_http_error=True,
+            grid=no_coverage_grid(),
+            step_s=60.0,
+            http_error_marker="response_time_at_time_no_coverage_http_500",
         ),
     ),
     LiveSnapshotCase(
@@ -291,10 +351,31 @@ CASES = [
     ),
     LiveSnapshotCase(
         id="fom_response_time_grid_stats_over_time",
-        description="FOM response time over-time route currently returns an ASTROX HTTP 500 for the representative case.",
+        description=(
+            "Drift guard: FOM response-time over-time currently returns ASTROX "
+            "HTTP 500 for the representative intermittent case because the "
+            "sample series reaches a no-next-access condition."
+        ),
         run=lambda: fom_route(
             coverage.response_time.grid_stats_over_time,
             expect_http_error=True,
+            http_error_marker="response_time_over_time_no_next_access_http_500",
+        ),
+    ),
+    LiveSnapshotCase(
+        id="fom_response_time_grid_stats_over_time_no_coverage_http_500",
+        description=(
+            "Drift guard: FOM response-time over-time currently returns ASTROX "
+            "HTTP 500 for a never-covered grid. If the server starts returning "
+            "full-window durations, empty data, or a clearer validation error, "
+            "this snapshot should fail and be recalibrated."
+        ),
+        run=lambda: fom_route(
+            coverage.response_time.grid_stats_over_time,
+            expect_http_error=True,
+            grid=no_coverage_grid(),
+            step_s=60.0,
+            http_error_marker="response_time_over_time_no_coverage_http_500",
         ),
     ),
     LiveSnapshotCase(
