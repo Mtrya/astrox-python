@@ -23,6 +23,10 @@ from tests.validation._support import (
 
 
 SNAPSHOT_PATH = Path(__file__).with_name("coverage.snap.json")
+# GitHub Actions has observed about 2 ms of live numeric drift from the same
+# checked-in inputs while local runs match exactly. Keep this as a narrow live
+# response-shape guard; cross-validation owns semantic precision.
+COVERAGE_SNAPSHOT_ABS_TOL = 2.0e-3
 START = "2024-01-01T00:00:00.000Z"
 STOP = "2024-01-01T00:30:00.000Z"
 TLE_LINES = (
@@ -412,7 +416,12 @@ CASES = [
 
 def test_coverage_live_snapshot() -> None:
     configure_astrox_from_env()
-    check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
+    check_snapshot(
+        cases=CASES,
+        snapshot_path=SNAPSHOT_PATH,
+        abs_tol=COVERAGE_SNAPSHOT_ABS_TOL,
+        datetime_abs_tol_s=COVERAGE_SNAPSHOT_ABS_TOL,
+    )
 
 
 def test_site_entity_as_coverage_asset_currently_returns_worker_error() -> None:
