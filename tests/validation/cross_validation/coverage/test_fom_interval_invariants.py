@@ -44,75 +44,49 @@
 
 from __future__ import annotations
 
-import math
 import sys
-from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrox import coverage, entities, exceptions
+from astrox import coverage, exceptions
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
-
-
-START = "2024-01-01T00:00:00.000Z"
-STOP = "2024-01-01T00:30:00.000Z"
-STEP_S = 300.0
-VALUE_ABS = 1.0e-6
-POSITION_ABS_DEG = 1.0e-10
-TLE_LINES = (
-    "1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9995",
-    "2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456",
+from tests.validation.cross_validation.coverage._fom_helpers import (
+    START,
+    STOP,
+    CrossValidationError,
+    active_count_at,
+    assert_fom_values,
+    assert_stats,
+    compute_trace,
+    containing_gap_duration,
+    duration_s,
+    gap_durations,
+    intermittent_grid,
+    iso_at_offset,
+    max_positive_count,
+    mean,
+    min_count,
+    primary_asset,
+    total_positive_duration,
 )
 
 
-class CrossValidationError(Exception):
-    """Raised when live ASTROX FOM behavior disagrees with interval invariants."""
-
-
-def sample_grid() -> coverage.LatLonGrid:
-    return coverage.lat_lon_grid(
-        min_latitude_deg=20.0,
-        max_latitude_deg=25.0,
-        min_longitude_deg=-120.0,
-        max_longitude_deg=-110.0,
-        resolution_deg=5.0,
-    )
-
-
-def sample_asset() -> entities.Entity:
-    return entities.entity(
-        name="Relay",
-        position=entities.sgp4_position(tle_lines=TLE_LINES),
-    )
-
-
-def compute_trace() -> dict[str, Any]:
-    return coverage.compute(
-        start=START,
-        stop=STOP,
-        grid=sample_grid(),
-        assets=[sample_asset()],
-        minimum_assets=1,
-        include_asset_access_results=True,
-        include_coverage_points=True,
-        step_s=STEP_S,
-    )
+STEP_S = 300.0
 
 
 def test_fom_simple_coverage_matches_compute_intervals() -> None:
     configure_astrox_from_env()
-    trace = compute_trace()
+    trace = compute_trace(step_s=STEP_S)
     point_traces = trace["SatisfactionIntervalsWithNumberOfAssets"]
     points = trace["Points"]["GridPoints"]
     by_point = coverage.simple_coverage.by_grid_point(
         start=START,
         stop=STOP,
-        grid=sample_grid(),
-        assets=[sample_asset()],
+        grid=intermittent_grid(),
+        assets=[primary_asset()],
         minimum_assets=1,
         step_s=STEP_S,
     )
@@ -121,8 +95,8 @@ def test_fom_simple_coverage_matches_compute_intervals() -> None:
     stats = coverage.simple_coverage.grid_stats(
         start=START,
         stop=STOP,
-        grid=sample_grid(),
-        assets=[sample_asset()],
+        grid=intermittent_grid(),
+        assets=[primary_asset()],
         minimum_assets=1,
         step_s=STEP_S,
     )
@@ -131,8 +105,8 @@ def test_fom_simple_coverage_matches_compute_intervals() -> None:
         time="2024-01-01T00:10:00.000Z",
         start=START,
         stop=STOP,
-        grid=sample_grid(),
-        assets=[sample_asset()],
+        grid=intermittent_grid(),
+        assets=[primary_asset()],
         minimum_assets=1,
         step_s=STEP_S,
     )
@@ -142,16 +116,16 @@ def test_fom_simple_coverage_matches_compute_intervals() -> None:
 
 def test_fom_coverage_time_and_number_of_assets_match_interval_derivation() -> None:
     configure_astrox_from_env()
-    trace = compute_trace()
+    trace = compute_trace(step_s=STEP_S)
     point_traces = trace["SatisfactionIntervalsWithNumberOfAssets"]
     points = trace["Points"]["GridPoints"]
-    duration_s = epoch_seconds(STOP) - epoch_seconds(START)
+    total_duration_s = duration_s()
     coverage_time_values = [total_positive_duration(intervals) for intervals in point_traces]
     coverage_time_report = coverage.coverage_time.by_grid_point(
         start=START,
         stop=STOP,
-        grid=sample_grid(),
-        assets=[sample_asset()],
+        grid=intermittent_grid(),
+        assets=[primary_asset()],
         minimum_assets=1,
         compute_type="TotalTimeAbove",
         step_s=STEP_S,
@@ -160,8 +134,8 @@ def test_fom_coverage_time_and_number_of_assets_match_interval_derivation() -> N
     coverage_time_stats = coverage.coverage_time.grid_stats(
         start=START,
         stop=STOP,
-        grid=sample_grid(),
-        assets=[sample_asset()],
+        grid=intermittent_grid(),
+        assets=[primary_asset()],
         minimum_assets=1,
         compute_type="TotalTimeAbove",
         step_s=STEP_S,
@@ -169,7 +143,7 @@ def test_fom_coverage_time_and_number_of_assets_match_interval_derivation() -> N
     assert_stats("coverage_time_grid_stats", coverage_time_stats, coverage_time_values)
 
     number_expectations = {
-        "Average": [value / duration_s for value in coverage_time_values],
+        "Average": [value / total_duration_s for value in coverage_time_values],
         "Maximum": [max_positive_count(intervals) for intervals in point_traces],
         "Minimum": [min_count(intervals) for intervals in point_traces],
     }
@@ -177,8 +151,8 @@ def test_fom_coverage_time_and_number_of_assets_match_interval_derivation() -> N
         report = coverage.number_of_assets.by_grid_point(
             start=START,
             stop=STOP,
-            grid=sample_grid(),
-            assets=[sample_asset()],
+            grid=intermittent_grid(),
+            assets=[primary_asset()],
             minimum_assets=1,
             compute_type=compute_type,
             step_s=STEP_S,
@@ -187,8 +161,8 @@ def test_fom_coverage_time_and_number_of_assets_match_interval_derivation() -> N
     stats = coverage.number_of_assets.grid_stats(
         start=START,
         stop=STOP,
-        grid=sample_grid(),
-        assets=[sample_asset()],
+        grid=intermittent_grid(),
+        assets=[primary_asset()],
         minimum_assets=1,
         compute_type="Average",
         step_s=STEP_S,
@@ -198,19 +172,19 @@ def test_fom_coverage_time_and_number_of_assets_match_interval_derivation() -> N
 
 def test_fom_response_and_revisit_time_match_gap_derivation() -> None:
     configure_astrox_from_env()
-    trace = compute_trace()
+    trace = compute_trace(step_s=STEP_S)
     point_traces = trace["SatisfactionIntervalsWithNumberOfAssets"]
     points = trace["Points"]["GridPoints"]
     response_expectations = {
-        "Maximum": [max(gap_durations(intervals)) for intervals in point_traces],
-        "Minimum": [0.0 if total_positive_duration(intervals) > 0.0 else math.inf for intervals in point_traces],
+        "Maximum": [max(representative_gap_durations(intervals)) for intervals in point_traces],
+        "Minimum": [0.0 if total_positive_duration(intervals) > 0.0 else float("inf") for intervals in point_traces],
     }
     for compute_type, expected in response_expectations.items():
         report = coverage.response_time.by_grid_point(
             start=START,
             stop=STOP,
-            grid=sample_grid(),
-            assets=[sample_asset()],
+            grid=intermittent_grid(),
+            assets=[primary_asset()],
             minimum_assets=1,
             compute_type=compute_type,
             step_s=STEP_S,
@@ -219,8 +193,8 @@ def test_fom_response_and_revisit_time_match_gap_derivation() -> None:
     response_stats = coverage.response_time.grid_stats(
         start=START,
         stop=STOP,
-        grid=sample_grid(),
-        assets=[sample_asset()],
+        grid=intermittent_grid(),
+        assets=[primary_asset()],
         minimum_assets=1,
         compute_type="Maximum",
         step_s=STEP_S,
@@ -228,16 +202,16 @@ def test_fom_response_and_revisit_time_match_gap_derivation() -> None:
     assert_stats("response_time_grid_stats", response_stats, response_expectations["Maximum"])
 
     revisit_expectations = {
-        "Average": [mean(gap_durations(intervals)) for intervals in point_traces],
-        "Maximum": [max(gap_durations(intervals)) for intervals in point_traces],
-        "Minimum": [min(gap_durations(intervals)) for intervals in point_traces],
+        "Average": [mean(representative_gap_durations(intervals)) for intervals in point_traces],
+        "Maximum": [max(representative_gap_durations(intervals)) for intervals in point_traces],
+        "Minimum": [min(representative_gap_durations(intervals)) for intervals in point_traces],
     }
     for compute_type, expected in revisit_expectations.items():
         report = coverage.revisit_time.by_grid_point(
             start=START,
             stop=STOP,
-            grid=sample_grid(),
-            assets=[sample_asset()],
+            grid=intermittent_grid(),
+            assets=[primary_asset()],
             minimum_assets=1,
             compute_type=compute_type,
             step_s=STEP_S,
@@ -247,8 +221,8 @@ def test_fom_response_and_revisit_time_match_gap_derivation() -> None:
         time="2024-01-01T00:10:00.000Z",
         start=START,
         stop=STOP,
-        grid=sample_grid(),
-        assets=[sample_asset()],
+        grid=intermittent_grid(),
+        assets=[primary_asset()],
         minimum_assets=1,
         step_s=STEP_S,
     )
@@ -257,8 +231,8 @@ def test_fom_response_and_revisit_time_match_gap_derivation() -> None:
     revisit_stats = coverage.revisit_time.grid_stats(
         start=START,
         stop=STOP,
-        grid=sample_grid(),
-        assets=[sample_asset()],
+        grid=intermittent_grid(),
+        assets=[primary_asset()],
         minimum_assets=1,
         compute_type="Average",
         step_s=STEP_S,
@@ -289,8 +263,8 @@ def test_fom_over_time_stats_match_at_time_routes() -> None:
         over_time = over_time_func(
             start=START,
             stop=STOP,
-            grid=sample_grid(),
-            assets=[sample_asset()],
+            grid=intermittent_grid(),
+            assets=[primary_asset()],
             minimum_assets=1,
             step_s=STEP_S,
         )
@@ -302,8 +276,8 @@ def test_fom_over_time_stats_match_at_time_routes() -> None:
                     time=iso_at_offset(epoch_s),
                     start=START,
                     stop=STOP,
-                    grid=sample_grid(),
-                    assets=[sample_asset()],
+                    grid=intermittent_grid(),
+                    assets=[primary_asset()],
                     minimum_assets=1,
                     step_s=STEP_S,
                 )["Datas"]
@@ -311,90 +285,11 @@ def test_fom_over_time_stats_match_at_time_routes() -> None:
             assert_stats(f"{label}_over_time_at_{epoch_s}", sample, expected_values)
 
 
-def total_positive_duration(intervals: list[dict[str, Any]]) -> float:
-    return sum(interval["Duration"] for interval in intervals if interval["NumberOfAssets"] > 0)
-
-
-def active_count_at(intervals: list[dict[str, Any]], seconds: float) -> int:
-    for interval in intervals:
-        if interval_start_s(interval) <= seconds <= interval_stop_s(interval):
-            return int(interval["NumberOfAssets"])
-    raise CrossValidationError(f"no interval contains t={seconds}")
-
-
-def max_positive_count(intervals: list[dict[str, Any]]) -> int:
-    return max(int(interval["NumberOfAssets"]) for interval in intervals)
-
-
-def min_count(intervals: list[dict[str, Any]]) -> int:
-    return min(int(interval["NumberOfAssets"]) for interval in intervals)
-
-
-def gap_durations(intervals: list[dict[str, Any]]) -> list[float]:
-    gaps = [interval["Duration"] for interval in intervals if interval["NumberOfAssets"] == 0]
+def representative_gap_durations(intervals: list[dict[str, object]]) -> list[float]:
+    gaps = gap_durations(intervals)
     if not gaps:
         raise CrossValidationError("representative case must include at least one zero-asset gap")
     return gaps
-
-
-def containing_gap_duration(intervals: list[dict[str, Any]], seconds: float) -> float:
-    for interval in intervals:
-        if interval_start_s(interval) <= seconds <= interval_stop_s(interval):
-            if interval["NumberOfAssets"] > 0:
-                return 0.0
-            return interval["Duration"]
-    raise CrossValidationError(f"no interval contains t={seconds}")
-
-
-def interval_start_s(interval: dict[str, Any]) -> float:
-    return epoch_seconds(interval["Start"]) - epoch_seconds(START)
-
-
-def interval_stop_s(interval: dict[str, Any]) -> float:
-    return epoch_seconds(interval["Stop"]) - epoch_seconds(START)
-
-
-def epoch_seconds(value: str) -> float:
-    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    start = datetime.fromisoformat(START.replace("Z", "+00:00"))
-    return (parsed.astimezone(UTC) - start.astimezone(UTC)).total_seconds()
-
-
-def iso_at_offset(seconds: float) -> str:
-    start = datetime.fromisoformat(START.replace("Z", "+00:00")).astimezone(UTC)
-    value = start.timestamp() + seconds
-    return datetime.fromtimestamp(value, UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
-
-
-def mean(values: list[float]) -> float:
-    return sum(values) / len(values)
-
-
-def assert_fom_values(
-    label: str,
-    actual_rows: list[dict[str, Any]],
-    expected_points: list[dict[str, Any]],
-    expected_values: list[float],
-) -> None:
-    if len(actual_rows) != len(expected_values):
-        raise CrossValidationError(f"{label}: expected {len(expected_values)} rows, got {len(actual_rows)}")
-    for index, (actual, point, expected_value) in enumerate(zip(actual_rows, expected_points, expected_values, strict=True)):
-        latitude_rad, longitude_rad = point["Position"]
-        assert_close(f"{label}[{index}].Latitude", math.degrees(latitude_rad), actual["Latitude"], POSITION_ABS_DEG)
-        assert_close(f"{label}[{index}].Longitude", math.degrees(longitude_rad), actual["Longitude"], POSITION_ABS_DEG)
-        assert_close(f"{label}[{index}].Altitude", 0.0, actual["Altitude"], VALUE_ABS)
-        assert_close(f"{label}[{index}].FOM_Value", expected_value, actual["FOM_Value"], VALUE_ABS)
-
-
-def assert_stats(label: str, actual: dict[str, Any], values: list[float]) -> None:
-    assert_close(f"{label}.Minimum", min(values), actual["Minimum"], VALUE_ABS)
-    assert_close(f"{label}.Maximum", max(values), actual["Maximum"], VALUE_ABS)
-    assert_close(f"{label}.Average", mean(values), actual["Average"], VALUE_ABS)
-
-
-def assert_close(label: str, expected: float, actual: float, abs_tol: float) -> None:
-    if not math.isclose(float(actual), float(expected), abs_tol=abs_tol):
-        raise CrossValidationError(f"{label}: expected {expected}, got {actual}")
 
 
 def run_all_checks() -> int:

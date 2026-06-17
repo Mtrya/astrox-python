@@ -100,7 +100,7 @@ def expected_points(grid: coverage.CoverageGrid) -> list[dict[str, Any]]:
 
 
 def duration_s(start: str = START, stop: str = STOP) -> float:
-    return seconds_since_start(stop, start=start) - seconds_since_start(start, start=start)
+    return seconds_since_start(stop, start=start)
 
 
 def seconds_since_start(value: str, *, start: str = START) -> float:
@@ -168,6 +168,8 @@ def interval_stop_s(interval: dict[str, Any], *, start: str = START) -> float:
 
 
 def mean(values: list[float]) -> float:
+    if not values:
+        raise CrossValidationError("mean() requires at least one value")
     return sum(values) / len(values)
 
 

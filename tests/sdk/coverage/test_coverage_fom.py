@@ -234,6 +234,31 @@ def test_fom_optional_compute_type_is_omitted(
     assert "ComputeType" not in calls[0]["json"]
 
 
+def test_fom_exactly_assets_lowers_without_minimum_default(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[dict[str, object]] = []
+
+    def fake_post(endpoint: str, *, json: object) -> dict[str, Any]:
+        calls.append({"endpoint": endpoint, "json": json})
+        return FOM_RESPONSE
+
+    monkeypatch.setattr(_fom.raw, "post", fake_post)
+
+    coverage.number_of_assets.by_grid_point(
+        start="2024-01-01T00:00:00.000Z",
+        stop="2024-01-01T00:30:00.000Z",
+        grid=sample_grid(),
+        assets=[sample_asset()],
+        minimum_assets=None,
+        exactly_assets=2,
+    )
+
+    assert calls[0]["endpoint"] == "/Coverage/FOM/ValueByGridPoint/NumberOfAssets"
+    assert calls[0]["json"]["FilterType"] == "ExactlyN"
+    assert calls[0]["json"]["NumberOfAssets"] == 2
+
+
 def test_fom_functions_return_malformed_raw_response_without_parsing(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
