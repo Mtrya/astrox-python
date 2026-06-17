@@ -1,0 +1,4 @@
+interface:
+  display_name: "ASTROX Release"
+  short_description: "Publish astrox-python releases safely."
+  default_prompt: "Prepare and publish an astrox-python release."
