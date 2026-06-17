@@ -64,19 +64,51 @@ dev = [
 packages = ["astrox"]
 
 [tool.hatch.build.targets.sdist]
+only-include = [
+    "astrox",
+    "docs",
+    "examples",
+    "tests",
+    "LICENSE",
+    "README.md",
+    "pyproject.toml",
+    "uv.lock",
+]
 exclude = [
+    ".agents",
+    ".agents/**",
+    ".codex",
+    ".codex/**",
     ".git",
+    ".git/**",
     ".github",
+    ".github/**",
+    ".qoder",
+    ".qoder/**",
     ".venv",
+    ".venv/**",
+    ".worktrees",
+    ".worktrees/**",
     ".pytest_cache",
+    ".pytest_cache/**",
     ".ruff_cache",
+    ".ruff_cache/**",
     "build",
+    "build/**",
     "dist",
+    "dist/**",
+    "reviews",
+    "reviews/**",
     "vendor",
+    "vendor/**",
     "wheels",
+    "wheels/**",
     "roadmap",
+    "roadmap/**",
     "scripts",
+    "scripts/**",
     "openapi",
+    "openapi/**",
 ]
 
 [tool.pytest.ini_options]
