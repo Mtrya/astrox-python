@@ -15,5 +15,6 @@ wheels/
 *.md
 !README.md
 !docs/**/*.md
+docs/MAINTAINER_QUESTIONS.md
 !openapi/**/*.md
 !.agents/skills/**/*.md

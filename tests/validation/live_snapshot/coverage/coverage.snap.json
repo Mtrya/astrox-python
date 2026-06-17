@@ -286,32 +286,32 @@
       "return": {
         "AccessDurationDatas": [
           {
-            "Duration": 528.562586010943,
+            "Duration": 528.5643985289207,
             "PercentOver": 100,
             "PercentUnder": 0
           },
           {
-            "Duration": 558.1281962310604,
+            "Duration": 558.1296776892705,
             "PercentOver": 83.33333333333334,
             "PercentUnder": 16.666666666666664
           },
           {
-            "Duration": 577.8878650298211,
+            "Duration": 577.8891884787081,
             "PercentOver": 66.66666666666667,
             "PercentUnder": 33.33333333333333
           },
           {
-            "Duration": 599.4616952254655,
+            "Duration": 599.4627556210835,
             "PercentOver": 50,
             "PercentUnder": 50
           },
           {
-            "Duration": 612.4264286217003,
+            "Duration": 612.4273645730864,
             "PercentOver": 33.33333333333334,
             "PercentUnder": 66.66666666666666
           },
           {
-            "Duration": 627.4162131673947,
+            "Duration": 627.4169229750041,
             "PercentOver": 16.666666666666657,
             "PercentUnder": 83.33333333333334
           }
@@ -320,7 +320,7 @@
           [
             [
               {
-                "Duration": 558.1281962310604,
+                "Duration": 558.1296776892705,
                 "NumberOfAssets": 1,
                 "Start": "2024-01-01T00:00:19.152Z",
                 "Stop": "2024-01-01T00:09:37.281Z"
@@ -330,17 +330,17 @@
           [
             [
               {
-                "Duration": 599.4616952254655,
+                "Duration": 599.4627556210835,
                 "NumberOfAssets": 1,
-                "Start": "2024-01-01T00:00:27.276Z",
-                "Stop": "2024-01-01T00:10:26.737Z"
+                "Start": "2024-01-01T00:00:27.275Z",
+                "Stop": "2024-01-01T00:10:26.738Z"
               }
             ]
           ],
           [
             [
               {
-                "Duration": 627.4162131673947,
+                "Duration": 627.4169229750041,
                 "NumberOfAssets": 1,
                 "Start": "2024-01-01T00:00:42.708Z",
                 "Stop": "2024-01-01T00:11:10.125Z"
@@ -350,102 +350,102 @@
           [
             [
               {
-                "Duration": 528.562586010943,
+                "Duration": 528.5643985289207,
                 "NumberOfAssets": 1,
-                "Start": "2024-01-01T00:01:07.665Z",
-                "Stop": "2024-01-01T00:09:56.227Z"
+                "Start": "2024-01-01T00:01:07.664Z",
+                "Stop": "2024-01-01T00:09:56.228Z"
               }
             ]
           ],
           [
             [
               {
-                "Duration": 577.8878650298211,
+                "Duration": 577.8891884787081,
                 "NumberOfAssets": 1,
                 "Start": "2024-01-01T00:01:11.138Z",
-                "Stop": "2024-01-01T00:10:49.026Z"
+                "Stop": "2024-01-01T00:10:49.027Z"
               }
             ]
           ],
           [
             [
               {
-                "Duration": 612.4264286217003,
+                "Duration": 612.4273645730864,
                 "NumberOfAssets": 1,
-                "Start": "2024-01-01T00:01:22.666Z",
-                "Stop": "2024-01-01T00:11:35.092Z"
+                "Start": "2024-01-01T00:01:22.665Z",
+                "Stop": "2024-01-01T00:11:35.093Z"
               }
             ]
           ]
         ],
         "GapDurationDatas": [
           {
-            "Duration": 19.152827789788716,
+            "Duration": 19.152293214327074,
             "PercentOver": 100,
             "PercentUnder": 0
           },
           {
-            "Duration": 27.276145195755817,
+            "Duration": 27.27578557068773,
             "PercentOver": 91.66666666666667,
             "PercentUnder": 8.333333333333332
           },
           {
-            "Duration": 42.70878961371636,
+            "Duration": 42.708574450196465,
             "PercentOver": 83.33333333333334,
             "PercentUnder": 16.666666666666664
           },
           {
-            "Duration": 67.6650286035001,
+            "Duration": 67.66433666318335,
             "PercentOver": 75,
             "PercentUnder": 25
           },
           {
-            "Duration": 71.13879815089604,
+            "Duration": 71.13831758219749,
             "PercentOver": 66.66666666666667,
             "PercentUnder": 33.33333333333333
           },
           {
-            "Duration": 82.6661763562006,
+            "Duration": 82.66586032331543,
             "PercentOver": 58.33333333333333,
             "PercentUnder": 41.66666666666667
           },
           {
-            "Duration": 1104.907395022099,
+            "Duration": 1104.9067751035982,
             "PercentOver": 50,
             "PercentUnder": 50
           },
           {
-            "Duration": 1129.874997218889,
+            "Duration": 1129.8745025747994,
             "PercentOver": 41.666666666666664,
             "PercentUnder": 58.333333333333336
           },
           {
-            "Duration": 1150.9733368192828,
+            "Duration": 1150.9724939390944,
             "PercentOver": 33.33333333333334,
             "PercentUnder": 66.66666666666666
           },
           {
-            "Duration": 1173.2621595787787,
+            "Duration": 1173.2614588082288,
             "PercentOver": 25,
             "PercentUnder": 75
           },
           {
-            "Duration": 1203.7723853855568,
+            "Duration": 1203.771264807896,
             "PercentOver": 16.666666666666657,
             "PercentUnder": 83.33333333333334
           },
           {
-            "Duration": 1222.7189759791509,
+            "Duration": 1222.7180290964025,
             "PercentOver": 8.333333333333343,
             "PercentUnder": 91.66666666666666
           }
         ],
         "GlobalCoverageDatas": [
           {
-            "AccessStart": "2024-01-01T00:01:22.666Z",
+            "AccessStart": "2024-01-01T00:01:22.665Z",
             "AccessStop": "2024-01-01T00:09:37.281Z",
-            "Duration": 494.61484766464855,
-            "Percent": 27.47860264803603
+            "Duration": 494.6161105802821,
+            "Percent": 27.478672810015674
           }
         ],
         "IsSuccess": true,
@@ -611,19 +611,19 @@
         "SatisfactionIntervalsWithNumberOfAssets": [
           [
             {
-              "Duration": 19.152827789788716,
+              "Duration": 19.152293214327074,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:00:00.000Z",
               "Stop": "2024-01-01T00:00:19.152Z"
             },
             {
-              "Duration": 558.1281962310604,
+              "Duration": 558.1296776892705,
               "NumberOfAssets": 1,
               "Start": "2024-01-01T00:00:19.152Z",
               "Stop": "2024-01-01T00:09:37.281Z"
             },
             {
-              "Duration": 1222.7189759791509,
+              "Duration": 1222.7180290964025,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:09:37.281Z",
               "Stop": "2024-01-01T00:30:00.000Z"
@@ -631,39 +631,39 @@
           ],
           [
             {
-              "Duration": 27.276145195755817,
+              "Duration": 27.27578557068773,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:00:00.000Z",
-              "Stop": "2024-01-01T00:00:27.276Z"
+              "Stop": "2024-01-01T00:00:27.275Z"
             },
             {
-              "Duration": 599.4616952254655,
+              "Duration": 599.4627556210835,
               "NumberOfAssets": 1,
-              "Start": "2024-01-01T00:00:27.276Z",
-              "Stop": "2024-01-01T00:10:26.737Z"
+              "Start": "2024-01-01T00:00:27.275Z",
+              "Stop": "2024-01-01T00:10:26.738Z"
             },
             {
-              "Duration": 1173.2621595787787,
+              "Duration": 1173.2614588082288,
               "NumberOfAssets": 0,
-              "Start": "2024-01-01T00:10:26.737Z",
+              "Start": "2024-01-01T00:10:26.738Z",
               "Stop": "2024-01-01T00:30:00.000Z"
             }
           ],
           [
             {
-              "Duration": 42.70878961371636,
+              "Duration": 42.708574450196465,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:00:00.000Z",
               "Stop": "2024-01-01T00:00:42.708Z"
             },
             {
-              "Duration": 627.4162131673947,
+              "Duration": 627.4169229750041,
               "NumberOfAssets": 1,
               "Start": "2024-01-01T00:00:42.708Z",
               "Stop": "2024-01-01T00:11:10.125Z"
             },
             {
-              "Duration": 1129.874997218889,
+              "Duration": 1129.8745025747994,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:11:10.125Z",
               "Stop": "2024-01-01T00:30:00.000Z"
@@ -671,61 +671,61 @@
           ],
           [
             {
-              "Duration": 67.6650286035001,
+              "Duration": 67.66433666318335,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:00:00.000Z",
-              "Stop": "2024-01-01T00:01:07.665Z"
+              "Stop": "2024-01-01T00:01:07.664Z"
             },
             {
-              "Duration": 528.562586010943,
+              "Duration": 528.5643985289207,
               "NumberOfAssets": 1,
-              "Start": "2024-01-01T00:01:07.665Z",
-              "Stop": "2024-01-01T00:09:56.227Z"
+              "Start": "2024-01-01T00:01:07.664Z",
+              "Stop": "2024-01-01T00:09:56.228Z"
             },
             {
-              "Duration": 1203.7723853855568,
+              "Duration": 1203.771264807896,
               "NumberOfAssets": 0,
-              "Start": "2024-01-01T00:09:56.227Z",
+              "Start": "2024-01-01T00:09:56.228Z",
               "Stop": "2024-01-01T00:30:00.000Z"
             }
           ],
           [
             {
-              "Duration": 71.13879815089604,
+              "Duration": 71.13831758219749,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:00:00.000Z",
               "Stop": "2024-01-01T00:01:11.138Z"
             },
             {
-              "Duration": 577.8878650298211,
+              "Duration": 577.8891884787081,
               "NumberOfAssets": 1,
               "Start": "2024-01-01T00:01:11.138Z",
-              "Stop": "2024-01-01T00:10:49.026Z"
+              "Stop": "2024-01-01T00:10:49.027Z"
             },
             {
-              "Duration": 1150.9733368192828,
+              "Duration": 1150.9724939390944,
               "NumberOfAssets": 0,
-              "Start": "2024-01-01T00:10:49.026Z",
+              "Start": "2024-01-01T00:10:49.027Z",
               "Stop": "2024-01-01T00:30:00.000Z"
             }
           ],
           [
             {
-              "Duration": 82.6661763562006,
+              "Duration": 82.66586032331543,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:00:00.000Z",
-              "Stop": "2024-01-01T00:01:22.666Z"
+              "Stop": "2024-01-01T00:01:22.665Z"
             },
             {
-              "Duration": 612.4264286217003,
+              "Duration": 612.4273645730864,
               "NumberOfAssets": 1,
-              "Start": "2024-01-01T00:01:22.666Z",
-              "Stop": "2024-01-01T00:11:35.092Z"
+              "Start": "2024-01-01T00:01:22.665Z",
+              "Stop": "2024-01-01T00:11:35.093Z"
             },
             {
-              "Duration": 1104.907395022099,
+              "Duration": 1104.9067751035982,
               "NumberOfAssets": 0,
-              "Start": "2024-01-01T00:11:35.092Z",
+              "Start": "2024-01-01T00:11:35.093Z",
               "Stop": "2024-01-01T00:30:00.000Z"
             }
           ]
@@ -738,32 +738,32 @@
       "return": {
         "AccessDurationDatas": [
           {
-            "Duration": 528.562586010943,
+            "Duration": 528.5643985289207,
             "PercentOver": 100,
             "PercentUnder": 0
           },
           {
-            "Duration": 558.1281962310604,
+            "Duration": 558.1296776892705,
             "PercentOver": 83.33333333333334,
             "PercentUnder": 16.666666666666664
           },
           {
-            "Duration": 577.8878650298211,
+            "Duration": 577.8891884787081,
             "PercentOver": 66.66666666666667,
             "PercentUnder": 33.33333333333333
           },
           {
-            "Duration": 599.4616952254655,
+            "Duration": 599.4627556210835,
             "PercentOver": 50,
             "PercentUnder": 50
           },
           {
-            "Duration": 612.4264286217003,
+            "Duration": 612.4273645730864,
             "PercentOver": 33.33333333333334,
             "PercentUnder": 66.66666666666666
           },
           {
-            "Duration": 627.4162131673947,
+            "Duration": 627.4169229750041,
             "PercentOver": 16.666666666666657,
             "PercentUnder": 83.33333333333334
           }
@@ -772,7 +772,7 @@
           [
             [
               {
-                "Duration": 558.1281962310604,
+                "Duration": 558.1296776892705,
                 "NumberOfAssets": 1,
                 "Start": "2024-01-01T00:00:19.152Z",
                 "Stop": "2024-01-01T00:09:37.281Z"
@@ -782,17 +782,17 @@
           [
             [
               {
-                "Duration": 599.4616952254655,
+                "Duration": 599.4627556210835,
                 "NumberOfAssets": 1,
-                "Start": "2024-01-01T00:00:27.276Z",
-                "Stop": "2024-01-01T00:10:26.737Z"
+                "Start": "2024-01-01T00:00:27.275Z",
+                "Stop": "2024-01-01T00:10:26.738Z"
               }
             ]
           ],
           [
             [
               {
-                "Duration": 627.4162131673947,
+                "Duration": 627.4169229750041,
                 "NumberOfAssets": 1,
                 "Start": "2024-01-01T00:00:42.708Z",
                 "Stop": "2024-01-01T00:11:10.125Z"
@@ -802,102 +802,102 @@
           [
             [
               {
-                "Duration": 528.562586010943,
+                "Duration": 528.5643985289207,
                 "NumberOfAssets": 1,
-                "Start": "2024-01-01T00:01:07.665Z",
-                "Stop": "2024-01-01T00:09:56.227Z"
+                "Start": "2024-01-01T00:01:07.664Z",
+                "Stop": "2024-01-01T00:09:56.228Z"
               }
             ]
           ],
           [
             [
               {
-                "Duration": 577.8878650298211,
+                "Duration": 577.8891884787081,
                 "NumberOfAssets": 1,
                 "Start": "2024-01-01T00:01:11.138Z",
-                "Stop": "2024-01-01T00:10:49.026Z"
+                "Stop": "2024-01-01T00:10:49.027Z"
               }
             ]
           ],
           [
             [
               {
-                "Duration": 612.4264286217003,
+                "Duration": 612.4273645730864,
                 "NumberOfAssets": 1,
-                "Start": "2024-01-01T00:01:22.666Z",
-                "Stop": "2024-01-01T00:11:35.092Z"
+                "Start": "2024-01-01T00:01:22.665Z",
+                "Stop": "2024-01-01T00:11:35.093Z"
               }
             ]
           ]
         ],
         "GapDurationDatas": [
           {
-            "Duration": 19.152827789788716,
+            "Duration": 19.152293214327074,
             "PercentOver": 100,
             "PercentUnder": 0
           },
           {
-            "Duration": 27.276145195755817,
+            "Duration": 27.27578557068773,
             "PercentOver": 91.66666666666667,
             "PercentUnder": 8.333333333333332
           },
           {
-            "Duration": 42.70878961371636,
+            "Duration": 42.708574450196465,
             "PercentOver": 83.33333333333334,
             "PercentUnder": 16.666666666666664
           },
           {
-            "Duration": 67.6650286035001,
+            "Duration": 67.66433666318335,
             "PercentOver": 75,
             "PercentUnder": 25
           },
           {
-            "Duration": 71.13879815089604,
+            "Duration": 71.13831758219749,
             "PercentOver": 66.66666666666667,
             "PercentUnder": 33.33333333333333
           },
           {
-            "Duration": 82.6661763562006,
+            "Duration": 82.66586032331543,
             "PercentOver": 58.33333333333333,
             "PercentUnder": 41.66666666666667
           },
           {
-            "Duration": 1104.907395022099,
+            "Duration": 1104.9067751035982,
             "PercentOver": 50,
             "PercentUnder": 50
           },
           {
-            "Duration": 1129.874997218889,
+            "Duration": 1129.8745025747994,
             "PercentOver": 41.666666666666664,
             "PercentUnder": 58.333333333333336
           },
           {
-            "Duration": 1150.9733368192828,
+            "Duration": 1150.9724939390944,
             "PercentOver": 33.33333333333334,
             "PercentUnder": 66.66666666666666
           },
           {
-            "Duration": 1173.2621595787787,
+            "Duration": 1173.2614588082288,
             "PercentOver": 25,
             "PercentUnder": 75
           },
           {
-            "Duration": 1203.7723853855568,
+            "Duration": 1203.771264807896,
             "PercentOver": 16.666666666666657,
             "PercentUnder": 83.33333333333334
           },
           {
-            "Duration": 1222.7189759791509,
+            "Duration": 1222.7180290964025,
             "PercentOver": 8.333333333333343,
             "PercentUnder": 91.66666666666666
           }
         ],
         "GlobalCoverageDatas": [
           {
-            "AccessStart": "2024-01-01T00:01:22.666Z",
+            "AccessStart": "2024-01-01T00:01:22.665Z",
             "AccessStop": "2024-01-01T00:09:37.281Z",
-            "Duration": 494.61484766464855,
-            "Percent": 27.47860264803603
+            "Duration": 494.6161105802821,
+            "Percent": 27.478672810015674
           }
         ],
         "IsSuccess": true,
@@ -1063,19 +1063,19 @@
         "SatisfactionIntervalsWithNumberOfAssets": [
           [
             {
-              "Duration": 19.152827789788716,
+              "Duration": 19.152293214327074,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:00:00.000Z",
               "Stop": "2024-01-01T00:00:19.152Z"
             },
             {
-              "Duration": 558.1281962310604,
+              "Duration": 558.1296776892705,
               "NumberOfAssets": 1,
               "Start": "2024-01-01T00:00:19.152Z",
               "Stop": "2024-01-01T00:09:37.281Z"
             },
             {
-              "Duration": 1222.7189759791509,
+              "Duration": 1222.7180290964025,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:09:37.281Z",
               "Stop": "2024-01-01T00:30:00.000Z"
@@ -1083,39 +1083,39 @@
           ],
           [
             {
-              "Duration": 27.276145195755817,
+              "Duration": 27.27578557068773,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:00:00.000Z",
-              "Stop": "2024-01-01T00:00:27.276Z"
+              "Stop": "2024-01-01T00:00:27.275Z"
             },
             {
-              "Duration": 599.4616952254655,
+              "Duration": 599.4627556210835,
               "NumberOfAssets": 1,
-              "Start": "2024-01-01T00:00:27.276Z",
-              "Stop": "2024-01-01T00:10:26.737Z"
+              "Start": "2024-01-01T00:00:27.275Z",
+              "Stop": "2024-01-01T00:10:26.738Z"
             },
             {
-              "Duration": 1173.2621595787787,
+              "Duration": 1173.2614588082288,
               "NumberOfAssets": 0,
-              "Start": "2024-01-01T00:10:26.737Z",
+              "Start": "2024-01-01T00:10:26.738Z",
               "Stop": "2024-01-01T00:30:00.000Z"
             }
           ],
           [
             {
-              "Duration": 42.70878961371636,
+              "Duration": 42.708574450196465,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:00:00.000Z",
               "Stop": "2024-01-01T00:00:42.708Z"
             },
             {
-              "Duration": 627.4162131673947,
+              "Duration": 627.4169229750041,
               "NumberOfAssets": 1,
               "Start": "2024-01-01T00:00:42.708Z",
               "Stop": "2024-01-01T00:11:10.125Z"
             },
             {
-              "Duration": 1129.874997218889,
+              "Duration": 1129.8745025747994,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:11:10.125Z",
               "Stop": "2024-01-01T00:30:00.000Z"
@@ -1123,61 +1123,61 @@
           ],
           [
             {
-              "Duration": 67.6650286035001,
+              "Duration": 67.66433666318335,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:00:00.000Z",
-              "Stop": "2024-01-01T00:01:07.665Z"
+              "Stop": "2024-01-01T00:01:07.664Z"
             },
             {
-              "Duration": 528.562586010943,
+              "Duration": 528.5643985289207,
               "NumberOfAssets": 1,
-              "Start": "2024-01-01T00:01:07.665Z",
-              "Stop": "2024-01-01T00:09:56.227Z"
+              "Start": "2024-01-01T00:01:07.664Z",
+              "Stop": "2024-01-01T00:09:56.228Z"
             },
             {
-              "Duration": 1203.7723853855568,
+              "Duration": 1203.771264807896,
               "NumberOfAssets": 0,
-              "Start": "2024-01-01T00:09:56.227Z",
+              "Start": "2024-01-01T00:09:56.228Z",
               "Stop": "2024-01-01T00:30:00.000Z"
             }
           ],
           [
             {
-              "Duration": 71.13879815089604,
+              "Duration": 71.13831758219749,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:00:00.000Z",
               "Stop": "2024-01-01T00:01:11.138Z"
             },
             {
-              "Duration": 577.8878650298211,
+              "Duration": 577.8891884787081,
               "NumberOfAssets": 1,
               "Start": "2024-01-01T00:01:11.138Z",
-              "Stop": "2024-01-01T00:10:49.026Z"
+              "Stop": "2024-01-01T00:10:49.027Z"
             },
             {
-              "Duration": 1150.9733368192828,
+              "Duration": 1150.9724939390944,
               "NumberOfAssets": 0,
-              "Start": "2024-01-01T00:10:49.026Z",
+              "Start": "2024-01-01T00:10:49.027Z",
               "Stop": "2024-01-01T00:30:00.000Z"
             }
           ],
           [
             {
-              "Duration": 82.6661763562006,
+              "Duration": 82.66586032331543,
               "NumberOfAssets": 0,
               "Start": "2024-01-01T00:00:00.000Z",
-              "Stop": "2024-01-01T00:01:22.666Z"
+              "Stop": "2024-01-01T00:01:22.665Z"
             },
             {
-              "Duration": 612.4264286217003,
+              "Duration": 612.4273645730864,
               "NumberOfAssets": 1,
-              "Start": "2024-01-01T00:01:22.666Z",
-              "Stop": "2024-01-01T00:11:35.092Z"
+              "Start": "2024-01-01T00:01:22.665Z",
+              "Stop": "2024-01-01T00:11:35.093Z"
             },
             {
-              "Duration": 1104.907395022099,
+              "Duration": 1104.9067751035982,
               "NumberOfAssets": 0,
-              "Start": "2024-01-01T00:11:35.092Z",
+              "Start": "2024-01-01T00:11:35.093Z",
               "Stop": "2024-01-01T00:30:00.000Z"
             }
           ]
@@ -1241,10 +1241,644 @@
         "IsSuccess": true,
         "Message": "Success"
       }
+    },
+    {
+      "description": "FOM simple coverage values by grid point.",
+      "id": "fom_simple_coverage_by_grid_point",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM simple coverage values by grid point at one time.",
+      "id": "fom_simple_coverage_by_grid_point_at_time",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM simple coverage grid statistics.",
+      "id": "fom_simple_coverage_grid_stats",
+      "return": {
+        "Average": 1,
+        "IsSuccess": true,
+        "Maximum": 1,
+        "Message": "Success",
+        "Minimum": 1
+      }
+    },
+    {
+      "description": "FOM simple coverage grid statistics over time.",
+      "id": "fom_simple_coverage_grid_stats_over_time",
+      "return": {
+        "Datas": [
+          {
+            "Average": 0,
+            "EpochSeconds": 0,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 1,
+            "EpochSeconds": 300,
+            "Maximum": 1,
+            "Minimum": 1
+          },
+          {
+            "Average": 0.6666666666666666,
+            "EpochSeconds": 600,
+            "Maximum": 1,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 900,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 1200,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 1500,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 1800,
+            "Maximum": 0,
+            "Minimum": 0
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM coverage time values by grid point.",
+      "id": "fom_coverage_time_by_grid_point",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 558.1296776892705,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 599.4627556210835,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 627.4169229750041,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 528.5643985289207,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 577.8891884787081,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 612.4273645730864,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM coverage time grid statistics.",
+      "id": "fom_coverage_time_grid_stats",
+      "return": {
+        "Average": 583.9817179776788,
+        "IsSuccess": true,
+        "Maximum": 627.4169229750041,
+        "Message": "Success",
+        "Minimum": 528.5643985289207
+      }
+    },
+    {
+      "description": "FOM number of assets values by grid point.",
+      "id": "fom_number_of_assets_by_grid_point",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 0.3100720431607058,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0.33303486423393525,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0.34856495720833564,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0.29364688807162265,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0.32104954915483785,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0.34023742476282576,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM number of assets values by grid point at one time.",
+      "id": "fom_number_of_assets_by_grid_point_at_time",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM number of assets grid statistics.",
+      "id": "fom_number_of_assets_grid_stats",
+      "return": {
+        "Average": 0.32443428776537714,
+        "IsSuccess": true,
+        "Maximum": 0.34856495720833564,
+        "Message": "Success",
+        "Minimum": 0.29364688807162265
+      }
+    },
+    {
+      "description": "FOM number of assets grid statistics over time.",
+      "id": "fom_number_of_assets_grid_stats_over_time",
+      "return": {
+        "Datas": [
+          {
+            "Average": 0,
+            "EpochSeconds": 0,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 1,
+            "EpochSeconds": 300,
+            "Maximum": 1,
+            "Minimum": 1
+          },
+          {
+            "Average": 0.6666666666666666,
+            "EpochSeconds": 600,
+            "Maximum": 1,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 900,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 1200,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 1500,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 1800,
+            "Maximum": 0,
+            "Minimum": 0
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM response time values by grid point.",
+      "id": "fom_response_time_by_grid_point",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 1222.7180290964025,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1173.2614588082288,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1129.8745025747994,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1203.771264807896,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1150.9724939390944,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1104.9067751035982,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "Drift guard: FOM response-time at-time currently returns ASTROX HTTP 500 when the representative intermittent case includes a grid point with no later access inside the analysis window.",
+      "id": "fom_response_time_by_grid_point_at_time",
+      "return": {
+        "endpoint": "/Coverage/FOM/ValueByGridPointAtTime/ResponseTime",
+        "error": "AstroxHTTPError",
+        "expected_current_behavior": "response_time_at_time_no_next_access_http_500",
+        "message": "Internal Server Error",
+        "status_code": 500
+      }
+    },
+    {
+      "description": "Drift guard: FOM response-time at-time currently returns ASTROX HTTP 500 late in the representative window, when all points are uncovered and have no later access. If ASTROX returns a value or a clearer validation error, this snapshot must fail so we can recalibrate the SDK docs and cross-validation.",
+      "id": "fom_response_time_by_grid_point_at_time_all_no_next_access_http_500",
+      "return": {
+        "endpoint": "/Coverage/FOM/ValueByGridPointAtTime/ResponseTime",
+        "error": "AstroxHTTPError",
+        "expected_current_behavior": "response_time_at_time_all_no_next_access_http_500",
+        "message": "Internal Server Error",
+        "status_code": 500
+      }
+    },
+    {
+      "description": "Drift guard: FOM response-time at-time currently returns ASTROX HTTP 500 for a never-covered grid. A future success or clearer server validation error should force this snapshot to change.",
+      "id": "fom_response_time_by_grid_point_at_time_no_coverage_http_500",
+      "return": {
+        "endpoint": "/Coverage/FOM/ValueByGridPointAtTime/ResponseTime",
+        "error": "AstroxHTTPError",
+        "expected_current_behavior": "response_time_at_time_no_coverage_http_500",
+        "message": "Internal Server Error",
+        "status_code": 500
+      }
+    },
+    {
+      "description": "FOM response time grid statistics.",
+      "id": "fom_response_time_grid_stats",
+      "return": {
+        "Average": 1164.2507540550032,
+        "IsSuccess": true,
+        "Maximum": 1222.7180290964025,
+        "Message": "Success",
+        "Minimum": 1104.9067751035982
+      }
+    },
+    {
+      "description": "Drift guard: FOM response-time over-time currently returns ASTROX HTTP 500 for the representative intermittent case because the sample series reaches a no-next-access condition.",
+      "id": "fom_response_time_grid_stats_over_time",
+      "return": {
+        "endpoint": "/Coverage/FOM/GridStatsOverTime/ResponseTime",
+        "error": "AstroxHTTPError",
+        "expected_current_behavior": "response_time_over_time_no_next_access_http_500",
+        "message": "Internal Server Error",
+        "status_code": 500
+      }
+    },
+    {
+      "description": "Drift guard: FOM response-time over-time currently returns ASTROX HTTP 500 for a never-covered grid. If the server starts returning full-window durations, empty data, or a clearer validation error, this snapshot should fail and be recalibrated.",
+      "id": "fom_response_time_grid_stats_over_time_no_coverage_http_500",
+      "return": {
+        "endpoint": "/Coverage/FOM/GridStatsOverTime/ResponseTime",
+        "error": "AstroxHTTPError",
+        "expected_current_behavior": "response_time_over_time_no_coverage_http_500",
+        "message": "Internal Server Error",
+        "status_code": 500
+      }
+    },
+    {
+      "description": "FOM revisit time values by grid point.",
+      "id": "fom_revisit_time_by_grid_point",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 620.9351611553648,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 600.2686221894583,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 586.2915385124979,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 635.7178007355396,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 611.055405760646,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 593.7863177134568,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM revisit time values by grid point at one time.",
+      "id": "fom_revisit_time_by_grid_point_at_time",
+      "return": {
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": 1222.7180290964025,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 1203.771264807896,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
+    },
+    {
+      "description": "FOM revisit time grid statistics.",
+      "id": "fom_revisit_time_grid_stats",
+      "return": {
+        "Average": 608.0091410111605,
+        "IsSuccess": true,
+        "Maximum": 635.7178007355396,
+        "Message": "Success",
+        "Minimum": 586.2915385124979
+      }
+    },
+    {
+      "description": "FOM revisit time grid statistics over time.",
+      "id": "fom_revisit_time_grid_stats_over_time",
+      "return": {
+        "Datas": [
+          {
+            "Average": 51.767527967317925,
+            "EpochSeconds": 0,
+            "Maximum": 82.66586032331543,
+            "Minimum": 19.152293214327074
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 300,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": 404.41488231738305,
+            "EpochSeconds": 600,
+            "Maximum": 1222.7180290964025,
+            "Minimum": 0
+          },
+          {
+            "Average": 1164.2507540550032,
+            "EpochSeconds": 900,
+            "Maximum": 1222.7180290964025,
+            "Minimum": 1104.9067751035982
+          },
+          {
+            "Average": 1164.2507540550032,
+            "EpochSeconds": 1200,
+            "Maximum": 1222.7180290964025,
+            "Minimum": 1104.9067751035982
+          },
+          {
+            "Average": 1164.2507540550032,
+            "EpochSeconds": 1500,
+            "Maximum": 1222.7180290964025,
+            "Minimum": 1104.9067751035982
+          },
+          {
+            "Average": 1164.2507540550032,
+            "EpochSeconds": 1800,
+            "Maximum": 1222.7180290964025,
+            "Minimum": 1104.9067751035982
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
+      }
     }
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-06-15T07:46:04Z"
+    "refreshed_at": "2026-06-17T06:58:13Z"
   }
 }

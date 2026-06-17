@@ -21,6 +21,11 @@ from tests.validation._support import (
 
 
 SNAPSHOT_PATH = Path(__file__).with_name("access.snap.json")
+# GitHub Actions and local runs have observed millisecond/sub-millidegree
+# numeric differences from the same public ASTROX endpoint, likely due to
+# backend routing. Live snapshots guard maintained response shape; semantic
+# precision lives in cross-validation.
+ACCESS_SNAPSHOT_ABS_TOL = 5.0e-3
 START = "2024-01-01T00:00:00.000Z"
 STOP = "2024-01-01T02:00:00.000Z"
 DAY_STOP = "2024-01-02T00:00:00.000Z"
@@ -580,7 +585,12 @@ CASES = [
 
 def test_access_live_snapshot() -> None:
     configure_astrox_from_env()
-    check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
+    check_snapshot(
+        cases=CASES,
+        snapshot_path=SNAPSHOT_PATH,
+        abs_tol=ACCESS_SNAPSHOT_ABS_TOL,
+        datetime_abs_tol_s=ACCESS_SNAPSHOT_ABS_TOL,
+    )
 
 
 if __name__ == "__main__":

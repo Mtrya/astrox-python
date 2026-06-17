@@ -130,6 +130,32 @@ def test_check_snapshot_allows_explicit_approximate_numeric_tolerance(tmp_path: 
     )
 
 
+def test_check_snapshot_allows_explicit_approximate_datetime_tolerance(tmp_path: Path) -> None:
+    path = tmp_path / "sample.snap.json"
+    contracts.write_snapshot(
+        path,
+        {
+            "cases": [
+                {
+                    "id": "case",
+                    "return": {"start": "2024-01-01T00:00:27.275Z"},
+                }
+            ]
+        },
+    )
+
+    contracts.check_snapshot(
+        cases=[
+            contracts.LiveSnapshotCase(
+                id="case",
+                run=lambda: {"start": "2024-01-01T00:00:27.276Z"},
+            )
+        ],
+        snapshot_path=path,
+        datetime_abs_tol_s=0.002,
+    )
+
+
 def test_check_snapshot_rejects_case_id_drift(tmp_path: Path) -> None:
     path = tmp_path / "sample.snap.json"
     contracts.write_snapshot(path, {"cases": [{"id": "expected", "return": True}]})

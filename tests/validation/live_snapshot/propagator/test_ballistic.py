@@ -20,6 +20,9 @@ from tests.validation._support import (
 
 
 SNAPSHOT_PATH = Path(__file__).with_name("ballistic.snap.json")
+# Ballistic live snapshots have shown sub-nanounit floating drift across live
+# runners. Keep exact structure while allowing insignificant numeric jitter.
+BALLISTIC_SNAPSHOT_ABS_TOL = 1.0e-9
 
 
 def _base_inputs() -> dict[str, float | str]:
@@ -92,7 +95,12 @@ CASES = [
 
 def test_ballistic_live_snapshot() -> None:
     configure_astrox_from_env()
-    check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
+    check_snapshot(
+        cases=CASES,
+        snapshot_path=SNAPSHOT_PATH,
+        abs_tol=BALLISTIC_SNAPSHOT_ABS_TOL,
+        datetime_abs_tol_s=BALLISTIC_SNAPSHOT_ABS_TOL,
+    )
 
 
 if __name__ == "__main__":

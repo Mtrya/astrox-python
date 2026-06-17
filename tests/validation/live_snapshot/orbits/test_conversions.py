@@ -20,6 +20,10 @@ from tests.validation._support import (
 
 
 SNAPSHOT_PATH = Path(__file__).with_name("conversions.snap.json")
+# Live runners have observed tiny angle/value drift from the same ASTROX route.
+# This snapshot remains a response-shape drift guard, not a semantic precision
+# proof.
+ORBIT_CONVERSIONS_SNAPSHOT_ABS_TOL = 1.0e-4
 EARTH_MU = 398600441500000.0
 ORBIT_EPOCH = "2024-01-01T00:00:00.000Z"
 
@@ -177,7 +181,12 @@ CASES = [
 
 def test_orbit_conversion_live_snapshot() -> None:
     configure_astrox_from_env()
-    check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
+    check_snapshot(
+        cases=CASES,
+        snapshot_path=SNAPSHOT_PATH,
+        abs_tol=ORBIT_CONVERSIONS_SNAPSHOT_ABS_TOL,
+        datetime_abs_tol_s=ORBIT_CONVERSIONS_SNAPSHOT_ABS_TOL,
+    )
 
 
 if __name__ == "__main__":

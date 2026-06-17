@@ -20,6 +20,9 @@ from tests.validation._support import (
 
 
 SNAPSHOT_PATH = Path(__file__).with_name("wizards.snap.json")
+# Live runner drift has been observed around 5e-5 deg for wizard RAAN values.
+# This tolerance keeps snapshots focused on maintained response compatibility.
+ORBIT_WIZARDS_SNAPSHOT_ABS_TOL = 1.0e-4
 ORBIT_EPOCH = "2024-01-01T00:00:00.000Z"
 
 
@@ -123,7 +126,12 @@ CASES = [
 
 def test_orbit_wizard_live_snapshot() -> None:
     configure_astrox_from_env()
-    check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
+    check_snapshot(
+        cases=CASES,
+        snapshot_path=SNAPSHOT_PATH,
+        abs_tol=ORBIT_WIZARDS_SNAPSHOT_ABS_TOL,
+        datetime_abs_tol_s=ORBIT_WIZARDS_SNAPSHOT_ABS_TOL,
+    )
 
 
 if __name__ == "__main__":

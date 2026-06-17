@@ -148,6 +148,7 @@ def check_snapshot(
     snapshot_path: Path,
     abs_tol: float = 0.0,
     rel_tol: float = 0.0,
+    datetime_abs_tol_s: float = 0.0,
 ) -> None:
     expected = read_snapshot(snapshot_path)
     actual_cases = _run_cases(cases)
@@ -162,6 +163,7 @@ def check_snapshot(
             actual["return"],
             abs_tol=abs_tol,
             rel_tol=rel_tol,
+            datetime_abs_tol_s=datetime_abs_tol_s,
         )
         if mismatch is not None:
             failures.append(f"case={case_id}; {mismatch.format()}")
@@ -175,12 +177,20 @@ def compare_values(
     *,
     abs_tol: float = 0.0,
     rel_tol: float = 0.0,
+    datetime_abs_tol_s: float = 0.0,
 ) -> _Mismatch | None:
-    if abs_tol == 0.0 and rel_tol == 0.0:
+    if abs_tol == 0.0 and rel_tol == 0.0 and datetime_abs_tol_s == 0.0:
         if canonical_bytes(expected) == canonical_bytes(actual):
             return None
         return _first_structural_mismatch(expected, actual)
-    return _compare_at(expected, actual, path="$", abs_tol=abs_tol, rel_tol=rel_tol)
+    return _compare_at(
+        expected,
+        actual,
+        path="$",
+        abs_tol=abs_tol,
+        rel_tol=rel_tol,
+        datetime_abs_tol_s=datetime_abs_tol_s,
+    )
 
 
 def main(
@@ -192,6 +202,7 @@ def main(
     env: dict[str, str] | None = None,
     abs_tol: float = 0.0,
     rel_tol: float = 0.0,
+    datetime_abs_tol_s: float = 0.0,
 ) -> int:
     parser = argparse.ArgumentParser(description="Check or refresh a live snapshot.")
     action = parser.add_mutually_exclusive_group(required=True)
@@ -211,6 +222,7 @@ def main(
                 snapshot_path=snapshot_path,
                 abs_tol=abs_tol,
                 rel_tol=rel_tol,
+                datetime_abs_tol_s=datetime_abs_tol_s,
             )
             print(f"LIVE_SNAPSHOT_CHECKED={len(cases)}")
     except SnapshotError as exc:
@@ -258,6 +270,7 @@ def _compare_at(
     path: str,
     abs_tol: float,
     rel_tol: float,
+    datetime_abs_tol_s: float,
 ) -> _Mismatch | None:
     if isinstance(expected, bool) or isinstance(actual, bool):
         if expected == actual:
@@ -273,6 +286,24 @@ def _compare_at(
             actual=actual,
             max_numeric_error=abs(float(actual) - float(expected)),
         )
+    if (
+        datetime_abs_tol_s > 0.0
+        and isinstance(expected, str)
+        and isinstance(actual, str)
+    ):
+        expected_datetime = _parse_iso_datetime(expected)
+        actual_datetime = _parse_iso_datetime(actual)
+        if expected_datetime is not None and actual_datetime is not None:
+            error_s = abs((actual_datetime - expected_datetime).total_seconds())
+            if error_s <= datetime_abs_tol_s:
+                return None
+            return _Mismatch(
+                path=path,
+                category="datetime",
+                expected=expected,
+                actual=actual,
+                max_numeric_error=error_s,
+            )
     if type(expected) is not type(actual):
         return _Mismatch(
             path=path,
@@ -295,6 +326,7 @@ def _compare_at(
                 path=f"{path}.{key}",
                 abs_tol=abs_tol,
                 rel_tol=rel_tol,
+                datetime_abs_tol_s=datetime_abs_tol_s,
             )
             if mismatch is not None:
                 return mismatch
@@ -314,6 +346,7 @@ def _compare_at(
                 path=f"{path}[{index}]",
                 abs_tol=abs_tol,
                 rel_tol=rel_tol,
+                datetime_abs_tol_s=datetime_abs_tol_s,
             )
             if mismatch is not None:
                 return mismatch
@@ -321,6 +354,16 @@ def _compare_at(
     if expected != actual:
         return _Mismatch(path=path, category="value", expected=expected, actual=actual)
     return None
+
+
+def _parse_iso_datetime(value: str) -> datetime | None:
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC)
 
 
 def _first_structural_mismatch(expected: Any, actual: Any, path: str = "$") -> _Mismatch:
