@@ -7,6 +7,7 @@
 #     - FOM with LatitudeBounds grid: verified against ComputeCoverage interval/gap derivation for a no-coverage trace
 #     - FOM with Global grid: verified against ComputeCoverage interval/gap derivation for a no-coverage trace
 #     - FOM with CbLatLonBounds grid: verified against ComputeCoverage interval/gap derivation for a covered trace
+#     - FOM GridStats weighting: verified as arithmetic rather than grid-weighted on a non-equal-weight LatLonBounds grid with differing values
 #     - FOM with Range grid-point constraint: verified against modified ComputeCoverage interval/gap derivation
 #     - FOM with ElevationAngle grid-point constraint: verified against modified ComputeCoverage interval/gap derivation
 #     - FOM with AzElMask grid-point constraint: verified to reject consistently with coverage-role AzElMask server behavior
@@ -18,6 +19,7 @@
 #     - Minimum/Maximum/Average: verified as arithmetic statistics over derived per-point values for representative grid branches
 #   Parameters:
 #     - grid: verified for representative LatLonBounds, LatitudeBounds, Global, and CbLatLonBounds branches
+#     - grid point Weight: verified not to affect FOM GridStats Average in the representative distinguishing case
 #     - grid_point_sensor: verified for Conic and Rectangular restrictive branches that still return coverage
 #     - grid_point_constraints: verified for Range and ElevationAngle restrictive branches that still return coverage; AzElMask rejection verified
 #   Comparison:
@@ -28,6 +30,7 @@
 #     - Representative FOM routes consume range/elevation constraints and conic/rectangular sensors consistently with ComputeCoverage interval filtering.
 #     - Representative FOM routes reject AzElMask in the coverage grid-point role, matching ComputeCoverage's current non-ground-station role behavior.
 #     - FOM routes preserve ComputeCoverage point ordering and coordinates across representative LatLonBounds, LatitudeBounds, Global, and CbLatLonBounds grids.
+#     - FOM GridStats Average is arithmetic over point values, not weighted by grid-point Weight.
 
 from __future__ import annotations
 
@@ -49,6 +52,7 @@ from tests.validation.cross_validation.coverage._fom_helpers import (
     CrossValidationError,
     assert_fom_values,
     assert_stats,
+    assert_close,
     compute_trace,
     duration_s,
     gap_durations,
@@ -185,6 +189,32 @@ def test_fom_grid_branches_match_compute_interval_derivation_and_arithmetic_stat
                 **extra,
             )
             assert_stats(f"{case['label']}_{metric_label}", report, values)
+
+
+def test_fom_grid_stats_average_is_arithmetic_not_grid_weighted() -> None:
+    configure_astrox_from_env()
+    trace = compute_trace(grid=intermittent_grid(), step_s=300.0)
+    values = [
+        total_positive_duration(intervals)
+        for intervals in trace["SatisfactionIntervalsWithNumberOfAssets"]
+    ]
+    weights = [point["Weight"] for point in trace["Points"]["GridPoints"]]
+    arithmetic_average = mean(values)
+    weighted_average = sum(value * weight for value, weight in zip(values, weights, strict=True)) / sum(weights)
+    if abs(arithmetic_average - weighted_average) <= 1.0e-3:
+        raise CrossValidationError(
+            "representative grid no longer distinguishes arithmetic from weighted FOM statistics"
+        )
+    report = coverage.coverage_time.grid_stats(
+        start=START,
+        stop=STOP,
+        grid=intermittent_grid(),
+        assets=[primary_asset()],
+        minimum_assets=1,
+        compute_type="TotalTimeAbove",
+        step_s=300.0,
+    )
+    assert_close("coverage_time_grid_stats.Average", arithmetic_average, report["Average"])
 
 
 def test_fom_az_el_mask_constraint_rejects_consistently_with_compute_coverage_role() -> None:
@@ -335,8 +365,9 @@ def assert_representative_fom_routes_match_trace(
 def run_all_checks() -> int:
     test_fom_grid_point_modifiers_match_compute_interval_derivation()
     test_fom_grid_branches_match_compute_interval_derivation_and_arithmetic_stats()
+    test_fom_grid_stats_average_is_arithmetic_not_grid_weighted()
     test_fom_az_el_mask_constraint_rejects_consistently_with_compute_coverage_role()
-    return 3
+    return 4
 
 
 def main() -> int:
