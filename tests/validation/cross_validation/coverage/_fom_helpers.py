@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import Any
 
@@ -76,6 +77,8 @@ def compute_trace(
     step_s: float = 60.0,
     minimum_assets: int | None = 1,
     exactly_assets: int | None = None,
+    grid_point_sensor: entities.EntitySensor | None = None,
+    grid_point_constraints: Sequence[entities.Constraint] | None = None,
 ) -> dict[str, Any]:
     return coverage.compute(
         start=start,
@@ -84,6 +87,8 @@ def compute_trace(
         assets=assets or [primary_asset()],
         minimum_assets=minimum_assets,
         exactly_assets=exactly_assets,
+        grid_point_sensor=grid_point_sensor,
+        grid_point_constraints=grid_point_constraints,
         include_asset_access_results=True,
         include_coverage_points=True,
         step_s=step_s,
