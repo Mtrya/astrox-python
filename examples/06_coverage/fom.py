@@ -43,6 +43,10 @@ def main() -> None:
         compute_type="TotalTimeAbove",
         **common,
     )
+    response_stats = coverage.response_time.grid_stats(
+        compute_type="Maximum",
+        **common,
+    )
     revisit_stats = coverage.revisit_time.grid_stats(
         compute_type="Average",
         **common,
@@ -51,6 +55,7 @@ def main() -> None:
     print(f"Simple coverage rows: {len(simple['Datas'])}")
     print(f"Number-of-assets rows at time: {len(at_time['Datas'])}")
     print(f"Coverage-time average: {duration_stats['Average']:.6f} s")
+    print(f"Response-time maximum: {response_stats['Maximum']:.6f} s")
     print(f"Revisit-time maximum: {revisit_stats['Maximum']:.6f} s")
 
 
