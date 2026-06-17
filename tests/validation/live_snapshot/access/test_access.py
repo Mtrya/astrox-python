@@ -11,7 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrox import access, entities, orbits, propagator
+from astrox import access, components, orbits, propagator
 from tests.validation._support import (
     LiveSnapshotCase,
     check_snapshot,
@@ -77,10 +77,10 @@ CZML_VELOCITY_SAMPLES = [
 ]
 
 
-def site() -> entities.Entity:
-    return entities.entity(
+def site() -> components.Entity:
+    return components.entity(
         name="Ground",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-155.468,
             latitude_deg=19.821,
             height_m=4205.0,
@@ -113,17 +113,17 @@ def controlled_sensor_orbit() -> orbits.KeplerianElements:
 def sgp4_entity(
     name: str = "ISS",
     tle_lines: tuple[str, str] = TLE_A,
-) -> entities.Entity:
-    return entities.entity(
+) -> components.Entity:
+    return components.entity(
         name=name,
-        position=entities.sgp4_position(tle_lines=tle_lines),
+        position=components.sgp4_position(tle_lines=tle_lines),
     )
 
 
-def controlled_target_site() -> entities.Entity:
-    return entities.entity(
+def controlled_target_site() -> components.Entity:
+    return components.entity(
         name="TargetSite",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-105.0,
             latitude_deg=40.0,
             height_m=1800.0,
@@ -131,20 +131,20 @@ def controlled_target_site() -> entities.Entity:
     )
 
 
-def two_body_sensor_entity() -> entities.Entity:
-    return entities.entity(
+def two_body_sensor_entity() -> components.Entity:
+    return components.entity(
         name="ObserverSat",
-        position=entities.two_body_position(
+        position=components.two_body_position(
             orbit_epoch=START,
             orbit=controlled_sensor_orbit(),
             start=START,
             stop=STOP,
             step_s=120.0,
         ),
-        orientation=entities.vvlh_axes(),
-        sensor=entities.conic_sensor(outer_half_angle_deg=8.0),
-        sensor_pointing=entities.fixed_sensor_pointing(
-            rotation=entities.az_el_rotation(
+        orientation=components.vvlh_axes(),
+        sensor=components.conic_sensor(outer_half_angle_deg=8.0),
+        sensor_pointing=components.fixed_sensor_pointing(
+            rotation=components.az_el_rotation(
                 azimuth_deg=0.0,
                 elevation_deg=-20.0,
             ),
@@ -152,21 +152,21 @@ def two_body_sensor_entity() -> entities.Entity:
     )
 
 
-def two_body_custom_axes_sensor_entity() -> entities.Entity:
+def two_body_custom_axes_sensor_entity() -> components.Entity:
     # Live access accepts fixed axes when they reference the built-in VVLH axes
     # name. Custom VGT-defined axes name resolution is left to cross-validation.
-    camera_axes = entities.fixed_axes(
+    camera_axes = components.fixed_axes(
         reference_axes="VVLH",
-        rotation=entities.euler_rotation(
+        rotation=components.euler_rotation(
             sequence="321",
             a_deg=0.0,
             b_deg=20.0,
             c_deg=0.0,
         ),
     )
-    return entities.entity(
+    return components.entity(
         name="ObserverSat",
-        position=entities.two_body_position(
+        position=components.two_body_position(
             orbit_epoch=START,
             orbit=controlled_sensor_orbit(),
             start=START,
@@ -174,38 +174,38 @@ def two_body_custom_axes_sensor_entity() -> entities.Entity:
             step_s=120.0,
         ),
         orientation=camera_axes,
-        sensor=entities.conic_sensor(outer_half_angle_deg=8.0),
+        sensor=components.conic_sensor(outer_half_angle_deg=8.0),
     )
 
 
-def two_body_vgt_container_entity() -> entities.Entity:
-    body_axes = entities.vvlh_axes(name="Body VVLH")
-    return entities.entity(
+def two_body_vgt_container_entity() -> components.Entity:
+    body_axes = components.vvlh_axes(name="Body VVLH")
+    return components.entity(
         name="ObserverSat",
-        position=entities.two_body_position(
+        position=components.two_body_position(
             orbit_epoch=START,
             orbit=controlled_sensor_orbit(),
             start=START,
             stop=STOP,
             step_s=120.0,
         ),
-        vgt=entities.vgt(axes=[body_axes]),
-        orientation=entities.vvlh_axes(),
-        sensor=entities.conic_sensor(outer_half_angle_deg=8.0),
+        vgt=components.vgt(axes=[body_axes]),
+        orientation=components.vvlh_axes(),
+        sensor=components.conic_sensor(outer_half_angle_deg=8.0),
     )
 
 
-def moon_entity() -> entities.Entity:
-    return entities.entity(
+def moon_entity() -> components.Entity:
+    return components.entity(
         name="Moon",
-        position=entities.central_body_position("Moon"),
+        position=components.central_body_position("Moon"),
     )
 
 
-def hpop_entity() -> entities.Entity:
-    return entities.entity(
+def hpop_entity() -> components.Entity:
+    return components.entity(
         name="HPOP",
-        position=entities.hpop_position(
+        position=components.hpop_position(
             start=START,
             stop=STOP,
             orbit_epoch=START,
@@ -222,12 +222,12 @@ def hpop_entity() -> entities.Entity:
     )
 
 
-def czml_positions_entity() -> entities.Entity:
-    return entities.entity(
+def czml_positions_entity() -> components.Entity:
+    return components.entity(
         name="CzmlSequence",
-        position=entities.czml_positions(
+        position=components.czml_positions(
             [
-                entities.czml_position(
+                components.czml_position(
                     epoch=START,
                     reference_frame="INERTIAL",
                     interpolation_algorithm="LAGRANGE",
@@ -240,10 +240,10 @@ def czml_positions_entity() -> entities.Entity:
     )
 
 
-def simple_ascent_entity() -> entities.Entity:
-    return entities.entity(
+def simple_ascent_entity() -> components.Entity:
+    return components.entity(
         name="Ascent",
-        position=entities.simple_ascent_position(
+        position=components.simple_ascent_position(
             start="2024-01-01T03:00:00.000Z",
             stop="2024-01-01T03:02:00.000Z",
             launch_latitude_deg=40.9575,
@@ -257,10 +257,10 @@ def simple_ascent_entity() -> entities.Entity:
     )
 
 
-def ballistic_entity() -> entities.Entity:
-    return entities.entity(
+def ballistic_entity() -> components.Entity:
+    return components.entity(
         name="Ballistic",
-        position=entities.ballistic_position(
+        position=components.ballistic_position(
             start="2024-01-01T12:00:00.000Z",
             ballistic_type="DeltaV",
             ballistic_type_value=3000.0,
@@ -285,10 +285,10 @@ def access_compute_site_sgp4() -> dict[str, Any]:
     )
 
 
-def constrained_site(*, constraints: list[Any]) -> entities.Entity:
-    return entities.entity(
+def constrained_site(*, constraints: list[Any]) -> components.Entity:
+    return components.entity(
         name="ConstrainedGround",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-155.468,
             latitude_deg=19.821,
             height_m=4205.0,
@@ -303,8 +303,8 @@ def access_compute_site_sgp4_elevation_range_constraints() -> dict[str, Any]:
         stop=DAY_STOP,
         from_entity=constrained_site(
             constraints=[
-                entities.elevation_constraint(minimum_deg=10.0),
-                entities.range_constraint(maximum_km=2500.0, maximum_enabled=True),
+                components.elevation_constraint(minimum_deg=10.0),
+                components.range_constraint(maximum_km=2500.0, maximum_enabled=True),
             ],
         ),
         to_entity=sgp4_entity(),
@@ -319,7 +319,7 @@ def access_compute_site_sgp4_az_el_mask_constraint() -> dict[str, Any]:
         stop=DAY_STOP,
         from_entity=constrained_site(
             constraints=[
-                entities.az_el_mask_constraint(
+                components.az_el_mask_constraint(
                     az_el_mask_rad=[
                         0.0,
                         0.17453292519943295,
@@ -352,7 +352,7 @@ def access_compute_site_sgp4_az_el_mask_constraint_with_max_range() -> dict[str,
         stop=DAY_STOP,
         from_entity=constrained_site(
             constraints=[
-                entities.az_el_mask_constraint(
+                components.az_el_mask_constraint(
                     az_el_mask_rad=[
                         0.0,
                         0.17453292519943295,
@@ -470,7 +470,7 @@ def access_chain_site_sgp4() -> dict[str, Any]:
 
 def access_chain_site_group() -> dict[str, Any]:
     ground = site()
-    targets = entities.entity_group(
+    targets = components.entity_group(
         name="Targets",
         members=[
             sgp4_entity(),

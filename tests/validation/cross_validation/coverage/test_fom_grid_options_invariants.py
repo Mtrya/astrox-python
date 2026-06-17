@@ -44,7 +44,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrox import coverage, entities, exceptions
+from astrox import coverage, components, exceptions
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 from tests.validation.cross_validation.coverage._fom_helpers import (
     START,
@@ -70,7 +70,7 @@ def test_fom_grid_point_modifiers_match_compute_interval_derivation() -> None:
             "label": "range_max_2000",
             "kwargs": {
                 "grid_point_constraints": [
-                    entities.range_constraint(maximum_km=2000.0, maximum_enabled=True)
+                    components.range_constraint(maximum_km=2000.0, maximum_enabled=True)
                 ]
             },
         },
@@ -78,20 +78,20 @@ def test_fom_grid_point_modifiers_match_compute_interval_derivation() -> None:
             "label": "elevation_min_10",
             "kwargs": {
                 "grid_point_constraints": [
-                    entities.elevation_constraint(minimum_deg=10.0)
+                    components.elevation_constraint(minimum_deg=10.0)
                 ]
             },
         },
         {
             "label": "conic_89",
             "kwargs": {
-                "grid_point_sensor": entities.conic_sensor(outer_half_angle_deg=89.0)
+                "grid_point_sensor": components.conic_sensor(outer_half_angle_deg=89.0)
             },
         },
         {
             "label": "rectangular_89",
             "kwargs": {
-                "grid_point_sensor": entities.rectangular_sensor(
+                "grid_point_sensor": components.rectangular_sensor(
                     x_half_angle_deg=89.0,
                     y_half_angle_deg=89.0,
                 )
@@ -219,7 +219,7 @@ def test_fom_grid_stats_average_is_arithmetic_not_grid_weighted() -> None:
 
 def test_fom_az_el_mask_constraint_rejects_consistently_with_compute_coverage_role() -> None:
     configure_astrox_from_env()
-    mask = entities.az_el_mask_constraint(
+    mask = components.az_el_mask_constraint(
         az_el_mask_rad=[0.0, 0.0, 3.141592653589793, 0.0],
     )
     with pytest.raises(exceptions.AstroxAPIError) as compute_error:
@@ -285,8 +285,8 @@ def assert_representative_fom_routes_match_trace(
     label: str,
     grid: coverage.CoverageGrid,
     step_s: float,
-    grid_point_sensor: entities.EntitySensor | None = None,
-    grid_point_constraints: list[entities.Constraint] | None = None,
+    grid_point_sensor: components.EntitySensor | None = None,
+    grid_point_constraints: list[components.Constraint] | None = None,
 ) -> dict[str, list[float]]:
     trace = compute_trace(
         grid=grid,

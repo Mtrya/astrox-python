@@ -42,7 +42,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrox import coverage, entities, exceptions
+from astrox import coverage, components, exceptions
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 
 
@@ -69,17 +69,17 @@ def sample_grid() -> coverage.LatLonGrid:
     )
 
 
-def sample_asset() -> entities.Entity:
-    return entities.entity(
+def sample_asset() -> components.Entity:
+    return components.entity(
         name="RelayA",
-        position=entities.sgp4_position(tle_lines=TLE),
+        position=components.sgp4_position(tle_lines=TLE),
     )
 
 
 def compute_with_modifiers(
     *,
-    grid_point_sensor: entities.EntitySensor | None = None,
-    grid_point_constraints: list[entities.Constraint] | None = None,
+    grid_point_sensor: components.EntitySensor | None = None,
+    grid_point_constraints: list[components.Constraint] | None = None,
 ) -> dict[str, Any]:
     return coverage.compute(
         start=START,
@@ -100,25 +100,25 @@ def test_permissive_grid_point_modifiers_match_unmodified_intervals() -> None:
     cases = {
         "range_max_5000": compute_with_modifiers(
             grid_point_constraints=[
-                entities.range_constraint(maximum_km=5000.0, maximum_enabled=True)
+                components.range_constraint(maximum_km=5000.0, maximum_enabled=True)
             ]
         ),
         "range_min_0": compute_with_modifiers(
-            grid_point_constraints=[entities.range_constraint(minimum_km=0.0)]
+            grid_point_constraints=[components.range_constraint(minimum_km=0.0)]
         ),
         "elevation_min_0": compute_with_modifiers(
-            grid_point_constraints=[entities.elevation_constraint(minimum_deg=0.0)]
+            grid_point_constraints=[components.elevation_constraint(minimum_deg=0.0)]
         ),
         "elevation_max_90": compute_with_modifiers(
             grid_point_constraints=[
-                entities.elevation_constraint(maximum_deg=90.0, maximum_enabled=True)
+                components.elevation_constraint(maximum_deg=90.0, maximum_enabled=True)
             ]
         ),
         "conic_90": compute_with_modifiers(
-            grid_point_sensor=entities.conic_sensor(outer_half_angle_deg=90.0)
+            grid_point_sensor=components.conic_sensor(outer_half_angle_deg=90.0)
         ),
         "rectangular_90": compute_with_modifiers(
-            grid_point_sensor=entities.rectangular_sensor(
+            grid_point_sensor=components.rectangular_sensor(
                 x_half_angle_deg=90.0,
                 y_half_angle_deg=90.0,
             )
@@ -134,25 +134,25 @@ def test_restrictive_grid_point_modifiers_are_baseline_subsets() -> None:
     cases = {
         "range_max_2000": compute_with_modifiers(
             grid_point_constraints=[
-                entities.range_constraint(maximum_km=2000.0, maximum_enabled=True)
+                components.range_constraint(maximum_km=2000.0, maximum_enabled=True)
             ]
         ),
         "range_min_1000": compute_with_modifiers(
-            grid_point_constraints=[entities.range_constraint(minimum_km=1000.0)]
+            grid_point_constraints=[components.range_constraint(minimum_km=1000.0)]
         ),
         "elevation_min_10": compute_with_modifiers(
-            grid_point_constraints=[entities.elevation_constraint(minimum_deg=10.0)]
+            grid_point_constraints=[components.elevation_constraint(minimum_deg=10.0)]
         ),
         "elevation_max_20": compute_with_modifiers(
             grid_point_constraints=[
-                entities.elevation_constraint(maximum_deg=20.0, maximum_enabled=True)
+                components.elevation_constraint(maximum_deg=20.0, maximum_enabled=True)
             ]
         ),
         "conic_89": compute_with_modifiers(
-            grid_point_sensor=entities.conic_sensor(outer_half_angle_deg=89.0)
+            grid_point_sensor=components.conic_sensor(outer_half_angle_deg=89.0)
         ),
         "rectangular_89": compute_with_modifiers(
-            grid_point_sensor=entities.rectangular_sensor(
+            grid_point_sensor=components.rectangular_sensor(
                 x_half_angle_deg=89.0,
                 y_half_angle_deg=89.0,
             )
@@ -169,7 +169,7 @@ def test_restrictive_grid_point_modifiers_are_baseline_subsets() -> None:
             "range_max_500",
             {
                 "grid_point_constraints": [
-                    entities.range_constraint(
+                    components.range_constraint(
                         maximum_km=500.0,
                         maximum_enabled=True,
                     )
@@ -180,7 +180,7 @@ def test_restrictive_grid_point_modifiers_are_baseline_subsets() -> None:
             "range_min_3000",
             {
                 "grid_point_constraints": [
-                    entities.range_constraint(minimum_km=3000.0)
+                    components.range_constraint(minimum_km=3000.0)
                 ]
             },
         ),
@@ -188,7 +188,7 @@ def test_restrictive_grid_point_modifiers_are_baseline_subsets() -> None:
             "elevation_min_45",
             {
                 "grid_point_constraints": [
-                    entities.elevation_constraint(minimum_deg=45.0)
+                    components.elevation_constraint(minimum_deg=45.0)
                 ]
             },
         ),
@@ -196,7 +196,7 @@ def test_restrictive_grid_point_modifiers_are_baseline_subsets() -> None:
             "elevation_max_0",
             {
                 "grid_point_constraints": [
-                    entities.elevation_constraint(
+                    components.elevation_constraint(
                         maximum_deg=0.0,
                         maximum_enabled=True,
                     )
@@ -206,13 +206,13 @@ def test_restrictive_grid_point_modifiers_are_baseline_subsets() -> None:
         (
             "conic_1",
             {
-                "grid_point_sensor": entities.conic_sensor(outer_half_angle_deg=1.0)
+                "grid_point_sensor": components.conic_sensor(outer_half_angle_deg=1.0)
             },
         ),
         (
             "rectangular_1",
             {
-                "grid_point_sensor": entities.rectangular_sensor(
+                "grid_point_sensor": components.rectangular_sensor(
                     x_half_angle_deg=1.0,
                     y_half_angle_deg=1.0,
                 )
@@ -234,7 +234,7 @@ def test_az_el_mask_grid_point_constraint_reduces_to_non_ground_station_error() 
     with pytest.raises(exceptions.AstroxAPIError, match="AzElMask"):
         compute_with_modifiers(
             grid_point_constraints=[
-                entities.az_el_mask_constraint(
+                components.az_el_mask_constraint(
                     az_el_mask_rad=[
                         0.0,
                         -1.57079632679,
@@ -408,7 +408,7 @@ def run_all_checks() -> int:
         baseline,
         compute_with_modifiers(
             grid_point_constraints=[
-                entities.range_constraint(maximum_km=5000.0, maximum_enabled=True)
+                components.range_constraint(maximum_km=5000.0, maximum_enabled=True)
             ]
         ),
     )
@@ -416,12 +416,12 @@ def run_all_checks() -> int:
         "elevation_min_10",
         baseline,
         compute_with_modifiers(
-            grid_point_constraints=[entities.elevation_constraint(minimum_deg=10.0)]
+            grid_point_constraints=[components.elevation_constraint(minimum_deg=10.0)]
         ),
     )
     with pytest.raises(exceptions.AstroxAPIError, match="Index was out of range"):
         compute_with_modifiers(
-            grid_point_sensor=entities.conic_sensor(outer_half_angle_deg=1.0)
+            grid_point_sensor=components.conic_sensor(outer_half_angle_deg=1.0)
         )
     return 3
 

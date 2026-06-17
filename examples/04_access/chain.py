@@ -4,7 +4,7 @@
 # ///
 """Chain access calculation through named participants."""
 
-from astrox import access, entities
+from astrox import access, components
 
 
 ISS_TLE = (
@@ -18,23 +18,23 @@ HUBBLE_TLE = (
 
 
 def main() -> None:
-    ground = entities.entity(
+    ground = components.entity(
         name="Ground",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-155.468,
             latitude_deg=19.821,
             height_m=4205.0,
         ),
     )
-    iss = entities.entity(
+    iss = components.entity(
         name="ISS",
-        position=entities.sgp4_position(tle_lines=ISS_TLE),
+        position=components.sgp4_position(tle_lines=ISS_TLE),
     )
-    hubble = entities.entity(
+    hubble = components.entity(
         name="Hubble",
-        position=entities.sgp4_position(tle_lines=HUBBLE_TLE),
+        position=components.sgp4_position(tle_lines=HUBBLE_TLE),
     )
-    targets = entities.entity_group(
+    targets = components.entity_group(
         name="Targets",
         members=[iss, hubble],
         to_restriction="AnyOf",

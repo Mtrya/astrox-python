@@ -28,7 +28,7 @@ import numpy as np
 from skyfield.api import Loader
 from skyfield.framelib import itrs
 
-from astrox import access, entities, orbits
+from astrox import access, components, orbits
 from tests.validation.cross_validation.access._cases import (
     EARTH_MU,
     START,
@@ -77,8 +77,8 @@ StateFunction = Callable[[float], tuple[Vector, Vector]]
 @dataclass(frozen=True, kw_only=True)
 class SensorCase:
     id: str
-    observer: entities.Entity
-    target: entities.Entity
+    observer: components.Entity
+    target: components.Entity
     expected: list[Interval]
 
 
@@ -103,15 +103,15 @@ def two_body_entity(
     *,
     name: str,
     orbit: orbits.KeplerianElements | None = None,
-    orientation: entities.EntityAxes | None = None,
-    sensor: entities.EntitySensor | None = None,
-    sensor_pointing: entities.SensorPointing | None = None,
-    vgt: entities.VgtProvider | None = None,
-) -> entities.Entity:
+    orientation: components.EntityAxes | None = None,
+    sensor: components.EntitySensor | None = None,
+    sensor_pointing: components.SensorPointing | None = None,
+    vgt: components.VgtProvider | None = None,
+) -> components.Entity:
     orbit = controlled_orbit() if orbit is None else orbit
-    return entities.entity(
+    return components.entity(
         name=name,
-        position=entities.two_body_position(
+        position=components.two_body_position(
             orbit_epoch=START,
             orbit=orbit,
             start=START,
@@ -126,11 +126,11 @@ def two_body_entity(
     )
 
 
-def subpoint_site() -> entities.Entity:
+def subpoint_site() -> components.Entity:
     lon_deg, lat_deg = subpoint_geodetic_degrees(0.0)
-    return entities.entity(
+    return components.entity(
         name="Subpoint",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=lon_deg,
             latitude_deg=lat_deg,
             height_m=SUBPOINT_HEIGHT_M,
@@ -138,10 +138,10 @@ def subpoint_site() -> entities.Entity:
     )
 
 
-def blocked_site() -> entities.Entity:
-    return entities.entity(
+def blocked_site() -> components.Entity:
+    return components.entity(
         name="BlockedSite",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=BLOCKED_SITE_LONGITUDE_DEG,
             latitude_deg=BLOCKED_SITE_LATITUDE_DEG,
             height_m=BLOCKED_SITE_HEIGHT_M,
@@ -149,7 +149,7 @@ def blocked_site() -> entities.Entity:
     )
 
 
-def target_satellite(delta_true_anomaly_deg: float) -> entities.Entity:
+def target_satellite(delta_true_anomaly_deg: float) -> components.Entity:
     return two_body_entity(
         name=f"TargetSat{delta_true_anomaly_deg:g}",
         orbit=controlled_orbit(true_anomaly_offset_deg=delta_true_anomaly_deg),
@@ -163,7 +163,7 @@ def target_orbit_entity(
     inclination_delta_deg: float = 0.0,
     raan_delta_deg: float = 0.0,
     true_anomaly_offset_deg: float = 0.0,
-) -> entities.Entity:
+) -> components.Entity:
     return two_body_entity(
         name=name,
         orbit=controlled_orbit(
@@ -175,7 +175,7 @@ def target_orbit_entity(
     )
 
 
-def compute_sensor_access(observer: entities.Entity, target: entities.Entity) -> list[Interval]:
+def compute_sensor_access(observer: components.Entity, target: components.Entity) -> list[Interval]:
     result = access.compute(
         start=START,
         stop=STOP,
@@ -195,28 +195,28 @@ def compare_sensor_case(case: SensorCase) -> None:
 def observer_with_sensor(
     *,
     name: str,
-    orientation: entities.EntityAxes,
-    sensor: entities.EntitySensor,
-    rotation: entities.Rotation | None = None,
-    vgt: entities.VgtProvider | None = None,
-) -> entities.Entity:
+    orientation: components.EntityAxes,
+    sensor: components.EntitySensor,
+    rotation: components.Rotation | None = None,
+    vgt: components.VgtProvider | None = None,
+) -> components.Entity:
     return two_body_entity(
         name=name,
         orientation=orientation,
         sensor=sensor,
-        sensor_pointing=entities.fixed_sensor_pointing(rotation=rotation)
+        sensor_pointing=components.fixed_sensor_pointing(rotation=rotation)
         if rotation is not None
         else None,
         vgt=vgt,
     )
 
 
-def conic_sensor(half_angle_deg: float) -> entities.ConicSensor:
-    return entities.conic_sensor(outer_half_angle_deg=half_angle_deg)
+def conic_sensor(half_angle_deg: float) -> components.ConicSensor:
+    return components.conic_sensor(outer_half_angle_deg=half_angle_deg)
 
 
-def rectangular_sensor(x_half_angle_deg: float, y_half_angle_deg: float) -> entities.RectangularSensor:
-    return entities.rectangular_sensor(
+def rectangular_sensor(x_half_angle_deg: float, y_half_angle_deg: float) -> components.RectangularSensor:
+    return components.rectangular_sensor(
         x_half_angle_deg=x_half_angle_deg,
         y_half_angle_deg=y_half_angle_deg,
     )
@@ -247,14 +247,14 @@ def expected_intervals(
 
 def expected_site_intervals(
     *,
-    site: entities.Entity,
+    site: components.Entity,
     frame: Callable[[float], Frame],
     sensor_predicate: Callable[[Vector], bool],
     step_s: float = SHORT_SAMPLE_STEP_S,
     stop_s: float = 7200.0,
 ) -> list[Interval]:
     site_position = site.position
-    if not isinstance(site_position, entities.SitePosition):
+    if not isinstance(site_position, components.SitePosition):
         raise TypeError("site must use SitePosition")
     target_ecef = site_ecef(
         latitude_deg=site_position.latitude_deg,

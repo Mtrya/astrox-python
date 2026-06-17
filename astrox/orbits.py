@@ -456,16 +456,16 @@ def lambert_delta_v(
 
 
 def convert_czml_position(
-    position: entities.CzmlPosition,
+    position: components.CzmlPosition,
     *,
     to_central_body: str,
     target_reference_frame: str,
-) -> tuple[float, entities.CzmlPosition]:
+) -> tuple[float, components.CzmlPosition]:
     """Transform a sampled CZML position to another central-body frame.
 
     Returns ``(period_s, transformed_position)``.
     """
-    if not isinstance(position, entities.CzmlPosition):
+    if not isinstance(position, components.CzmlPosition):
         raise TypeError("position must be a CzmlPosition instance")
 
     result = raw.post(
@@ -476,24 +476,24 @@ def convert_czml_position(
             "TargetFrame": target_reference_frame,
         },
     )
-    return result["Period"], entities.CzmlPosition.from_czml_wire(result["Position"])
+    return result["Period"], components.CzmlPosition.from_czml_wire(result["Position"])
 
 
 def earth_moon_libration(
-    position: entities.CzmlPosition,
-) -> entities.CzmlPositionSTM:
+    position: components.CzmlPosition,
+) -> components.CzmlPositionSTM:
     """Transform a sampled CZML position to the Earth-Moon libration frame.
 
     Wires to ``/OrbitSystem/EarthMoonLibration2``.
     """
-    if not isinstance(position, entities.CzmlPosition):
+    if not isinstance(position, components.CzmlPosition):
         raise TypeError("position must be a CzmlPosition instance")
 
     result = raw.post(
         "/OrbitSystem/EarthMoonLibration2",
         json=position.to_czml_wire(),
     )
-    return entities.CzmlPositionSTM.from_czml_wire(result["position"])
+    return components.CzmlPositionSTM.from_czml_wire(result["position"])
 
 
-import astrox.entities as entities  # noqa: E402
+import astrox.components as components  # noqa: E402

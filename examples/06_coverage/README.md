@@ -3,7 +3,7 @@
 This directory contains runnable coverage examples. The curated coverage examples use this public SDK style:
 
 ```python
-from astrox import coverage, entities
+from astrox import coverage, components
 ```
 
 The user-facing guide is [docs/sdk/coverage.md](../../docs/sdk/coverage.md).

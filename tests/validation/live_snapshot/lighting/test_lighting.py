@@ -11,7 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrox import entities, lighting, orbits
+from astrox import components, lighting, orbits
 from tests.validation._support import (
     LiveSnapshotCase,
     check_snapshot,
@@ -34,8 +34,8 @@ TLE_LINES = (
 )
 
 
-def site_position() -> entities.SitePosition:
-    return entities.site_position(
+def site_position() -> components.SitePosition:
+    return components.site_position(
         longitude_deg=-155.468,
         latitude_deg=19.821,
         height_m=4205.0,
@@ -53,28 +53,28 @@ def orbit() -> orbits.KeplerianElements:
     )
 
 
-def sgp4_position() -> entities.Sgp4Position:
-    return entities.sgp4_position(tle_lines=TLE_LINES)
+def sgp4_position() -> components.Sgp4Position:
+    return components.sgp4_position(tle_lines=TLE_LINES)
 
 
-def j2_position() -> entities.J2Position:
-    return entities.j2_position(
+def j2_position() -> components.J2Position:
+    return components.j2_position(
         orbit_epoch=START,
         orbit=orbit(),
         gravitational_parameter_m3_s2=EARTH_MU,
     )
 
 
-def two_body_position() -> entities.TwoBodyPosition:
-    return entities.two_body_position(
+def two_body_position() -> components.TwoBodyPosition:
+    return components.two_body_position(
         orbit_epoch=START,
         orbit=orbit(),
         gravitational_parameter_m3_s2=EARTH_MU,
     )
 
 
-def czml_position() -> entities.CzmlPosition:
-    return entities.czml_position(
+def czml_position() -> components.CzmlPosition:
+    return components.czml_position(
         epoch=START,
         reference_frame="INERTIAL",
         interpolation_algorithm="LAGRANGE",

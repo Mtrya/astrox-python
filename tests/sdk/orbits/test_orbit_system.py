@@ -6,14 +6,14 @@ from typing import Any, get_type_hints
 
 import pytest
 
-from astrox import entities, exceptions, orbits
+from astrox import components, exceptions, orbits
 
 
 EPOCH = "2024-01-01T00:00:00.000Z"
 
 
-def sample_czml_position() -> entities.CzmlPosition:
-    return entities.czml_position(
+def sample_czml_position() -> components.CzmlPosition:
+    return components.czml_position(
         epoch=EPOCH,
         central_body="Earth",
         reference_frame="INERTIAL",
@@ -94,7 +94,7 @@ def test_convert_czml_position_emits_payload_and_returns_position(
     }
     assert calls[0]["params"] is None
     assert period_s == 6000.0
-    assert isinstance(out_position, entities.CzmlPosition)
+    assert isinstance(out_position, components.CzmlPosition)
     assert out_position.epoch == EPOCH
     assert out_position.reference_frame == "FIXED"
     assert out_position.cartesian == (0.0, 7000000.0, 0.0, 0.0)
@@ -116,7 +116,7 @@ def test_earth_moon_libration_emits_payload_and_returns_stm(
     assert calls[0]["endpoint"] == "/OrbitSystem/EarthMoonLibration2"
     assert calls[0]["json"] == position.to_czml_wire()
     assert calls[0]["params"] is None
-    assert isinstance(state, entities.CzmlPositionSTM)
+    assert isinstance(state, components.CzmlPositionSTM)
     assert state.epoch == EPOCH
     assert state.reference_frame == "Libration"
     assert state.cartesian == (0.0, 1.0, 2.0, 3.0)
@@ -258,10 +258,10 @@ def test_orbit_system_return_type_hints_are_curated_values() -> None:
         get_type_hints(orbits.convert_czml_position)["return"]
         == tuple[
             float,
-            entities.CzmlPosition,
+            components.CzmlPosition,
         ]
     )
     assert (
         get_type_hints(orbits.earth_moon_libration)["return"]
-        == entities.CzmlPositionSTM
+        == components.CzmlPositionSTM
     )

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from astrox import access, entities
+from astrox import access, components
 from astrox.exceptions import AstroxAPIError
 from tests.validation._support import configure_astrox_from_env
 from tests.validation.cross_validation.access._cases import (
@@ -33,10 +33,10 @@ from tests.validation.cross_validation.access._geometry import (
 )
 
 
-def _target_site(name: str = "G2") -> entities.Entity:
-    return entities.entity(
+def _target_site(name: str = "G2") -> components.Entity:
+    return components.entity(
         name=name,
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-150.0,
             latitude_deg=22.0,
             height_m=0.0,
@@ -45,14 +45,14 @@ def _target_site(name: str = "G2") -> entities.Entity:
 
 
 def _serial_chain(
-    ground: entities.Entity,
-    relay: entities.Entity,
-    target: entities.Entity,
+    ground: components.Entity,
+    relay: components.Entity,
+    target: components.Entity,
     *,
-    participants: list[entities.Entity] | None = None,
+    participants: list[components.Entity] | None = None,
     connections: list[access.Connection] | None = None,
-    start_participant: entities.Entity | None = None,
-    end_participant: entities.Entity | None = None,
+    start_participant: components.Entity | None = None,
+    end_participant: components.Entity | None = None,
     use_light_time_delay: bool | None = None,
 ) -> dict[str, object]:
     route_connections = (
@@ -113,7 +113,7 @@ def test_entity_group_anyof_complete_access_is_union_of_member_strands() -> None
 def test_entity_group_atleastn_complete_access_is_intersection_of_member_strands() -> None:
     configure_astrox_from_env()
     ground = site()
-    targets = entities.entity_group(
+    targets = components.entity_group(
         name="TargetsAtLeast2",
         members=[
             sgp4_entity("ISS", TLE_A),
@@ -398,7 +398,7 @@ def test_extra_branch_connection_expected_server_no_path() -> None:
 def test_start_entity_group_expected_server_index_error() -> None:
     configure_astrox_from_env()
     ground = site("Ground")
-    sources = entities.entity_group(
+    sources = components.entity_group(
         name="Sources",
         members=[
             sgp4_entity("ISS", TLE_A),

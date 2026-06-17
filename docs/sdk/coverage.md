@@ -3,10 +3,10 @@
 This page documents the curated ASTROX Python coverage interface. The intended import style is:
 
 ```python
-from astrox import coverage, entities
+from astrox import coverage, components
 ```
 
-Coverage functions generate grid points, compute coverage over those grid points, and call the two non-FOM coverage report routes. The SDK assembles request payloads from coverage grid values, `entities.Entity` assets, optional `entities` sensor or constraint fragments, and ordinary Python options, then returns the ASTROX JSON-like response dictionary unchanged.
+Coverage functions generate grid points, compute coverage over those grid points, and call the two non-FOM coverage report routes. The SDK assembles request payloads from coverage grid values, `components.Entity` assets, optional `components` sensor or constraint fragments, and ordinary Python options, then returns the ASTROX JSON-like response dictionary unchanged.
 
 ## Grids
 
@@ -57,9 +57,9 @@ For representative `lat_lon_grid(...)`, `latitude_grid(...)`, and `global_grid(.
 `coverage.compute(...)` calls `/Coverage/ComputeCoverage`:
 
 ```python
-asset = entities.entity(
+asset = components.entity(
     name="Relay",
-    position=entities.sgp4_position(tle_lines=TLE_LINES),
+    position=components.sgp4_position(tle_lines=TLE_LINES),
 )
 
 result = coverage.compute(
@@ -74,15 +74,15 @@ result = coverage.compute(
 )
 ```
 
-`assets` accepts a sequence of `entities.Entity` values. Strings and raw dictionaries are not accepted because coverage assets lower to full ASTROX entity objects, not name references. SGP4 satellite assets are the validated path for the examples below. An empty asset list lowers deterministically, but live ASTROX currently rejects it. Fixed-site assets currently result in a server worker error in the smallest tested coverage-compute case, so do not rely on fixed-site coverage assets until that server behavior is clarified.
+`assets` accepts a sequence of `components.Entity` values. Strings and raw dictionaries are not accepted because coverage assets lower to full ASTROX entity objects, not name references. SGP4 satellite assets are the validated path for the examples below. An empty asset list lowers deterministically, but live ASTROX currently rejects it. Fixed-site assets currently result in a server worker error in the smallest tested coverage-compute case, so do not rely on fixed-site coverage assets until that server behavior is clarified.
 
 Use `minimum_assets=N` for the ASTROX `AtLeastN` resource-count rule, or `exactly_assets=N` for `ExactlyN`. Supplying both is rejected by the SDK because it cannot lower to one unambiguous request. In validated coverage-compute cases, ASTROX returns `SatisfactionIntervalsWithNumberOfAssets` as a per-grid-point count trace: intervals below the requested count are reported as zero, and intervals meeting the requested count preserve the actual simultaneous asset count. The returned trace includes zero-asset intervals. In a duplicate two-asset case, `exactly_assets=1` matches `minimum_assets=1` and returns intervals with `NumberOfAssets=2`, so ASTROX `ExactlyN` behaves like the same at-least threshold rather than strict equality. Do not use it when strict equality is required.
 
 `include_asset_access_results=True` returns per-grid-point, per-asset intervals. Validated cases show those intervals compose back into `SatisfactionIntervalsWithNumberOfAssets`, and duplicate identical assets are preserved as separate asset entries. For a representative SGP4 satellite over a surface `lat_lon_grid(...)`, those per-asset intervals match an independent Skyfield SGP4 plus WGS84 Earth-obstruction line-of-sight calculation within the calibrated live validation tolerance.
 
-`grid_point_sensor` accepts `entities.conic_sensor(...)` or `entities.rectangular_sensor(...)`. Validated full-hemisphere sensor cases preserve the unconstrained coverage intervals, and slightly narrower representative sensors return interval subsets. Very narrow representative sensors currently return a server worker error instead of empty no-access intervals.
+`grid_point_sensor` accepts `components.conic_sensor(...)` or `components.rectangular_sensor(...)`. Validated full-hemisphere sensor cases preserve the unconstrained coverage intervals, and slightly narrower representative sensors return interval subsets. Very narrow representative sensors currently return a server worker error instead of empty no-access intervals.
 
-`grid_point_constraints` accepts shared `entities.Constraint` values such as `entities.elevation_constraint(...)` and `entities.range_constraint(...)`. Validated permissive range/elevation constraints preserve the unconstrained intervals, and validated restrictive range/elevation constraints return interval subsets. Over-restrictive representative constraints currently return a server worker error instead of empty no-access intervals. `entities.az_el_mask_constraint(...)` is accepted by the SDK, but ASTROX currently rejects it in this coverage role with a server message that the current object is not a ground-station object.
+`grid_point_constraints` accepts shared `components.Constraint` values such as `components.elevation_constraint(...)` and `components.range_constraint(...)`. Validated permissive range/elevation constraints preserve the unconstrained intervals, and validated restrictive range/elevation constraints return interval subsets. Over-restrictive representative constraints currently return a server worker error instead of empty no-access intervals. `components.az_el_mask_constraint(...)` is accepted by the SDK, but ASTROX currently rejects it in this coverage role with a server message that the current object is not a ground-station object.
 
 `include_asset_access_results`, `include_coverage_points`, `step_s`, and `description` are optional and omitted unless supplied.
 

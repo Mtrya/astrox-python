@@ -4,7 +4,7 @@ Functions are organized by domain modules and can use package-level
 configuration without requiring explicit client management:
 
     import astrox
-    from astrox import access, coverage, entities, lighting, orbits, propagator
+    from astrox import access, coverage, components, lighting, orbits, propagator
 
     astrox.configure(base_url="http://custom:8765", timeout=120)
     orbit = orbits.keplerian(...)
@@ -26,7 +26,7 @@ Raw route access is available for advanced callers:
 
 from importlib.metadata import PackageNotFoundError, version
 
-from astrox import access, coverage, entities, lighting, orbits, propagator, rocket
+from astrox import access, coverage, components, lighting, orbits, propagator, rocket
 from astrox._http import Client, configure, get_session, raw
 
 try:
@@ -40,7 +40,7 @@ __all__ = [
     "get_session",
     "access",
     "coverage",
-    "entities",
+    "components",
     "lighting",
     "orbits",
     "propagator",

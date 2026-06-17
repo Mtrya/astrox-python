@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from astrox import entities, exceptions, lighting, orbits
+from astrox import components, exceptions, lighting, orbits
 from tests.sdk.helpers import assert_canonical_equal
 
 
@@ -59,8 +59,8 @@ def sample_orbit() -> orbits.KeplerianElements:
     )
 
 
-def sample_site() -> entities.SitePosition:
-    return entities.site_position(
+def sample_site() -> components.SitePosition:
+    return components.site_position(
         longitude_deg=-155.468,
         latitude_deg=19.821,
         height_m=4205.0,
@@ -149,7 +149,7 @@ def test_lighting_times_emits_typed_position_payload_and_returns_raw_response(
     response = lighting.lighting_times(
         start="2024-01-01T00:00:00.000Z",
         stop="2024-01-01T01:00:00.000Z",
-        position=entities.sgp4_position(tle_lines=TLE_LINES),
+        position=components.sgp4_position(tle_lines=TLE_LINES),
         description="ISS lighting",
         occultation_bodies=["Earth", "Moon"],
     )
@@ -209,7 +209,7 @@ def test_lighting_accepts_propagated_position_sources(
     lighting.solar_intensity(
         start="2024-01-01T00:00:00.000Z",
         stop="2024-01-01T01:00:00.000Z",
-        position=entities.j2_position(
+        position=components.j2_position(
             orbit_epoch="2024-01-01T00:00:00.000Z",
             orbit=sample_orbit(),
         ),
@@ -295,7 +295,7 @@ def test_solar_aer_accepts_spacecraft_position_sources(
     lighting.solar_aer(
         start="2024-01-01T00:00:00.000Z",
         stop="2024-01-01T01:00:00.000Z",
-        position=entities.sgp4_position(tle_lines=TLE_LINES),
+        position=components.sgp4_position(tle_lines=TLE_LINES),
         step_s=600,
     )
 
@@ -323,16 +323,16 @@ def test_solar_aer_accepts_spacecraft_position_sources(
                 "stop": "2024-01-01T01:00:00.000Z",
                 "position": {"$type": "SGP4"},
             },
-            "position must be an astrox.entities position value",
+            "position must be an astrox.components position value",
         ),
         (
             lighting.solar_intensity,
             {
                 "start": "2024-01-01T00:00:00.000Z",
                 "stop": "2024-01-01T01:00:00.000Z",
-                "position": entities.entity(name="site", position=sample_site()),
+                "position": components.entity(name="site", position=sample_site()),
             },
-            "position must be an astrox.entities position value",
+            "position must be an astrox.components position value",
         ),
         (
             lighting.solar_aer,
@@ -341,7 +341,7 @@ def test_solar_aer_accepts_spacecraft_position_sources(
                 "stop": "2024-01-01T01:00:00.000Z",
                 "position": {"$type": "SGP4"},
             },
-            "position must be an astrox.entities position value",
+            "position must be an astrox.components position value",
         ),
         (
             lighting.solar_intensity,

@@ -166,12 +166,12 @@ The GEO-YM helper accepts Keplerian input orbits instead of Cartesian endpoint s
 
 ## Frame And Libration Transforms
 
-`orbits.convert_czml_position(...)` transforms a sampled CZML position from one central-body frame to another. The input must be an `entities.CzmlPosition` and the function returns `(period_s, transformed_position)`:
+`orbits.convert_czml_position(...)` transforms a sampled CZML position from one central-body frame to another. The input must be a `components.CzmlPosition` and the function returns `(period_s, transformed_position)`:
 
 ```python
-from astrox import entities, orbits
+from astrox import components, orbits
 
-position = entities.czml_position(
+position = components.czml_position(
     epoch="2024-01-01T00:00:00Z",
     central_body="Earth",
     reference_frame="INERTIAL",
@@ -187,7 +187,7 @@ period_s, fixed_position = orbits.convert_czml_position(
 )
 ```
 
-`to_central_body` and `target_reference_frame` are required. The returned `fixed_position` is an `entities.CzmlPosition` whose `cartesian` samples are in the requested target frame.
+`to_central_body` and `target_reference_frame` are required. The returned `fixed_position` is a `components.CzmlPosition` whose `cartesian` samples are in the requested target frame.
 
 Independent cross-validation has calibrated the following `orbits.convert_czml_position(...)` branches against external ephemeris tools. Static input samples at 7 000 km from Earth center are used for all cases.
 
@@ -201,7 +201,7 @@ Independent cross-validation has calibrated the following `orbits.convert_czml_p
 
 No other `to_central_body` / `target_reference_frame` combinations have been independently calibrated.
 
-`orbits.earth_moon_libration(...)` transforms a sampled CZML position to the Earth-Moon libration frame. It wires to ``/OrbitSystem/EarthMoonLibration2`` and returns an `entities.CzmlPositionSTM`:
+`orbits.earth_moon_libration(...)` transforms a sampled CZML position to the Earth-Moon libration frame. It wires to ``/OrbitSystem/EarthMoonLibration2`` and returns a `components.CzmlPositionSTM`:
 
 ```python
 libration_state = orbits.earth_moon_libration(position)

@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from astrox import access, entities, orbits, propagator
+from astrox import access, components, orbits, propagator
 from astrox.exceptions import AstroxAPIError
 
 START = "2024-01-01T00:00:00.000Z"
@@ -82,10 +82,10 @@ def is_server_worker_thread_message(message: str) -> bool:
     return SERVER_WORKER_THREAD_MESSAGE in message
 
 
-def site(name: str = "Ground") -> entities.Entity:
-    return entities.entity(
+def site(name: str = "Ground") -> components.Entity:
+    return components.entity(
         name=name,
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=SITE_LONGITUDE_DEG,
             latitude_deg=SITE_LATITUDE_DEG,
             height_m=SITE_HEIGHT_M,
@@ -93,10 +93,10 @@ def site(name: str = "Ground") -> entities.Entity:
     )
 
 
-def remote_site() -> entities.Entity:
-    return entities.entity(
+def remote_site() -> components.Entity:
+    return components.entity(
         name="Madrid",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=REMOTE_LONGITUDE_DEG,
             latitude_deg=REMOTE_LATITUDE_DEG,
             height_m=REMOTE_HEIGHT_M,
@@ -104,8 +104,8 @@ def remote_site() -> entities.Entity:
     )
 
 
-def sgp4_entity(name: str = "ISS", tle_lines: tuple[str, str] = TLE_A) -> entities.Entity:
-    return entities.entity(name=name, position=entities.sgp4_position(tle_lines=tle_lines))
+def sgp4_entity(name: str = "ISS", tle_lines: tuple[str, str] = TLE_A) -> components.Entity:
+    return components.entity(name=name, position=components.sgp4_position(tle_lines=tle_lines))
 
 
 def access_orbit() -> orbits.KeplerianElements:
@@ -130,10 +130,10 @@ def distinct_access_orbit() -> orbits.KeplerianElements:
     )
 
 
-def j2_entity() -> entities.Entity:
-    return entities.entity(
+def j2_entity() -> components.Entity:
+    return components.entity(
         name="J2",
-        position=entities.j2_position(
+        position=components.j2_position(
             orbit_epoch=START,
             orbit=access_orbit(),
             start=START,
@@ -151,11 +151,11 @@ def two_body_entity(
     orbit: orbits.KeplerianElements | None = None,
     *,
     name: str = "TwoBody",
-) -> entities.Entity:
+) -> components.Entity:
     orbit = access_orbit() if orbit is None else orbit
-    return entities.entity(
+    return components.entity(
         name=name,
-        position=entities.two_body_position(
+        position=components.two_body_position(
             orbit_epoch=START,
             orbit=orbit,
             start=START,
@@ -171,11 +171,11 @@ def hpop_entity(
     orbit: orbits.KeplerianElements | None = None,
     *,
     name: str = "HPOP",
-) -> entities.Entity:
+) -> components.Entity:
     orbit = access_orbit() if orbit is None else orbit
-    return entities.entity(
+    return components.entity(
         name=name,
-        position=entities.hpop_position(
+        position=components.hpop_position(
             start=START,
             stop=STOP,
             orbit_epoch=START,
@@ -190,8 +190,8 @@ def hpop_entity(
 
 
 def compute_access(
-    from_entity: entities.Entity,
-    to_entity: entities.Entity,
+    from_entity: components.Entity,
+    to_entity: components.Entity,
     *,
     start: str = START,
     stop: str = STOP,
@@ -212,8 +212,8 @@ def compute_access(
 
 def branch_probe(
     label: str,
-    from_entity: entities.Entity,
-    to_entity: entities.Entity,
+    from_entity: components.Entity,
+    to_entity: components.Entity,
 ) -> BranchProbe:
     try:
         result = compute_access(from_entity, to_entity)
@@ -241,7 +241,7 @@ def direct_chain_sgp4(*, use_light_time_delay: bool | None = None) -> dict[str, 
 
 def group_chain_anyof() -> dict[str, object]:
     ground = site()
-    targets = entities.entity_group(
+    targets = components.entity_group(
         name="Targets",
         members=[
             sgp4_entity("ISS", TLE_A),
@@ -258,12 +258,12 @@ def group_chain_anyof() -> dict[str, object]:
     )
 
 
-def relay_chain() -> tuple[dict[str, object], entities.Entity, entities.Entity, entities.Entity]:
+def relay_chain() -> tuple[dict[str, object], components.Entity, components.Entity, components.Entity]:
     ground_a = site("GroundA")
     relay = sgp4_entity("Relay")
-    ground_b = entities.entity(
+    ground_b = components.entity(
         name="GroundB",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-150.0,
             latitude_deg=22.0,
             height_m=0.0,

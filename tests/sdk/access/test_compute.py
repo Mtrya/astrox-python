@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from astrox import access, entities, exceptions
+from astrox import access, components, exceptions
 from tests.sdk.access.helpers import ground, iss, record_raw_post
 from tests.sdk.helpers import assert_canonical_equal
 
@@ -173,15 +173,15 @@ def test_compute_embeds_orientation_sensor_and_pointing_metadata(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls = record_raw_post(monkeypatch, ACCESS_RESPONSE)
-    body_axes = entities.vvlh_axes(name="Body VVLH")
-    observer = entities.entity(
+    body_axes = components.vvlh_axes(name="Body VVLH")
+    observer = components.entity(
         name="Observer",
-        position=entities.sgp4_position(tle_lines=list(iss().position.tle_lines)),
-        vgt=entities.vgt(axes=[body_axes]),
+        position=components.sgp4_position(tle_lines=list(iss().position.tle_lines)),
+        vgt=components.vgt(axes=[body_axes]),
         orientation=body_axes,
-        sensor=entities.conic_sensor(outer_half_angle_deg=8.0),
-        sensor_pointing=entities.fixed_sensor_pointing(
-            rotation=entities.az_el_rotation(
+        sensor=components.conic_sensor(outer_half_angle_deg=8.0),
+        sensor_pointing=components.fixed_sensor_pointing(
+            rotation=components.az_el_rotation(
                 azimuth_deg=0.0,
                 elevation_deg=-20.0,
             ),
@@ -250,23 +250,23 @@ def test_compute_embeds_constraints_in_from_and_to_paths(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls = record_raw_post(monkeypatch, ACCESS_RESPONSE)
-    ground_entity = entities.entity(
+    ground_entity = components.entity(
         name="Ground",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-155.468,
             latitude_deg=19.821,
             height_m=4205.0,
         ),
         constraints=[
-            entities.elevation_constraint(minimum_deg=10.0),
-            entities.range_constraint(maximum_km=2500.0, maximum_enabled=True),
+            components.elevation_constraint(minimum_deg=10.0),
+            components.range_constraint(maximum_km=2500.0, maximum_enabled=True),
         ],
     )
-    satellite = entities.entity(
+    satellite = components.entity(
         name="ISS",
-        position=entities.sgp4_position(tle_lines=list(iss().position.tle_lines)),
+        position=components.sgp4_position(tle_lines=list(iss().position.tle_lines)),
         constraints=[
-            entities.elevation_constraint(minimum_deg=5.0, maximum_deg=85.0, maximum_enabled=True),
+            components.elevation_constraint(minimum_deg=5.0, maximum_deg=85.0, maximum_enabled=True),
         ],
     )
 
@@ -326,14 +326,14 @@ def test_compute_embeds_constraints_in_from_and_to_paths(
                 "from_entity": {"Name": "Ground"},
                 "to_entity": iss(),
             },
-            "from_entity must be an astrox.entities.Entity value",
+            "from_entity must be an astrox.components.Entity value",
         ),
         (
             {
                 "from_entity": ground(),
                 "to_entity": "ISS",
             },
-            "to_entity must be an astrox.entities.Entity value",
+            "to_entity must be an astrox.components.Entity value",
         ),
     ],
 )

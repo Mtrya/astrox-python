@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Any
 
-from astrox import entities
+from astrox import components
 from astrox._http import raw
 
 from ._core import (
@@ -22,11 +22,11 @@ def post_coverage_input(
     start: str,
     stop: str,
     grid: CoverageGrid,
-    assets: Sequence[entities.Entity],
+    assets: Sequence[components.Entity],
     minimum_assets: int | None = None,
     exactly_assets: int | None = None,
-    grid_point_sensor: entities.EntitySensor | None = None,
-    grid_point_constraints: Sequence[entities.Constraint] | None = None,
+    grid_point_sensor: components.EntitySensor | None = None,
+    grid_point_constraints: Sequence[components.Constraint] | None = None,
     include_asset_access_results: bool | None = None,
     include_coverage_points: bool | None = None,
     step_s: float | None = None,
@@ -55,12 +55,12 @@ def post_value_by_grid_point_input(
     start: str,
     stop: str,
     grid: CoverageGrid,
-    assets: Sequence[entities.Entity],
+    assets: Sequence[components.Entity],
     compute_type: str | None = None,
     minimum_assets: int | None = None,
     exactly_assets: int | None = None,
-    grid_point_sensor: entities.EntitySensor | None = None,
-    grid_point_constraints: Sequence[entities.Constraint] | None = None,
+    grid_point_sensor: components.EntitySensor | None = None,
+    grid_point_constraints: Sequence[components.Constraint] | None = None,
     include_asset_access_results: bool | None = None,
     include_coverage_points: bool | None = None,
     step_s: float | None = None,
@@ -95,11 +95,11 @@ def post_time_value_by_grid_point_input(
     start: str,
     stop: str,
     grid: CoverageGrid,
-    assets: Sequence[entities.Entity],
+    assets: Sequence[components.Entity],
     minimum_assets: int | None = None,
     exactly_assets: int | None = None,
-    grid_point_sensor: entities.EntitySensor | None = None,
-    grid_point_constraints: Sequence[entities.Constraint] | None = None,
+    grid_point_sensor: components.EntitySensor | None = None,
+    grid_point_constraints: Sequence[components.Constraint] | None = None,
     include_asset_access_results: bool | None = None,
     include_coverage_points: bool | None = None,
     step_s: float | None = None,

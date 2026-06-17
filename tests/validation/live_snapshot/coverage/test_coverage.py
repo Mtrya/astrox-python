@@ -13,7 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrox import coverage, entities, exceptions
+from astrox import coverage, components, exceptions
 from tests.validation._support import (
     LiveSnapshotCase,
     check_snapshot,
@@ -65,17 +65,17 @@ def cb_grid() -> coverage.CbLatLonGrid:
     )
 
 
-def relay() -> entities.Entity:
-    return entities.entity(
+def relay() -> components.Entity:
+    return components.entity(
         name="Relay",
-        position=entities.sgp4_position(tle_lines=TLE_LINES),
+        position=components.sgp4_position(tle_lines=TLE_LINES),
     )
 
 
-def ground_asset() -> entities.Entity:
-    return entities.entity(
+def ground_asset() -> components.Entity:
+    return components.entity(
         name="GroundAsset",
-        position=entities.site_position(
+        position=components.site_position(
             latitude_deg=0.0,
             longitude_deg=0.0,
             height_m=0.0,
@@ -112,8 +112,8 @@ def compute_with_grid_point_constraints() -> dict[str, Any]:
         assets=[relay()],
         minimum_assets=1,
         grid_point_constraints=[
-            entities.elevation_constraint(minimum_deg=0.0),
-            entities.range_constraint(maximum_km=5000.0, maximum_enabled=True),
+            components.elevation_constraint(minimum_deg=0.0),
+            components.range_constraint(maximum_km=5000.0, maximum_enabled=True),
         ],
         include_coverage_points=True,
         include_asset_access_results=True,

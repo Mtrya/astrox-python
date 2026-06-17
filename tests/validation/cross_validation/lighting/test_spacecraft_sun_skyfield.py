@@ -34,7 +34,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from skyfield.api import EarthSatellite, Loader
 
-from astrox import entities, lighting
+from astrox import components, lighting
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 
 
@@ -119,8 +119,8 @@ def skyfield_context(tle_lines: tuple[str, str]) -> SkyfieldSpacecraftContext:
     )
 
 
-def spacecraft_position(tle_lines: tuple[str, str]) -> entities.Sgp4Position:
-    return entities.sgp4_position(tle_lines=tle_lines)
+def spacecraft_position(tle_lines: tuple[str, str]) -> components.Sgp4Position:
+    return components.sgp4_position(tle_lines=tle_lines)
 
 
 def astrox_solar_aer(case: SpacecraftSolarAerCase) -> list[dict[str, object]]:

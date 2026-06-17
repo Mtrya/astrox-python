@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Any
 
-from astrox import entities
+from astrox import components
 
 from ._core import CoverageGrid
 from ._fom import post_coverage_input, post_time_value_by_grid_point_input
@@ -23,11 +23,11 @@ def by_grid_point(
     start: str,
     stop: str,
     grid: CoverageGrid,
-    assets: Sequence[entities.Entity],
+    assets: Sequence[components.Entity],
     minimum_assets: int | None = None,
     exactly_assets: int | None = None,
-    grid_point_sensor: entities.EntitySensor | None = None,
-    grid_point_constraints: Sequence[entities.Constraint] | None = None,
+    grid_point_sensor: components.EntitySensor | None = None,
+    grid_point_constraints: Sequence[components.Constraint] | None = None,
     include_asset_access_results: bool | None = None,
     include_coverage_points: bool | None = None,
     step_s: float | None = None,
@@ -57,11 +57,11 @@ def by_grid_point_at_time(
     start: str,
     stop: str,
     grid: CoverageGrid,
-    assets: Sequence[entities.Entity],
+    assets: Sequence[components.Entity],
     minimum_assets: int | None = None,
     exactly_assets: int | None = None,
-    grid_point_sensor: entities.EntitySensor | None = None,
-    grid_point_constraints: Sequence[entities.Constraint] | None = None,
+    grid_point_sensor: components.EntitySensor | None = None,
+    grid_point_constraints: Sequence[components.Constraint] | None = None,
     include_asset_access_results: bool | None = None,
     include_coverage_points: bool | None = None,
     step_s: float | None = None,
@@ -91,11 +91,11 @@ def grid_stats(
     start: str,
     stop: str,
     grid: CoverageGrid,
-    assets: Sequence[entities.Entity],
+    assets: Sequence[components.Entity],
     minimum_assets: int | None = None,
     exactly_assets: int | None = None,
-    grid_point_sensor: entities.EntitySensor | None = None,
-    grid_point_constraints: Sequence[entities.Constraint] | None = None,
+    grid_point_sensor: components.EntitySensor | None = None,
+    grid_point_constraints: Sequence[components.Constraint] | None = None,
     include_asset_access_results: bool | None = None,
     include_coverage_points: bool | None = None,
     step_s: float | None = None,
@@ -124,11 +124,11 @@ def grid_stats_over_time(
     start: str,
     stop: str,
     grid: CoverageGrid,
-    assets: Sequence[entities.Entity],
+    assets: Sequence[components.Entity],
     minimum_assets: int | None = None,
     exactly_assets: int | None = None,
-    grid_point_sensor: entities.EntitySensor | None = None,
-    grid_point_constraints: Sequence[entities.Constraint] | None = None,
+    grid_point_sensor: components.EntitySensor | None = None,
+    grid_point_constraints: Sequence[components.Constraint] | None = None,
     include_asset_access_results: bool | None = None,
     include_coverage_points: bool | None = None,
     step_s: float | None = None,

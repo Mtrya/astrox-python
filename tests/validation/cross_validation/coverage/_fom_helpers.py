@@ -7,7 +7,7 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import Any
 
-from astrox import coverage, entities
+from astrox import coverage, components
 
 START = "2024-01-01T00:00:00.000Z"
 STOP = "2024-01-01T00:30:00.000Z"
@@ -49,22 +49,22 @@ def no_coverage_grid() -> coverage.LatLonGrid:
     )
 
 
-def sgp4_asset(name: str, tle_lines: tuple[str, str] = TLE_A) -> entities.Entity:
-    return entities.entity(
+def sgp4_asset(name: str, tle_lines: tuple[str, str] = TLE_A) -> components.Entity:
+    return components.entity(
         name=name,
-        position=entities.sgp4_position(tle_lines=tle_lines),
+        position=components.sgp4_position(tle_lines=tle_lines),
     )
 
 
-def primary_asset() -> entities.Entity:
+def primary_asset() -> components.Entity:
     return sgp4_asset("RelayA")
 
 
-def duplicate_assets() -> list[entities.Entity]:
+def duplicate_assets() -> list[components.Entity]:
     return [sgp4_asset("RelayA"), sgp4_asset("RelayA2")]
 
 
-def offset_assets() -> list[entities.Entity]:
+def offset_assets() -> list[components.Entity]:
     return [sgp4_asset("RelayA"), sgp4_asset("RelayB", TLE_B_OFFSET_RAAN)]
 
 
@@ -73,12 +73,12 @@ def compute_trace(
     start: str = START,
     stop: str = STOP,
     grid: coverage.CoverageGrid | None = None,
-    assets: list[entities.Entity] | None = None,
+    assets: list[components.Entity] | None = None,
     step_s: float = 60.0,
     minimum_assets: int | None = 1,
     exactly_assets: int | None = None,
-    grid_point_sensor: entities.EntitySensor | None = None,
-    grid_point_constraints: Sequence[entities.Constraint] | None = None,
+    grid_point_sensor: components.EntitySensor | None = None,
+    grid_point_constraints: Sequence[components.Constraint] | None = None,
 ) -> dict[str, Any]:
     return coverage.compute(
         start=start,

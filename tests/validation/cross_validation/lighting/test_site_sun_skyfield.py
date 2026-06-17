@@ -43,7 +43,7 @@ try:
 except ImportError:
     _skyfield_astrometric_to_altaz = None
 
-from astrox import entities, lighting
+from astrox import components, lighting
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 
 
@@ -175,8 +175,8 @@ LIGHTING_TIME_CALIBRATION_CASES = (GREENWICH_JAN_DAY,)
 SOLAR_INTENSITY_GRAZING_CALIBRATION_CASES = (HAWAII_JAN_SUNSET,)
 
 
-def site_position(case: SiteCase) -> entities.SitePosition:
-    return entities.site_position(
+def site_position(case: SiteCase) -> components.SitePosition:
+    return components.site_position(
         longitude_deg=case.longitude_deg,
         latitude_deg=case.latitude_deg,
         height_m=case.height_m,

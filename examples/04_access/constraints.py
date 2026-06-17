@@ -6,7 +6,7 @@
 
 import math
 
-from astrox import access, entities
+from astrox import access, components
 
 
 ISS_TLE = (
@@ -16,22 +16,22 @@ ISS_TLE = (
 
 
 def main() -> None:
-    ground = entities.entity(
+    ground = components.entity(
         name="Ground",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-155.468,
             latitude_deg=19.821,
             height_m=4205.0,
         ),
         constraints=[
-            entities.elevation_constraint(minimum_deg=10.0),
-            entities.range_constraint(maximum_km=2500.0, maximum_enabled=True),
+            components.elevation_constraint(minimum_deg=10.0),
+            components.range_constraint(maximum_km=2500.0, maximum_enabled=True),
         ],
     )
 
-    satellite = entities.entity(
+    satellite = components.entity(
         name="ISS",
-        position=entities.sgp4_position(tle_lines=ISS_TLE),
+        position=components.sgp4_position(tle_lines=ISS_TLE),
     )
 
     result = access.compute(
@@ -51,15 +51,15 @@ def main() -> None:
     # A flat azimuth/elevation mask behaves like an elevation minimum that
     # varies with azimuth. AzEl masks are only meaningful for SitePosition
     # participants; attaching one to a moving position source raises an error.
-    masked_ground = entities.entity(
+    masked_ground = components.entity(
         name="MaskedGround",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-155.468,
             latitude_deg=19.821,
             height_m=4205.0,
         ),
         constraints=[
-            entities.az_el_mask_constraint(
+            components.az_el_mask_constraint(
                 az_el_mask_rad=[
                     0.0,
                     math.radians(20.0),

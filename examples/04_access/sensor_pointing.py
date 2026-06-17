@@ -4,7 +4,7 @@
 # ///
 """Access from a calibrated VVLH satellite sensor to a ground site."""
 
-from astrox import access, entities, orbits
+from astrox import access, components, orbits
 
 
 START = "2024-01-01T00:00:00.000Z"
@@ -12,7 +12,7 @@ STOP = "2024-01-01T02:00:00.000Z"
 EARTH_MU_M3_S2 = 398600441500000.0
 
 
-def observer_satellite() -> entities.Entity:
+def observer_satellite() -> components.Entity:
     orbit = orbits.keplerian(
         semi_major_axis_m=6878137.0,
         eccentricity=0.001,
@@ -21,9 +21,9 @@ def observer_satellite() -> entities.Entity:
         raan_deg=20.0,
         true_anomaly_deg=10.0,
     )
-    return entities.entity(
+    return components.entity(
         name="ObserverSat",
-        position=entities.two_body_position(
+        position=components.two_body_position(
             orbit_epoch=START,
             orbit=orbit,
             start=START,
@@ -31,10 +31,10 @@ def observer_satellite() -> entities.Entity:
             step_s=120.0,
             gravitational_parameter_m3_s2=EARTH_MU_M3_S2,
         ),
-        orientation=entities.vvlh_axes(),
-        sensor=entities.conic_sensor(outer_half_angle_deg=8.0),
-        sensor_pointing=entities.fixed_sensor_pointing(
-            rotation=entities.quaternion_rotation(
+        orientation=components.vvlh_axes(),
+        sensor=components.conic_sensor(outer_half_angle_deg=8.0),
+        sensor_pointing=components.fixed_sensor_pointing(
+            rotation=components.quaternion_rotation(
                 scalar=1.0,
                 x=0.0,
                 y=0.0,
@@ -44,10 +44,10 @@ def observer_satellite() -> entities.Entity:
     )
 
 
-def target_site() -> entities.Entity:
-    return entities.entity(
+def target_site() -> components.Entity:
+    return components.entity(
         name="TargetSite",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-72.7164158261611,
             latitude_deg=7.1862428649977526,
             height_m=0.0,

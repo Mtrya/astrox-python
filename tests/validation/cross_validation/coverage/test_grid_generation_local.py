@@ -45,7 +45,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrox import coverage, entities
+from astrox import coverage, components
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 
 
@@ -445,9 +445,9 @@ def test_compute_coverage_points_match_get_grid_points_ordering() -> None:
         max_longitude_deg=-110.0,
         resolution_deg=5.0,
     )
-    asset = entities.entity(
+    asset = components.entity(
         name="Relay",
-        position=entities.sgp4_position(tle_lines=TLE_LINES),
+        position=components.sgp4_position(tle_lines=TLE_LINES),
     )
     expected = coverage.grid_points(grid=grid)["Points"]["GridPoints"]
     result = coverage.compute(
@@ -693,9 +693,9 @@ def main() -> int:
             max_longitude_deg=-110.0,
             resolution_deg=5.0,
         )
-        asset = entities.entity(
+        asset = components.entity(
             name="Relay",
-            position=entities.sgp4_position(tle_lines=TLE_LINES),
+            position=components.sgp4_position(tle_lines=TLE_LINES),
         )
         expected = coverage.grid_points(grid=grid)["Points"]["GridPoints"]
         result = coverage.compute(

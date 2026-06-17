@@ -4,7 +4,7 @@
 # ///
 """Coverage figure-of-merit routes grouped by metric namespace."""
 
-from astrox import coverage, entities
+from astrox import coverage, components
 
 
 ISS_TLE = (
@@ -21,9 +21,9 @@ def main() -> None:
         max_longitude_deg=-110.0,
         resolution_deg=5.0,
     )
-    relay = entities.entity(
+    relay = components.entity(
         name="Relay",
-        position=entities.sgp4_position(tle_lines=ISS_TLE),
+        position=components.sgp4_position(tle_lines=ISS_TLE),
     )
     common = {
         "start": "2024-01-01T00:00:00.000Z",

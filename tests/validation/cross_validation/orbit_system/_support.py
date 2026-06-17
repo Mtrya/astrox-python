@@ -24,7 +24,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrox import entities, orbits
+from astrox import components, orbits
 
 
 EPOCH = "2024-01-01T00:00:00Z"
@@ -164,7 +164,7 @@ def _sample_static_position(
     inertial_longitude_deg: float,
     reference_frame: str,
     central_body: str = "Earth",
-) -> entities.CzmlPosition:
+) -> components.CzmlPosition:
     """Build a static, equatorial CZML sample in the requested frame."""
     longitude_rad = math.radians(inertial_longitude_deg)
     dt_s = SAMPLE_DURATION_S / (SAMPLE_COUNT - 1)
@@ -177,7 +177,7 @@ def _sample_static_position(
             SAMPLE_RADIUS_M * math.sin(longitude_rad),
             0.0,
         ]
-    return entities.czml_position(
+    return components.czml_position(
         epoch=epoch,
         central_body=central_body,
         reference_frame=reference_frame,
@@ -192,14 +192,14 @@ def _sample_origin_position(
     epoch: str = EPOCH,
     reference_frame: str,
     central_body: str = "Earth",
-) -> entities.CzmlPosition:
+) -> components.CzmlPosition:
     """Build an origin (zero-radius) CZML sample to isolate translation."""
     dt_s = SAMPLE_DURATION_S / (SAMPLE_COUNT - 1)
     cartesian: list[float] = []
     for index in range(SAMPLE_COUNT):
         t_s = index * dt_s
         cartesian += [t_s, 0.0, 0.0, 0.0]
-    return entities.czml_position(
+    return components.czml_position(
         epoch=epoch,
         central_body=central_body,
         reference_frame=reference_frame,
@@ -218,7 +218,7 @@ def _build_libration_czml(
     sample_count: int = SAMPLE_COUNT,
     interpolation_degree: int = 7,
     with_velocity: bool = False,
-) -> entities.CzmlPosition:
+) -> components.CzmlPosition:
     """Build a CZML sample for ``orbits.earth_moon_libration``."""
     longitude_rad = math.radians(inertial_longitude_deg)
     dt_s = SAMPLE_DURATION_S / (sample_count - 1)
@@ -232,7 +232,7 @@ def _build_libration_czml(
         cartesian += [t_s, x, y, z]
         if with_velocity:
             velocity += [t_s, 0.0, 0.0, 0.0]
-    return entities.czml_position(
+    return components.czml_position(
         epoch=epoch,
         central_body=central_body,
         reference_frame=reference_frame,

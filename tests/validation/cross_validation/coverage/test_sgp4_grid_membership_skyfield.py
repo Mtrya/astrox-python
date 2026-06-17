@@ -29,7 +29,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrox import coverage, entities
+from astrox import coverage, components
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 from tests.validation.cross_validation.access._cases import (
     CrossValidationError,
@@ -62,10 +62,10 @@ def sample_grid() -> coverage.LatLonGrid:
     )
 
 
-def sgp4_asset() -> entities.Entity:
-    return entities.entity(
+def sgp4_asset() -> components.Entity:
+    return components.entity(
         name="RelayA",
-        position=entities.sgp4_position(tle_lines=TLE_LINES),
+        position=components.sgp4_position(tle_lines=TLE_LINES),
     )
 
 

@@ -6,7 +6,7 @@ from dataclasses import FrozenInstanceError, is_dataclass
 
 import pytest
 
-from astrox import entities, orbits, propagator
+from astrox import components, orbits, propagator
 from tests.sdk.helpers import assert_canonical_equal
 
 
@@ -41,56 +41,56 @@ def sample_state() -> orbits.CartesianState:
 
 
 def test_public_entity_names_are_exported() -> None:
-    assert "AlignedAndConstrainedAxes" in entities.__all__
-    assert "AzElMaskConstraint" in entities.__all__
-    assert "AzElRotation" in entities.__all__
-    assert "CompositeAxes" in entities.__all__
-    assert "Constraint" in entities.__all__
-    assert "CzmlAxes" in entities.__all__
-    assert "Entity" in entities.__all__
-    assert "EntityAxes" in entities.__all__
-    assert "EntityGroup" in entities.__all__
-    assert "ElevationConstraint" in entities.__all__
-    assert "EulerRotation" in entities.__all__
-    assert "FixedAtEpochAxes" in entities.__all__
-    assert "FixedAxes" in entities.__all__
-    assert "FixedSensorPointing" in entities.__all__
-    assert "LvlhAxes" in entities.__all__
-    assert "QuaternionRotation" in entities.__all__
-    assert "RangeConstraint" in entities.__all__
-    assert "Rotation" in entities.__all__
-    assert "RaDecDirection" in entities.__all__
-    assert "SensorPointing" in entities.__all__
-    assert "SitePosition" in entities.__all__
-    assert "CentralBodyPosition" in entities.__all__
-    assert "J2Position" in entities.__all__
-    assert "TwoBodyPosition" in entities.__all__
-    assert "Sgp4Position" in entities.__all__
-    assert "CzmlPosition" in entities.__all__
-    assert "CzmlPositions" in entities.__all__
-    assert "HpopPosition" in entities.__all__
-    assert "SimpleAscentPosition" in entities.__all__
-    assert "BallisticPosition" in entities.__all__
-    assert "ConicSensor" in entities.__all__
-    assert "RectangularSensor" in entities.__all__
-    assert "VgtAngle" in entities.__all__
-    assert "VgtDirection" in entities.__all__
-    assert "VgtFixedVector" in entities.__all__
-    assert "VgtPlane" in entities.__all__
-    assert "VgtPoint" in entities.__all__
-    assert "VgtProvider" in entities.__all__
-    assert "VgtSystem" in entities.__all__
-    assert "VgtVector" in entities.__all__
-    assert "VncAxes" in entities.__all__
-    assert "VvlhAxes" in entities.__all__
-    assert "XyzDirection" in entities.__all__
-    assert "az_el_mask_constraint" in entities.__all__
-    assert "elevation_constraint" in entities.__all__
-    assert "range_constraint" in entities.__all__
+    assert "AlignedAndConstrainedAxes" in components.__all__
+    assert "AzElMaskConstraint" in components.__all__
+    assert "AzElRotation" in components.__all__
+    assert "CompositeAxes" in components.__all__
+    assert "Constraint" in components.__all__
+    assert "CzmlAxes" in components.__all__
+    assert "Entity" in components.__all__
+    assert "EntityAxes" in components.__all__
+    assert "EntityGroup" in components.__all__
+    assert "ElevationConstraint" in components.__all__
+    assert "EulerRotation" in components.__all__
+    assert "FixedAtEpochAxes" in components.__all__
+    assert "FixedAxes" in components.__all__
+    assert "FixedSensorPointing" in components.__all__
+    assert "LvlhAxes" in components.__all__
+    assert "QuaternionRotation" in components.__all__
+    assert "RangeConstraint" in components.__all__
+    assert "Rotation" in components.__all__
+    assert "RaDecDirection" in components.__all__
+    assert "SensorPointing" in components.__all__
+    assert "SitePosition" in components.__all__
+    assert "CentralBodyPosition" in components.__all__
+    assert "J2Position" in components.__all__
+    assert "TwoBodyPosition" in components.__all__
+    assert "Sgp4Position" in components.__all__
+    assert "CzmlPosition" in components.__all__
+    assert "CzmlPositions" in components.__all__
+    assert "HpopPosition" in components.__all__
+    assert "SimpleAscentPosition" in components.__all__
+    assert "BallisticPosition" in components.__all__
+    assert "ConicSensor" in components.__all__
+    assert "RectangularSensor" in components.__all__
+    assert "VgtAngle" in components.__all__
+    assert "VgtDirection" in components.__all__
+    assert "VgtFixedVector" in components.__all__
+    assert "VgtPlane" in components.__all__
+    assert "VgtPoint" in components.__all__
+    assert "VgtProvider" in components.__all__
+    assert "VgtSystem" in components.__all__
+    assert "VgtVector" in components.__all__
+    assert "VncAxes" in components.__all__
+    assert "VvlhAxes" in components.__all__
+    assert "XyzDirection" in components.__all__
+    assert "az_el_mask_constraint" in components.__all__
+    assert "elevation_constraint" in components.__all__
+    assert "range_constraint" in components.__all__
 
 
 def test_site_position_has_typed_and_site_only_wire_forms() -> None:
-    position = entities.site_position(
+    position = components.site_position(
         longitude_deg=-155.468,
         latitude_deg=19.821,
         height_m=4205.0,
@@ -100,7 +100,7 @@ def test_site_position_has_typed_and_site_only_wire_forms() -> None:
     )
 
     assert is_dataclass(position)
-    assert isinstance(position, entities.SitePosition)
+    assert isinstance(position, components.SitePosition)
     assert_canonical_equal(
         position.to_wire(),
         {
@@ -126,7 +126,7 @@ def test_site_position_has_typed_and_site_only_wire_forms() -> None:
 
 
 def test_site_position_omits_server_owned_defaults() -> None:
-    position = entities.site_position(
+    position = components.site_position(
         longitude_deg=-155.468,
         latitude_deg=19.821,
         height_m=4205.0,
@@ -142,7 +142,7 @@ def test_site_position_omits_server_owned_defaults() -> None:
 
 
 def test_czml_position_lowers_supplied_samples_without_defaults() -> None:
-    position = entities.czml_position(
+    position = components.czml_position(
         epoch="2024-01-01T00:00:00.000Z",
         reference_frame="INERTIAL",
         interpolation_algorithm="LAGRANGE",
@@ -150,7 +150,7 @@ def test_czml_position_lowers_supplied_samples_without_defaults() -> None:
         cartesian_velocity=[0.0, 7000000.0, 0.0, 0.0, 0.0, 7500.0, 0.0],
     )
 
-    assert isinstance(position, entities.CzmlPosition)
+    assert isinstance(position, components.CzmlPosition)
     assert_canonical_equal(
         position.to_wire(),
         {
@@ -165,18 +165,18 @@ def test_czml_position_lowers_supplied_samples_without_defaults() -> None:
 
 
 def test_czml_positions_lowers_composite_samples_without_item_discriminators() -> None:
-    first = entities.czml_position(
+    first = components.czml_position(
         epoch="2024-01-01T00:00:00.000Z",
         cartesian=[0.0, 7000000.0, 0.0, 0.0],
     )
-    second = entities.czml_position(
+    second = components.czml_position(
         epoch="2024-01-01T00:01:00.000Z",
         cartesian=[60.0, 6990000.0, 1000.0, 0.0],
     )
 
-    position = entities.czml_positions([first, second], central_body="Earth")
+    position = components.czml_positions([first, second], central_body="Earth")
 
-    assert isinstance(position, entities.CzmlPositions)
+    assert isinstance(position, components.CzmlPositions)
     assert_canonical_equal(
         position.to_wire(),
         {
@@ -197,14 +197,14 @@ def test_czml_positions_lowers_composite_samples_without_item_discriminators() -
 
 
 def test_central_body_position_lowers_named_body() -> None:
-    position = entities.central_body_position("Sun")
+    position = components.central_body_position("Sun")
 
-    assert isinstance(position, entities.CentralBodyPosition)
+    assert isinstance(position, components.CentralBodyPosition)
     assert_canonical_equal(position.to_wire(), {"$type": "CentralBody", "Name": "Sun"})
 
 
 def test_j2_position_lowers_keplerian_source_and_explicit_options() -> None:
-    position = entities.j2_position(
+    position = components.j2_position(
         orbit_epoch="2024-01-01T00:00:00.000Z",
         orbit=sample_orbit(),
         start="2024-01-01T00:00:00.000Z",
@@ -217,7 +217,7 @@ def test_j2_position_lowers_keplerian_source_and_explicit_options() -> None:
         ref_distance_m=6378136.3,
     )
 
-    assert isinstance(position, entities.J2Position)
+    assert isinstance(position, components.J2Position)
     assert_canonical_equal(
         position.to_wire(),
         {
@@ -238,12 +238,12 @@ def test_j2_position_lowers_keplerian_source_and_explicit_options() -> None:
 
 
 def test_two_body_position_lowers_keplerian_source_without_optional_defaults() -> None:
-    position = entities.two_body_position(
+    position = components.two_body_position(
         orbit_epoch="2024-01-01T00:00:00.000Z",
         orbit=sample_orbit(),
     )
 
-    assert isinstance(position, entities.TwoBodyPosition)
+    assert isinstance(position, components.TwoBodyPosition)
     assert_canonical_equal(
         position.to_wire(),
         {
@@ -256,7 +256,7 @@ def test_two_body_position_lowers_keplerian_source_without_optional_defaults() -
 
 
 def test_sgp4_position_lowers_tle_lines_and_supplied_options() -> None:
-    position = entities.sgp4_position(
+    position = components.sgp4_position(
         tle_lines=list(TLE_LINES),
         start="2024-01-01T00:00:00.000Z",
         stop="2024-01-01T00:10:00.000Z",
@@ -264,7 +264,7 @@ def test_sgp4_position_lowers_tle_lines_and_supplied_options() -> None:
         satellite_number="25544",
     )
 
-    assert isinstance(position, entities.Sgp4Position)
+    assert isinstance(position, components.Sgp4Position)
     assert position.tle_lines == TLE_LINES
     assert_canonical_equal(
         position.to_wire(),
@@ -285,7 +285,7 @@ def test_hpop_position_lowers_classical_or_cartesian_source() -> None:
         gravity=propagator.hpop_two_body_gravity(),
     )
 
-    classical = entities.hpop_position(
+    classical = components.hpop_position(
         start="2024-01-01T00:00:00.000Z",
         stop="2024-01-01T00:10:00.000Z",
         orbit_epoch="2024-01-01T00:00:00.000Z",
@@ -294,14 +294,14 @@ def test_hpop_position_lowers_classical_or_cartesian_source() -> None:
         coord_system="GCRF",
         gravitational_parameter_m3_s2=398600441500000.0,
     )
-    cartesian = entities.hpop_position(
+    cartesian = components.hpop_position(
         start="2024-01-01T00:00:00.000Z",
         stop="2024-01-01T00:10:00.000Z",
         orbit_epoch="2024-01-01T00:00:00.000Z",
         state=sample_state(),
     )
 
-    assert isinstance(classical, entities.HpopPosition)
+    assert isinstance(classical, components.HpopPosition)
     assert_canonical_equal(
         classical.to_wire(),
         {
@@ -333,7 +333,7 @@ def test_hpop_position_lowers_classical_or_cartesian_source() -> None:
 
 
 def test_simple_ascent_position_lowers_required_inputs_and_supplied_options() -> None:
-    position = entities.simple_ascent_position(
+    position = components.simple_ascent_position(
         start="2024-01-01T00:00:00.000Z",
         stop="2024-01-01T00:30:00.000Z",
         launch_latitude_deg=40.0,
@@ -347,7 +347,7 @@ def test_simple_ascent_position_lowers_required_inputs_and_supplied_options() ->
         central_body="Earth",
     )
 
-    assert isinstance(position, entities.SimpleAscentPosition)
+    assert isinstance(position, components.SimpleAscentPosition)
     assert_canonical_equal(
         position.to_wire(),
         {
@@ -368,7 +368,7 @@ def test_simple_ascent_position_lowers_required_inputs_and_supplied_options() ->
 
 
 def test_ballistic_position_lowers_branch_inputs_and_supplied_options() -> None:
-    position = entities.ballistic_position(
+    position = components.ballistic_position(
         start="2024-01-01T00:00:00.000Z",
         ballistic_type="DeltaV",
         ballistic_type_value=5000.0,
@@ -380,7 +380,7 @@ def test_ballistic_position_lowers_branch_inputs_and_supplied_options() -> None:
         impact_longitude_deg=102.0,
     )
 
-    assert isinstance(position, entities.BallisticPosition)
+    assert isinstance(position, components.BallisticPosition)
     assert_canonical_equal(
         position.to_wire(),
         {
@@ -400,7 +400,7 @@ def test_ballistic_position_lowers_branch_inputs_and_supplied_options() -> None:
 
 def test_sensor_constructors_lower_discriminated_fragments() -> None:
     assert_canonical_equal(
-        entities.conic_sensor(
+        components.conic_sensor(
             inner_half_angle_deg=1.0,
             outer_half_angle_deg=30.0,
             minimum_clock_angle_deg=10.0,
@@ -417,7 +417,7 @@ def test_sensor_constructors_lower_discriminated_fragments() -> None:
         },
     )
     assert_canonical_equal(
-        entities.rectangular_sensor(
+        components.rectangular_sensor(
             x_half_angle_deg=5.0,
             y_half_angle_deg=10.0,
             text="rect-camera",
@@ -433,7 +433,7 @@ def test_sensor_constructors_lower_discriminated_fragments() -> None:
 
 def test_constraint_constructors_lower_discriminated_fragments() -> None:
     assert_canonical_equal(
-        entities.elevation_constraint(
+        components.elevation_constraint(
             minimum_deg=10.0,
             maximum_deg=80.0,
             maximum_enabled=True,
@@ -448,7 +448,7 @@ def test_constraint_constructors_lower_discriminated_fragments() -> None:
         },
     )
     assert_canonical_equal(
-        entities.range_constraint(
+        components.range_constraint(
             minimum_km=100.0,
             maximum_km=2500.0,
             maximum_enabled=True,
@@ -463,7 +463,7 @@ def test_constraint_constructors_lower_discriminated_fragments() -> None:
         },
     )
     assert_canonical_equal(
-        entities.az_el_mask_constraint(
+        components.az_el_mask_constraint(
             az_el_mask_rad=[0.0, 0.1, 1.57079632679, 0.2],
             max_range_km=5000.0,
             text="terrain mask",
@@ -479,27 +479,27 @@ def test_constraint_constructors_lower_discriminated_fragments() -> None:
 
 def test_constraints_omit_unsupplied_optional_keys() -> None:
     assert_canonical_equal(
-        entities.elevation_constraint(minimum_deg=5.0).to_wire(),
+        components.elevation_constraint(minimum_deg=5.0).to_wire(),
         {"$type": "ElevationAngle", "MinimumValue": 5.0},
     )
     assert_canonical_equal(
-        entities.elevation_constraint(maximum_deg=80.0).to_wire(),
+        components.elevation_constraint(maximum_deg=80.0).to_wire(),
         {"$type": "ElevationAngle", "MaximumValue": 80.0},
     )
     assert_canonical_equal(
-        entities.range_constraint(minimum_km=100.0).to_wire(),
+        components.range_constraint(minimum_km=100.0).to_wire(),
         {"$type": "Range", "MinimumValue": 100.0},
     )
     assert_canonical_equal(
-        entities.range_constraint(maximum_km=2500.0).to_wire(),
+        components.range_constraint(maximum_km=2500.0).to_wire(),
         {"$type": "Range", "MaximumValue": 2500.0},
     )
     assert_canonical_equal(
-        entities.az_el_mask_constraint(az_el_mask_rad=[0.0, 0.1]).to_wire(),
+        components.az_el_mask_constraint(az_el_mask_rad=[0.0, 0.1]).to_wire(),
         {"$type": "AzElMask", "AzElMaskData": [0.0, 0.1]},
     )
     assert_canonical_equal(
-        entities.az_el_mask_constraint(
+        components.az_el_mask_constraint(
             az_el_mask_rad=[0.0, 0.1],
             max_range_km=123.0,
         ).to_wire(),
@@ -512,15 +512,15 @@ def test_constraints_omit_unsupplied_optional_keys() -> None:
 
 
 def test_entity_composes_position_and_sensor_metadata() -> None:
-    sat = entities.entity(
+    sat = components.entity(
         name="ISS",
         description="Representative spacecraft",
-        position=entities.sgp4_position(tle_lines=TLE_LINES),
-        sensor=entities.conic_sensor(outer_half_angle_deg=30.0),
+        position=components.sgp4_position(tle_lines=TLE_LINES),
+        sensor=components.conic_sensor(outer_half_angle_deg=30.0),
     )
 
     assert is_dataclass(sat)
-    assert isinstance(sat, entities.Entity)
+    assert isinstance(sat, components.Entity)
     assert_canonical_equal(
         sat.to_wire(),
         {
@@ -539,22 +539,22 @@ def test_entity_composes_position_and_sensor_metadata() -> None:
 
 
 def test_entity_composes_constraints_metadata() -> None:
-    site = entities.entity(
+    site = components.entity(
         name="Ground",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-155.468,
             latitude_deg=19.821,
             height_m=4205.0,
         ),
         constraints=[
-            entities.elevation_constraint(minimum_deg=5.0),
-            entities.range_constraint(maximum_km=3000.0, maximum_enabled=True),
+            components.elevation_constraint(minimum_deg=5.0),
+            components.range_constraint(maximum_km=3000.0, maximum_enabled=True),
         ],
     )
 
     assert site.constraints == (
-        entities.elevation_constraint(minimum_deg=5.0),
-        entities.range_constraint(maximum_km=3000.0, maximum_enabled=True),
+        components.elevation_constraint(minimum_deg=5.0),
+        components.range_constraint(maximum_km=3000.0, maximum_enabled=True),
     )
     assert_canonical_equal(
         site.to_wire(),
@@ -580,9 +580,9 @@ def test_entity_composes_constraints_metadata() -> None:
 
 
 def test_entity_omits_constraints_when_none() -> None:
-    site = entities.entity(
+    site = components.entity(
         name="Ground",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-155.468,
             latitude_deg=19.821,
             height_m=4205.0,
@@ -595,15 +595,15 @@ def test_entity_omits_constraints_when_none() -> None:
 
 def test_rotation_fragments_lower_to_inner_orientation_wire_shapes() -> None:
     assert_canonical_equal(
-        entities.az_el_rotation(azimuth_deg=10.0, elevation_deg=-20.0).to_wire(),
+        components.az_el_rotation(azimuth_deg=10.0, elevation_deg=-20.0).to_wire(),
         {"$type": "AzEl", "Azimuth": 10.0, "Elevation": -20.0},
     )
     assert_canonical_equal(
-        entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0).to_wire(),
+        components.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0).to_wire(),
         {"$type": "Quaternion", "QS": 1.0, "QX": 0.0, "QY": 0.0, "QZ": 0.0},
     )
     assert_canonical_equal(
-        entities.euler_rotation(
+        components.euler_rotation(
             sequence="321",
             a_deg=1.0,
             b_deg=2.0,
@@ -615,7 +615,7 @@ def test_rotation_fragments_lower_to_inner_orientation_wire_shapes() -> None:
 
 def test_orbital_axes_lower_generic_and_relative_variants() -> None:
     assert_canonical_equal(
-        entities.vvlh_axes(
+        components.vvlh_axes(
             name="Body VVLH",
             description="body frame",
             start="2024-01-01T00:00:00.000Z",
@@ -630,32 +630,32 @@ def test_orbital_axes_lower_generic_and_relative_variants() -> None:
         },
     )
     assert_canonical_equal(
-        entities.vvlh_axes(relative_to="Earth").to_wire(),
+        components.vvlh_axes(relative_to="Earth").to_wire(),
         {"$type": "VVLH(Earth)"},
     )
     assert_canonical_equal(
-        entities.lvlh_axes(relative_to="CBF").to_wire(),
+        components.lvlh_axes(relative_to="CBF").to_wire(),
         {"$type": "LVLH(CBF)"},
     )
     assert_canonical_equal(
-        entities.vnc_axes(relative_to="Sun").to_wire(),
+        components.vnc_axes(relative_to="Sun").to_wire(),
         {"$type": "VNC(Sun)"},
     )
 
 
 def test_fixed_and_fixed_at_epoch_axes_lower_named_references() -> None:
-    body_axes = entities.vvlh_axes(name="Body VVLH")
-    fixed = entities.fixed_axes(
+    body_axes = components.vvlh_axes(name="Body VVLH")
+    fixed = components.fixed_axes(
         name="Camera Axes",
         reference_axes=body_axes,
-        rotation=entities.euler_rotation(
+        rotation=components.euler_rotation(
             sequence="321",
             a_deg=0.0,
             b_deg=20.0,
             c_deg=0.0,
         ),
     )
-    frozen = entities.fixed_at_epoch_axes(
+    frozen = components.fixed_at_epoch_axes(
         source_axes=fixed,
         reference_axes="ICRF",
         epoch="2024-01-01T00:00:00.000Z",
@@ -688,36 +688,36 @@ def test_fixed_and_fixed_at_epoch_axes_lower_named_references() -> None:
 
 
 def test_aligned_composite_and_czml_axes_lower_complete_wire_shapes() -> None:
-    body_axes = entities.vvlh_axes(name="Body VVLH")
-    boresight = entities.vgt_fixed_vector(
+    body_axes = components.vvlh_axes(name="Body VVLH")
+    boresight = components.vgt_fixed_vector(
         name="Boresight",
         reference_axes=body_axes,
-        direction=entities.xyz_direction(x=0.0, y=0.0, z=1.0),
+        direction=components.xyz_direction(x=0.0, y=0.0, z=1.0),
     )
-    sun_hint = entities.vgt_fixed_vector(
+    sun_hint = components.vgt_fixed_vector(
         name="Sun Hint",
         reference_axes="Body VVLH",
-        direction=entities.ra_dec_direction(
+        direction=components.ra_dec_direction(
             ra_deg=15.0,
             dec_deg=-5.0,
             magnitude=1.0,
         ),
     )
-    aligned = entities.aligned_and_constrained_axes(
+    aligned = components.aligned_and_constrained_axes(
         name="Aligned Camera",
         principal=boresight,
         principal_axis="+Z",
         reference=sun_hint,
         reference_axis="+X",
     )
-    czml = entities.czml_axes(
+    czml = components.czml_axes(
         epoch="2024-01-01T00:00:00.000Z",
         unit_quaternion_xyzw=[0.0, 0.0, 0.0, 1.0],
         central_body="Earth",
         interpolation_algorithm="LINEAR",
         interpolation_degree=1,
     )
-    composite = entities.composite_axes(intervals=[body_axes, aligned, czml])
+    composite = components.composite_axes(intervals=[body_axes, aligned, czml])
 
     assert_canonical_equal(
         aligned.to_wire(),
@@ -751,26 +751,26 @@ def test_aligned_composite_and_czml_axes_lower_complete_wire_shapes() -> None:
 
 
 def test_vgt_provider_lowers_named_geometry_collections() -> None:
-    body_axes = entities.vvlh_axes(name="Body VVLH")
-    vector = entities.vgt_fixed_vector(
+    body_axes = components.vvlh_axes(name="Body VVLH")
+    vector = components.vgt_fixed_vector(
         name="Boresight",
         reference_axes=body_axes,
-        direction=entities.xyz_direction(x=0.0, y=0.0, z=1.0),
+        direction=components.xyz_direction(x=0.0, y=0.0, z=1.0),
         description="sensor boresight",
     )
-    provider = entities.vgt(
+    provider = components.vgt(
         axes=[body_axes],
         vectors=[vector],
-        points=[entities.vgt_point(name="Target Point", description="point")],
-        systems=[entities.vgt_system(name="Body System")],
+        points=[components.vgt_point(name="Target Point", description="point")],
+        systems=[components.vgt_system(name="Body System")],
         angles=[
-            entities.vgt_angle(
+            components.vgt_angle(
                 name="Look Angle",
                 from_vector=vector,
                 to_vector="Boresight",
             )
         ],
-        planes=[entities.vgt_plane(name="Local Plane", plane_type="Fixed")],
+        planes=[components.vgt_plane(name="Local Plane", plane_type="Fixed")],
     )
 
     assert_canonical_equal(
@@ -802,12 +802,12 @@ def test_vgt_provider_lowers_named_geometry_collections() -> None:
 
 
 def test_fixed_sensor_pointing_lowers_rotation_without_requiring_sensor() -> None:
-    sat = entities.entity(
+    sat = components.entity(
         name="Observer",
-        position=entities.sgp4_position(tle_lines=TLE_LINES),
-        orientation=entities.vvlh_axes(),
-        sensor_pointing=entities.fixed_sensor_pointing(
-            rotation=entities.az_el_rotation(
+        position=components.sgp4_position(tle_lines=TLE_LINES),
+        orientation=components.vvlh_axes(),
+        sensor_pointing=components.fixed_sensor_pointing(
+            rotation=components.az_el_rotation(
                 azimuth_deg=0.0,
                 elevation_deg=-20.0,
             ),
@@ -838,26 +838,26 @@ def test_fixed_sensor_pointing_lowers_rotation_without_requiring_sensor() -> Non
 
 
 def test_entity_composes_vgt_orientation_sensor_and_pointing_metadata() -> None:
-    body_axes = entities.vvlh_axes(name="Body VVLH")
-    camera_axes = entities.fixed_axes(
+    body_axes = components.vvlh_axes(name="Body VVLH")
+    camera_axes = components.fixed_axes(
         name="Camera Axes",
         reference_axes=body_axes,
-        rotation=entities.euler_rotation(
+        rotation=components.euler_rotation(
             sequence="321",
             a_deg=0.0,
             b_deg=20.0,
             c_deg=0.0,
         ),
     )
-    sat = entities.entity(
+    sat = components.entity(
         name="Observer",
         description="Representative sensor platform",
-        position=entities.sgp4_position(tle_lines=TLE_LINES),
-        vgt=entities.vgt(axes=[body_axes, camera_axes]),
+        position=components.sgp4_position(tle_lines=TLE_LINES),
+        vgt=components.vgt(axes=[body_axes, camera_axes]),
         orientation=camera_axes,
-        sensor=entities.conic_sensor(outer_half_angle_deg=8.0),
-        sensor_pointing=entities.fixed_sensor_pointing(
-            rotation=entities.quaternion_rotation(
+        sensor=components.conic_sensor(outer_half_angle_deg=8.0),
+        sensor_pointing=components.fixed_sensor_pointing(
+            rotation=components.quaternion_rotation(
                 scalar=1.0,
                 x=0.0,
                 y=0.0,
@@ -898,15 +898,15 @@ def test_entity_composes_vgt_orientation_sensor_and_pointing_metadata() -> None:
 
 
 def test_entity_group_lowers_grouped_entities() -> None:
-    iss = entities.entity(
-        name="ISS", position=entities.sgp4_position(tle_lines=TLE_LINES)
+    iss = components.entity(
+        name="ISS", position=components.sgp4_position(tle_lines=TLE_LINES)
     )
-    hubble = entities.entity(
+    hubble = components.entity(
         name="Hubble",
-        position=entities.sgp4_position(tle_lines=TLE_LINES),
+        position=components.sgp4_position(tle_lines=TLE_LINES),
     )
 
-    group = entities.entity_group(
+    group = components.entity_group(
         name="Targets",
         members=[iss, hubble],
         from_restriction="AnyOf",
@@ -915,7 +915,7 @@ def test_entity_group_lowers_grouped_entities() -> None:
     )
 
     assert is_dataclass(group)
-    assert isinstance(group, entities.EntityGroup)
+    assert isinstance(group, components.EntityGroup)
     assert group.members == (iss, hubble)
     assert_canonical_equal(
         group.to_wire(),
@@ -934,55 +934,55 @@ def test_entity_group_lowers_grouped_entities() -> None:
     ("factory", "kwargs", "match"),
     [
         (
-            entities.j2_position,
+            components.j2_position,
             {"orbit_epoch": "2024-01-01T00:00:00.000Z", "orbit": ORBIT_WIRE},
             "orbit must be a KeplerianElements instance",
         ),
         (
-            entities.two_body_position,
+            components.two_body_position,
             {"orbit_epoch": "2024-01-01T00:00:00.000Z", "orbit": ORBIT_WIRE},
             "orbit must be a KeplerianElements instance",
         ),
         (
-            entities.sgp4_position,
+            components.sgp4_position,
             {"tle_lines": ["not enough"]},
             "tle_lines must be a two-item sequence of TLE strings",
         ),
         (
-            entities.czml_positions,
+            components.czml_positions,
             {"positions": [{"epoch": "2024-01-01T00:00:00.000Z"}]},
             "positions must be a sequence of CzmlPosition values",
         ),
         (
-            entities.czml_position,
+            components.czml_position,
             {"epoch": "2024-01-01T00:00:00.000Z", "cartesian": "1,2,3"},
             "cartesian must be a sequence of numbers",
         ),
         (
-            entities.czml_position,
+            components.czml_position,
             {"epoch": "2024-01-01T00:00:00.000Z", "cartesian": [0.0, "1.0", 2.0]},
             "cartesian must be a sequence of numbers",
         ),
         (
-            entities.czml_position,
+            components.czml_position,
             {"epoch": "2024-01-01T00:00:00.000Z", "cartesian_velocity": [0.0, True]},
             "cartesian_velocity must be a sequence of numbers",
         ),
         (
-            entities.az_el_rotation,
+            components.az_el_rotation,
             {"azimuth_deg": "0", "elevation_deg": 0.0},
             "azimuth_deg must be a number",
         ),
         (
-            entities.euler_rotation,
+            components.euler_rotation,
             {"sequence": 321, "a_deg": 0.0, "b_deg": 0.0, "c_deg": 0.0},
             "sequence must be a string",
         ),
         (
-            entities.fixed_axes,
+            components.fixed_axes,
             {
-                "reference_axes": entities.vvlh_axes(),
-                "rotation": entities.euler_rotation(
+                "reference_axes": components.vvlh_axes(),
+                "rotation": components.euler_rotation(
                     sequence="321",
                     a_deg=0.0,
                     b_deg=0.0,
@@ -992,7 +992,7 @@ def test_entity_group_lowers_grouped_entities() -> None:
             "reference_axes object must have a name",
         ),
         (
-            entities.fixed_sensor_pointing,
+            components.fixed_sensor_pointing,
             {
                 "rotation": {
                     "$type": "AzEl",
@@ -1000,10 +1000,10 @@ def test_entity_group_lowers_grouped_entities() -> None:
                     "Elevation": 0.0,
                 },
             },
-            "rotation must be an astrox.entities rotation value",
+            "rotation must be an astrox.components rotation value",
         ),
         (
-            entities.czml_axes,
+            components.czml_axes,
             {
                 "epoch": "2024-01-01T00:00:00.000Z",
                 "unit_quaternion_xyzw": [0.0, "0.0", 0.0, 1.0],
@@ -1011,55 +1011,55 @@ def test_entity_group_lowers_grouped_entities() -> None:
             "unit_quaternion_xyzw must be a sequence of numbers",
         ),
         (
-            entities.az_el_mask_constraint,
+            components.az_el_mask_constraint,
             {"az_el_mask_rad": [0.0, "0.1"]},
             "az_el_mask_rad must be a sequence of numbers",
         ),
         (
-            entities.vgt,
-            {"axes": [entities.vgt_point(name="not axes")]},
+            components.vgt,
+            {"axes": [components.vgt_point(name="not axes")]},
             "axes contains unsupported item values",
         ),
         (
-            entities.entity,
+            components.entity,
             {"name": "bad", "position": {"$type": "SitePosition"}},
-            "position must be an astrox.entities position value",
+            "position must be an astrox.components position value",
         ),
         (
-            entities.entity,
+            components.entity,
             {
                 "name": "bad",
-                "position": entities.sgp4_position(tle_lines=TLE_LINES),
-                "orientation": entities.az_el_rotation(
+                "position": components.sgp4_position(tle_lines=TLE_LINES),
+                "orientation": components.az_el_rotation(
                     azimuth_deg=0.0,
                     elevation_deg=0.0,
                 ),
             },
-            "orientation must be an astrox.entities axes value",
+            "orientation must be an astrox.components axes value",
         ),
         (
-            entities.entity,
+            components.entity,
             {
                 "name": "bad",
-                "position": entities.sgp4_position(tle_lines=TLE_LINES),
+                "position": components.sgp4_position(tle_lines=TLE_LINES),
                 "constraints": [{"$type": "ElevationAngle"}],
             },
             "constraints contains unsupported item values",
         ),
         (
-            entities.entity,
+            components.entity,
             {
                 "name": "bad",
-                "position": entities.sgp4_position(tle_lines=TLE_LINES),
-                "sensor_pointing": entities.az_el_rotation(
+                "position": components.sgp4_position(tle_lines=TLE_LINES),
+                "sensor_pointing": components.az_el_rotation(
                     azimuth_deg=0.0,
                     elevation_deg=0.0,
                 ),
             },
-            "sensor_pointing must be an astrox.entities sensor-pointing value",
+            "sensor_pointing must be an astrox.components sensor-pointing value",
         ),
         (
-            entities.entity_group,
+            components.entity_group,
             {"name": "bad", "members": [{"Name": "ISS"}]},
             "members must be a sequence of Entity values",
         ),
@@ -1074,12 +1074,12 @@ def test_constructors_reject_unsupported_shapes(
 
 def test_entity_group_rejects_unknown_restriction() -> None:
     with pytest.raises(ValueError, match="to_restriction must be one of"):
-        entities.entity_group(
+        components.entity_group(
             name="bad",
             members=[
-                entities.entity(
+                components.entity(
                     name="ISS",
-                    position=entities.sgp4_position(tle_lines=TLE_LINES),
+                    position=components.sgp4_position(tle_lines=TLE_LINES),
                 )
             ],
             to_restriction="AllOf",
@@ -1088,12 +1088,12 @@ def test_entity_group_rejects_unknown_restriction() -> None:
 
 def test_axes_reject_unknown_relative_to_variant() -> None:
     with pytest.raises(ValueError, match="relative_to must be one of"):
-        entities.vvlh_axes(relative_to="earth")
+        components.vvlh_axes(relative_to="earth")
 
 
 def test_aligned_axes_reject_unknown_axis_direction() -> None:
     with pytest.raises(ValueError, match="principal_axis must be one of"):
-        entities.aligned_and_constrained_axes(
+        components.aligned_and_constrained_axes(
             principal="Boresight",
             principal_axis="X",
             reference="Sun Hint",

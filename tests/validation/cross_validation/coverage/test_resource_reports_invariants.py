@@ -43,7 +43,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrox import coverage, entities, exceptions
+from astrox import coverage, components, exceptions
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 
 
@@ -75,10 +75,10 @@ def sample_grid() -> coverage.LatLonGrid:
     )
 
 
-def sgp4_asset(name: str, tle_lines: tuple[str, str] = TLE_A) -> entities.Entity:
-    return entities.entity(
+def sgp4_asset(name: str, tle_lines: tuple[str, str] = TLE_A) -> components.Entity:
+    return components.entity(
         name=name,
-        position=entities.sgp4_position(tle_lines=tle_lines),
+        position=components.sgp4_position(tle_lines=tle_lines),
     )
 
 

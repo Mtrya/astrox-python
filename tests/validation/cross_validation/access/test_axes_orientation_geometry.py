@@ -28,7 +28,7 @@ import sys
 
 import pytest
 
-from astrox import entities
+from astrox import components
 from astrox.exceptions import AstroxAPIError
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 from tests.validation.cross_validation.access._cases import CrossValidationError, START
@@ -62,7 +62,7 @@ from tests.validation.cross_validation.access._orientation import (
 def test_vvlh_generic_earth_and_cbf_match_local_vvlh_frame() -> None:
     configure_astrox_from_env()
     target = subpoint_site()
-    rotation = entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0)
+    rotation = components.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0)
     boresight = quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0) @ [0.0, 0.0, 1.0]
     expected = expected_site_intervals(
         site=target,
@@ -72,7 +72,7 @@ def test_vvlh_generic_earth_and_cbf_match_local_vvlh_frame() -> None:
     for relative_to in (None, "Earth", "CBF"):
         case = case_for_axes(
             case_id=f"vvlh_{relative_to or 'generic'}_nadir",
-            axes=entities.vvlh_axes(relative_to=relative_to),
+            axes=components.vvlh_axes(relative_to=relative_to),
             target=target,
             rotation=rotation,
             expected=expected,
@@ -83,7 +83,7 @@ def test_vvlh_generic_earth_and_cbf_match_local_vvlh_frame() -> None:
 def test_vvlh_and_vnc_along_track_branches_match_local_frame_candidates() -> None:
     configure_astrox_from_env()
     target = target_satellite(5.0)
-    rotation = entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0)
+    rotation = components.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0)
     expected_vvlh = expected_intervals(
         target_state=state_function(controlled_orbit(true_anomaly_offset_deg=5.0)),
         frame=vvlh_frame,
@@ -98,7 +98,7 @@ def test_vvlh_and_vnc_along_track_branches_match_local_frame_candidates() -> Non
         compare_sensor_case(
             case_for_axes(
                 case_id=f"vvlh_{relative_to or 'generic'}_along_track",
-                axes=entities.vvlh_axes(relative_to=relative_to),
+                axes=components.vvlh_axes(relative_to=relative_to),
                 target=target,
                 rotation=rotation,
                 expected=expected_vvlh,
@@ -107,7 +107,7 @@ def test_vvlh_and_vnc_along_track_branches_match_local_frame_candidates() -> Non
         compare_sensor_case(
             case_for_axes(
                 case_id=f"vnc_{relative_to or 'generic'}_along_track",
-                axes=entities.vnc_axes(relative_to=relative_to),
+                axes=components.vnc_axes(relative_to=relative_to),
                 target=target,
                 rotation=rotation,
                 expected=expected_vnc,
@@ -143,9 +143,9 @@ def test_vvlh_vnc_and_lvlh_cross_axis_discriminators_match_local_frame_candidate
         compare_sensor_case(
             case_for_axes(
                 case_id=f"vvlh_{relative_to or 'generic'}_cross_track",
-                axes=entities.vvlh_axes(relative_to=relative_to),
+                axes=components.vvlh_axes(relative_to=relative_to),
                 target=cross_track,
-                rotation=entities.az_el_rotation(azimuth_deg=90.0, elevation_deg=0.0),
+                rotation=components.az_el_rotation(azimuth_deg=90.0, elevation_deg=0.0),
                 expected=vvlh_cross_expected,
                 sensor=conic_sensor(20.0),
             )
@@ -153,9 +153,9 @@ def test_vvlh_vnc_and_lvlh_cross_axis_discriminators_match_local_frame_candidate
         compare_sensor_case(
             case_for_axes(
                 case_id=f"vnc_{relative_to or 'generic'}_radial",
-                axes=entities.vnc_axes(relative_to=relative_to),
+                axes=components.vnc_axes(relative_to=relative_to),
                 target=radial,
-                rotation=entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=90.0),
+                rotation=components.az_el_rotation(azimuth_deg=0.0, elevation_deg=90.0),
                 expected=vnc_radial_expected,
                 sensor=conic_sensor(20.0),
             )
@@ -163,9 +163,9 @@ def test_vvlh_vnc_and_lvlh_cross_axis_discriminators_match_local_frame_candidate
         compare_sensor_case(
             case_for_axes(
                 case_id=f"vnc_{relative_to or 'generic'}_cross_track",
-                axes=entities.vnc_axes(relative_to=relative_to),
+                axes=components.vnc_axes(relative_to=relative_to),
                 target=cross_track,
-                rotation=entities.az_el_rotation(azimuth_deg=90.0, elevation_deg=0.0),
+                rotation=components.az_el_rotation(azimuth_deg=90.0, elevation_deg=0.0),
                 expected=vnc_cross_expected,
                 sensor=conic_sensor(20.0),
             )
@@ -173,9 +173,9 @@ def test_vvlh_vnc_and_lvlh_cross_axis_discriminators_match_local_frame_candidate
         compare_sensor_case(
             case_for_axes(
                 case_id=f"lvlh_{relative_to or 'generic'}_cross_track",
-                axes=entities.lvlh_axes(relative_to=relative_to),
+                axes=components.lvlh_axes(relative_to=relative_to),
                 target=cross_track,
-                rotation=entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=90.0),
+                rotation=components.az_el_rotation(azimuth_deg=0.0, elevation_deg=90.0),
                 expected=lvlh_cross_expected,
                 sensor=conic_sensor(20.0),
             )
@@ -186,8 +186,8 @@ def test_lvlh_branches_match_radial_and_along_track_frame_candidates() -> None:
     configure_astrox_from_env()
     radial_target = target_orbit_entity(name="RadialOut", semi_major_delta_m=100000.0)
     along_target = target_satellite(5.0)
-    radial_rotation = entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0)
-    along_rotation = entities.az_el_rotation(azimuth_deg=90.0, elevation_deg=0.0)
+    radial_rotation = components.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0)
+    along_rotation = components.az_el_rotation(azimuth_deg=90.0, elevation_deg=0.0)
     expected_radial = expected_intervals(
         target_state=state_function(controlled_orbit(semi_major_delta_m=100000.0)),
         frame=lvlh_frame,
@@ -202,7 +202,7 @@ def test_lvlh_branches_match_radial_and_along_track_frame_candidates() -> None:
         compare_sensor_case(
             case_for_axes(
                 case_id=f"lvlh_{relative_to or 'generic'}_radial",
-                axes=entities.lvlh_axes(relative_to=relative_to),
+                axes=components.lvlh_axes(relative_to=relative_to),
                 target=radial_target,
                 rotation=radial_rotation,
                 expected=expected_radial,
@@ -211,7 +211,7 @@ def test_lvlh_branches_match_radial_and_along_track_frame_candidates() -> None:
         compare_sensor_case(
             case_for_axes(
                 case_id=f"lvlh_{relative_to or 'generic'}_along_track",
-                axes=entities.lvlh_axes(relative_to=relative_to),
+                axes=components.lvlh_axes(relative_to=relative_to),
                 target=along_target,
                 rotation=along_rotation,
                 expected=expected_along,
@@ -242,26 +242,26 @@ def test_moon_mars_relative_axes_remain_unresolved_after_body_vector_probe() -> 
     for body_name in ("Moon", "Mars"):
         body_state = skyfield_body_state_function(body_name)
         target_state = body_state
-        target = entities.entity(name=body_name, position=entities.central_body_position(body_name))
+        target = components.entity(name=body_name, position=components.central_body_position(body_name))
         for axes_name, axes, rotation, frame, boresight in (
             (
                 "VVLH",
-                entities.vvlh_axes(relative_to=body_name),
-                entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+                components.vvlh_axes(relative_to=body_name),
+                components.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
                 body_vvlh_frame(body_state),
                 quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0) @ [0.0, 0.0, 1.0],
             ),
             (
                 "VNC",
-                entities.vnc_axes(relative_to=body_name),
-                entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
+                components.vnc_axes(relative_to=body_name),
+                components.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
                 body_vnc_frame(body_state),
                 az_el_boresight(azimuth_deg=0.0, elevation_deg=0.0),
             ),
             (
                 "LVLH",
-                entities.lvlh_axes(relative_to=body_name),
-                entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
+                components.lvlh_axes(relative_to=body_name),
+                components.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
                 body_lvlh_frame(body_state),
                 az_el_boresight(azimuth_deg=0.0, elevation_deg=0.0),
             ),
@@ -314,24 +314,24 @@ def test_moon_mars_relative_axes_remain_unresolved_after_body_vector_probe() -> 
 )
 def test_sun_relative_axes_remain_unresolved_after_central_body_and_czml_probes() -> None:
     configure_astrox_from_env()
-    target = entities.entity(name="Sun", position=entities.central_body_position("Sun"))
+    target = components.entity(name="Sun", position=components.central_body_position("Sun"))
     failures: list[str] = []
     successes: list[str] = []
     for axes_name, axes, rotation in (
         (
             "VVLH",
-            entities.vvlh_axes(relative_to="Sun"),
-            entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+            components.vvlh_axes(relative_to="Sun"),
+            components.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
         ),
         (
             "VNC",
-            entities.vnc_axes(relative_to="Sun"),
-            entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
+            components.vnc_axes(relative_to="Sun"),
+            components.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
         ),
         (
             "LVLH",
-            entities.lvlh_axes(relative_to="Sun"),
-            entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
+            components.lvlh_axes(relative_to="Sun"),
+            components.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
         ),
     ):
         observer = observer_with_sensor(
@@ -359,22 +359,22 @@ def test_sun_relative_axes_remain_unresolved_after_central_body_and_czml_probes(
     for axes_name, axes, rotation, frame, boresight in (
         (
             "VVLH",
-            entities.vvlh_axes(relative_to="Sun"),
-            entities.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
+            components.vvlh_axes(relative_to="Sun"),
+            components.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0),
             body_vvlh_frame(sun_state),
             quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0) @ [0.0, 0.0, 1.0],
         ),
         (
             "VNC",
-            entities.vnc_axes(relative_to="Sun"),
-            entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
+            components.vnc_axes(relative_to="Sun"),
+            components.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
             body_vnc_frame(sun_state),
             az_el_boresight(azimuth_deg=0.0, elevation_deg=0.0),
         ),
         (
             "LVLH",
-            entities.lvlh_axes(relative_to="Sun"),
-            entities.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
+            components.lvlh_axes(relative_to="Sun"),
+            components.az_el_rotation(azimuth_deg=0.0, elevation_deg=0.0),
             body_lvlh_frame(sun_state),
             az_el_boresight(azimuth_deg=0.0, elevation_deg=0.0),
         ),
@@ -414,14 +414,14 @@ def test_sun_relative_axes_remain_unresolved_after_central_body_and_czml_probes(
     )
 
 
-def skyfield_body_czml_entity(name: str, body_state) -> entities.Entity:
+def skyfield_body_czml_entity(name: str, body_state) -> components.Entity:
     cartesian: list[float] = []
     for offset_s in range(0, 7201, 600):
         position, _ = body_state(float(offset_s))
         cartesian.extend([float(offset_s), *[float(value) for value in position]])
-    return entities.entity(
+    return components.entity(
         name=name,
-        position=entities.czml_position(
+        position=components.czml_position(
             epoch=START,
             reference_frame="INERTIAL",
             central_body="Earth",

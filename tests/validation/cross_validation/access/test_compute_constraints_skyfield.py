@@ -59,7 +59,7 @@ import sys
 
 import pytest
 
-from astrox import entities
+from astrox import components
 from astrox.exceptions import AstroxAPIError
 from tests.validation._support import LiveConfigError, configure_astrox_from_env
 from tests.validation.cross_validation.access._aer import (
@@ -139,10 +139,10 @@ _AZ_EL_MASK_INTERPOLATION_MASKS: list[tuple[str, tuple[float, ...]]] = [
 def _constrained_site(
     *,
     constraints: list[object],
-) -> entities.Entity:
-    return entities.entity(
+) -> components.Entity:
+    return components.entity(
         name="ConstrainedGround",
-        position=entities.site_position(
+        position=components.site_position(
             longitude_deg=-155.468,
             latitude_deg=19.821,
             height_m=4205.0,
@@ -154,10 +154,10 @@ def _constrained_site(
 def _constrained_satellite(
     *,
     constraints: list[object],
-) -> entities.Entity:
-    return entities.entity(
+) -> components.Entity:
+    return components.entity(
         name="ConstrainedISS",
-        position=entities.sgp4_position(tle_lines=TLE_A),
+        position=components.sgp4_position(tle_lines=TLE_A),
         constraints=constraints,
     )
 
@@ -264,7 +264,7 @@ def test_elevation_minimum_on_ground_matches_skyfield_topocentric_predicate() ->
     configure_astrox_from_env()
     minimum_deg = 10.0
     ground = _constrained_site(
-        constraints=[entities.elevation_constraint(minimum_deg=minimum_deg)],
+        constraints=[components.elevation_constraint(minimum_deg=minimum_deg)],
     )
     result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
     actual = intervals_from_access_passes(result["Passes"])
@@ -281,7 +281,7 @@ def test_elevation_higher_minimum_narrows_intervals() -> None:
     high_minimum = 20.0
     low_result = compute_access(
         _constrained_site(
-            constraints=[entities.elevation_constraint(minimum_deg=low_minimum)],
+            constraints=[components.elevation_constraint(minimum_deg=low_minimum)],
         ),
         sgp4_entity(),
         start=START,
@@ -289,7 +289,7 @@ def test_elevation_higher_minimum_narrows_intervals() -> None:
     )
     high_result = compute_access(
         _constrained_site(
-            constraints=[entities.elevation_constraint(minimum_deg=high_minimum)],
+            constraints=[components.elevation_constraint(minimum_deg=high_minimum)],
         ),
         sgp4_entity(),
         start=START,
@@ -325,7 +325,7 @@ def test_elevation_maximum_active_only_when_enabled() -> None:
     enabled_result = compute_access(
         _constrained_site(
             constraints=[
-                entities.elevation_constraint(
+                components.elevation_constraint(
                     minimum_deg=minimum_deg,
                     maximum_deg=maximum_deg,
                     maximum_enabled=True,
@@ -339,7 +339,7 @@ def test_elevation_maximum_active_only_when_enabled() -> None:
     disabled_result = compute_access(
         _constrained_site(
             constraints=[
-                entities.elevation_constraint(
+                components.elevation_constraint(
                     minimum_deg=minimum_deg,
                     maximum_deg=maximum_deg,
                     maximum_enabled=False,
@@ -405,7 +405,7 @@ def test_elevation_sharp_boundary_matches_independent_crossing() -> None:
         )
     threshold_deg = min_elevation + 0.25 * (max_elevation - min_elevation)
     ground = _constrained_site(
-        constraints=[entities.elevation_constraint(minimum_deg=threshold_deg)],
+        constraints=[components.elevation_constraint(minimum_deg=threshold_deg)],
     )
     result = compute_access(
         ground,
@@ -435,7 +435,7 @@ def test_elevation_contradictory_minimum_returns_no_access() -> None:
     """A minimum above the maximum possible elevation yields no passes."""
     configure_astrox_from_env()
     ground = _constrained_site(
-        constraints=[entities.elevation_constraint(minimum_deg=90.0)],
+        constraints=[components.elevation_constraint(minimum_deg=90.0)],
     )
     result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
     actual = intervals_from_access_passes(result["Passes"])
@@ -451,7 +451,7 @@ def test_range_maximum_on_ground_matches_skyfield_geometric_range() -> None:
     maximum_km = 2500.0
     ground = _constrained_site(
         constraints=[
-            entities.range_constraint(maximum_km=maximum_km, maximum_enabled=True)
+            components.range_constraint(maximum_km=maximum_km, maximum_enabled=True)
         ],
     )
     result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
@@ -469,7 +469,7 @@ def test_range_minimum_and_maximum_on_ground_matches_skyfield() -> None:
     maximum_km = 2500.0
     ground = _constrained_site(
         constraints=[
-            entities.range_constraint(
+            components.range_constraint(
                 minimum_km=minimum_km,
                 maximum_km=maximum_km,
                 maximum_enabled=True,
@@ -492,7 +492,7 @@ def test_range_minimum_active_without_maximum() -> None:
     configure_astrox_from_env()
     minimum_km = 800.0
     ground = _constrained_site(
-        constraints=[entities.range_constraint(minimum_km=minimum_km)],
+        constraints=[components.range_constraint(minimum_km=minimum_km)],
     )
     result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
     actual = intervals_from_access_passes(result["Passes"])
@@ -508,7 +508,7 @@ def test_range_maximum_disabled_is_ignored() -> None:
     maximum_km = 500.0
     constrained = _constrained_site(
         constraints=[
-            entities.range_constraint(
+            components.range_constraint(
                 maximum_km=maximum_km,
                 maximum_enabled=False,
             )
@@ -529,7 +529,7 @@ def test_range_contradictory_maximum_returns_no_access() -> None:
     """A maximum below the minimum possible range yields no passes."""
     configure_astrox_from_env()
     ground = _constrained_site(
-        constraints=[entities.range_constraint(maximum_km=100.0, maximum_enabled=True)],
+        constraints=[components.range_constraint(maximum_km=100.0, maximum_enabled=True)],
     )
     result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
     actual = intervals_from_access_passes(result["Passes"])
@@ -546,8 +546,8 @@ def test_elevation_and_range_combined_matches_intersection() -> None:
     maximum_km = 2500.0
     ground = _constrained_site(
         constraints=[
-            entities.elevation_constraint(minimum_deg=minimum_deg),
-            entities.range_constraint(maximum_km=maximum_km, maximum_enabled=True),
+            components.elevation_constraint(minimum_deg=minimum_deg),
+            components.range_constraint(maximum_km=maximum_km, maximum_enabled=True),
         ],
     )
     result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
@@ -577,7 +577,7 @@ def test_az_el_mask_flat_matches_elevation_minimum() -> None:
         math.radians(elevation_deg),
     )
     ground = _constrained_site(
-        constraints=[entities.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
+        constraints=[components.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
     )
     result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
     actual = intervals_from_access_passes(result["Passes"])
@@ -602,7 +602,7 @@ def test_az_el_mask_sector_blocks_known_azimuth() -> None:
         math.radians(0.0),
     )
     ground = _constrained_site(
-        constraints=[entities.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
+        constraints=[components.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
     )
     result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
     actual = intervals_from_access_passes(result["Passes"])
@@ -628,7 +628,7 @@ def test_az_el_mask_contradictory_returns_no_access() -> None:
         math.radians(90.0),
     )
     ground = _constrained_site(
-        constraints=[entities.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
+        constraints=[components.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
     )
     result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
     actual = intervals_from_access_passes(result["Passes"])
@@ -641,7 +641,7 @@ def test_elevation_constraint_returns_matching_aer_rows() -> None:
     configure_astrox_from_env()
     minimum_deg = 10.0
     ground = _constrained_site(
-        constraints=[entities.elevation_constraint(minimum_deg=minimum_deg)],
+        constraints=[components.elevation_constraint(minimum_deg=minimum_deg)],
     )
     result = compute_access(
         ground,
@@ -676,7 +676,7 @@ def test_elevation_minimum_on_satellite_matches_geodetic_local_frame() -> None:
     configure_astrox_from_env()
     minimum_deg = 10.0
     satellite = _constrained_satellite(
-        constraints=[entities.elevation_constraint(minimum_deg=minimum_deg)],
+        constraints=[components.elevation_constraint(minimum_deg=minimum_deg)],
     )
     result = compute_access(site(), satellite, start=START, stop=DAY_STOP)
     actual = intervals_from_access_passes(result["Passes"])
@@ -696,7 +696,7 @@ def test_range_maximum_on_satellite_matches_geodetic_local_frame() -> None:
     maximum_km = 2500.0
     satellite = _constrained_satellite(
         constraints=[
-            entities.range_constraint(maximum_km=maximum_km, maximum_enabled=True)
+            components.range_constraint(maximum_km=maximum_km, maximum_enabled=True)
         ],
     )
     result = compute_access(site(), satellite, start=START, stop=DAY_STOP)
@@ -710,10 +710,10 @@ def test_both_participants_elevation_constrained_matches_intersection() -> None:
     configure_astrox_from_env()
     minimum_deg = 10.0
     ground = _constrained_site(
-        constraints=[entities.elevation_constraint(minimum_deg=minimum_deg)],
+        constraints=[components.elevation_constraint(minimum_deg=minimum_deg)],
     )
     satellite = _constrained_satellite(
-        constraints=[entities.elevation_constraint(minimum_deg=minimum_deg)],
+        constraints=[components.elevation_constraint(minimum_deg=minimum_deg)],
     )
     result = compute_access(ground, satellite, start=START, stop=DAY_STOP)
     actual = intervals_from_access_passes(result["Passes"])
@@ -742,7 +742,7 @@ def test_range_maximum_with_light_time_delay_uses_geometric_range() -> None:
     maximum_km = 2500.0
     ground = _constrained_site(
         constraints=[
-            entities.range_constraint(maximum_km=maximum_km, maximum_enabled=True)
+            components.range_constraint(maximum_km=maximum_km, maximum_enabled=True)
         ],
     )
     result = compute_access(
@@ -775,7 +775,7 @@ def test_az_el_mask_on_satellite_is_rejected_as_site_only() -> None:
         math.radians(10.0),
     )
     satellite = _constrained_satellite(
-        constraints=[entities.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
+        constraints=[components.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
     )
     with pytest.raises(AstroxAPIError, match="AzElMask"):
         compute_access(site(), satellite, start=START, stop=DAY_STOP)
@@ -796,7 +796,7 @@ def test_az_el_mask_max_range_is_documentation_only() -> None:
     )
     without = compute_access(
         _constrained_site(
-            constraints=[entities.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
+            constraints=[components.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
         ),
         sgp4_entity(),
         start=START,
@@ -805,7 +805,7 @@ def test_az_el_mask_max_range_is_documentation_only() -> None:
     with_range = compute_access(
         _constrained_site(
             constraints=[
-                entities.az_el_mask_constraint(
+                components.az_el_mask_constraint(
                     az_el_mask_rad=mask_rad,
                     max_range_km=1.0,
                 )
@@ -826,7 +826,7 @@ def _check_az_el_mask_interpolation(label: str, mask_rad: tuple[float, ...]) -> 
     """Compare one AzElMask against the piecewise-linear oracle."""
     configure_astrox_from_env()
     ground = _constrained_site(
-        constraints=[entities.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
+        constraints=[components.az_el_mask_constraint(az_el_mask_rad=mask_rad)],
     )
     result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)
     actual = intervals_from_access_passes(result["Passes"])
@@ -859,7 +859,7 @@ def test_elevation_min_exceeding_max_with_maximum_enabled_raises() -> None:
     configure_astrox_from_env()
     ground = _constrained_site(
         constraints=[
-            entities.elevation_constraint(
+            components.elevation_constraint(
                 minimum_deg=80.0,
                 maximum_deg=10.0,
                 maximum_enabled=True,
@@ -878,7 +878,7 @@ def test_range_min_exceeding_max_with_maximum_enabled_raises() -> None:
     configure_astrox_from_env()
     ground = _constrained_site(
         constraints=[
-            entities.range_constraint(
+            components.range_constraint(
                 minimum_km=2000.0,
                 maximum_km=1000.0,
                 maximum_enabled=True,
@@ -897,8 +897,8 @@ def test_ordered_contradictory_constraints_return_no_access() -> None:
     configure_astrox_from_env()
     ground = _constrained_site(
         constraints=[
-            entities.elevation_constraint(minimum_deg=90.0),
-            entities.range_constraint(maximum_km=100.0, maximum_enabled=True),
+            components.elevation_constraint(minimum_deg=90.0),
+            components.range_constraint(maximum_km=100.0, maximum_enabled=True),
         ],
     )
     result = compute_access(ground, sgp4_entity(), start=START, stop=DAY_STOP)

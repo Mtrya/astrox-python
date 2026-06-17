@@ -8,7 +8,7 @@ from typing import Any
 import pytest
 
 import astrox
-from astrox import coverage, entities, exceptions
+from astrox import coverage, components, exceptions
 from astrox.coverage import _fom
 from tests.sdk.helpers import assert_canonical_equal
 
@@ -34,10 +34,10 @@ def sample_grid() -> coverage.LatLonGrid:
     )
 
 
-def sample_asset(name: str = "Relay") -> entities.Entity:
-    return entities.entity(
+def sample_asset(name: str = "Relay") -> components.Entity:
+    return components.entity(
         name=name,
-        position=entities.sgp4_position(tle_lines=TLE_LINES),
+        position=components.sgp4_position(tle_lines=TLE_LINES),
     )
 
 
@@ -164,9 +164,9 @@ def test_fom_functions_emit_route_payloads_and_return_raw_response(
         "grid": sample_grid(),
         "assets": [asset],
         "minimum_assets": 1,
-        "grid_point_sensor": entities.conic_sensor(outer_half_angle_deg=40.0),
+        "grid_point_sensor": components.conic_sensor(outer_half_angle_deg=40.0),
         "grid_point_constraints": [
-            entities.elevation_constraint(minimum_deg=5.0),
+            components.elevation_constraint(minimum_deg=5.0),
         ],
         "include_asset_access_results": True,
         "include_coverage_points": False,

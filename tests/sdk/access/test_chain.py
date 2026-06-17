@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from astrox import access, entities, exceptions
+from astrox import access, components, exceptions
 from tests.sdk.access.helpers import ground, hubble, iss, record_raw_post
 from tests.sdk.helpers import assert_canonical_equal
 
@@ -22,8 +22,8 @@ CHAIN_RESPONSE: dict[str, Any] = {
 }
 
 
-def targets() -> entities.EntityGroup:
-    return entities.entity_group(
+def targets() -> components.EntityGroup:
+    return components.entity_group(
         name="Targets",
         members=[iss(), hubble()],
         to_restriction="AnyOf",
