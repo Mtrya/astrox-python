@@ -52,13 +52,20 @@ When a live probe fails:
 - Do not turn an error into a silent xfail unless the validation principle for that branch explicitly allows unresolved evidence and the user has accepted that state.
 - If the user decides the error is self-documenting and not worth blocking on, keep the public claim narrow: for example, "callable in a no-access fixture" rather than "fully interval-calibrated."
 
-## Done Means
+## Exit Criteria
 
-Finish only when all applicable items are true:
+Finish only when every applicable item below is proven by current-state evidence:
 
 - OpenAPI diff understood and mapped to SDK code paths.
 - SDK runtime surface updated with idiomatic public names and honest lowering.
-- Behavior tests pass for exports, constructors, optional omission, and endpoint embedding.
-- Required live cross-validation passes with `CROSS_VALIDATION_FAILED=0`.
-- Docs describe the new surface and validation scope without overstating semantics.
+- Behavior tests pass for exports, constructors, optional-key omission, type rejection where the public boundary owns it, error propagation where the route surface owns it, and endpoint embedding at every call site that forwards the changed object.
+- Each affected semantic branch has a coverage-checklist state in the relevant cross-validation script. Branches promoted as understood must be `verified`, must include at least one distinguishing case when the option filters/transforms/calculates behavior, and must pass live validation with `CROSS_VALIDATION_FAILED=0`.
+- Required live cross-validation passes are mandatory. Do not replace them with payload tests, live snapshots, HTTP 200 checks, or a weaker invariant.
+- All endpoint-route and role variants that forward the changed object are either verified or explicitly left out of the promoted semantic claim. If a branch remains `partial` or `unresolved`, docs and final handoff must say exactly which branch is not promoted and why.
+- Stale caveats are removed or narrowed after a branch is promoted. Search changed docs, validation READMEs, and validators for old words such as `partial`, `unresolved`, `xfail`, `no-access`, and the old error signature before claiming the issue is resolved.
+- Docs describe the new surface, units, server-owned defaults, and validation scope without overstating semantics.
+- The project-level skill remains valid if it was created or edited: validate `.agents/skills/<name>/SKILL.md` and keep `agents/openai.yaml` aligned with the skill metadata.
+- Before commit or PR, fetch the remote default branch and rebase or merge as appropriate so validation runs against current upstream state.
 - Worktree hygiene is checked with `git status --short --branch` and `git diff --check`.
+
+Do not use fallback exit criteria. If a required validator cannot pass because live upstream behavior is broken, preserve the failure evidence, report the blocker, and keep the public claim narrow. Do not call the workflow complete merely because another route, role, or weaker check passes.
