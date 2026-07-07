@@ -1,6 +1,6 @@
 ---
 name: astrox-openapi-drift
-description: Handle small ASTROX upstream OpenAPI changes in astrox-python. Use when upstream/openapi-drift moved, a new schema field/enum/constraint/endpoint appears, or Codex must inspect latest ASTROX OpenAPI drift, update SDK code/tests/docs, design mandatory cross-validation, and distill the workflow without hiding live-server issues.
+description: Handle small ASTROX upstream OpenAPI changes in astrox-python. Use when upstream/openapi-drift moved, a new schema field/enum/constraint/endpoint appears, or an agent must inspect latest ASTROX OpenAPI drift, update SDK code/tests/docs, design mandatory cross-validation, and keep live-server issues visible.
 ---
 
 # ASTROX OpenAPI Drift

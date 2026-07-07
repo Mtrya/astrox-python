@@ -18,7 +18,7 @@
 #     - Passes.AccessStart/AccessStop under SGP4 from_entity/to_entity Sun/Moon exclusion constraints: verified against independent WGS84 line-of-sight plus Skyfield body-separation and body-occultation predicates
 #     - CompleteChainAccess.Start/Stop under direct-chain Sun/Moon exclusion constraints: verified against independent oracle intervals and AccessCompute intervals
 #   Parameters:
-#     - SunExclusionAngle.MinimumValue: verified at 0 deg as permissive and 60 deg as restrictive for fixed-site, SGP4 from_entity, and SGP4 to_entity roles; 25 deg remains a non-distinguishing fixed-site equality case in this fixture
+#     - SunExclusionAngle.MinimumValue: verified at 0 deg as permissive and 60 deg as restrictive for fixed-site, SGP4 from_entity, and SGP4 to_entity roles
 #     - MoonExclusionAngle.MinimumValue: verified at 0 deg as permissive and 25/60 deg as restrictive for the fixed-site role; verified at 0/60 deg for SGP4 from_entity with a Madrid target fixture; verified at 0/120 deg for SGP4 to_entity with an access-producing no-drag TLE fixture
 #   Comparison:
 #     - External: Skyfield SGP4, DE421 Sun/Moon ephemerides, apparent topocentric body altitude gate, astrometric topocentric/satellite-observer body-separation angle, satellite body Earth-occultation, and WGS84 segment-obstruction visibility
@@ -33,6 +33,7 @@
 from __future__ import annotations
 
 import sys
+from functools import lru_cache
 
 from astrox import access, components
 from astrox.exceptions import AstroxAPIError
@@ -56,8 +57,10 @@ from tests.validation.cross_validation.access._cases import (
 )
 from tests.validation.cross_validation.access._exclusion import (
     EXCLUSION_INTERVAL_ABS_S,
+    ExclusionEphemeris,
     expected_satellite_exclusion_intervals,
     expected_site_exclusion_intervals,
+    load_exclusion_ephemeris,
 )
 from tests.validation.cross_validation.access._geometry import (
     compare_intervals,
@@ -69,6 +72,11 @@ TLE_TO_ENTITY_NO_DRAG = (
     "1 90001U 24001A   24001.00000000  .00000000  00000-0  00000-0 0  9994",
     "2 90001  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393000001",
 )
+
+
+@lru_cache(maxsize=1)
+def _shared_exclusion_ephemeris() -> ExclusionEphemeris:
+    return load_exclusion_ephemeris()
 
 
 def constrained_site(constraint: components.Constraint | None) -> components.Entity:
@@ -107,6 +115,7 @@ def sgp4_entity(
 
 def test_fixed_site_exclusion_angle_constraints_match_skyfield_body_separation() -> None:
     configure_astrox_from_env()
+    ephemeris = _shared_exclusion_ephemeris()
     cases = [
         (
             "from_site_sun0",
@@ -186,6 +195,7 @@ def test_fixed_site_exclusion_angle_constraints_match_skyfield_body_separation()
             latitude_deg=SITE_LATITUDE_DEG,
             longitude_deg=SITE_LONGITUDE_DEG,
             height_m=SITE_HEIGHT_M,
+            ephemeris=ephemeris,
         )
         try:
             compare_intervals(expected, actual, tolerance_s=EXCLUSION_INTERVAL_ABS_S)
@@ -195,6 +205,7 @@ def test_fixed_site_exclusion_angle_constraints_match_skyfield_body_separation()
 
 def test_sgp4_from_entity_exclusion_angle_constraints_match_skyfield_body_separation() -> None:
     configure_astrox_from_env()
+    ephemeris = _shared_exclusion_ephemeris()
     cases = [
         (
             "sun0_hawaii",
@@ -264,6 +275,7 @@ def test_sgp4_from_entity_exclusion_angle_constraints_match_skyfield_body_separa
             target_latitude_deg=target_latitude_deg,
             target_longitude_deg=target_longitude_deg,
             target_height_m=target_height_m,
+            ephemeris=ephemeris,
         )
         try:
             compare_intervals(expected, actual, tolerance_s=EXCLUSION_INTERVAL_ABS_S)
@@ -273,6 +285,7 @@ def test_sgp4_from_entity_exclusion_angle_constraints_match_skyfield_body_separa
 
 def test_direct_chain_exclusion_angle_constraints_match_compute_and_skyfield() -> None:
     configure_astrox_from_env()
+    ephemeris = _shared_exclusion_ephemeris()
     cases = [
         (
             "chain_site_sun60",
@@ -290,6 +303,7 @@ def test_direct_chain_exclusion_angle_constraints_match_compute_and_skyfield() -
                 latitude_deg=SITE_LATITUDE_DEG,
                 longitude_deg=SITE_LONGITUDE_DEG,
                 height_m=SITE_HEIGHT_M,
+                ephemeris=ephemeris,
             ),
         ),
         (
@@ -308,6 +322,7 @@ def test_direct_chain_exclusion_angle_constraints_match_compute_and_skyfield() -
                 latitude_deg=SITE_LATITUDE_DEG,
                 longitude_deg=SITE_LONGITUDE_DEG,
                 height_m=SITE_HEIGHT_M,
+                ephemeris=ephemeris,
             ),
         ),
         (
@@ -326,6 +341,7 @@ def test_direct_chain_exclusion_angle_constraints_match_compute_and_skyfield() -
                 latitude_deg=SITE_LATITUDE_DEG,
                 longitude_deg=SITE_LONGITUDE_DEG,
                 height_m=SITE_HEIGHT_M,
+                ephemeris=ephemeris,
             ),
         ),
         (
@@ -344,6 +360,7 @@ def test_direct_chain_exclusion_angle_constraints_match_compute_and_skyfield() -
                 latitude_deg=SITE_LATITUDE_DEG,
                 longitude_deg=SITE_LONGITUDE_DEG,
                 height_m=SITE_HEIGHT_M,
+                ephemeris=ephemeris,
             ),
         ),
         (
@@ -366,6 +383,7 @@ def test_direct_chain_exclusion_angle_constraints_match_compute_and_skyfield() -
                 target_latitude_deg=SITE_LATITUDE_DEG,
                 target_longitude_deg=SITE_LONGITUDE_DEG,
                 target_height_m=SITE_HEIGHT_M,
+                ephemeris=ephemeris,
             ),
         ),
         (
@@ -388,6 +406,7 @@ def test_direct_chain_exclusion_angle_constraints_match_compute_and_skyfield() -
                 target_latitude_deg=REMOTE_LATITUDE_DEG,
                 target_longitude_deg=REMOTE_LONGITUDE_DEG,
                 target_height_m=REMOTE_HEIGHT_M,
+                ephemeris=ephemeris,
             ),
         ),
         (
@@ -410,6 +429,7 @@ def test_direct_chain_exclusion_angle_constraints_match_compute_and_skyfield() -
                 target_latitude_deg=SITE_LATITUDE_DEG,
                 target_longitude_deg=SITE_LONGITUDE_DEG,
                 target_height_m=SITE_HEIGHT_M,
+                ephemeris=ephemeris,
             ),
         ),
         (
@@ -432,6 +452,7 @@ def test_direct_chain_exclusion_angle_constraints_match_compute_and_skyfield() -
                 target_latitude_deg=SITE_LATITUDE_DEG,
                 target_longitude_deg=SITE_LONGITUDE_DEG,
                 target_height_m=SITE_HEIGHT_M,
+                ephemeris=ephemeris,
             ),
         ),
     ]
@@ -473,6 +494,7 @@ def test_direct_chain_exclusion_angle_constraints_match_compute_and_skyfield() -
 
 def test_sgp4_to_entity_exclusion_angle_constraints_match_skyfield_body_separation() -> None:
     configure_astrox_from_env()
+    ephemeris = _shared_exclusion_ephemeris()
     ground = site()
     cases = [
         (
@@ -522,6 +544,7 @@ def test_sgp4_to_entity_exclusion_angle_constraints_match_skyfield_body_separati
             target_latitude_deg=SITE_LATITUDE_DEG,
             target_longitude_deg=SITE_LONGITUDE_DEG,
             target_height_m=SITE_HEIGHT_M,
+            ephemeris=ephemeris,
         )
         try:
             compare_intervals(expected, actual, tolerance_s=EXCLUSION_INTERVAL_ABS_S)
