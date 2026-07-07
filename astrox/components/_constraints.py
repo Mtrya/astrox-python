@@ -65,10 +65,52 @@ class AzElMaskConstraint:
         return payload
 
 
-Constraint: TypeAlias = ElevationConstraint | RangeConstraint | AzElMaskConstraint
+@dataclass(frozen=True, kw_only=True)
+class SunExclusionAngleConstraint:
+    """Sun exclusion-angle constraint fragment shared by ASTROX entity and coverage inputs."""
+
+    minimum_deg: float | None = None
+    text: str | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to an ASTROX Sun exclusion-angle constraint fragment."""
+        payload: dict[str, Any] = {"$type": "SunExclusionAngle"}
+        _include_if_supplied(payload, "MinimumValue", self.minimum_deg)
+        _include_if_supplied(payload, "Text", self.text)
+        return payload
 
 
-_CONSTRAINT_TYPES = (ElevationConstraint, RangeConstraint, AzElMaskConstraint)
+@dataclass(frozen=True, kw_only=True)
+class MoonExclusionAngleConstraint:
+    """Moon exclusion-angle constraint fragment shared by ASTROX entity and coverage inputs."""
+
+    minimum_deg: float | None = None
+    text: str | None = None
+
+    def to_wire(self) -> dict[str, Any]:
+        """Lower to an ASTROX Moon exclusion-angle constraint fragment."""
+        payload: dict[str, Any] = {"$type": "MoonExclusionAngle"}
+        _include_if_supplied(payload, "MinimumValue", self.minimum_deg)
+        _include_if_supplied(payload, "Text", self.text)
+        return payload
+
+
+Constraint: TypeAlias = (
+    ElevationConstraint
+    | RangeConstraint
+    | AzElMaskConstraint
+    | SunExclusionAngleConstraint
+    | MoonExclusionAngleConstraint
+)
+
+
+_CONSTRAINT_TYPES = (
+    ElevationConstraint,
+    RangeConstraint,
+    AzElMaskConstraint,
+    SunExclusionAngleConstraint,
+    MoonExclusionAngleConstraint,
+)
 
 
 def elevation_constraint(
@@ -130,6 +172,24 @@ def az_el_mask_constraint(
         max_range_km=max_range_km,
         text=text,
     )
+
+
+def sun_exclusion_angle_constraint(
+    *,
+    minimum_deg: float | None = None,
+    text: str | None = None,
+) -> SunExclusionAngleConstraint:
+    """Create a Sun exclusion-angle constraint fragment."""
+    return SunExclusionAngleConstraint(minimum_deg=minimum_deg, text=text)
+
+
+def moon_exclusion_angle_constraint(
+    *,
+    minimum_deg: float | None = None,
+    text: str | None = None,
+) -> MoonExclusionAngleConstraint:
+    """Create a Moon exclusion-angle constraint fragment."""
+    return MoonExclusionAngleConstraint(minimum_deg=minimum_deg, text=text)
 
 
 def _constraint_to_wire(constraint: Constraint) -> dict[str, Any]:

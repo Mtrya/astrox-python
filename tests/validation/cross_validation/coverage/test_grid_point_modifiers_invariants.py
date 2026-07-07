@@ -5,6 +5,8 @@
 #   Branches:
 #     - GridPointConstraints Range: verified for permissive max/min equality and restrictive max/min pointwise subset behavior; over-restrictive branches reduce to worker error instead of empty intervals
 #     - GridPointConstraints ElevationAngle: verified for permissive minimum equality and restrictive minimum/maximum pointwise subset behavior; over-restrictive branches reduce to worker error instead of empty intervals
+#     - GridPointConstraints SunExclusionAngle: verified for permissive equality and restrictive pointwise subset behavior
+#     - GridPointConstraints MoonExclusionAngle: verified callable as a non-filtering equality case in this representative coverage fixture; restrictive interval filtering is verified against Skyfield in test_exclusion_grid_constraints_skyfield.py
 #     - GridPointConstraints AzElMask: unresolved server role behavior; smallest repro returns a clear non-ground-station server error
 #     - GridPointSensor Conic: verified for 90 deg full-hemisphere equality and 89 deg restrictive pointwise subset behavior; very narrow sensor reduces to worker error instead of empty intervals
 #     - GridPointSensor Rectangular: verified for 90 deg full-hemisphere equality and 89 deg restrictive pointwise subset behavior; very narrow sensor reduces to worker error instead of empty intervals
@@ -16,6 +18,8 @@
 #     - Range.MinimumValue: verified at 0 km as permissive and 1000 km as restrictive; 3000 km captured as worker-error edge
 #     - ElevationAngle.MinimumValue: verified at 0 deg as permissive and 10 deg as restrictive; 45 deg captured as worker-error edge
 #     - ElevationAngle.MaximumValue/IsMaximumEnabled: verified at 20 deg as restrictive and 90 deg as permissive; 0 deg captured as worker-error edge
+#     - SunExclusionAngle.MinimumValue: verified at 0 deg as permissive and 60 deg as restrictive
+#     - MoonExclusionAngle.MinimumValue: verified at 0 and 60 deg as non-filtering for this representative modifier fixture
 #     - AzElMaskData: unresolved for coverage grid-point role because live ASTROX rejects the representative branch before intervals are produced
 #     - Conic.outerHalfAngle: verified at 90 and 89 deg; 1 deg captured as worker-error edge
 #     - Rectangular.xHalfAngle/yHalfAngle: verified at 90 and 89 deg; 1 deg captured as worker-error edge
@@ -26,6 +30,8 @@
 #   Findings:
 #     - Permissive range/elevation/sensor branches preserve baseline intervals exactly in the covered cases.
 #     - Restrictive but still-accessible range/elevation/sensor branches return pointwise subsets of the baseline intervals.
+#     - SunExclusionAngle follows the same equality/subset coverage modifier pattern in the representative fixture.
+#     - MoonExclusionAngle is accepted by ComputeCoverage in the representative fixture, but the chosen Moon thresholds do not change the returned coverage intervals there; a separate Hawaii-area fixture verifies restrictive Moon filtering against Skyfield.
 #     - When a modifier eliminates all coverage in the covered cases, ASTROX returns a worker "Index was out of range" error instead of empty zero-asset intervals.
 #     - AzElMask in the coverage grid-point modifier role currently fails with a server message that the current object is not a ground-station object.
 
@@ -160,6 +166,39 @@ def test_restrictive_grid_point_modifiers_are_baseline_subsets() -> None:
     }
     for label, result in cases.items():
         assert_strict_subset_coverage_traces(label, baseline, result)
+
+
+def test_exclusion_grid_point_constraints_match_baseline_or_subset_invariants() -> None:
+    configure_astrox_from_env()
+    baseline = compute_with_modifiers()
+    equality_cases = {
+        "sun0": compute_with_modifiers(
+            grid_point_constraints=[
+                components.sun_exclusion_angle_constraint(minimum_deg=0.0)
+            ]
+        ),
+        "moon0": compute_with_modifiers(
+            grid_point_constraints=[
+                components.moon_exclusion_angle_constraint(minimum_deg=0.0)
+            ]
+        ),
+        "moon60": compute_with_modifiers(
+            grid_point_constraints=[
+                components.moon_exclusion_angle_constraint(minimum_deg=60.0)
+            ]
+        ),
+    }
+    for label, result in equality_cases.items():
+        assert_same_coverage_traces(label, baseline, result)
+    assert_strict_subset_coverage_traces(
+        "sun60",
+        baseline,
+        compute_with_modifiers(
+            grid_point_constraints=[
+                components.sun_exclusion_angle_constraint(minimum_deg=60.0)
+            ]
+        ),
+    )
 
 
 @pytest.mark.parametrize(
@@ -419,11 +458,29 @@ def run_all_checks() -> int:
             grid_point_constraints=[components.elevation_constraint(minimum_deg=10.0)]
         ),
     )
+    assert_strict_subset_coverage_traces(
+        "sun60",
+        baseline,
+        compute_with_modifiers(
+            grid_point_constraints=[
+                components.sun_exclusion_angle_constraint(minimum_deg=60.0)
+            ]
+        ),
+    )
+    assert_same_coverage_traces(
+        "moon60",
+        baseline,
+        compute_with_modifiers(
+            grid_point_constraints=[
+                components.moon_exclusion_angle_constraint(minimum_deg=60.0)
+            ]
+        ),
+    )
     with pytest.raises(exceptions.AstroxAPIError, match="Index was out of range"):
         compute_with_modifiers(
             grid_point_sensor=components.conic_sensor(outer_half_angle_deg=1.0)
         )
-    return 3
+    return 5
 
 
 def main() -> int:

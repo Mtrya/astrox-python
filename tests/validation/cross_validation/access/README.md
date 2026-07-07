@@ -9,6 +9,7 @@ The current non-orientation access calibration covers these behavior axes:
 | Axis | Status | Evidence |
 | --- | --- | --- |
 | Fixed ground to SGP4 intervals | covered | Skyfield SGP4 plus WGS84 segment-obstruction oracle |
+| Sun/Moon exclusion constraints | covered | Fixed-site, SGP4 `from_entity`, access-producing no-drag SGP4 `to_entity`, coverage grid-point, FOM consumption, and direct-chain routes are calibrated; drag-bearing SGP4 `to_entity` fixtures can still surface live propagation errors before intervals are returned |
 | Ground-origin SGP4 AER convention | covered with precision caveat | Skyfield topocentric azimuth/elevation/range comparison for coarse boundary rows and dense `OutStep=60s` interior rows |
 | Strict ground-origin SGP4 AER precision | calibration xfail | same-epoch, light-time-shifted, manual ITRS topocentric, horizon, and simple site/time offset diagnostics still leave an arcsecond-scale dense-row residual |
 | SGP4 to ground interval/range role reversal | covered | symmetry against ground to SGP4 live output |

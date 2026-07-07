@@ -207,6 +207,8 @@ _CONSTRAINT_TYPES = (
     components.ElevationConstraint,
     components.RangeConstraint,
     components.AzElMaskConstraint,
+    components.SunExclusionAngleConstraint,
+    components.MoonExclusionAngleConstraint,
 )
 
 

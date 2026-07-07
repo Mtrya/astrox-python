@@ -1,0 +1,4 @@
+interface:
+  display_name: "ASTROX OpenAPI Drift"
+  short_description: "Handle small ASTROX upstream API drift"
+  default_prompt: "Use $astrox-openapi-drift to inspect a small upstream OpenAPI change and update the SDK with strict validation."

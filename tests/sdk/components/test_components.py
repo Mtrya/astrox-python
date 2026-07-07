@@ -69,7 +69,9 @@ def test_public_entity_names_are_exported() -> None:
     assert "CzmlPosition" in components.__all__
     assert "CzmlPositions" in components.__all__
     assert "HpopPosition" in components.__all__
+    assert "MoonExclusionAngleConstraint" in components.__all__
     assert "SimpleAscentPosition" in components.__all__
+    assert "SunExclusionAngleConstraint" in components.__all__
     assert "BallisticPosition" in components.__all__
     assert "ConicSensor" in components.__all__
     assert "RectangularSensor" in components.__all__
@@ -86,7 +88,9 @@ def test_public_entity_names_are_exported() -> None:
     assert "XyzDirection" in components.__all__
     assert "az_el_mask_constraint" in components.__all__
     assert "elevation_constraint" in components.__all__
+    assert "moon_exclusion_angle_constraint" in components.__all__
     assert "range_constraint" in components.__all__
+    assert "sun_exclusion_angle_constraint" in components.__all__
 
 
 def test_site_position_has_typed_and_site_only_wire_forms() -> None:
@@ -475,6 +479,28 @@ def test_constraint_constructors_lower_discriminated_fragments() -> None:
             "Text": "terrain mask",
         },
     )
+    assert_canonical_equal(
+        components.sun_exclusion_angle_constraint(
+            minimum_deg=25.0,
+            text="sun keepout",
+        ).to_wire(),
+        {
+            "$type": "SunExclusionAngle",
+            "MinimumValue": 25.0,
+            "Text": "sun keepout",
+        },
+    )
+    assert_canonical_equal(
+        components.moon_exclusion_angle_constraint(
+            minimum_deg=15.0,
+            text="moon keepout",
+        ).to_wire(),
+        {
+            "$type": "MoonExclusionAngle",
+            "MinimumValue": 15.0,
+            "Text": "moon keepout",
+        },
+    )
 
 
 def test_constraints_omit_unsupplied_optional_keys() -> None:
@@ -508,6 +534,22 @@ def test_constraints_omit_unsupplied_optional_keys() -> None:
             "AzElMaskData": [0.0, 0.1],
             "MaxRange": 123.0,
         },
+    )
+    assert_canonical_equal(
+        components.sun_exclusion_angle_constraint().to_wire(),
+        {"$type": "SunExclusionAngle"},
+    )
+    assert_canonical_equal(
+        components.sun_exclusion_angle_constraint(minimum_deg=25.0).to_wire(),
+        {"$type": "SunExclusionAngle", "MinimumValue": 25.0},
+    )
+    assert_canonical_equal(
+        components.moon_exclusion_angle_constraint().to_wire(),
+        {"$type": "MoonExclusionAngle"},
+    )
+    assert_canonical_equal(
+        components.moon_exclusion_angle_constraint(minimum_deg=15.0).to_wire(),
+        {"$type": "MoonExclusionAngle", "MinimumValue": 15.0},
     )
 
 
@@ -549,12 +591,16 @@ def test_entity_composes_constraints_metadata() -> None:
         constraints=[
             components.elevation_constraint(minimum_deg=5.0),
             components.range_constraint(maximum_km=3000.0, maximum_enabled=True),
+            components.sun_exclusion_angle_constraint(minimum_deg=25.0),
+            components.moon_exclusion_angle_constraint(minimum_deg=15.0),
         ],
     )
 
     assert site.constraints == (
         components.elevation_constraint(minimum_deg=5.0),
         components.range_constraint(maximum_km=3000.0, maximum_enabled=True),
+        components.sun_exclusion_angle_constraint(minimum_deg=25.0),
+        components.moon_exclusion_angle_constraint(minimum_deg=15.0),
     )
     assert_canonical_equal(
         site.to_wire(),
@@ -573,6 +619,14 @@ def test_entity_composes_constraints_metadata() -> None:
                     "$type": "Range",
                     "MaximumValue": 3000.0,
                     "IsMaximumEnabled": True,
+                },
+                {
+                    "$type": "SunExclusionAngle",
+                    "MinimumValue": 25.0,
+                },
+                {
+                    "$type": "MoonExclusionAngle",
+                    "MinimumValue": 15.0,
                 },
             ],
         },

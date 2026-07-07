@@ -36,11 +36,15 @@ from ._constraints import (
     AzElMaskConstraint,
     Constraint,
     ElevationConstraint,
+    MoonExclusionAngleConstraint,
     RangeConstraint,
+    SunExclusionAngleConstraint,
     _constraint_to_wire,
     az_el_mask_constraint,
     elevation_constraint,
+    moon_exclusion_angle_constraint,
     range_constraint,
+    sun_exclusion_angle_constraint,
 )
 from ._objects import Entity, EntityGroup, entity, entity_group
 from ._positions import (
@@ -141,6 +145,7 @@ __all__ = [
     "HpopPosition",
     "J2Position",
     "LvlhAxes",
+    "MoonExclusionAngleConstraint",
     "QuaternionRotation",
     "RangeConstraint",
     "RectangularSensor",
@@ -150,6 +155,7 @@ __all__ = [
     "Sgp4Position",
     "SitePosition",
     "SimpleAscentPosition",
+    "SunExclusionAngleConstraint",
     "TwoBodyPosition",
     "VgtAngle",
     "VgtDirection",
@@ -182,6 +188,7 @@ __all__ = [
     "hpop_position",
     "j2_position",
     "lvlh_axes",
+    "moon_exclusion_angle_constraint",
     "quaternion_rotation",
     "range_constraint",
     "ra_dec_direction",
@@ -198,5 +205,6 @@ __all__ = [
     "sgp4_position",
     "site_position",
     "simple_ascent_position",
+    "sun_exclusion_angle_constraint",
     "two_body_position",
 ]

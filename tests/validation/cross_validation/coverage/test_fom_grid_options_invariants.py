@@ -10,6 +10,8 @@
 #     - FOM GridStats weighting: verified as arithmetic rather than grid-weighted on a non-equal-weight LatLonBounds grid with differing values
 #     - FOM with Range grid-point constraint: verified against modified ComputeCoverage interval/gap derivation
 #     - FOM with ElevationAngle grid-point constraint: verified against modified ComputeCoverage interval/gap derivation
+#     - FOM with SunExclusionAngle grid-point constraint: verified against modified ComputeCoverage interval/gap derivation
+#     - FOM with MoonExclusionAngle grid-point constraint: verified against modified ComputeCoverage interval/gap derivation
 #     - FOM with AzElMask grid-point constraint: verified to reject consistently with coverage-role AzElMask server behavior
 #     - FOM with Conic grid-point sensor: verified against modified ComputeCoverage interval/gap derivation
 #     - FOM with Rectangular grid-point sensor: verified against modified ComputeCoverage interval/gap derivation
@@ -21,13 +23,13 @@
 #     - grid: verified for representative LatLonBounds, LatitudeBounds, Global, and CbLatLonBounds branches
 #     - grid point Weight: verified not to affect FOM GridStats Average in the representative distinguishing case
 #     - grid_point_sensor: verified for Conic and Rectangular restrictive branches that still return coverage
-#     - grid_point_constraints: verified for Range and ElevationAngle restrictive branches that still return coverage; AzElMask rejection verified
+#     - grid_point_constraints: verified for Range, ElevationAngle, SunExclusionAngle, and MoonExclusionAngle branches that return coverage; AzElMask rejection verified
 #   Comparison:
 #     - External: local interval/gap derivation from ComputeCoverage with the same grid, sensor, and constraint options
 #     - Constants: no physical constants; sensor/constraint thresholds are selected from modifier cross-validation to be restrictive but not over-restrictive
 #     - Tolerances: VALUE_ABS=1e-6 for endpoint-to-endpoint floating values; POSITION_ABS_DEG=1e-10 for grid coordinate echoes
 #   Findings:
-#     - Representative FOM routes consume range/elevation constraints and conic/rectangular sensors consistently with ComputeCoverage interval filtering.
+#     - Representative FOM routes consume range/elevation/SunExclusionAngle/MoonExclusionAngle constraints and conic/rectangular sensors consistently with ComputeCoverage interval filtering.
 #     - Representative FOM routes reject AzElMask in the coverage grid-point role, matching ComputeCoverage's current non-ground-station role behavior.
 #     - FOM routes preserve ComputeCoverage point ordering and coordinates across representative LatLonBounds, LatitudeBounds, Global, and CbLatLonBounds grids.
 #     - FOM GridStats Average is arithmetic over point values, not weighted by grid-point Weight.
@@ -79,6 +81,22 @@ def test_fom_grid_point_modifiers_match_compute_interval_derivation() -> None:
             "kwargs": {
                 "grid_point_constraints": [
                     components.elevation_constraint(minimum_deg=10.0)
+                ]
+            },
+        },
+        {
+            "label": "sun_exclusion_60",
+            "kwargs": {
+                "grid_point_constraints": [
+                    components.sun_exclusion_angle_constraint(minimum_deg=60.0)
+                ]
+            },
+        },
+        {
+            "label": "moon_exclusion_60",
+            "kwargs": {
+                "grid_point_constraints": [
+                    components.moon_exclusion_angle_constraint(minimum_deg=60.0)
                 ]
             },
         },
