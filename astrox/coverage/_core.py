@@ -9,6 +9,7 @@ from typing import Any, TypeAlias
 
 from astrox import components
 from astrox._http import raw
+from astrox.components._constraints import _CONSTRAINT_TYPES
 
 __all__ = [
     "CbLatLonGrid",
@@ -203,11 +204,6 @@ class CbLatLonGrid:
 CoverageGrid: TypeAlias = GlobalGrid | LatitudeGrid | LatLonGrid | CbLatLonGrid
 _GRID_TYPES = (GlobalGrid, LatitudeGrid, LatLonGrid, CbLatLonGrid)
 _SENSOR_TYPES = (components.ConicSensor, components.RectangularSensor)
-_CONSTRAINT_TYPES = (
-    components.ElevationConstraint,
-    components.RangeConstraint,
-    components.AzElMaskConstraint,
-)
 
 
 def global_grid(

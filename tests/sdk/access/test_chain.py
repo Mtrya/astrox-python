@@ -103,6 +103,36 @@ def test_chain_emits_definition_table_name_references_and_direct_null_connection
     )
 
 
+def test_chain_embeds_exclusion_constraints_in_participant_definitions(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(monkeypatch, CHAIN_RESPONSE)
+    constrained_ground = components.entity(
+        name="Ground",
+        position=ground().position,
+        constraints=[
+            components.sun_exclusion_angle_constraint(minimum_deg=60.0),
+            components.moon_exclusion_angle_constraint(minimum_deg=25.0),
+        ],
+    )
+
+    access.chain(
+        start="2024-01-01T00:00:00.000Z",
+        stop="2024-01-02T00:00:00.000Z",
+        participants=[constrained_ground, iss()],
+        start_participant=constrained_ground,
+        end_participant=iss(),
+    )
+
+    assert_canonical_equal(
+        calls[0]["json"]["AllObjects"][0]["Constraints"],
+        [
+            {"$type": "SunExclusionAngle", "MinimumValue": 60.0},
+            {"$type": "MoonExclusionAngle", "MinimumValue": 25.0},
+        ],
+    )
+
+
 def test_chain_returns_malformed_raw_response_without_parsing(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

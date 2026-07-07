@@ -235,6 +235,8 @@ def test_compute_emits_complete_coverage_payload_and_returns_raw_response(
         grid_point_constraints=[
             components.elevation_constraint(minimum_deg=10.0),
             components.range_constraint(maximum_km=2500.0, maximum_enabled=True),
+            components.sun_exclusion_angle_constraint(minimum_deg=25.0),
+            components.moon_exclusion_angle_constraint(minimum_deg=15.0),
         ],
         include_asset_access_results=True,
         include_coverage_points=True,
@@ -269,6 +271,14 @@ def test_compute_emits_complete_coverage_payload_and_returns_raw_response(
                     "$type": "Range",
                     "MaximumValue": 2500.0,
                     "IsMaximumEnabled": True,
+                },
+                {
+                    "$type": "SunExclusionAngle",
+                    "MinimumValue": 25.0,
+                },
+                {
+                    "$type": "MoonExclusionAngle",
+                    "MinimumValue": 15.0,
                 },
             ],
             "FilterType": "AtLeastN",

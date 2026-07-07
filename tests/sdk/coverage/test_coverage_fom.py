@@ -167,6 +167,8 @@ def test_fom_functions_emit_route_payloads_and_return_raw_response(
         "grid_point_sensor": components.conic_sensor(outer_half_angle_deg=40.0),
         "grid_point_constraints": [
             components.elevation_constraint(minimum_deg=5.0),
+            components.sun_exclusion_angle_constraint(minimum_deg=25.0),
+            components.moon_exclusion_angle_constraint(minimum_deg=15.0),
         ],
         "include_asset_access_results": True,
         "include_coverage_points": False,
@@ -191,7 +193,15 @@ def test_fom_functions_emit_route_payloads_and_return_raw_response(
             {
                 "$type": "ElevationAngle",
                 "MinimumValue": 5.0,
-            }
+            },
+            {
+                "$type": "SunExclusionAngle",
+                "MinimumValue": 25.0,
+            },
+            {
+                "$type": "MoonExclusionAngle",
+                "MinimumValue": 15.0,
+            },
         ],
         "FilterType": "AtLeastN",
         "NumberOfAssets": 1,

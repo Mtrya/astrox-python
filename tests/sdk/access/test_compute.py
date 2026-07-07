@@ -260,6 +260,7 @@ def test_compute_embeds_constraints_in_from_and_to_paths(
         constraints=[
             components.elevation_constraint(minimum_deg=10.0),
             components.range_constraint(maximum_km=2500.0, maximum_enabled=True),
+            components.sun_exclusion_angle_constraint(minimum_deg=25.0),
         ],
     )
     satellite = components.entity(
@@ -267,6 +268,7 @@ def test_compute_embeds_constraints_in_from_and_to_paths(
         position=components.sgp4_position(tle_lines=list(iss().position.tle_lines)),
         constraints=[
             components.elevation_constraint(minimum_deg=5.0, maximum_deg=85.0, maximum_enabled=True),
+            components.moon_exclusion_angle_constraint(minimum_deg=15.0),
         ],
     )
 
@@ -296,6 +298,7 @@ def test_compute_embeds_constraints_in_from_and_to_paths(
                         "MaximumValue": 2500.0,
                         "IsMaximumEnabled": True,
                     },
+                    {"$type": "SunExclusionAngle", "MinimumValue": 25.0},
                 ],
             },
             "ToObjectPath": {
@@ -311,6 +314,7 @@ def test_compute_embeds_constraints_in_from_and_to_paths(
                         "MaximumValue": 85.0,
                         "IsMaximumEnabled": True,
                     },
+                    {"$type": "MoonExclusionAngle", "MinimumValue": 15.0},
                 ],
             },
             "OutStep": 600.0,
