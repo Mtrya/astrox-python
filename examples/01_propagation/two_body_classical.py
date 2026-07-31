@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Two-body orbit propagation using classical orbital elements."""
+"""使用经典开普勒根数进行二体轨道传播。"""
 
 from astrox import orbits, propagator
 
@@ -28,9 +28,9 @@ def main():
         gravitational_parameter_m3_s2=EARTH_MU,
     )
 
-    print(f"Period: {period_s:.3f} s")
-    print(f"Position epoch: {position.epoch}")
-    print(f"Reference frame: {position.reference_frame}")
+    print(f"轨道周期: {period_s:.3f} s")
+    print(f"位置历元: {position.epoch}")
+    print(f"参考系: {position.reference_frame}")
 
 
 if __name__ == "__main__":

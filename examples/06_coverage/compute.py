@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Compute coverage for a satellite asset over a bounded grid."""
+"""计算卫星资产在有界网格上的覆盖。"""
 
 from astrox import coverage, components
 
@@ -40,7 +40,7 @@ def main() -> None:
     intervals_by_point = result["SatisfactionIntervalsWithNumberOfAssets"]
     asset_intervals_by_point = result["AssetAccessResults"]
     points = result["Points"]["GridPoints"]
-    print(f"Grid points with interval lists: {len(intervals_by_point)}")
+    print(f"带有区间列表的网格点数: {len(intervals_by_point)}")
     if intervals_by_point:
         covering_intervals = [
             interval
@@ -48,10 +48,10 @@ def main() -> None:
             for interval in point_intervals
             if interval["NumberOfAssets"] > 0
         ]
-        print(f"Grid points echoed in response: {len(points)}")
-        print(f"Per-point asset interval lists: {len(asset_intervals_by_point)}")
-        print(f"Intervals for first point: {len(intervals_by_point[0])}")
-        print(f"Intervals with at least one asset: {len(covering_intervals)}")
+        print(f"响应中回显的网格点数: {len(points)}")
+        print(f"每个网格点的资产区间列表数: {len(asset_intervals_by_point)}")
+        print(f"第一个点的区间数: {len(intervals_by_point[0])}")
+        print(f"至少有一个资产覆盖的区间数: {len(covering_intervals)}")
 
 
 if __name__ == "__main__":

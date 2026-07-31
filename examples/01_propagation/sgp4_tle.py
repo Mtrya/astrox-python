@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""SGP4 propagation from two-line element data."""
+"""从两行根数（TLE）出发进行 SGP4 传播。"""
 
 from astrox import propagator
 
@@ -22,9 +22,9 @@ def main() -> None:
         tle_lines=ISS_TLE,
     )
 
-    print(f"Period: {period_s:.3f} s")
-    print(f"Position epoch: {position.epoch}")
-    print(f"Reference frame: {position.reference_frame} (GCRF/GCRS-style inertial)")
+    print(f"轨道周期: {period_s:.3f} s")
+    print(f"位置历元: {position.epoch}")
+    print(f"参考系: {position.reference_frame} (GCRF/GCRS 风格惯性系)")
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Orbit wizard examples using the curated public SDK style."""
+"""使用精选公开 SDK 风格进行轨道向导示例。"""
 
 from astrox import orbits
 
@@ -22,7 +22,7 @@ def describe_pair(
         f"RAAN={elements_tod.raan_deg:.6f} deg"
     )
     print(
-        f"  Inertial: a={elements_inertial.semi_major_axis_m:.3f} m, "
+        f"  惯性系: a={elements_inertial.semi_major_axis_m:.3f} m, "
         f"i={elements_inertial.inclination_deg:.6f} deg, "
         f"RAAN={elements_inertial.raan_deg:.6f} deg"
     )
@@ -34,10 +34,10 @@ def describe_walker(
 ) -> None:
     print(label)
     for plane_index, plane in enumerate(walker, start=1):
-        print(f"  plane {plane_index}: {len(plane)} satellites")
+        print(f"  轨道面 {plane_index}: {len(plane)} 颗卫星")
         for sat_index, satellite in enumerate(plane, start=1):
             print(
-                f"    sat {sat_index}: "
+                f"    卫星 {sat_index}: "
                 f"RAAN={satellite.raan_deg:.6f} deg, "
                 f"TA={satellite.true_anomaly_deg:.6f} deg"
             )

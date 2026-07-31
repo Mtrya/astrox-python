@@ -1,23 +1,23 @@
-# Access Examples
+# 访问示例
 
-This directory contains runnable access examples. The curated access examples use this public SDK style:
+本目录包含可运行的访问计算示例。这些精选示例使用如下公共 SDK 风格：
 
 ```python
 from astrox import access, components
 ```
 
-The user-facing guides are [docs/sdk/components.md](../../docs/sdk/components.md) and [docs/sdk/access.md](../../docs/sdk/access.md). They document named entities, entity groups, access functions, arguments, units, return shape, and caveats.
+用户指南请参阅 [访问手册](../../docs/manual/access/README.md) 与 [组件手册](../../docs/manual/components/README.md)，它们介绍命名对象、命名对象组、访问函数、参数、单位、返回结构及注意事项。如何一步步计算访问区间，请参考 [计算访问区间](../../docs/how_to/compute_access_intervals.md)。
 
-## Curated Access Examples
+## 精选访问示例
 
-| Example | Public API shown |
+| 示例 | 展示的公共 API |
 | --- | --- |
-| `compute.py` | `components.entity(...)`, `components.site_position(...)`, `components.sgp4_position(...)`, and `access.compute(...)` |
-| `chain.py` | `components.entity_group(...)`, `access.connection(...)`, and `access.chain(...)` |
-| `sensor_pointing.py` | `components.vvlh_axes(...)`, `components.conic_sensor(...)`, `components.fixed_sensor_pointing(...)`, quaternion sensor pointing, and `access.compute(...)` |
-| `custom_axes.py` | `components.fixed_axes(...)`, `components.euler_rotation(...)`, calibrated VVLH-relative sensor frames, and `access.compute(...)` |
+| `compute.py` | `components.entity(...)`、`components.site_position(...)`、`components.sgp4_position(...)` 与 `access.compute(...)` |
+| `chain.py` | `components.entity_group(...)`、`access.connection(...)` 与 `access.chain(...)` |
+| `sensor_pointing.py` | `components.vvlh_axes(...)`、`components.conic_sensor(...)`、`components.fixed_sensor_pointing(...)`、四元数传感器指向与 `access.compute(...)` |
+| `custom_axes.py` | `components.fixed_axes(...)`、`components.euler_rotation(...)`、基于 VVLH 校准的传感器轴系与 `access.compute(...)` |
 
-Install the development environment once, then run examples from the repository root:
+先安装开发环境，然后从仓库根目录运行示例：
 
 ```bash
 uv sync --group dev
@@ -27,4 +27,4 @@ uv run python examples/04_access/sensor_pointing.py
 uv run python examples/04_access/custom_axes.py
 ```
 
-These examples call the ASTROX API through the package default client configuration. Running them end to end requires access to a compatible ASTROX server.
+这些示例通过包的默认客户端配置调用 ASTROX API。端到端运行需要能够连接到兼容的 ASTROX 服务器。

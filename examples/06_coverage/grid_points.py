@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Generate coverage grid points from a latitude/longitude grid definition."""
+"""根据经纬度网格定义生成覆盖网格点。"""
 
 from astrox import coverage
 
@@ -22,9 +22,9 @@ def main() -> None:
     )
 
     points = result["Points"]["GridPoints"]
-    print(f"Generated grid points: {len(points)}")
+    print(f"生成的网格点数: {len(points)}")
     if points:
-        print(f"First point: {points[0]['Position']}")
+        print(f"第一个网格点: {points[0]['Position']}")
 
 
 if __name__ == "__main__":

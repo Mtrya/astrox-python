@@ -101,7 +101,7 @@ Evidence is layered. Each layer answers a different question and should not be u
 
 `tests/validation/cross_validation/` contains semantic cross-validation. Each script compares live ASTROX behavior with an external library, trusted tool, physical invariant, or independent local derivation. This layer calibrates what ASTROX behavior appears to mean.
 
-`docs/sdk/` is user-facing documentation. It should make the recommended path obvious and may also document other callable branches when that helps users understand choices, scope, and caveats. It must distinguish validated behavior from behavior that is merely callable or still unexplained.
+User-facing documentation lives under `docs/`: `docs/manual/` holds the per-domain API reference, `docs/how_to/` holds task guides, `docs/getting_started.md` is the entry tutorial, and `docs/validation/` is the English evidence register. `docs/i18n/en/` mirrors the Chinese user-facing pages in English. Layer rules are recorded in `docs/docs-principles.md`. The documentation should make the recommended path obvious and may also document other callable branches when that helps users understand choices, scope, and caveats. It must distinguish validated behavior from behavior that is merely callable or still unexplained.
 
 The sequence is allowed to loop, but claims must not outrun evidence. If later validation changes the understanding of a branch, update runtime code only when SDK lowering or parsing was wrong, then update behavior tests, live snapshot validation, cross-validation, docs, and examples as appropriate.
 
@@ -123,7 +123,7 @@ If the residual cannot be explained after a bounded investigation, keep the case
 
 Public docs should describe the Python interface, units, return policy, recommended path, and caveats. They may be comprehensive, but they must not turn runtime callability into a semantic guarantee.
 
-Final examples should be copyable demonstrations of the style users should imitate. If a branch is callable but not yet understood well enough to recommend, prefer documenting its caveat in `docs/sdk/` instead of making it a main example.
+Final examples should be copyable demonstrations of the style users should imitate. If a branch is callable but not yet understood well enough to recommend, prefer documenting its caveat in the Manual layer instead of making it a main example.
 
 Docs and examples should use user-facing language. Do not expose internal planning labels, validation bookkeeping terms, or temporary implementation notes as if they were product concepts.
 
@@ -139,7 +139,7 @@ Use this sequence when developing a new curated SDK surface:
 4. Add `tests/validation/live_snapshot/` cases and sidecar snapshots for maintained public SDK calls so live upstream drift surfaces.
 5. Add `tests/validation/cross_validation/` cases for semantics-sensitive branches whenever credible comparison is feasible.
 6. Revisit `astrox/` only if behavior tests or validation reveal an SDK lowering, wiring, public-shape, or parser problem.
-7. Write or update `docs/sdk/` with the implemented interface, units, return policy, recommended path, and caveats that match the evidence.
+7. Write or update `docs/manual/` (and `docs/how_to/` where a task guide helps) with the implemented interface, units, return policy, recommended path, and caveats that match the evidence.
 8. Tighten final `examples/` so they demonstrate the actual implemented SDK code and the style users should copy.
 
 The workflow details for carrying out these steps belong in an agent skill or task-specific plan. This document records the stable principles and ownership boundaries.

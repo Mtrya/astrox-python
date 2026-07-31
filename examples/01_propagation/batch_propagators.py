@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Batch propagator examples using the curated public SDK style."""
+"""使用精选公开 SDK 风格调用批量传播器。"""
 
 from astrox import orbits, propagator
 
@@ -58,14 +58,14 @@ def main() -> None:
         states=states,
         gravitational_parameter_m3_s2=EARTH_MU_M3_S2,
     )
-    describe("Multi two-body", two_body)
+    describe("批量二体传播", two_body)
 
     j2 = propagator.multi_j2(
         epoch="2024-01-01T00:10:00.000Z",
         states=states,
         gravitational_parameter_m3_s2=EARTH_MU_M3_S2,
     )
-    describe("Multi J2", j2)
+    describe("批量 J2 传播", j2)
 
     sgp4 = propagator.multi_sgp4(
         epoch="2024-01-01T00:10:00.000Z",
@@ -74,7 +74,7 @@ def main() -> None:
             HUBBLE_TLE,
         ],
     )
-    describe("Multi SGP4", sgp4)
+    describe("批量 SGP4 传播", sgp4)
 
 
 if __name__ == "__main__":

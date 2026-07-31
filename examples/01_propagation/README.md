@@ -1,30 +1,30 @@
-# Orbit Propagation Examples
+# 轨道传播示例
 
-This directory contains runnable propagation examples. The curated propagator examples use this public SDK style:
+本目录包含可运行的轨道传播示例。这些精选传播器示例采用如下公开 SDK 风格：
 
 ```python
 from astrox import orbits, propagator
 ```
 
-The user-facing guide is [docs/sdk/propagator.md](../../docs/sdk/propagator.md). It documents arguments, units, return values, and caveats for `orbits.keplerian(...)`, `orbits.cartesian_state(...)`, `propagator.j2(...)`, `propagator.two_body(...)`, `propagator.multi_j2(...)`, `propagator.multi_two_body(...)`, `propagator.sgp4(...)`, `propagator.multi_sgp4(...)`, `propagator.simple_ascent(...)`, `propagator.hpop(...)`, and the curated ballistic functions.
+用户指南请参见[传播器手册](../../docs/manual/propagator/README.md)，其中记录了 `orbits.keplerian(...)`、`orbits.cartesian_state(...)`、`propagator.j2(...)`、`propagator.two_body(...)`、`propagator.multi_j2(...)`、`propagator.multi_two_body(...)`、`propagator.sgp4(...)`、`propagator.multi_sgp4(...)`、`propagator.simple_ascent(...)`、`propagator.hpop(...)` 以及精选弹道函数的参数、单位、返回值与注意事项。若需要按步骤选择传播器，可参考[如何传播一条轨道](../../docs/how_to/propagate_an_orbit.md)；若需要搭建 HPOP 力模型配置，可参考[如何搭建 HPOP 力模型配置](../../docs/how_to/build_an_hpop_configuration.md)。
 
-## Curated Propagator Examples
+## 精选传播器示例
 
-| Example | Public API shown |
+| 示例 | 展示的公开 API |
 | --- | --- |
-| `propagator_reference.py` | One compact pass through `orbits.keplerian(...)`, `propagator.j2(...)`, `propagator.two_body(...)`, `propagator.hpop(...)`, `propagator.ballistic_delta_v(...)`, `propagator.sgp4(...)`, and `propagator.simple_ascent(...)` |
-| `j2_classical.py` | J2 propagation from Classical Keplerian elements |
-| `two_body_classical.py` | Two-body propagation from Classical Keplerian elements |
-| `batch_propagators.py` | Batch J2, two-body, and SGP4 propagation to one target epoch |
-| `sgp4_tle.py` | SGP4 propagation from two-line element data |
-| `simple_ascent.py` | Simple ascent propagation from launch point to burnout point |
-| `hpop.py` | HPOP propagation from Classical and Cartesian states |
-| `ballistic_delta_v.py` | Ballistic `DeltaV` branch |
-| `ballistic_min_ecc.py` | Ballistic `DeltaV_MinEcc` branch |
-| `ballistic_apogee_alt.py` | Ballistic `ApogeeAlt` branch |
-| `ballistic_time_of_flight.py` | Ballistic `TimeOfFlight` branch |
+| `propagator_reference.py` | 紧凑地遍历 `orbits.keplerian(...)`、`propagator.j2(...)`、`propagator.two_body(...)`、`propagator.hpop(...)`、`propagator.ballistic_delta_v(...)`、`propagator.sgp4(...)`、`propagator.simple_ascent(...)` |
+| `j2_classical.py` | 由经典开普勒根数进行 J2 传播 |
+| `two_body_classical.py` | 由经典开普勒根数进行二体传播 |
+| `batch_propagators.py` | 批量 J2、二体与 SGP4 传播至同一目标历元 |
+| `sgp4_tle.py` | 由两行根数（TLE）数据进行 SGP4 传播 |
+| `simple_ascent.py` | 由发射点到熄火点进行简单上升传播 |
+| `hpop.py` | 由经典开普勒根数与笛卡尔状态进行 HPOP 传播 |
+| `ballistic_delta_v.py` | 弹道 `DeltaV` 分支 |
+| `ballistic_min_ecc.py` | 弹道 `DeltaV_MinEcc` 分支 |
+| `ballistic_apogee_alt.py` | 弹道 `ApogeeAlt` 分支 |
+| `ballistic_time_of_flight.py` | 弹道 `TimeOfFlight` 分支 |
 
-Install the development environment once, then run examples from the repository root:
+安装开发环境后，即可从仓库根目录运行示例：
 
 ```bash
 uv sync --group dev
@@ -38,10 +38,10 @@ uv run python examples/01_propagation/hpop.py
 uv run python examples/01_propagation/ballistic_delta_v.py
 ```
 
-These examples call the ASTROX API through the package default client configuration. Running them end to end requires access to a compatible ASTROX server.
+这些示例通过包默认客户端配置调用 ASTROX API。端到端运行需要能够访问兼容的 ASTROX 服务器。
 
-## Output Shape
+## 输出形式
 
-The single-result curated propagator functions return `(period_s, position)`. `period_s` is the server period value. `position` is a `propagator.PropagatorPosition` dataclass with `central_body`, `epoch`, `reference_frame`, `interpolation_algorithm`, `interpolation_degree`, and `cartesian_velocity`. Batch propagator functions return `tuple[orbits.KeplerianElements, ...]`.
+单个结果的精选传播器函数返回 `(period_s, position)`。`period_s` 为服务器返回的轨道周期。`position` 是 `propagator.PropagatorPosition` 数据类，包含 `central_body`、`epoch`、`reference_frame`、`interpolation_algorithm`、`interpolation_degree` 与 `cartesian_velocity`。批量传播器函数返回 `tuple[orbits.KeplerianElements, ...]`。
 
-For SGP4 examples, ASTROX reports `position.reference_frame` as `INERTIAL`. Compare those coordinates as GCRF/GCRS-style inertial states, not raw TEME states from low-level SGP4 libraries.
+对于 SGP4 示例，ASTROX 报告的 `position.reference_frame` 为 `INERTIAL`。应将这些坐标作为 GCRF/GCRS 风格的惯性状态来理解，而非底层 SGP4 库返回的原始 TEME 状态。

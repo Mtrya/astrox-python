@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Orbit conversion examples using the curated public SDK style."""
+"""使用精选公开 SDK 风格进行轨道转换示例。"""
 
 from astrox import orbits
 
@@ -36,22 +36,22 @@ def main() -> None:
         orbit,
         gravitational_parameter_m3_s2=EARTH_MU_M3_S2,
     )
-    print("Cartesian state:")
-    print(f"  position: ({cartesian.x_m:.3f}, {cartesian.y_m:.3f}, {cartesian.z_m:.3f}) m")
-    print(f"  velocity: ({cartesian.vx_m_s:.6f}, {cartesian.vy_m_s:.6f}, {cartesian.vz_m_s:.6f}) m/s")
+    print("笛卡尔状态:")
+    print(f"  位置: ({cartesian.x_m:.3f}, {cartesian.y_m:.3f}, {cartesian.z_m:.3f}) m")
+    print(f"  速度: ({cartesian.vx_m_s:.6f}, {cartesian.vy_m_s:.6f}, {cartesian.vz_m_s:.6f}) m/s")
 
     round_trip = orbits.cartesian_to_keplerian(cartesian)
-    describe_keplerian("Converted back to Keplerian", round_trip)
+    describe_keplerian("转回开普勒根数", round_trip)
 
     longitude_deg, latitude_deg, height_m = orbits.lla_at_ascending_node(
         orbit,
         orbit_epoch=ORBIT_EPOCH,
     )
-    print("Ascending-node location:")
-    print(f"  longitude={longitude_deg:.6f} deg, latitude={latitude_deg:.6f} deg, height={height_m:.3f} m")
+    print("升交点位置:")
+    print(f"  经度={longitude_deg:.6f} deg，纬度={latitude_deg:.6f} deg，高度={height_m:.3f} m")
 
     mean_elements = orbits.kozai_izsak_mean_elements(orbit)
-    print("Kozai-Izsak mean elements:")
+    print("Kozai-Izsak 平均根数:")
     print(f"  a={mean_elements.semi_major_axis_m:.3f} m")
     print(f"  e={mean_elements.eccentricity:.8f}")
     print(f"  i={mean_elements.inclination_deg:.6f} deg")

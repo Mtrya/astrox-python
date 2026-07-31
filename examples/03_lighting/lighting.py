@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Lighting calculations from entity position sources."""
+"""从命名对象位置源进行光照计算。"""
 
 from astrox import components, lighting
 
@@ -40,19 +40,19 @@ def main() -> None:
         step_s=900,
     )
 
-    print(f"ISS sunlight intervals: {len(intervals['SunLight']['Intervals'])}")
+    print(f"ISS 光照区间段数: {len(intervals['SunLight']['Intervals'])}")
     first_intensity = intensity["Datas"][0]
     first_aer = aer["Datas"][0]
     print(
-        "First site intensity sample: "
-        f"{first_intensity['Intensity']:.3f} visible, "
-        f"{first_intensity['PercentShadow']:.3f} shadow"
+        "地面站首个太阳辐射强度采样: "
+        f"可见比例 {first_intensity['Intensity']:.3f}, "
+        f"阴影比例 {first_intensity['PercentShadow']:.3f}"
     )
     print(
-        "First site solar AER sample: "
-        f"az={first_aer['Azimuth']:.3f} deg, "
-        f"el={first_aer['Elevation']:.3f} deg, "
-        f"range={first_aer['Range']:.1f} km"
+        "地面站首个太阳 AER 采样: "
+        f"方位角={first_aer['Azimuth']:.3f} deg, "
+        f"仰角={first_aer['Elevation']:.3f} deg, "
+        f"距离={first_aer['Range']:.1f} km"
     )
 
 

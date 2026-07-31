@@ -1,23 +1,23 @@
-# Orbit Conversion And Wizard Examples
+# 轨道转换与轨道向导示例
 
-This directory contains runnable orbit examples. The curated orbit examples use this public SDK style:
+本目录包含可运行的轨道示例。这些精选轨道示例采用如下公开 SDK 风格：
 
 ```python
 from astrox import orbits
 ```
 
-The user-facing guide is [docs/sdk/orbits.md](../../docs/sdk/orbits.md). It documents arguments, units, return values, and notes for orbit conversions, GEO/Molniya/SSO helpers, Walker constellation helpers, and Lambert delta-v.
+用户指南请参见[轨道手册](../../docs/manual/orbits/README.md)，其中记录了轨道转换、GEO/Molniya/SSO 辅助函数、Walker 星座辅助函数以及 Lambert 速度增量的参数、单位、返回值与说明。若需要按步骤在不同轨道表示之间转换，可参考[如何在不同轨道表示之间转换](../../docs/how_to/convert_between_orbit_representations.md)。
 
-## Curated Orbit Examples
+## 精选轨道示例
 
-| Example | Public API shown |
+| 示例 | 展示的公开 API |
 | --- | --- |
-| `conversions.py` | `orbits.keplerian_to_cartesian(...)`, `orbits.cartesian_to_keplerian(...)`, `orbits.lla_at_ascending_node(...)`, and `orbits.kozai_izsak_mean_elements(...)` |
-| `wizards.py` | `orbits.geo(...)`, `orbits.molniya(...)`, `orbits.sso(...)`, `orbits.walker_delta(...)`, `orbits.walker_star(...)`, and `orbits.walker_custom(...)` |
-| `lambert_delta_v.py` | `orbits.lambert_delta_v(...)` and `orbits.geo_ym_lambert_delta_v(...)` |
-| `orbit_system.py` | `orbits.convert_czml_position(...)` and `orbits.earth_moon_libration(...)` |
+| `conversions.py` | `orbits.keplerian_to_cartesian(...)`、`orbits.cartesian_to_keplerian(...)`、`orbits.lla_at_ascending_node(...)`、`orbits.kozai_izsak_mean_elements(...)` |
+| `wizards.py` | `orbits.geo(...)`、`orbits.molniya(...)`、`orbits.sso(...)`、`orbits.walker_delta(...)`、`orbits.walker_star(...)`、`orbits.walker_custom(...)` |
+| `lambert_delta_v.py` | `orbits.lambert_delta_v(...)`、`orbits.geo_ym_lambert_delta_v(...)` |
+| `orbit_system.py` | `orbits.convert_czml_position(...)`、`orbits.earth_moon_libration(...)` |
 
-Install the development environment once, then run examples from the repository root:
+安装开发环境后，即可从仓库根目录运行示例：
 
 ```bash
 uv sync --group dev
@@ -27,4 +27,4 @@ uv run python examples/02_orbits/lambert_delta_v.py
 uv run python examples/02_orbits/orbit_system.py
 ```
 
-These examples call the ASTROX API through the package default client configuration. Running them end to end requires access to a compatible ASTROX server.
+这些示例通过包默认客户端配置调用 ASTROX API。端到端运行需要能够访问兼容的 ASTROX 服务器。

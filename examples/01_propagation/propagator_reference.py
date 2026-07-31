@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Reference propagator examples using the curated public SDK style."""
+"""传播器综合示例：使用精选公开 SDK 风格调用各传播分支。"""
 
 from astrox import orbits, propagator
 
@@ -26,7 +26,7 @@ def main() -> None:
         true_anomaly_deg=0.0,
     )
 
-    print("Classical wire order:", orbit.to_wire())
+    print("经典根数字段顺序:", orbit.to_wire())
 
     j2_period_s, j2_position = propagator.j2(
         start="2024-01-01T00:00:00.000Z",
@@ -39,8 +39,8 @@ def main() -> None:
         j2_normalized_value=EARTH_J2_NORMALIZED,
         ref_distance_m=EARTH_RADIUS_M,
     )
-    print(f"J2 period: {j2_period_s:.3f} s")
-    print(f"J2 frame: {j2_position.reference_frame}")
+    print(f"J2 轨道周期: {j2_period_s:.3f} s")
+    print(f"J2 参考系: {j2_position.reference_frame}")
 
     two_body_period_s, two_body_position = propagator.two_body(
         start="2024-01-01T00:00:00.000Z",
@@ -51,8 +51,8 @@ def main() -> None:
         coord_system="Inertial",
         gravitational_parameter_m3_s2=EARTH_MU_M3_S2,
     )
-    print(f"Two-body period: {two_body_period_s:.3f} s")
-    print(f"Two-body frame: {two_body_position.reference_frame}")
+    print(f"二体轨道周期: {two_body_period_s:.3f} s")
+    print(f"二体参考系: {two_body_position.reference_frame}")
 
     hpop_period_s, hpop_position = propagator.hpop(
         start="2024-01-01T00:00:00.000Z",
@@ -82,8 +82,8 @@ def main() -> None:
             ),
         ),
     )
-    print(f"HPOP period: {hpop_period_s:.3f} s")
-    print(f"HPOP frame: {hpop_position.reference_frame}")
+    print(f"HPOP 轨道周期: {hpop_period_s:.3f} s")
+    print(f"HPOP 参考系: {hpop_position.reference_frame}")
 
     ballistic_period_s, ballistic_position = propagator.ballistic_delta_v(
         start="2024-01-01T12:00:00.000Z",
@@ -96,8 +96,8 @@ def main() -> None:
         delta_v_m_s=3000.0,
         step_s=30.0,
     )
-    print(f"Ballistic period: {ballistic_period_s:.3f} s")
-    print(f"Ballistic frame: {ballistic_position.reference_frame}")
+    print(f"弹道轨道周期: {ballistic_period_s:.3f} s")
+    print(f"弹道参考系: {ballistic_position.reference_frame}")
 
     sgp4_period_s, sgp4_position = propagator.sgp4(
         start="2024-01-01T00:00:00.000Z",
@@ -106,8 +106,8 @@ def main() -> None:
         satellite_number="25544",
         tle_lines=ISS_TLE,
     )
-    print(f"SGP4 period: {sgp4_period_s:.3f} s")
-    print(f"SGP4 frame: {sgp4_position.reference_frame} (GCRF/GCRS-style inertial)")
+    print(f"SGP4 轨道周期: {sgp4_period_s:.3f} s")
+    print(f"SGP4 参考系: {sgp4_position.reference_frame} (GCRF/GCRS 风格惯性系)")
 
     simple_ascent_period_s, simple_ascent_position = propagator.simple_ascent(
         start="2024-01-01T03:00:00.000Z",
@@ -122,8 +122,8 @@ def main() -> None:
         burnout_longitude_deg=101.0,
         burnout_altitude_m=200000.0,
     )
-    print(f"Simple ascent period: {simple_ascent_period_s:.3f} s")
-    print(f"Simple ascent frame: {simple_ascent_position.reference_frame}")
+    print(f"简单上升轨道周期: {simple_ascent_period_s:.3f} s")
+    print(f"简单上升参考系: {simple_ascent_position.reference_frame}")
 
 
 if __name__ == "__main__":

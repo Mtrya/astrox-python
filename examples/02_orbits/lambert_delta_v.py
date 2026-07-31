@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Lambert delta-v examples using the curated public SDK style."""
+"""使用精选公开 SDK 风格进行 Lambert 转移速度增量示例。"""
 
 from astrox import orbits
 
@@ -35,9 +35,9 @@ def main() -> None:
         gravitational_parameter_m3_s2=EARTH_MU_M3_S2,
     )
 
-    print("Cartesian Lambert departure delta-v (m/s):")
+    print("笛卡尔 Lambert 出发速度增量 (m/s):")
     print(f"  x={departure_delta_v_m_s[0]:.6f}, y={departure_delta_v_m_s[1]:.6f}, z={departure_delta_v_m_s[2]:.6f}")
-    print("Cartesian Lambert arrival delta-v (m/s):")
+    print("笛卡尔 Lambert 到达速度增量 (m/s):")
     print(f"  x={arrival_delta_v_m_s[0]:.6f}, y={arrival_delta_v_m_s[1]:.6f}, z={arrival_delta_v_m_s[2]:.6f}")
 
     platform_orbit = orbits.keplerian(
@@ -64,9 +64,9 @@ def main() -> None:
         platform_gravitational_parameter_m3_s2=EARTH_MU_M3_S2,
     )
 
-    print("GEO-YM Lambert departure delta-v (m/s):")
+    print("GEO-YM Lambert 出发速度增量 (m/s):")
     print(f"  x={departure_delta_v_m_s[0]:.6f}, y={departure_delta_v_m_s[1]:.6f}, z={departure_delta_v_m_s[2]:.6f}")
-    print("GEO-YM Lambert arrival delta-v (m/s):")
+    print("GEO-YM Lambert 到达速度增量 (m/s):")
     print(f"  x={arrival_delta_v_m_s[0]:.6f}, y={arrival_delta_v_m_s[1]:.6f}, z={arrival_delta_v_m_s[2]:.6f}")
 
 

@@ -2,22 +2,22 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""J2 perturbation propagation using classical orbital elements."""
+"""使用经典开普勒根数进行 J2 摄动传播。"""
 
 from astrox import orbits, propagator
 
 
-# Earth gravitational parameter (m^3/s^2)
+# 地球引力参数（m^3/s^2）
 EARTH_MU = 3.986004418e14
 
-# Earth J2 normalized value and reference distance
+# 地球 J2 归一化系数与参考距离
 EARTH_J2 = 0.000484165143790815
-EARTH_RADIUS = 6378137.0  # meters
+EARTH_RADIUS = 6378137.0  # 米
 
 
 def main():
-    # ISS-like orbit: 400 km altitude, 51.6° inclination
-    altitude = 400000.0  # meters
+    # 类 ISS 轨道：高度 400 km，倾角 51.6°
+    altitude = 400000.0  # 米
     semimajor_axis = EARTH_RADIUS + altitude
 
     orbit = orbits.keplerian(
@@ -29,7 +29,7 @@ def main():
         true_anomaly_deg=45.0,
     )
 
-    # Propagate for 2 days with 60-second step
+    # 以 60 秒步长传播 2 天
     period_s, position = propagator.j2(
         start="2024-01-01T00:00:00.000Z",
         stop="2024-01-03T00:00:00.000Z",
@@ -43,10 +43,10 @@ def main():
         ref_distance_m=EARTH_RADIUS,
     )
 
-    print(f"Period: {period_s:.3f} s")
-    print(f"Epoch: {position.epoch}")
-    print(f"Reference frame: {position.reference_frame}")
-    print(f"Cartesian-velocity values: {len(position.cartesian_velocity)}")
+    print(f"轨道周期: {period_s:.3f} s")
+    print(f"历元: {position.epoch}")
+    print(f"参考系: {position.reference_frame}")
+    print(f"笛卡尔速度采样值数量: {len(position.cartesian_velocity)}")
 
 
 if __name__ == "__main__":
