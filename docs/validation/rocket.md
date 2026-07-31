@@ -84,7 +84,7 @@ Live snapshots verify shape and drift only; they do not prove physical correctne
 
 ## Dropped Material
 
-The following content from [`docs/sdk/rocket.md`](../../docs/sdk/rocket.md) was intentionally omitted from this validation page because it belongs in the Manual or How-To layers:
+The following content from the former `docs/sdk/rocket.md` (removed when the documentation was reorganized into Manual/How-To/Validation layers) was intentionally omitted from this validation page because it belongs in the Manual or How-To layers:
 
 - Import style and usage tutorial (`from astrox import rocket`).
 - Function signature and argument/unit reference table.

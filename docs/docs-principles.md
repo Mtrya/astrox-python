@@ -50,7 +50,7 @@ No layer may substitute for another. A user should be able to follow Getting Sta
 
 ## Convention vs. Investigation
 
-Content in current `docs/sdk/*.md` must be split according to this rule:
+Content inherited from the former `docs/sdk/*.md` pages was split according to this rule; apply the same rule to any new material:
 
 - **Convention statements** stay in Manual as neutral one-sentence asides. Example: "For SGP4 results, `position.reference_frame == 'INERTIAL'` corresponds to GCRF/GCRS-style inertial coordinates."
 - **Investigation narratives** move to Validation. Example: "Cross-validation against Skyfield confirms the sign and units for representative cases. An arcsecond-scale residual remains visible after frame and light-time diagnostics."
