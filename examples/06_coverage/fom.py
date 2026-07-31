@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Coverage figure-of-merit routes grouped by metric namespace."""
+"""按指标命名空间分组的覆盖指标（FOM）路由。"""
 
 from astrox import coverage, components
 
@@ -52,11 +52,11 @@ def main() -> None:
         **common,
     )
 
-    print(f"Simple coverage rows: {len(simple['Datas'])}")
-    print(f"Number-of-assets rows at time: {len(at_time['Datas'])}")
-    print(f"Coverage-time average: {duration_stats['Average']:.6f} s")
-    print(f"Response-time maximum: {response_stats['Maximum']:.6f} s")
-    print(f"Revisit-time maximum: {revisit_stats['Maximum']:.6f} s")
+    print(f"简单覆盖行数: {len(simple['Datas'])}")
+    print(f"指定时刻的资产数量行数: {len(at_time['Datas'])}")
+    print(f"覆盖时间平均值: {duration_stats['Average']:.6f} s")
+    print(f"响应时间最大值: {response_stats['Maximum']:.6f} s")
+    print(f"重访时间最大值: {revisit_stats['Maximum']:.6f} s")
 
 
 if __name__ == "__main__":

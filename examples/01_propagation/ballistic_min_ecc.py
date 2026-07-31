@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Ballistic propagation using the delta-v minimum eccentricity branch."""
+"""使用最小偏心率速度增量分支进行弹道传播。"""
 
 from astrox import propagator
 
@@ -20,8 +20,8 @@ def main():
         step_s=5.0,
     )
 
-    print(f"Period: {period_s:.3f} s")
-    print(f"Position epoch: {position.epoch}")
+    print(f"轨道周期: {period_s:.3f} s")
+    print(f"位置历元: {position.epoch}")
 
 
 if __name__ == "__main__":

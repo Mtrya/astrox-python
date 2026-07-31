@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Direct access with entity elevation, range, and azimuth/elevation constraints."""
+"""在命名对象上附加仰角、距离和方位-仰角遮罩约束后进行直接访问计算。"""
 
 import math
 
@@ -43,14 +43,14 @@ def main() -> None:
         compute_aer=True,
     )
 
-    print(f"Constrained access intervals: {len(result['Passes'])}")
+    print(f"带约束的访问区间数: {len(result['Passes'])}")
     if result["Passes"]:
         first = result["Passes"][0]
-        print(f"First interval: {first['AccessStart']} to {first['AccessStop']}")
+        print(f"第一个区间: {first['AccessStart']} 至 {first['AccessStop']}")
 
-    # A flat azimuth/elevation mask behaves like an elevation minimum that
-    # varies with azimuth. AzEl masks are only meaningful for SitePosition
-    # participants; attaching one to a moving position source raises an error.
+    # 平坦的方位-仰角遮罩相当于一个随方位角变化的仰角下限。
+    # 方位-仰角遮罩约束只对 SitePosition 位置源有效；
+    # 将其附加到移动位置源会引发错误。
     masked_ground = components.entity(
         name="MaskedGround",
         position=components.site_position(
@@ -81,7 +81,7 @@ def main() -> None:
         to_entity=satellite,
         step_s=60.0,
     )
-    print(f"Masked access intervals: {len(masked_result['Passes'])}")
+    print(f"带遮罩的访问区间数: {len(masked_result['Passes'])}")
 
 
 if __name__ == "__main__":

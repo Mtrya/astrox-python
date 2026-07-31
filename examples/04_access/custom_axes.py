@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Access from a satellite using a calibrated fixed VVLH sensor frame."""
+"""使用以 VVLH 为参考校准的固定传感器轴系，从卫星进行访问计算。"""
 
 from astrox import access, components, orbits
 
@@ -66,10 +66,10 @@ def main() -> None:
         compute_aer=True,
     )
 
-    print(f"Custom-axes sensor intervals: {len(result['Passes'])}")
+    print(f"自定义轴系传感器访问区间数: {len(result['Passes'])}")
     if result["Passes"]:
         first = result["Passes"][0]
-        print(f"First interval: {first['AccessStart']} to {first['AccessStop']}")
+        print(f"第一个区间: {first['AccessStart']} 至 {first['AccessStop']}")
 
 
 if __name__ == "__main__":

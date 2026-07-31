@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Simple ascent propagation from launch point to burnout point."""
+"""从发射点到熄火点的简单上升传播。"""
 
 from astrox import propagator
 
@@ -22,9 +22,9 @@ def main() -> None:
         burnout_altitude_m=200000.0,
     )
 
-    print(f"Period: {period_s:.3f} s")
-    print(f"Position epoch: {position.epoch}")
-    print(f"Reference frame: {position.reference_frame}")
+    print(f"轨道周期: {period_s:.3f} s")
+    print(f"位置历元: {position.epoch}")
+    print(f"参考系: {position.reference_frame}")
 
 
 if __name__ == "__main__":

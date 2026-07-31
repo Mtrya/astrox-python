@@ -1,25 +1,25 @@
-# Coverage Examples
+# 覆盖示例
 
-This directory contains runnable coverage examples. The curated coverage examples use this public SDK style:
+本目录包含可运行的覆盖分析示例。这些精选示例使用如下公共 SDK 风格：
 
 ```python
 from astrox import coverage, components
 ```
 
-The user-facing guide is [docs/sdk/coverage.md](../../docs/sdk/coverage.md).
+用户指南请参阅 [覆盖手册](../../docs/manual/coverage/README.md)。
 
-## Curated Coverage Examples
+## 精选覆盖示例
 
-| Example | Public API shown |
+| 示例 | 展示的公共 API |
 | --- | --- |
-| `grid_points.py` | `coverage.lat_lon_grid(...)` and `coverage.grid_points(...)` |
-| `compute.py` | `coverage.compute(...)`, SGP4 entity assets, resource-count options, and output flags |
-| `reports.py` | `coverage.percent_coverage(...)` and `coverage.coverage_by_asset(...)` |
-| `fom.py` | `coverage.simple_coverage`, `coverage.number_of_assets`, `coverage.coverage_time`, `coverage.response_time`, and `coverage.revisit_time` metric namespaces |
+| `grid_points.py` | `coverage.lat_lon_grid(...)` 与 `coverage.grid_points(...)` |
+| `compute.py` | `coverage.compute(...)`、带 SGP4 位置源的卫星命名对象资产、资源计数选项与输出标志 |
+| `reports.py` | `coverage.percent_coverage(...)` 与 `coverage.coverage_by_asset(...)` |
+| `fom.py` | `coverage.simple_coverage`、`coverage.number_of_assets`、`coverage.coverage_time`、`coverage.response_time` 与 `coverage.revisit_time` 指标命名空间 |
 
-The examples use SGP4 satellite entities as coverage assets because that is the calibrated path for this SDK surface. Use `minimum_assets` for the demonstrated resource-count rule; `exactly_assets` is available, but current ASTROX behavior in the validated duplicate-asset case matches the same threshold style rather than strict equality.
+这些示例使用带 SGP4 位置源的卫星命名对象作为覆盖资产。资源计数规则以 `minimum_assets` 演示；`exactly_assets` 也可用，二者语义与互斥关系请参阅覆盖手册。
 
-Install the development environment once, then run examples from the repository root:
+先安装开发环境，然后从仓库根目录运行示例：
 
 ```bash
 uv sync --group dev
@@ -29,4 +29,4 @@ uv run python examples/06_coverage/reports.py
 uv run python examples/06_coverage/fom.py
 ```
 
-These examples call the ASTROX API through the package's default client configuration. Running them end to end requires access to a compatible ASTROX server.
+这些示例通过包的默认客户端配置调用 ASTROX API。端到端运行需要能够连接到兼容的 ASTROX 服务器。

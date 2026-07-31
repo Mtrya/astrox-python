@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Access from a calibrated VVLH satellite sensor to a ground site."""
+"""从经过校准的 VVLH 卫星传感器指向地面站进行访问计算。"""
 
 from astrox import access, components, orbits
 
@@ -65,10 +65,10 @@ def main() -> None:
         compute_aer=True,
     )
 
-    print(f"Sensor-constrained intervals: {len(result['Passes'])}")
+    print(f"传感器约束访问区间数: {len(result['Passes'])}")
     if result["Passes"]:
         first = result["Passes"][0]
-        print(f"First interval: {first['AccessStart']} to {first['AccessStop']}")
+        print(f"第一个区间: {first['AccessStart']} 至 {first['AccessStop']}")
 
 
 if __name__ == "__main__":

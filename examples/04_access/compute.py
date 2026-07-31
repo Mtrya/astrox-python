@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Direct access calculation between named entities."""
+"""计算两个命名对象之间的直接访问。"""
 
 from astrox import access, components
 
@@ -36,12 +36,12 @@ def main() -> None:
         compute_aer=True,
     )
 
-    print(f"Direct access intervals: {len(result['Passes'])}")
+    print(f"直接访问区间数: {len(result['Passes'])}")
     if result["Passes"]:
         first = result["Passes"][0]
         print(
-            "First interval: "
-            f"{first['AccessStart']} to {first['AccessStop']} "
+            "第一个区间: "
+            f"{first['AccessStart']} 至 {first['AccessStop']} "
             f"({first['Duration']:.1f} s)"
         )
         max_elevation = first.get("MaxElevationData")
@@ -53,11 +53,11 @@ def main() -> None:
             time = None
         if isinstance(elevation, (int, float)) and time is not None:
             print(
-                "Max elevation in first interval: "
-                f"{elevation:.3f} deg at {time}"
+                "第一个区间内的最大仰角: "
+                f"{elevation:.3f} deg，时刻 {time}"
             )
         else:
-            print("Max elevation data was not included in the first interval")
+            print("第一个区间内未包含最大仰角数据")
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Compute a rocket landing-zone boundary from launch and impact points."""
+"""根据发射点和着陆点计算火箭着陆区边界。"""
 
 from astrox import rocket
 
@@ -27,17 +27,17 @@ def main() -> None:
         ],
     )
 
-    print(f"Success: {result['IsSuccess']}")
-    print(f"Message: {result['Message']}")
+    print(f"是否成功: {result['IsSuccess']}")
+    print(f"消息: {result['Message']}")
 
     cartographic = result["cartographicDegrees"]
     num_vertices = len(cartographic) // 3
-    print(f"Boundary vertices: {num_vertices}")
+    print(f"边界顶点数: {num_vertices}")
     for index in range(num_vertices):
         lon = cartographic[index * 3]
         lat = cartographic[index * 3 + 1]
         height = cartographic[index * 3 + 2]
-        print(f"  {index}: lon={lon:.6f} deg, lat={lat:.6f} deg, height={height:.3f} m")
+        print(f"  {index}: 经度={lon:.6f} deg, 纬度={lat:.6f} deg, 高度={height:.3f} m")
 
 
 if __name__ == "__main__":

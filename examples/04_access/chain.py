@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Chain access calculation through named participants."""
+"""通过命名对象参与者计算多跳访问链路。"""
 
 from astrox import access, components
 
@@ -59,10 +59,10 @@ def main() -> None:
         ],
     )
 
-    print(f"Group chain strands: {len(group_chain['ComputedStrands'])}")
-    print(f"Group chain intervals: {len(group_chain['CompleteChainAccess'])}")
-    print(f"Explicit chain strands: {len(explicit_chain['ComputedStrands'])}")
-    print(f"Explicit chain intervals: {len(explicit_chain['CompleteChainAccess'])}")
+    print(f"命名对象组链路的通路条数: {len(group_chain['ComputedStrands'])}")
+    print(f"命名对象组链路的访问区间数: {len(group_chain['CompleteChainAccess'])}")
+    print(f"显式链路的通路条数: {len(explicit_chain['ComputedStrands'])}")
+    print(f"显式链路的访问区间数: {len(explicit_chain['CompleteChainAccess'])}")
 
 
 if __name__ == "__main__":

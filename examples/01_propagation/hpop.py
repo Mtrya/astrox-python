@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""High-precision orbit propagation with HPOP."""
+"""使用 HPOP 进行高精度轨道传播。"""
 
 from astrox import orbits, propagator
 
@@ -62,10 +62,10 @@ def main() -> None:
         config=earth_gravity_config(),
     )
 
-    print("Classical HPOP")
-    print(f"  period: {period_s:.3f} s")
-    print(f"  position epoch: {position.epoch}")
-    print(f"  reference frame: {position.reference_frame}")
+    print("经典根数 HPOP")
+    print(f"  轨道周期: {period_s:.3f} s")
+    print(f"  位置历元: {position.epoch}")
+    print(f"  参考系: {position.reference_frame}")
 
     state = orbits.cartesian_state(
         x_m=7000000.0,
@@ -85,10 +85,10 @@ def main() -> None:
         config=two_body_config(),
     )
 
-    print("Cartesian HPOP")
-    print(f"  period: {cartesian_period_s:.3f} s")
-    print(f"  position epoch: {cartesian_position.epoch}")
-    print(f"  reference frame: {cartesian_position.reference_frame}")
+    print("笛卡尔状态 HPOP")
+    print(f"  轨道周期: {cartesian_period_s:.3f} s")
+    print(f"  位置历元: {cartesian_position.epoch}")
+    print(f"  参考系: {cartesian_position.reference_frame}")
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 # dependencies = ["astrox-python"]
 # requires-python = ">=3.10"
 # ///
-"""Coverage report routes for percent coverage and per-asset coverage."""
+"""覆盖百分比与按资产覆盖的报告路由。"""
 
 from astrox import coverage, components
 
@@ -44,13 +44,13 @@ def main() -> None:
     )
 
     samples = percent["PercentCoverageDatas"]
-    print(f"Percent coverage samples: {len(samples)}")
+    print(f"覆盖百分比样本数: {len(samples)}")
     if samples:
         first = samples[0]
         last = samples[-1]
-        print(f"First sample covered percent: {first['PercentCovered']:.6f}")
-        print(f"Final accumulated percent: {last['PercentAccumulated']:.6f}")
-    print(f"Per-asset rows: {len(by_asset['CoverageByAssetDatas'])}")
+        print(f"第一个样本的覆盖百分比: {first['PercentCovered']:.6f}")
+        print(f"最终累计覆盖百分比: {last['PercentAccumulated']:.6f}")
+    print(f"按资产覆盖行数: {len(by_asset['CoverageByAssetDatas'])}")
 
 
 if __name__ == "__main__":
