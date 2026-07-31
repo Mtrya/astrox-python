@@ -1,16 +1,16 @@
-# 传播器
+# Propagator
 
-`astrox.propagator` 提供轨道传播与弹道轨迹计算的公开 API，包括二体、J2、SGP4、简单上升、HPOP 和弹道等模型。推荐按如下方式导入：
+`astrox.propagator` provides the public API for orbit propagation and ballistic trajectory computation, including two-body, J2, SGP4, simple ascent, HPOP, and ballistic models. The recommended import style is:
 
 ```python
 from astrox import orbits, propagator
 ```
 
-本页按概念、返回值约定、函数族引用和示例组织。所有参数均采用 `snake_case`，带单位的参数使用 `_m`、`_deg`、`_s` 等显式后缀。可选参数在未提供时不会被发往 ASTROX，由服务器保留默认值。若需要完全控制请求载荷，请使用 `astrox.raw`。
+This page is organized by concept, return-value conventions, function-family reference, and examples. All parameters use `snake_case`; parameters that carry units use explicit suffixes such as `_m`, `_deg`, and `_s`. Optional parameters are not sent to ASTROX when omitted; the server retains its defaults. For full control over the request payload, use `astrox.raw`.
 
-## 轨道输入
+## Orbit Input
 
-传播函数接受 `orbits.KeplerianElements` 或 `orbits.CartesianState` 作为轨道描述。`orbits.keplerian(...)` 用六个开普勒根数构造轨道，`orbits.cartesian_state(...)` 用位置/速度构造笛卡尔状态。历元 `orbit_epoch` 与根数或状态分离，由传播函数单独接收。
+Propagation functions accept `orbits.KeplerianElements` or `orbits.CartesianState` as the orbit description. `orbits.keplerian(...)` constructs an orbit from six Keplerian elements, and `orbits.cartesian_state(...)` constructs a Cartesian state from position/velocity. The epoch `orbit_epoch` is separate from the elements or state and is passed to the propagation function directly.
 
 ```python
 orbit = orbits.keplerian(
@@ -23,29 +23,29 @@ orbit = orbits.keplerian(
 )
 ```
 
-轨道构造器详见 [orbits 手册](../orbits/README.md)。
+For details on orbit constructors, see the [orbits manual](../orbits/README.md).
 
-## 返回值
+## Return Values
 
-单个轨道传播函数返回 `(period_s, position)` 元组：
+Single-orbit propagation functions return a `(period_s, position)` tuple:
 
-- `period_s`：`float`，ASTROX 返回的轨道周期，单位秒。
-- `position`：`propagator.PropagatorPosition` 冻结数据类，字段如下：
+- `period_s`: `float`, the orbital period returned by ASTROX, in seconds.
+- `position`: `propagator.PropagatorPosition` frozen dataclass with the following fields:
 
-| 字段 | 类型 | 说明 |
+| Field | Type | Description |
 | --- | --- | --- |
-| `central_body` | `str` | 中心天体 |
-| `epoch` | `str` | 位置采样起始历元 |
-| `reference_frame` | `str` | 参考系，如 `INERTIAL`、`FIXED` |
-| `interpolation_algorithm` | `str` | 插值算法 |
-| `interpolation_degree` | `int` | 插值阶数 |
-| `cartesian_velocity` | `tuple[float, ...]` | CZML 风格的 `[t, x, y, z, vx, vy, vz, ...]` 采样序列 |
+| `central_body` | `str` | Central body |
+| `epoch` | `str` | Start epoch of the position samples |
+| `reference_frame` | `str` | Reference frame, e.g. `INERTIAL`, `FIXED` |
+| `interpolation_algorithm` | `str` | Interpolation algorithm |
+| `interpolation_degree` | `int` | Interpolation degree |
+| `cartesian_velocity` | `tuple[float, ...]` | CZML-style `[t, x, y, z, vx, vy, vz, ...]` sample sequence |
 
-`cartesian_velocity` 中的坐标与速度单位与 `reference_frame` 一致；`INERTIAL` 对应惯性参考系，`FIXED` 对应地固参考系。SGP4 返回的 `INERTIAL` 对应 GCRF/GCRS 风格的惯性坐标。
+The coordinates and velocities in `cartesian_velocity` use the units consistent with `reference_frame`; `INERTIAL` corresponds to an inertial reference frame, and `FIXED` corresponds to an Earth-fixed reference frame. The `INERTIAL` frame returned by SGP4 corresponds to a GCRF/GCRS-style inertial coordinate frame.
 
-批量传播函数 `multi_j2`、`multi_two_body`、`multi_sgp4` 返回 `tuple[orbits.KeplerianElements, ...]`，即目标历元处的开普勒根数元组。ASTROX 原始响应中每条根数还包含 `GravitationalParameter` 字段，SDK 解析后的返回值省略该字段；需要完整原始响应时请使用 `astrox.raw`。
+Batch propagation functions `multi_j2`, `multi_two_body`, and `multi_sgp4` return `tuple[orbits.KeplerianElements, ...]`, i.e. a tuple of Keplerian elements at the target epoch. Each element in the raw ASTROX response also contains a `GravitationalParameter` field, which is omitted from the SDK-parsed return value; for the full raw response, use `astrox.raw`.
 
-## J2 与二体传播
+## J2 and Two-Body Propagation
 
 ### `propagator.j2`
 
@@ -65,20 +65,20 @@ propagator.j2(
 ) -> tuple[float, PropagatorPosition]
 ```
 
-用 J2 模型从 `orbit_epoch` 开始传播开普勒根数。`j2_normalized_value` 为归一化 J2 系数，`ref_distance_m` 为参考距离，二者均用于覆盖服务器默认值。
+Propagates Keplerian elements starting from `orbit_epoch` using the J2 model. `j2_normalized_value` is the normalized J2 coefficient, and `ref_distance_m` is the reference distance; both override server defaults.
 
-| 参数 | 单位 | 说明 |
+| Parameter | Unit | Description |
 | --- | --- | --- |
-| `start` | — | 传播起始时间字符串 |
-| `stop` | — | 传播结束时间字符串 |
-| `orbit_epoch` | — | 轨道根数历元字符串 |
-| `orbit` | — | `orbits.KeplerianElements` 实例 |
-| `step_s` | s | 采样步长 |
-| `central_body` | — | 中心天体名称 |
-| `gravitational_parameter_m3_s2` | m³/s² | 引力参数 |
-| `coord_system` | — | 坐标系，如 `Inertial` |
-| `j2_normalized_value` | — | 归一化 J2 值 |
-| `ref_distance_m` | m | J2 参考距离 |
+| `start` | — | Propagation start time string |
+| `stop` | — | Propagation stop time string |
+| `orbit_epoch` | — | Orbit elements epoch string |
+| `orbit` | — | `orbits.KeplerianElements` instance |
+| `step_s` | s | Sampling step size |
+| `central_body` | — | Central body name |
+| `gravitational_parameter_m3_s2` | m³/s² | Gravitational parameter |
+| `coord_system` | — | Coordinate system, e.g. `Inertial` |
+| `j2_normalized_value` | — | Normalized J2 value |
+| `ref_distance_m` | m | J2 reference distance |
 
 ```python
 period_s, position = propagator.j2(
@@ -94,7 +94,7 @@ period_s, position = propagator.j2(
 )
 ```
 
-完整可运行示例见 `examples/01_propagation/j2_classical.py`。
+A complete runnable example is available at `examples/01_propagation/j2_classical.py`.
 
 ### `propagator.two_body`
 
@@ -112,7 +112,7 @@ propagator.two_body(
 ) -> tuple[float, PropagatorPosition]
 ```
 
-用二体模型传播开普勒根数。参数与 `j2` 相同，但不接受 `j2_normalized_value` 和 `ref_distance_m`。
+Propagates Keplerian elements using the two-body model. Parameters are the same as for `j2`, except `j2_normalized_value` and `ref_distance_m` are not accepted.
 
 ```python
 period_s, position = propagator.two_body(
@@ -124,11 +124,11 @@ period_s, position = propagator.two_body(
 )
 ```
 
-完整可运行示例见 `examples/01_propagation/two_body_classical.py`。
+A complete runnable example is available at `examples/01_propagation/two_body_classical.py`.
 
-## 批量传播
+## Batch Propagation
 
-批量传播将多个状态或 TLE 统一到同一个目标历元 `epoch`。
+Batch propagation brings multiple states or TLEs to a common target epoch `epoch`.
 
 ### `propagator.multi_j2`
 
@@ -141,7 +141,7 @@ propagator.multi_j2(
 ) -> tuple[KeplerianElements, ...]
 ```
 
-将多组开普勒根数用 J2 模型传播到 `epoch`。`states` 中每项为 `(orbit_epoch, orbit)`，其中 `orbit_epoch` 是该状态的历元字符串，`orbit` 为 `KeplerianElements`。
+Propagates multiple Keplerian-element sets to `epoch` using the J2 model. Each item in `states` is `(orbit_epoch, orbit)`, where `orbit_epoch` is the epoch string for that state and `orbit` is a `KeplerianElements` instance.
 
 ### `propagator.multi_two_body`
 
@@ -154,7 +154,7 @@ propagator.multi_two_body(
 ) -> tuple[KeplerianElements, ...]
 ```
 
-用二体模型批量传播。`gravitational_parameter_m3_s2` 若提供，会写入每个输入状态。
+Batch propagation using the two-body model. If `gravitational_parameter_m3_s2` is provided, it is written into each input state.
 
 ### `propagator.multi_sgp4`
 
@@ -166,7 +166,7 @@ propagator.multi_sgp4(
 ) -> tuple[KeplerianElements, ...]
 ```
 
-将多组两行根数（TLE）用 SGP4 传播到 `epoch`。`tle_sets` 中每项为包含 TLE 第一行和第二行的二元组。
+Propagates multiple two-line element sets (TLEs) to `epoch` using SGP4. Each item in `tle_sets` is a pair containing the first and second TLE lines.
 
 ```python
 leo = orbits.keplerian(...)
@@ -184,9 +184,9 @@ elements = propagator.multi_two_body(
 )
 ```
 
-完整可运行示例见 `examples/01_propagation/batch_propagators.py`。
+A complete runnable example is available at `examples/01_propagation/batch_propagators.py`.
 
-## SGP4 传播
+## SGP4 Propagation
 
 ### `propagator.sgp4`
 
@@ -201,15 +201,15 @@ propagator.sgp4(
 ) -> tuple[float, PropagatorPosition]
 ```
 
-从两行根数（TLE）出发，用 SGP4 模型传播卫星轨道。`tle_lines` 必须是包含 TLE 第一行和第二行的二元组。
+Propagates a satellite orbit from a two-line element set (TLE) using the SGP4 model. `tle_lines` must be a pair containing the first and second TLE lines.
 
-| 参数 | 说明 |
+| Parameter | Description |
 | --- | --- |
-| `start` | 传播起始时间字符串 |
-| `stop` | 传播结束时间字符串 |
-| `tle_lines` | TLE 第一行与第二行组成的二元组 |
-| `step_s` | 采样步长 |
-| `satellite_number` | 卫星编号 |
+| `start` | Propagation start time string |
+| `stop` | Propagation stop time string |
+| `tle_lines` | Pair consisting of the first and second TLE lines |
+| `step_s` | Sampling step size |
+| `satellite_number` | Satellite number |
 
 ```python
 ISS_TLE = (
@@ -226,9 +226,9 @@ period_s, position = propagator.sgp4(
 )
 ```
 
-完整可运行示例见 `examples/01_propagation/sgp4_tle.py`。
+A complete runnable example is available at `examples/01_propagation/sgp4_tle.py`.
 
-## 简单上升
+## Simple Ascent
 
 ### `propagator.simple_ascent`
 
@@ -249,21 +249,21 @@ propagator.simple_ascent(
 ) -> tuple[float, PropagatorPosition]
 ```
 
-从发射点与熄火点参数生成简单上升轨迹。
+Generates a simple ascent trajectory from launch-point and burnout-point parameters.
 
-| 参数 | 单位 | 说明 |
+| Parameter | Unit | Description |
 | --- | --- | --- |
-| `start` | — | 起始时间字符串 |
-| `stop` | — | 结束时间字符串 |
-| `launch_latitude_deg` | deg | 发射点纬度 |
-| `launch_longitude_deg` | deg | 发射点经度 |
-| `launch_altitude_m` | m | 发射点高度 |
-| `burnout_velocity_m_s` | m/s | 熄火点速度 |
-| `burnout_latitude_deg` | deg | 熄火点纬度 |
-| `burnout_longitude_deg` | deg | 熄火点经度 |
-| `burnout_altitude_m` | m | 熄火点高度 |
-| `step_s` | s | 采样步长 |
-| `central_body` | — | 中心天体 |
+| `start` | — | Start time string |
+| `stop` | — | Stop time string |
+| `launch_latitude_deg` | deg | Launch-point latitude |
+| `launch_longitude_deg` | deg | Launch-point longitude |
+| `launch_altitude_m` | m | Launch-point altitude |
+| `burnout_velocity_m_s` | m/s | Burnout velocity |
+| `burnout_latitude_deg` | deg | Burnout-point latitude |
+| `burnout_longitude_deg` | deg | Burnout-point longitude |
+| `burnout_altitude_m` | m | Burnout-point altitude |
+| `step_s` | s | Sampling step size |
+| `central_body` | — | Central body |
 
 ```python
 period_s, position = propagator.simple_ascent(
@@ -281,11 +281,11 @@ period_s, position = propagator.simple_ascent(
 )
 ```
 
-完整可运行示例见 `examples/01_propagation/simple_ascent.py`。
+A complete runnable example is available at `examples/01_propagation/simple_ascent.py`.
 
-## HPOP 高精度传播
+## HPOP High-Precision Propagation
 
-HPOP 支持从开普勒根数或笛卡尔状态出发，通过力模型配置进行高精度数值传播。
+HPOP supports high-precision numerical propagation from either Keplerian elements or a Cartesian state, using a force-model configuration.
 
 ### `propagator.hpop`
 
@@ -308,27 +308,27 @@ propagator.hpop(
 ) -> tuple[float, PropagatorPosition]
 ```
 
-`orbit` 与 `state` 必须且只能提供一个。`config` 可以是 `HpopConfig` 对象，也可以是已知 ASTROX 结构的原始字典映射。
+Exactly one of `orbit` or `state` must be provided. `config` may be an `HpopConfig` object or a raw dict matching the known ASTROX structure.
 
-| 参数 | 单位 | 说明 |
+| Parameter | Unit | Description |
 | --- | --- | --- |
-| `start` | — | 传播起始时间字符串 |
-| `stop` | — | 传播结束时间字符串 |
-| `orbit_epoch` | — | 轨道历元字符串 |
-| `orbit` | — | 开普勒根数输入 |
-| `state` | — | 笛卡尔状态输入 |
-| `config` | — | HPOP 配置对象或映射 |
-| `coord_system` | — | 坐标系 |
-| `coord_epoch` | — | 坐标历元 |
-| `gravitational_parameter_m3_s2` | m³/s² | 引力参数 |
-| `coefficient_of_drag` | — | 阻力系数 |
-| `area_mass_ratio_drag_m2_kg` | m²/kg | 阻力面积质量比 |
-| `coefficient_of_srp` | — | 太阳辐射压系数 |
-| `area_mass_ratio_srp_m2_kg` | m²/kg | 太阳辐射压面积质量比 |
+| `start` | — | Propagation start time string |
+| `stop` | — | Propagation stop time string |
+| `orbit_epoch` | — | Orbit epoch string |
+| `orbit` | — | Keplerian-elements input |
+| `state` | — | Cartesian-state input |
+| `config` | — | HPOP configuration object or mapping |
+| `coord_system` | — | Coordinate system |
+| `coord_epoch` | — | Coordinate epoch |
+| `gravitational_parameter_m3_s2` | m³/s² | Gravitational parameter |
+| `coefficient_of_drag` | — | Drag coefficient |
+| `area_mass_ratio_drag_m2_kg` | m²/kg | Drag area-to-mass ratio |
+| `coefficient_of_srp` | — | Solar-radiation-pressure coefficient |
+| `area_mass_ratio_srp_m2_kg` | m²/kg | Solar-radiation-pressure area-to-mass ratio |
 
-### HPOP 配置构造器
+### HPOP Configuration Constructors
 
-这些构造器返回冻结的 SDK 值对象，只发送调用者显式提供的字段。
+These constructors return frozen SDK value objects and send only the fields explicitly provided by the caller.
 
 #### `propagator.hpop_config`
 
@@ -365,7 +365,7 @@ propagator.hpop_rkf78(
 ) -> HpopIntegrator
 ```
 
-配置 RKF7(8) 数值积分器。
+Configures the RKF7(8) numerical integrator.
 
 #### `propagator.hpop_two_body_gravity`
 
@@ -378,7 +378,7 @@ propagator.hpop_two_body_gravity(
 ) -> HpopGravity
 ```
 
-使用二体重力模型。该分支的引力参数由 ASTROX 内部管理；如需覆盖，请使用 `hpop` 顶层的 `gravitational_parameter_m3_s2`。
+Uses the two-body gravity model. The gravitational parameter for this branch is managed internally by ASTROX; to override it, use the top-level `gravitational_parameter_m3_s2` in `hpop`.
 
 #### `propagator.hpop_gravity_field`
 
@@ -397,7 +397,7 @@ propagator.hpop_gravity_field(
 ) -> HpopGravity
 ```
 
-配置重力场模型。`gravity_file_name` 为重力场文件，`degree` 和 `order` 为阶次。
+Configures the gravity-field model. `gravity_file_name` is the gravity-field file; `degree` and `order` are the model degree and order.
 
 #### `propagator.hpop_jacchia_roberts`
 
@@ -415,7 +415,7 @@ propagator.hpop_jacchia_roberts(
 ) -> HpopAtmosphere
 ```
 
-配置 Jacchia-Roberts 大气模型。
+Configures the Jacchia-Roberts atmosphere model.
 
 #### `propagator.hpop_srp_spherical`
 
@@ -431,7 +431,7 @@ propagator.hpop_srp_spherical(
 ) -> HpopSrp
 ```
 
-配置球形太阳辐射压模型。
+Configures the spherical solar-radiation-pressure model.
 
 #### `propagator.hpop_third_body`
 
@@ -449,7 +449,7 @@ propagator.hpop_third_body(
 ) -> HpopThirdBody
 ```
 
-配置第三方天体摄动。`third_body_name` 为天体名称。
+Configures third-body perturbation. `third_body_name` is the name of the body.
 
 ```python
 config = propagator.hpop_config(
@@ -484,7 +484,7 @@ period_s, position = propagator.hpop(
 )
 ```
 
-笛卡尔状态输入：
+Cartesian-state input:
 
 ```python
 state = orbits.cartesian_state(
@@ -508,35 +508,35 @@ period_s, position = propagator.hpop(
 )
 ```
 
-完整可运行示例见 `examples/01_propagation/hpop.py`。
+A complete runnable example is available at `examples/01_propagation/hpop.py`.
 
-## 弹道传播
+## Ballistic Propagation
 
-弹道传播计算从发射点到落点的次轨道轨迹。共有五个函数：一个名义函数和四个按不同约束条件求解的函数。所有函数都返回 `(period_s, position)`。
+Ballistic propagation computes the suborbital trajectory from a launch point to an impact point. There are five functions: one nominal function and four that solve under different constraints. All functions return `(period_s, position)`.
 
-| 函数 | 额外必填参数 | 约束类型 |
+| Function | Additional Required Parameters | Constraint Type |
 | --- | --- | --- |
-| `propagator.ballistic` | 无 | 名义弹道 |
-| `propagator.ballistic_delta_v` | `delta_v_m_s` | 速度增量 |
-| `propagator.ballistic_delta_v_min_ecc` | `delta_v_m_s` | 最小偏心率速度增量 |
-| `propagator.ballistic_apogee_altitude` | `apogee_altitude_m` | 远地点高度 |
-| `propagator.ballistic_time_of_flight` | `time_of_flight_s` | 飞行时间 |
+| `propagator.ballistic` | None | Nominal ballistic trajectory |
+| `propagator.ballistic_delta_v` | `delta_v_m_s` | Delta-v |
+| `propagator.ballistic_delta_v_min_ecc` | `delta_v_m_s` | Minimum-eccentricity delta-v |
+| `propagator.ballistic_apogee_altitude` | `apogee_altitude_m` | Apogee altitude |
+| `propagator.ballistic_time_of_flight` | `time_of_flight_s` | Time of flight |
 
-共同参数：
+Common parameters:
 
-| 参数 | 单位 | 说明 |
+| Parameter | Unit | Description |
 | --- | --- | --- |
-| `start` | — | 起始时间字符串 |
-| `impact_latitude_deg` | deg | 落点纬度 |
-| `impact_longitude_deg` | deg | 落点经度 |
-| `stop` | — | 结束时间字符串 |
-| `step_s` | s | 采样步长 |
-| `central_body` | — | 中心天体 |
-| `gravitational_parameter_m3_s2` | m³/s² | 引力参数 |
-| `launch_latitude_deg` | deg | 发射点纬度 |
-| `launch_longitude_deg` | deg | 发射点经度 |
-| `launch_altitude_m` | m | 发射点高度 |
-| `impact_altitude_m` | m | 落点高度 |
+| `start` | — | Start time string |
+| `impact_latitude_deg` | deg | Impact-point latitude |
+| `impact_longitude_deg` | deg | Impact-point longitude |
+| `stop` | — | Stop time string |
+| `step_s` | s | Sampling step size |
+| `central_body` | — | Central body |
+| `gravitational_parameter_m3_s2` | m³/s² | Gravitational parameter |
+| `launch_latitude_deg` | deg | Launch-point latitude |
+| `launch_longitude_deg` | deg | Launch-point longitude |
+| `launch_altitude_m` | m | Launch-point altitude |
+| `impact_altitude_m` | m | Impact-point altitude |
 
 ### `propagator.ballistic`
 
@@ -623,12 +623,12 @@ period_s, position = propagator.ballistic_delta_v(
 )
 ```
 
-完整可运行示例见 `examples/01_propagation/ballistic_delta_v.py`、`ballistic_min_ecc.py`、`ballistic_apogee_alt.py`、`ballistic_time_of_flight.py`。
+Complete runnable examples are available at `examples/01_propagation/ballistic_delta_v.py`, `ballistic_min_ecc.py`, `ballistic_apogee_alt.py`, and `ballistic_time_of_flight.py`.
 
-## 与 `astrox.components` 位置源的对应关系
+## Correspondence with `astrox.components` Position Sources
 
-`astrox.components` 提供了与传播器参数对应的位置源对象，如 `J2Position`、`TwoBodyPosition`、`Sgp4Position`、`HpopPosition`、`SimpleAscentPosition`、`BallisticPosition`，用于在命名对象中组装位置源。它们的参数与 `propagator` 中的函数一一对应，但属于组件层的值对象。详见 [components 手册](../components/README.md)。
+`astrox.components` provides position-source objects that correspond to propagator parameters, such as `J2Position`, `TwoBodyPosition`, `Sgp4Position`, `HpopPosition`, `SimpleAscentPosition`, and `BallisticPosition`, for assembling position sources as named objects. Their parameters correspond one-to-one with the functions in `propagator`, but they belong to the component-layer value objects. For details, see the [components manual](../components/README.md).
 
-## 错误处理
+## Error Handling
 
-当 ASTROX 返回不成功响应或网络请求失败时，所有传播函数都会抛出 `astrox.exceptions.AstroxAPIError`。SDK 不会隐藏或改写服务器错误信息。需要完整原始响应时，请直接使用 `astrox.raw.post`。
+All propagation functions raise `astrox.exceptions.AstroxAPIError` when ASTROX returns an unsuccessful response or when the network request fails. The SDK does not hide or rewrite server error messages. For the full raw response, use `astrox.raw.post` directly.

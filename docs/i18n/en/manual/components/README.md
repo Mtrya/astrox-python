@@ -1,16 +1,16 @@
-# 组件
+# Components
 
-`astrox.components` 提供 ASTROX 分析对象的公共词汇表：命名对象、位置源、传感器、约束、姿态轴系、旋转以及矢量几何工具（VGT）。这些值对象本身不发起网络请求，只负责把 Python 参数组装成 ASTROX 可识别的请求片段。推荐按如下方式导入：
+`astrox.components` provides the public vocabulary for ASTROX analysis objects: named entities, position sources, sensors, constraints, attitude axes, rotations, and Vector Geometry Tool (VGT) utilities. These value objects do not initiate network requests themselves; they only assemble Python parameters into request fragments that ASTROX recognizes. The recommended import is:
 
 ```python
 from astrox import components
 ```
 
-组件通常嵌入到 `astrox.access` 的访问计算、覆盖计算等请求中。本页按概念分组介绍每个公开构造器及其参数；各端点如何使用这些值，请参阅 [access 手册](../access/README.md) 与 [propagator 手册](../propagator/README.md)。
+Components are typically embedded in requests for `astrox.access` access computations, coverage computations, and so on. This page introduces each public constructor and its parameters grouped by concept; for how each endpoint uses these values, see the [access manual](../access/README.md) and [propagator manual](../propagator/README.md).
 
-所有构造器均使用 `snake_case` 参数名，带单位的参数使用 `_m`、`_deg`、`_s`、`_km` 等显式后缀。未提供的可选参数不会发往 ASTROX，由服务器保留默认值。每个值对象都有 `to_wire()` 方法，可在需要时查看生成的请求片段；普通 SDK 调用直接传入值对象即可。
+All constructors use `snake_case` parameter names, and parameters with units use explicit suffixes such as `_m`, `_deg`, `_s`, `_km`, etc. Optional parameters that are not provided are not sent to ASTROX, and the server retains its default values. Every value object has a `to_wire()` method that can be used to inspect the generated request fragment when needed; ordinary SDK calls simply pass the value object in directly.
 
-## 命名对象
+## Named Entities
 
 ### `components.entity`
 
@@ -28,18 +28,18 @@ components.entity(
 ) -> Entity
 ```
 
-`entity` 构造一个命名对象（Entity），它是位置源与元数据的组合。`Entity` 是冻结数据类，字段如下：
+`entity` constructs a named entity (Entity), which is a combination of a position source and metadata. `Entity` is a frozen dataclass with the following fields:
 
-| 字段 | 类型 | 说明 |
+| Field | Type | Description |
 | --- | --- | --- |
-| `name` | `str` | 对象名称，在访问链路中用于标识该对象 |
-| `position` | `EntityPosition` | 位置源，必填 |
-| `description` | `str \| None` | 描述 |
-| `vgt` | `VgtProvider \| None` | 附着的 VGT 命名几何定义 |
-| `orientation` | `EntityAxes \| None` | 命名对象的姿态轴系 |
-| `sensor` | `EntitySensor \| None` | 传感器形状 |
-| `sensor_pointing` | `SensorPointing \| None` | 传感器指向 |
-| `constraints` | `tuple[Constraint, ...] \| None` | 约束条件 |
+| `name` | `str` | Entity name, used in access chains to identify this object |
+| `position` | `EntityPosition` | Position source, required |
+| `description` | `str \| None` | Description |
+| `vgt` | `VgtProvider \| None` | Attached VGT named geometry definitions |
+| `orientation` | `EntityAxes \| None` | Attitude axes of the named entity |
+| `sensor` | `EntitySensor \| None` | Sensor shape |
+| `sensor_pointing` | `SensorPointing \| None` | Sensor pointing |
+| `constraints` | `tuple[Constraint, ...] \| None` | Constraints |
 
 ```python
 satellite = components.entity(
@@ -68,7 +68,7 @@ components.entity_group(
 ) -> EntityGroup
 ```
 
-`entity_group` 把多个命名对象组合成一个命名对象组（EntityGroup），用于访问链路等需要成组参与者的场景。`from_restriction` 与 `to_restriction` 的可选值为 `"AnyOf"` 或 `"AtLeastN"`；当取值 `"AtLeastN"` 时，需同时提供对应的 `from_number` 或 `to_number`。
+`entity_group` combines multiple named entities into a named entity group (EntityGroup), used in scenarios such as access chains that require grouped participants. The optional values for `from_restriction` and `to_restriction` are `"AnyOf"` or `"AtLeastN"`; when the value is `"AtLeastN"`, the corresponding `from_number` or `to_number` must also be provided.
 
 ```python
 targets = components.entity_group(
@@ -80,7 +80,7 @@ targets = components.entity_group(
 
 ### `astrox.access.connection`
 
-访问链路的显式连接片段由 `astrox.access.connection` 构造，对应类型为 `astrox.access.Connection`。它不在 `astrox.components` 中导出，但与命名对象组配合使用：
+The explicit connection fragment for an access chain is constructed by `astrox.access.connection`, and its corresponding type is `astrox.access.Connection`. It is not exported from `astrox.components`, but it is used together with named entity groups:
 
 ```python
 from astrox import access, components
@@ -88,13 +88,13 @@ from astrox import access, components
 link = access.connection(ground, satellite)
 ```
 
-`connection` 的完整签名与用法见 [access 手册](../access/README.md)。
+The full signature and usage of `connection` are in the [access manual](../access/README.md).
 
-## 位置源
+## Position Sources
 
-位置源描述对象随时间变化的空间位置，是命名对象的 `position` 字段。`astrox.components` 中的位置源与 `astrox.propagator` 中的传播函数一一对应，但属于组件层的值对象，用于嵌入访问等请求。
+Position sources describe the spatial position of an object as a function of time and are the `position` field of a named entity. The position sources in `astrox.components` correspond one-to-one with the propagation functions in `astrox.propagator`, but they belong to the component-layer value objects used for embedding in requests such as access.
 
-### 地面站位置
+### Ground Site Position
 
 ```python
 components.site_position(
@@ -108,7 +108,7 @@ components.site_position(
 ) -> SitePosition
 ```
 
-`site_position` 用大地经纬度高描述固定地面站。`longitude_deg`、`latitude_deg` 为角度，`height_m` 为海拔高度（米）。
+`site_position` describes a fixed ground site using geodetic longitude, latitude, and height. `longitude_deg` and `latitude_deg` are in degrees, and `height_m` is altitude above the reference ellipsoid in meters.
 
 ```python
 site = components.site_position(
@@ -118,7 +118,7 @@ site = components.site_position(
 )
 ```
 
-### CZML 采样位置
+### CZML Sampled Position
 
 ```python
 components.czml_position(
@@ -134,7 +134,7 @@ components.czml_position(
 ) -> CzmlPosition
 ```
 
-`czml_position` 用 CZML 风格的采样序列描述位置。`cartesian` 为 `[t, x, y, z, ...]` 形式，`cartesian_velocity` 为 `[t, x, y, z, vx, vy, vz, ...]` 形式。
+`czml_position` describes a position using a CZML-style sampled sequence. `cartesian` has the form `[t, x, y, z, ...]`, and `cartesian_velocity` has the form `[t, x, y, z, vx, vy, vz, ...]`.
 
 ```python
 sampled = components.czml_position(
@@ -146,7 +146,7 @@ sampled = components.czml_position(
 )
 ```
 
-### 复合 CZML 位置
+### Composite CZML Position
 
 ```python
 components.czml_positions(
@@ -156,27 +156,27 @@ components.czml_positions(
 ) -> CzmlPositions
 ```
 
-`czml_positions` 把多个 `CzmlPosition` 组合成一个复合位置源。
+`czml_positions` combines multiple `CzmlPosition` objects into a composite position source.
 
 ```python
 track = components.czml_positions([sampled], central_body="Earth")
 ```
 
-### 中心天体位置
+### Central Body Position
 
 ```python
 components.central_body_position(name: str) -> CentralBodyPosition
 ```
 
-`central_body_position` 构造一个以指定中心天体本身为位置源的值。
+`central_body_position` constructs a value that uses the specified central body itself as the position source.
 
 ```python
 sun = components.central_body_position("Sun")
 ```
 
-### 传播型位置源
+### Propagation Position Sources
 
-以下构造器的参数与 `astrox.propagator` 中同名传播函数一致，区别是返回组件值对象而非直接发起传播请求。完整参数含义与单位请参阅 [propagator 手册](../propagator/README.md)。
+The parameters of the following constructors are consistent with the propagation functions of the same name in `astrox.propagator`; the difference is that they return component value objects instead of initiating propagation requests directly. For the full meaning of parameters and their units, see the [propagator manual](../propagator/README.md).
 
 ```python
 components.j2_position(
@@ -232,7 +232,7 @@ iss = components.sgp4_position(
 )
 ```
 
-### HPOP、简单上升与弹道位置源
+### HPOP, Simple Ascent, and Ballistic Position Sources
 
 ```python
 components.hpop_position(
@@ -284,16 +284,16 @@ components.ballistic_position(
 ) -> BallisticPosition
 ```
 
-`hpop_position` 的 `orbit` 与 `state` 必须且只能提供一个；`config` 可以是 `propagator.hpop_config(...)` 对象，也可以是已知 ASTROX 结构的原始字典映射。`ballistic_position` 的 `ballistic_type` 与 `ballistic_type_value` 对应 propagator 中不同弹道求解分支：
+For `hpop_position`, exactly one of `orbit` or `state` must be provided; `config` can be an object returned by `propagator.hpop_config(...)` or a raw dictionary mapping with a known ASTROX structure. `ballistic_position`'s `ballistic_type` and `ballistic_type_value` correspond to different ballistic solution branches in propagator:
 
-| `ballistic_type` | `ballistic_type_value` 含义 |
+| `ballistic_type` | Meaning of `ballistic_type_value` |
 | --- | --- |
-| `"DeltaV"` | 速度增量 `delta_v_m_s` |
-| `"MinEccentricity"` | 速度增量 `delta_v_m_s` |
-| `"ApogeeAltitude"` | 远地点高度 `apogee_altitude_m` |
-| `"TimeOfFlight"` | 飞行时间 `time_of_flight_s` |
+| `"DeltaV"` | Velocity increment `delta_v_m_s` |
+| `"MinEccentricity"` | Velocity increment `delta_v_m_s` |
+| `"ApogeeAltitude"` | Apogee altitude `apogee_altitude_m` |
+| `"TimeOfFlight"` | Time of flight `time_of_flight_s` |
 
-弹道传播的完整分支说明见 [propagator 手册](../propagator/README.md)。
+The full branch description for ballistic propagation is in the [propagator manual](../propagator/README.md).
 
 ```python
 ascent = components.simple_ascent_position(
@@ -315,9 +315,9 @@ ballistic = components.ballistic_position(
 )
 ```
 
-## 传感器与传感器指向
+## Sensors and Sensor Pointing
 
-### 圆锥传感器与矩形传感器
+### Conic and Rectangular Sensors
 
 ```python
 components.conic_sensor(
@@ -337,7 +337,7 @@ components.rectangular_sensor(
 ) -> RectangularSensor
 ```
 
-角度参数单位为度。`outer_half_angle_deg` 是圆锥传感器最常用的半张角；矩形传感器用 `x_half_angle_deg` 与 `y_half_angle_deg` 分别描述两个方向的半张角。
+Angle parameters are in degrees. `outer_half_angle_deg` is the most commonly used half-angle for conic sensors; rectangular sensors use `x_half_angle_deg` and `y_half_angle_deg` to describe the half-angles in the two directions.
 
 ```python
 camera = components.conic_sensor(outer_half_angle_deg=30.0)
@@ -347,7 +347,7 @@ rect_camera = components.rectangular_sensor(
 )
 ```
 
-### 固定传感器指向
+### Fixed Sensor Pointing
 
 ```python
 components.fixed_sensor_pointing(
@@ -357,7 +357,7 @@ components.fixed_sensor_pointing(
 ) -> FixedSensorPointing
 ```
 
-`fixed_sensor_pointing` 用旋转片段定义传感器相对于载体轴系的固定指向。`Rotation` 可以是 `az_el_rotation`、`quaternion_rotation` 或 `euler_rotation`。
+`fixed_sensor_pointing` defines a fixed sensor pointing relative to the host body axes using a rotation fragment. `Rotation` can be `az_el_rotation`, `quaternion_rotation`, or `euler_rotation`.
 
 ```python
 sensor_pointing = components.fixed_sensor_pointing(
@@ -370,7 +370,7 @@ sensor_pointing = components.fixed_sensor_pointing(
 )
 ```
 
-### 指向方向
+### Pointing Directions
 
 ```python
 components.ra_dec_direction(
@@ -388,13 +388,13 @@ components.xyz_direction(
 ) -> XyzDirection
 ```
 
-`ra_dec_direction` 与 `xyz_direction` 用于构造 VGT 固定矢量的方向，见下文 [矢量几何工具 VGT](#矢量几何工具-vgt)。
+`ra_dec_direction` and `xyz_direction` are used to construct directions for VGT fixed vectors, described below in [Vector Geometry Tool VGT](#vector-geometry-tool-vgt).
 
-## 约束
+## Constraints
 
-约束作为 `Entity.constraints` 列表嵌入命名对象，被访问等计算使用。
+Constraints are embedded in a named entity as the `Entity.constraints` list and are used by access and other computations.
 
-### 仰角约束
+### Elevation Constraint
 
 ```python
 components.elevation_constraint(
@@ -406,9 +406,9 @@ components.elevation_constraint(
 ) -> ElevationConstraint
 ```
 
-角度单位为度。`maximum_deg` 仅在同时提供 `maximum_enabled=True` 时才会生效。
+Angles are in degrees. `maximum_deg` only takes effect when `maximum_enabled=True` is also provided.
 
-### 距离约束
+### Range Constraint
 
 ```python
 components.range_constraint(
@@ -420,9 +420,9 @@ components.range_constraint(
 ) -> RangeConstraint
 ```
 
-距离单位为千米。`maximum_km` 仅在同时提供 `maximum_enabled=True` 时才会生效。
+Distance is in kilometers. `maximum_km` only takes effect when `maximum_enabled=True` is also provided.
 
-### 方位-仰角遮罩约束
+### Azimuth-Elevation Mask Constraint
 
 ```python
 components.az_el_mask_constraint(
@@ -433,9 +433,9 @@ components.az_el_mask_constraint(
 ) -> AzElMaskConstraint
 ```
 
-`az_el_mask_rad` 为交替排列的方位角与仰角采样序列，单位为弧度。该约束只对 `SitePosition` 位置源有效。
+`az_el_mask_rad` is an alternating sequence of azimuth and elevation samples in radians. This constraint is only valid for `SitePosition` position sources.
 
-### 太阳/月球排除角约束
+### Sun/Moon Exclusion Angle Constraints
 
 ```python
 components.sun_exclusion_angle_constraint(
@@ -451,7 +451,7 @@ components.moon_exclusion_angle_constraint(
 ) -> MoonExclusionAngleConstraint
 ```
 
-角度单位为度，表示被约束对象与太阳/月球方向之间的最小允许夹角。
+Angles are in degrees and represent the minimum allowed angular separation between the constrained object and the Sun/Moon direction.
 
 ```python
 constraints = [
@@ -463,11 +463,11 @@ constraints = [
 ]
 ```
 
-## 姿态轴系
+## Attitude Axes
 
-命名对象级姿态轴系用于描述命名对象的体轴或参考坐标系。`astrox.components` 用 `Axes` 表示这一层，与下文旋转片段 `Rotation` 区分。
+Entity-level attitude axes describe the body axes or reference frame of a named entity. `astrox.components` uses `Axes` at this layer, distinguished from the rotation fragments `Rotation` described below.
 
-### 轨道相关轴系
+### Orbit-Related Axes
 
 ```python
 components.vvlh_axes(
@@ -498,7 +498,7 @@ components.vnc_axes(
 ) -> VncAxes
 ```
 
-`relative_to` 的可选值为 `"Earth"`、`"Moon"`、`"Mars"`、`"Sun"`、`"CBF"`。若被其他轴系或 VGT 矢量引用，必须通过 `name` 参数命名。
+The optional values for `relative_to` are `"Earth"`, `"Moon"`, `"Mars"`, `"Sun"`, `"CBF"`. If referenced by other axes or VGT vectors, it must be named via the `name` parameter.
 
 ```python
 body_axes = components.vvlh_axes(name="BodyVVLH")
@@ -506,7 +506,7 @@ lvlh = components.lvlh_axes()
 vnc = components.vnc_axes(relative_to="Earth")
 ```
 
-### 固定轴系与历元固定轴系
+### Fixed Axes and Fixed-at-Epoch Axes
 
 ```python
 components.fixed_axes(
@@ -531,7 +531,7 @@ components.fixed_at_epoch_axes(
 ) -> FixedAtEpochAxes
 ```
 
-`fixed_axes` 把参考轴系按给定旋转固定。`fixed_at_epoch_axes` 在指定历元把源轴系冻结到参考轴系。被引用的 `EntityAxes` 对象必须已命名。
+`fixed_axes` fixes a reference axes by the given rotation. `fixed_at_epoch_axes` freezes the source axes onto the reference axes at the specified epoch. Referenced `EntityAxes` objects must already be named.
 
 ```python
 camera_axes = components.fixed_axes(
@@ -552,7 +552,7 @@ frozen = components.fixed_at_epoch_axes(
 )
 ```
 
-### 对齐约束轴系
+### Aligned and Constrained Axes
 
 ```python
 components.aligned_and_constrained_axes(
@@ -568,9 +568,9 @@ components.aligned_and_constrained_axes(
 ) -> AlignedAndConstrainedAxes
 ```
 
-`principal_axis` 与 `reference_axis` 的可选值为 `"+X"`、`"-X"`、`"+Y"`、`"-Y"`、`"+Z"`、`"-Z"`。该轴系使 `principal_axis` 对齐到 `principal` 矢量方向，同时让 `reference_axis` 尽量指向 `reference` 矢量方向。
+The optional values for `principal_axis` and `reference_axis` are `"+X"`, `"-X"`, `"+Y"`, `"-Y"`, `"+Z"`, `"-Z"`. This axes system aligns `principal_axis` with the `principal` vector direction while keeping `reference_axis` pointing as close as possible to the `reference` vector direction.
 
-### CZML 轴系与组合轴系
+### CZML Axes and Composite Axes
 
 ```python
 components.czml_axes(
@@ -596,7 +596,7 @@ components.composite_axes(
 ) -> CompositeAxes
 ```
 
-`czml_axes` 用 CZML 风格的单位四元数采样序列描述姿态，四元数顺序为 `xyzw`。`composite_axes` 把多个轴系按时间区间拼接。
+`czml_axes` describes attitude using a CZML-style unit quaternion sampled sequence, with quaternion order `xyzw`. `composite_axes` concatenates multiple axes by time interval.
 
 ```python
 czml_attitude = components.czml_axes(
@@ -616,11 +616,11 @@ piecewise = components.composite_axes(
 )
 ```
 
-## 旋转
+## Rotations
 
-旋转片段用于 `fixed_axes` 的 `rotation` 参数、传感器指向，以及其它需要小姿态偏移的地方。
+Rotation fragments are used for the `rotation` parameter of `fixed_axes`, sensor pointing, and other places that require a small attitude offset.
 
-### 方位-仰角旋转
+### Azimuth-Elevation Rotation
 
 ```python
 components.az_el_rotation(
@@ -630,7 +630,7 @@ components.az_el_rotation(
 ) -> AzElRotation
 ```
 
-### 四元数旋转
+### Quaternion Rotation
 
 ```python
 components.quaternion_rotation(
@@ -642,9 +642,9 @@ components.quaternion_rotation(
 ) -> QuaternionRotation
 ```
 
-参数为标量在前、向量在后的顺序；SDK 将其转换为 ASTROX 的 `QS/QX/QY/QZ` 字段。
+Parameters are in scalar-first, vector-last order; the SDK translates them into ASTROX's `QS/QX/QY/QZ` fields.
 
-### 欧拉旋转
+### Euler Rotation
 
 ```python
 components.euler_rotation(
@@ -656,7 +656,7 @@ components.euler_rotation(
 ) -> EulerRotation
 ```
 
-`sequence` 为旋转顺序字符串，如 `"321"`、 `"123"`。
+`sequence` is a rotation order string, such as `"321"`, `"123"`.
 
 ```python
 az_el = components.az_el_rotation(azimuth_deg=0.0, elevation_deg=-20.0)
@@ -664,9 +664,9 @@ quat = components.quaternion_rotation(scalar=1.0, x=0.0, y=0.0, z=0.0)
 euler = components.euler_rotation(sequence="321", a_deg=0.0, b_deg=-20.0, c_deg=0.0)
 ```
 
-## 矢量几何工具 VGT
+## Vector Geometry Tool VGT
 
-VGT（Vector Geometry Tool）是附在命名对象上的命名几何定义集合，通过 `entity(..., vgt=...)` 使用。`VgtProvider` 是 `vgt(...)` 构造器返回的值对象。
+VGT (Vector Geometry Tool) is a collection of named geometry definitions attached to a named entity, used via `entity(..., vgt=...)`. `VgtProvider` is the value object returned by the `vgt(...)` constructor.
 
 ```python
 components.vgt(
@@ -680,9 +680,9 @@ components.vgt(
 ) -> VgtProvider
 ```
 
-`axes` 必填，其余集合可选。集合中的元素必须提供 `name`，以便在轴系定义中被引用。
+`axes` is required; the remaining collections are optional. Elements in the collections must provide a `name` so they can be referenced in axis definitions.
 
-### 固定矢量
+### Fixed Vector
 
 ```python
 components.vgt_fixed_vector(
@@ -694,9 +694,9 @@ components.vgt_fixed_vector(
 ) -> VgtFixedVector
 ```
 
-`direction` 为 `xyz_direction(...)` 或 `ra_dec_direction(...)`。
+`direction` is `xyz_direction(...)` or `ra_dec_direction(...)`.
 
-### 点、系统、角与平面
+### Points, Systems, Angles, and Planes
 
 ```python
 components.vgt_point(
@@ -727,7 +727,7 @@ components.vgt_plane(
 ) -> VgtPlane
 ```
 
-### 完整示例
+### Complete Example
 
 ```python
 body_axes = components.vvlh_axes(name="BodyVVLH")
@@ -766,9 +766,9 @@ observer = components.entity(
 )
 ```
 
-## 组合到访问请求
+## Composing into Access Requests
 
-组件值对象通常直接传给 `astrox.access.compute` 或 `astrox.access.chain`：
+Component value objects are usually passed directly to `astrox.access.compute` or `astrox.access.chain`:
 
 ```python
 from astrox import access, components
@@ -796,12 +796,12 @@ result = access.compute(
 )
 ```
 
-完整示例见 `examples/04_access/compute.py`、`constraints.py`、`custom_axes.py`、`sensor_pointing.py` 与 `chain.py`。访问计算的语义与返回值说明见 [access 手册](../access/README.md)。
+Full examples are in `examples/04_access/compute.py`, `constraints.py`, `custom_axes.py`, `sensor_pointing.py`, and `chain.py`. The semantics and return values of access computations are described in the [access manual](../access/README.md).
 
-## 约定说明
+## Conventions
 
-- 可选参数在未提供时不会被发往 ASTROX，由服务器保留默认值。
-- 被其它轴系或 VGT 定义引用的 `EntityAxes` 与 `VgtVector` 对象必须提供 `name`。
-- `az_el_mask_constraint` 的 `az_el_mask_rad` 单位为弧度，且只对 `SitePosition` 有效。
-- `range_constraint` 使用千米，仰角与排除角约束使用度。
-- `quaternion_rotation` 使用标量在前的 Python 参数顺序。
+- Optional parameters are not sent to ASTROX when not provided; the server retains default values.
+- `EntityAxes` and `VgtVector` objects referenced by other axes or VGT definitions must provide a `name`.
+- `az_el_mask_constraint`'s `az_el_mask_rad` is in radians and is only valid for `SitePosition`.
+- `range_constraint` uses kilometers; elevation and exclusion angle constraints use degrees.
+- `quaternion_rotation` uses the scalar-first Python parameter order.
