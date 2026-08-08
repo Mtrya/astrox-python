@@ -68,7 +68,7 @@ def test_sgp4_omits_server_owned_optional_knobs_when_not_provided(
 
 
 def test_sgp4_rejects_raw_tle_fragments() -> None:
-    with pytest.raises(TypeError, match="tle must be an astrox.orbits.Tle"):
+    with pytest.raises(TypeError, match=r"tle must be an astrox\.orbits\.Tle"):
         propagator.sgp4(
             start=SGP4_REQUEST["Start"],
             stop=SGP4_REQUEST["Stop"],

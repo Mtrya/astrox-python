@@ -3,28 +3,29 @@
 
 # Coverage:
 #   Branches:
-#     - CA_ComputeV3 with TLE primary and TLE targets: partial; range, speed,
-#       continuous TCA, and TLE-defined plane angle are calibrated across target
-#       mean anomaly, RAAN, inclination, and stop-time cases; probability remains
-#       unresolved
-#     - CA_ComputeV4 with CZML primary and TLE targets: partial; range, speed,
-#       supplied-sample boundary behavior, and GCRS plane angle are calibrated;
-#       probability remains unresolved
+#     - CA_ComputeV3 with TLE primary and TLE targets: unresolved overall;
+#       range, speed, continuous TCA, and TLE-defined plane angle are calibrated,
+#       but CA_Probability remains unexplained after eight probe rounds
+#     - CA_ComputeV4 with CZML primary and TLE targets: unresolved overall;
+#       range, speed, supplied-sample boundary behavior, and GCRS plane angle are
+#       calibrated, but CA_Probability remains unexplained after eight rounds
 #   Fields:
 #     - CA_MinRange_Time: V3 is compared with an independent continuous local
 #       minimum including an off-grid interior case; V4 is compared with the
-#       supplied 60-second sample boundary convention
+#       supplied-sample boundary convention
 #     - CA_MinRange: verified against GCRS 3-D separation, rounded to 0.001 km
 #     - CA_DeltaV: verified against GCRS relative speed, rounded to 1e-6 km/s
 #     - CA_Theta: V3 is compared with the full TLE inclination/RAAN plane angle;
 #       V4 uses the GCRS angular-momentum angle
-#     - CA_Probability: unresolved; four probe rounds observed a stable zero
-#       scalar but found no covariance or independent probability oracle
+#     - CA_Probability: unresolved; eight live rounds observed a stable wire
+#       scalar zero across geometry, thresholds, branch/cadence parity, and a
+#       sub-kilometre case; no probability oracle or model inputs exist
 #   Parameters:
-#     - target TLE mean anomaly: verified for 130/135/137.7421/140/142.85/145/150
-#       deg; 130 deg is also retained as a no-result filter boundary
-#     - target inclination, RAAN, and mean motion: varied independently across
-#       plane-angle and relative-speed changes
+#     - target TLE mean anomaly: verified for 130/135/137.7421/140/142.8/142.85/145/150
+#       deg; eccentricity is varied through 0.0018/0.0009386/0.02; 130 deg is
+#       also retained as a no-result filter boundary
+#     - target inclination, RAAN, eccentricity, and mean motion: varied
+#       independently across plane-angle, distance, and relative-speed changes
 #     - V3 stop time: verified at 5, 8, and 10 minutes
 #     - V4 stop time: verified at 5, 8, and 10 minutes; the final CZML sample
 #       is excluded by the observed server interval convention
@@ -51,10 +52,12 @@
 #     and RAANs; independent RAAN-only and inclination-only probes distinguish it
 #     from the absolute inclination difference. V4 uses the instantaneous GCRS
 #     angular-momentum angle.
-#   - Repeated V3/V4 calls and geometry probes produced `CA_Probability=0.0`.
-#     Because the promoted request exposes no covariance, hard-body radius, or
-#     equivalent error model, this is classified as a stable server-owned
-#     opaque scalar rather than a verified statistical collision probability.
+#   - Eight new probability rounds covered independent geometry axes, threshold
+#     changes, V3/V4 cadence parity, and a sub-kilometre encounter. Every returned
+#     wire value was integer zero, including repeated and multi-target responses.
+#     The OpenAPI request and response expose no covariance, hard-body radius,
+#     uncertainty, or hidden probability fields, so the scalar remains unresolved
+#     rather than receiving statistical collision-probability semantics.
 
 from __future__ import annotations
 
@@ -86,7 +89,7 @@ TARGET_LINE1 = (
     "1 25545U 99999A   24001.00000000  .00000000  00000-0  00000-0 0  9993"
 )
 TARGET_LINE2_TEMPLATE = (
-    "2 25545 {inclination:8.4f} {raan:8.4f} 0009386 217.1816 "
+    "2 25545 {inclination:8.4f} {raan:8.4f} {eccentricity} 217.1816 "
     "{mean_anomaly:8.4f} {mean_motion:11.8f}    03"
 )
 SAMPLE_STEP_S = 60
@@ -94,10 +97,15 @@ RANGE_ABS_KM = 0.001
 RELATIVE_SPEED_ABS_KM_S = 5.0e-7
 V3_ANGLE_ABS_DEG = 0.01
 V4_ANGLE_ABS_DEG = 0.00051
+TIMESCALE = load.timescale(builtin=True)
 
 
 class CrossValidationError(Exception):
     """Raised when ASTROX and the Skyfield geometry disagree."""
+
+
+class UnresolvedSemanticsError(Exception):
+    """Raised when an intentionally unresolved CA convention still mismatches."""
 
 
 def tle_checksum(line: str) -> str:
@@ -123,14 +131,17 @@ def primary_tle() -> orbits.Tle:
 def target_tle(
     mean_anomaly_deg: float,
     *,
+    eccentricity: float = 0.0009386,
     inclination_deg: float = 51.6264,
     raan_deg: float = 339.8059,
     mean_motion_rev_day: float = 15.52489080,
 ) -> orbits.Tle:
+    eccentricity_field = f"{eccentricity:.7f}".split(".", 1)[1]
     line2 = tle_checksum(
         TARGET_LINE2_TEMPLATE.format(
             inclination=inclination_deg,
             raan=raan_deg,
+            eccentricity=eccentricity_field,
             mean_anomaly=mean_anomaly_deg,
             mean_motion=mean_motion_rev_day,
         )
@@ -138,13 +149,13 @@ def target_tle(
     return orbits.tle(
         line1=TARGET_LINE1,
         line2=line2,
-        name=f"probe-{mean_anomaly_deg:g}-{inclination_deg:g}",
+        name=f"probe-{mean_anomaly_deg:g}-{eccentricity:g}-{inclination_deg:g}",
         catalog_number="25545",
     )
 
 
 def target_satellite(tle: orbits.Tle) -> EarthSatellite:
-    timescale = load.timescale(builtin=True)
+    timescale = TIMESCALE
     return EarthSatellite(tle.line1, tle.line2, tle.catalog_number or "target", timescale)
 
 
@@ -167,7 +178,7 @@ def sample_state(
     satellite: EarthSatellite,
     offset_s: float,
 ) -> tuple[np.ndarray, np.ndarray]:
-    timescale = load.timescale(builtin=True)
+    timescale = TIMESCALE
     timestamp = timescale.utc(2024, 1, 1, 0, 0, offset_s)
     state = satellite.at(timestamp)
     return np.asarray(state.position.m), np.asarray(state.velocity.m_per_s)
@@ -224,14 +235,14 @@ def nearest_sample(
 def continuous_minimum(
     primary: EarthSatellite,
     target: EarthSatellite,
-    stop_s: int,
+    stop_seconds: int,
 ) -> tuple[float, float, float, float]:
     coarse = [
         sample_geometry(primary, target, float(offset_s))[0]
-        for offset_s in range(stop_s + 1)
+        for offset_s in range(stop_seconds + 1)
     ]
     best_index = min(range(len(coarse)), key=coarse.__getitem__)
-    if best_index in (0, stop_s):
+    if best_index in (0, stop_seconds):
         offset_s = float(best_index)
         range_km, speed_km_s, angle_deg = sample_geometry(primary, target, offset_s)
         return offset_s, range_km, speed_km_s, angle_deg
@@ -357,8 +368,8 @@ def compare_v3_case(
     *,
     inclination_deg: float = 51.6264,
     raan_deg: float = 339.8059,
-    stop_s: str = "2024-01-01T00:10:00.000Z",
-    stop_s_seconds: int = 600,
+    stop: str = "2024-01-01T00:10:00.000Z",
+    stop_seconds: int = 600,
     tol_max_distance_km: float = 1000.0,
 ) -> None:
     target = target_tle(
@@ -368,7 +379,7 @@ def compare_v3_case(
     )
     result = conjunction.find_tle_close_approaches(
         start=START,
-        stop=stop_s,
+        stop=stop,
         tle=primary_tle(),
         targets=[target],
         tol_max_distance_km=tol_max_distance_km,
@@ -380,13 +391,13 @@ def compare_v3_case(
         PRIMARY_LINE1,
         PRIMARY_LINE2,
         "25544",
-        load.timescale(builtin=True),
+        TIMESCALE,
     )
     target_satellite_value = target_satellite(target)
     expected_offset_s, expected_range_km, expected_speed_km_s, _ = continuous_minimum(
         primary,
         target_satellite_value,
-        stop_s_seconds,
+        stop_seconds,
     )
     expected = (
         expected_offset_s,
@@ -400,13 +411,13 @@ def compare_v3_case(
         angle_tolerance_deg=V3_ANGLE_ABS_DEG,
         label=(
             f"CA V3 mean_anomaly={mean_anomaly_deg:g}, "
-            f"inclination={inclination_deg:g}, raan={raan_deg:g}, stop={stop_s}"
+            f"inclination={inclination_deg:g}, raan={raan_deg:g}, stop={stop}"
         ),
     )
 
 
 def compare_v3_interior_case(mean_anomaly_deg: float) -> None:
-    stop_s_seconds = 600
+    stop_seconds = 600
     target = target_tle(mean_anomaly_deg)
     result = conjunction.find_tle_close_approaches(
         start=START,
@@ -424,18 +435,18 @@ def compare_v3_interior_case(mean_anomaly_deg: float) -> None:
         PRIMARY_LINE1,
         PRIMARY_LINE2,
         "25544",
-        load.timescale(builtin=True),
+        TIMESCALE,
     )
     target_satellite_value = target_satellite(target)
     expected_offset_s, expected_range_km, expected_speed_km_s, _ = continuous_minimum(
         primary,
         target_satellite_value,
-        stop_s_seconds,
+        stop_seconds,
     )
     expected_angle_deg = tle_plane_angle_deg(primary, target_satellite_value)
     result_item = result.results[0]
     actual_offset_s = offset_for_timestamp(result_item.min_range_time)
-    if not 0.0 < actual_offset_s < stop_s_seconds:
+    if not 0.0 < actual_offset_s < stop_seconds:
         raise CrossValidationError(
             f"CA V3 interior TCA was not inside the window: {actual_offset_s:g} s"
         )
@@ -476,15 +487,15 @@ def test_ca_v3_matches_skyfield_close_approach() -> None:
             raan_deg=raan_deg,
             tol_max_distance_km=10000.0,
         )
-    for stop_s, stop_s_seconds in (
+    for stop, stop_seconds in (
         ("2024-01-01T00:05:00.000Z", 300),
         ("2024-01-01T00:08:00.000Z", 480),
         ("2024-01-01T00:10:00.000Z", 600),
     ):
         compare_v3_case(
             137.7421,
-            stop_s=stop_s,
-            stop_s_seconds=stop_s_seconds,
+            stop=stop,
+            stop_seconds=stop_seconds,
         )
 
 
@@ -493,11 +504,15 @@ def test_ca_v3_matches_skyfield_interior_close_approach() -> None:
     compare_v3_interior_case(142.85)
 
 
-def propagated_czml_position(stop: str) -> components.CzmlPosition:
+def propagated_czml_position(
+    stop: str,
+    *,
+    step_s: float = float(SAMPLE_STEP_S),
+) -> components.CzmlPosition:
     _, position = propagator.sgp4(
         start=START,
         stop=stop,
-        step_s=float(SAMPLE_STEP_S),
+        step_s=step_s,
         tle=primary_tle(),
     )
     return components.czml_position(
@@ -510,26 +525,26 @@ def propagated_czml_position(stop: str) -> components.CzmlPosition:
     )
 
 
-def compare_v4_case(stop_s: str, stop_s_seconds: int) -> None:
+def compare_v4_case(stop: str, stop_seconds: int) -> None:
     target = target_tle(137.7421)
     result = conjunction.find_czml_close_approaches(
         start=START,
-        stop=stop_s,
-        position=propagated_czml_position(stop_s),
+        stop=stop,
+        position=propagated_czml_position(stop),
         targets=[target],
         tol_max_distance_km=1000.0,
     )
-    primary = EarthSatellite(PRIMARY_LINE1, PRIMARY_LINE2, "25544", load.timescale(builtin=True))
+    primary = EarthSatellite(PRIMARY_LINE1, PRIMARY_LINE2, "25544", TIMESCALE)
     expected = nearest_sample(
         primary,
         target_satellite(target),
-        sample_offsets(stop_s_seconds, include_stop=False),
+        sample_offsets(stop_seconds, include_stop=False),
     )
     compare_close_approach(
         result,
         expected=expected,
         angle_tolerance_deg=V4_ANGLE_ABS_DEG,
-        label=f"CA V4 stop={stop_s}",
+        label=f"CA V4 stop={stop}",
     )
 
 
@@ -553,68 +568,134 @@ def test_ca_v3_no_result_filter_boundary() -> None:
 
 def test_ca_v4_matches_skyfield_czml_sample_boundary() -> None:
     configure_astrox_from_env()
-    for stop_s, stop_s_seconds in (
+    for stop, stop_seconds in (
         ("2024-01-01T00:05:00.000Z", 300),
         ("2024-01-01T00:08:00.000Z", 480),
         ("2024-01-01T00:10:00.000Z", 600),
     ):
-        compare_v4_case(stop_s, stop_s_seconds)
+        compare_v4_case(stop, stop_seconds)
 
 
 @pytest.mark.calibration
 @pytest.mark.xfail(
     reason=(
-        "CA_Probability remains unresolved: four live probe rounds observed a "
-        "stable zero scalar across geometry, velocity, plane angle, V3/V4, and "
-        "filter-threshold changes, but the promoted requests expose no covariance "
-        "or collision-probability oracle."
+        "CA_Probability remains unresolved after eight live rounds: geometry, "
+        "threshold, V3/V4 cadence parity, and a sub-kilometre case all returned "
+        "wire scalar zero; the OpenAPI request has no covariance, hard-body-radius, "
+        "or uncertainty input and no independent probability oracle exists."
     ),
-    raises=CrossValidationError,
+    raises=UnresolvedSemanticsError,
     strict=True,
 )
 def test_ca_collision_probability_remains_unresolved() -> None:
     configure_astrox_from_env()
     observed: list[tuple[str, float]] = []
-    probe_cases = (
-        ("distance_135", target_tle(135.0)),
-        ("distance_140", target_tle(140.0)),
-        ("plane_plus_5", target_tle(137.7421, inclination_deg=56.6264)),
-        ("faster_target", target_tle(137.7421, mean_motion_rev_day=16.52489080)),
-    )
-    for label, target in probe_cases:
+
+    def record_v3(
+        label: str,
+        target: orbits.Tle,
+        *,
+        tol_max_distance_km: float = 10000.0,
+        tol_cross_dt_s: float = 10000.0,
+        tol_theta_deg: float = 180.0,
+        tol_dh_km: float = 10000.0,
+    ) -> None:
         result = conjunction.find_tle_close_approaches(
             start=START,
             stop="2024-01-01T00:10:00.000Z",
             tle=primary_tle(),
+            targets=[target],
+            tol_max_distance_km=tol_max_distance_km,
+            tol_cross_dt_s=tol_cross_dt_s,
+            tol_theta_deg=tol_theta_deg,
+            tol_dh_km=tol_dh_km,
+        )
+        if len(result.results) != 1:
+            raise CrossValidationError(
+                f"CA probability V3 probe returned {len(result.results)} results: {label}"
+            )
+        observed.append((label, result.results[0].collision_probability))
+
+    def record_v4(label: str, target: orbits.Tle, *, step_s: float) -> None:
+        result = conjunction.find_czml_close_approaches(
+            start=START,
+            stop="2024-01-01T00:10:00.000Z",
+            position=propagated_czml_position(
+                "2024-01-01T00:10:00.000Z",
+                step_s=step_s,
+            ),
             targets=[target],
             tol_max_distance_km=10000.0,
             tol_cross_dt_s=10000.0,
             tol_theta_deg=180.0,
             tol_dh_km=10000.0,
         )
-        if not result.results:
-            raise CrossValidationError(f"CA probability probe returned no result: {label}")
+        if len(result.results) != 1:
+            raise CrossValidationError(
+                f"CA probability V4 probe returned {len(result.results)} results: {label}"
+            )
         observed.append((label, result.results[0].collision_probability))
 
-    position = propagated_czml_position("2024-01-01T00:10:00.000Z")
-    v4_result = conjunction.find_czml_close_approaches(
+    # Round 1: independently vary distance, eccentricity, inclination, and RAAN.
+    for label, target in (
+        ("geometry_distance", target_tle(135.0)),
+        ("geometry_eccentricity", target_tle(142.8, eccentricity=0.02)),
+        ("geometry_inclination", target_tle(142.8, inclination_deg=40.0)),
+        ("geometry_raan", target_tle(142.8, raan_deg=90.0)),
+    ):
+        record_v3(label, target)
+
+    # Round 2: vary selection thresholds while preserving a returned pair.
+    threshold_target = target_tle(137.7421)
+    for label, values in (
+        ("threshold_broad", (10000.0, 10000.0, 180.0, 10000.0)),
+        ("threshold_distance", (700.0, 10000.0, 180.0, 10000.0)),
+        ("threshold_cross_dt", (10000.0, 600.0, 180.0, 10000.0)),
+        ("threshold_plane", (10000.0, 600.0, 5.0, 10000.0)),
+    ):
+        record_v3(
+            label,
+            threshold_target,
+            tol_max_distance_km=values[0],
+            tol_cross_dt_s=values[1],
+            tol_theta_deg=values[2],
+            tol_dh_km=values[3],
+        )
+
+    # Round 3: compare the same geometry through V3 and V4 cadences.
+    parity_target = target_tle(137.7421)
+    record_v3("parity_v3", parity_target)
+    for step_s in (30.0, 60.0, 120.0):
+        record_v4(f"parity_v4_step_{step_s:g}", parity_target, step_s=step_s)
+
+    # Round 4: test a sub-kilometre encounter and repeat it through both routes.
+    close_target = target_tle(142.8, eccentricity=0.0018)
+    record_v3("sub_km_v3", close_target)
+    record_v4("sub_km_v4", close_target, step_s=60.0)
+    repeat_result = conjunction.find_tle_close_approaches(
         start=START,
         stop="2024-01-01T00:10:00.000Z",
-        position=position,
-        targets=[target_tle(137.7421)],
+        tle=primary_tle(),
+        targets=[close_target, parity_target],
         tol_max_distance_km=10000.0,
         tol_cross_dt_s=10000.0,
         tol_theta_deg=180.0,
         tol_dh_km=10000.0,
     )
-    if not v4_result.results:
-        raise CrossValidationError("CA V4 probability probe returned no result")
-    observed.append(("v4_baseline", v4_result.results[0].collision_probability))
+    if len(repeat_result.results) != 2:
+        raise CrossValidationError(
+            "CA probability multi-target probe did not return two results"
+        )
+    observed.extend(
+        (f"multi_target_{index}", item.collision_probability)
+        for index, item in enumerate(repeat_result.results)
+    )
+
     values = [value for _, value in observed]
     if values and all(value == 0.0 for value in values):
-        raise CrossValidationError(
-            "CA_Probability observed stable zero probe values="
-            f"{observed!r}; no independent covariance-based comparison path exists"
+        raise UnresolvedSemanticsError(
+            "CA_Probability observed stable wire-zero values="
+            f"{observed!r}; no independent probability model exists"
         )
 
 

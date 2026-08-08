@@ -8,7 +8,7 @@ Status of `cat.generate_tle`:
 
 - Instantaneous-elements branch: `verified`. Both request forms — `is_mean_elements=False` and `is_mean_elements` omitted — are exercised live against an independent TEME Keplerian state oracle, with two element cases for each form.
 - TLE identifiers, epoch, and TEME state: `verified` for the false/omitted branch. The generated TLE epoch is compared explicitly with `START` within `EPOCH_ABS_S = 0.01` s before the state comparison.
-- Mean-elements branch (`is_mean_elements=True`): `partial`. For moderate/high eccentricity (e = 0.01, 0.05), the input true anomaly is converted to mean anomaly and the output argument-of-perigee plus mean-anomaly preserves the corresponding input mean longitude within 0.1 deg, read from independent Skyfield TLE mean fields (eccentricity within 0.0012, inclination and RAAN within 0.02 deg). The near-circular branch (e ≈ 0.0001882) redistributes argument of perigee and mean anomaly and retains an unexplained kilometre-scale state residual; it remains a strict calibration xfail, so the full true-to-mean conversion is not claimed verified.
+- Mean-elements branch (`is_mean_elements=True`): `unresolved` overall. The calibrated non-equatorial behavior converts the input true anomaly to mean anomaly, and the output argument-of-perigee plus mean-anomaly preserves the input mean longitude within 0.1 deg, read from independent Skyfield TLE mean fields (eccentricity within 0.0012, inclination and RAAN within 0.02 deg). Through the near-circular cases (e = 0, 0.0001882, 0.0005, and 0.001 at inclinations 51.6°, 63°, and 88°) the output eccentricity vector follows the observed translation e_out = e_in − K·(Re/a)·sin(i)·j_node with K = 1.1726e-3, within `MEAN_ECCENTRICITY_VECTOR_ABS = 3.0e-6`. K is an observed calibrated server convention, not a claimed physical law; its applicability is limited to the calibrated non-equatorial envelope. The equatorial special case (zero-inclination input) remains a strict calibration xfail — the server rejects the request or returns a normalization the calibrated translation does not explain — so the full cross-orbit envelope of the true-to-mean conversion is not claimed verified.
 
 Comparison path: Skyfield 1.54 raw SGP4 TEME state at epoch, checked against a local Keplerian state derived from the input elements (Brahe `state_koe_to_eci` with a true-to-mean anomaly conversion); Skyfield TLE mean fields (`ecco`, `inclo`, `argpo`, `nodeo`, `mo`) as the independent mean-element readout for the mean-elements branch.
 
@@ -19,16 +19,19 @@ Key constants and tolerances from [`tests/validation/cross_validation/cat/test_c
 - TLE epoch tolerance: `EPOCH_ABS_S = 0.01`.
 - Generated-state tolerances: `GENERATED_STATE_ABS_M = 10.0` and `GENERATED_VELOCITY_ABS_M_S = 0.02`.
 - Mean-element longitude tolerance: 0.1 deg, with eccentricity within 0.0012 and inclination / RAAN within 0.02 deg.
+- Eccentricity-vector translation: `MEAN_ECCENTRICITY_VECTOR_COEFFICIENT = 1.1726e-3` and `MEAN_ECCENTRICITY_VECTOR_ABS = 3.0e-6`.
 
-Known residuals and conventions: the explicit-false and omitted-`is_mean_elements` outputs both match the independent input osculating state in raw SGP4 TEME coordinates at the requested epoch; the residual is a few meters and is covered by the stated numerical precision bounds.
+Known residuals and conventions: the explicit-false and omitted-`is_mean_elements` outputs both match the independent input osculating state in raw SGP4 TEME coordinates at the requested epoch; the residual is a few meters and is covered by the stated numerical precision bounds. For `is_mean_elements=True`, the eccentricity-vector offset K·(Re/a)·sin(i) is a calibrated server convention that reproduces the observed non-equatorial outputs; it is recorded as an observed convention rather than promoted as a physical law, and no claim covers the equatorial normalization.
 
 ## Lifetime estimation
 
-Status of `cat.estimate_tle_lifetime`: `partial`.
+Status of `cat.estimate_tle_lifetime`: `unresolved` overall.
 
-- `life_years`: `partial` as a relative estimator. The response depends on the `sm`/`mass` ratio: matched-ratio cases (`(0.1, 100)` vs `(1, 1000)`, `(1, 100)` vs `(10, 1000)`, `(10, 100)` vs `(1, 10)`) agree value-for-value within 1e-12, and the three-ratio sweep (`(1.0, 1000.0)`, `(10.0, 10.0)`, `(100.0, 1.0)`) decreases strictly. Low ratios return the 25-year cap.
-- Breakup A2M equivalence: debris `life_years` from `simulate_debris_breakup` with `area_to_mass_ratio_m2_kg = ratio` agree value-for-value with `estimate_tle_lifetime(sm=ratio, mass=1.0)` for ratios 0.001, 0.002, and 0.01 within 1e-12.
-- Absolute lifetime semantics: unknown. `life_years` is not promoted as an absolute physical lifetime prediction; the 25-year cap and the documented fallback values are server-owned. The branch as a whole stays `partial` while absolute lifetime semantics remain unverified.
+- `life_years` as a relative estimator: `verified` for relative semantics. The response depends on the `sm`/`mass` ratio: matched-ratio cases (`(0.1, 100)` vs `(1, 1000)`, `(1, 100)` vs `(10, 1000)`, `(10, 100)` vs `(1, 10)`) agree value-for-value within 1e-12, and the three-ratio sweep (`(1.0, 1000.0)`, `(10.0, 10.0)`, `(100.0, 1.0)`) decreases strictly. Low ratios return the 25-year cap.
+- Omitted-parameter default: `verified`. Omitting `sm`/`mass` matches the explicit `sm=0.01, mass=1.0` lifetime value-for-value within 1e-12.
+- Sentinel behavior: `verified` as a sentinel, not as a lifetime. `compute_lifetime=False` returns exactly 25 years for both the simple and the explicit breakup branches. Server errors, skipped computations, and lifetimes above the cap may all surface the same 25-year value, so 25 years does not identify which case occurred and carries no lifetime meaning.
+- Breakup A2M equivalence: `verified`. Debris `life_years` from `simulate_debris_breakup` with `area_to_mass_ratio_m2_kg = ratio` agree value-for-value with `estimate_tle_lifetime(sm=ratio, mass=1.0)` for ratios 0.001, 0.002, and 0.01 within 1e-12.
+- Absolute lifetime semantics: `unresolved`. Four additional investigation rounds covered the `sm`/`mass` ratio sweep, TLE orbit/epoch/BStar/inclination changes, a comparison with an independent smooth decay model, and matched A2M across all three breakup branches. The relative and cross-endpoint behavior is reproducible, but the independent smooth decay model reproduces the response shape without matching absolute values, and the A2M response surface has a reproducible discontinuity near 400 km (the ratio 0.95 vs 0.98 jump asserted by the `test_lifetime_absolute_model_remains_unresolved` strict calibration xfail) that no independent smooth decay oracle explains. There is no credible absolute-lifetime oracle, so `life_years` is not promoted as an absolute physical lifetime prediction and the branch as a whole stays `unresolved`.
 
 ## Debris breakup
 
@@ -51,7 +54,7 @@ Key constants and tolerances:
 
 Known residuals and conventions: debris periods match the two-body period derived from the returned TLE state. Altitudes match when the local derivation uses the server's apparent 6378.140 km Earth radius; the radius constant was changed once from the common 6378.1363 km candidate after the stable residual showed a 3.9 m offset.
 
-Scope boundary: the verification covers internal consistency of the returned orbital quantities with independent SGP4 states. This page does not claim that the debris breakup model (debris counts, velocity distribution, mass distribution), collision probability, or lifetime prediction is scientifically correct.
+Scope boundary: the verification covers internal consistency of the returned orbital quantities with independent SGP4 states. This page does not claim that the debris breakup model (debris counts, velocity distribution, mass distribution) or lifetime prediction is scientifically correct.
 
 ## Live snapshot coverage
 

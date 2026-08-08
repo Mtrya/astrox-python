@@ -10,7 +10,7 @@ from astrox import orbits, propagator
 
 ## 轨道输入
 
-传播函数接受 `orbits.KeplerianElements` 或 `orbits.CartesianState` 作为轨道描述；`propagator.sgp4` 接受 `orbits.Tle` 两行根数。`orbits.keplerian(...)` 用六个开普勒根数构造轨道，`orbits.cartesian_state(...)` 用位置/速度构造笛卡尔状态，`orbits.tle(...)` 用两行根数构造 TLE。历元 `orbit_epoch` 与根数或状态分离，由传播函数单独接收。
+传播函数接受 `orbits.KeplerianElements` 或 `orbits.CartesianState` 作为轨道描述；`propagator.sgp4` 接受 `orbits.Tle` 两行根数。`orbits.keplerian(...)` 用六个开普勒根数构造轨道，`orbits.cartesian_state(...)` 用位置/速度构造笛卡尔状态，`orbits.tle(...)` 用两行根数构造 TLE。历元 `orbit_epoch` 只适用于 `KeplerianElements` 或 `CartesianState` 轨道输入，与根数或状态分离，由传播函数单独接收；`propagator.sgp4` 不接受 `orbit_epoch`，其传播历元来自 TLE 内编码的 epoch。
 
 ```python
 orbit = orbits.keplerian(

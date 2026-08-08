@@ -70,7 +70,7 @@ def main() -> None:
         stop=STOP,
         position=czml_position,
         targets=[TARGET],
-        tol_max_distance_km=CA_TOLERANCES["tol_max_distance_km"],
+        **CA_TOLERANCES,
     )
     print_results("CZML primary", czml_result)
 

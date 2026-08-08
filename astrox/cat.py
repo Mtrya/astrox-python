@@ -70,7 +70,7 @@ def _request_string(value: str, *, parameter: str) -> str:
 def _request_number(value: float, *, parameter: str) -> float:
     if isinstance(value, bool) or not isinstance(value, Real):
         raise TypeError(f"{parameter} must be a number")
-    return value
+    return float(value)
 
 
 def _request_integer(value: int, *, parameter: str) -> int:
@@ -121,12 +121,28 @@ class DebrisImpulse:
     area_to_mass_ratio_m2_kg: float
 
     def __post_init__(self) -> None:
-        _request_number(self.azimuth_deg, parameter="azimuth_deg")
-        _request_number(self.elevation_deg, parameter="elevation_deg")
-        _request_number(self.delta_v_m_s, parameter="delta_v_m_s")
-        _request_number(
-            self.area_to_mass_ratio_m2_kg,
-            parameter="area_to_mass_ratio_m2_kg",
+        object.__setattr__(
+            self,
+            "azimuth_deg",
+            _request_number(self.azimuth_deg, parameter="azimuth_deg"),
+        )
+        object.__setattr__(
+            self,
+            "elevation_deg",
+            _request_number(self.elevation_deg, parameter="elevation_deg"),
+        )
+        object.__setattr__(
+            self,
+            "delta_v_m_s",
+            _request_number(self.delta_v_m_s, parameter="delta_v_m_s"),
+        )
+        object.__setattr__(
+            self,
+            "area_to_mass_ratio_m2_kg",
+            _request_number(
+                self.area_to_mass_ratio_m2_kg,
+                parameter="area_to_mass_ratio_m2_kg",
+            ),
         )
 
     def to_wire(self) -> list[float]:

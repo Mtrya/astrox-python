@@ -153,9 +153,8 @@ result = conjunction.find_czml_close_approaches(
 
 ## 验证状态
 
-- TLE（V3）与 CZML（V4）入口整体为 `partial`：最近距离、相对速度与轨道面夹角等个别字段有验证证据；`collision_probability` 仍不可解释。
-- `collision_probability` 仅描述为服务端返回的标量，不赋予统计学碰撞概率语义。
-- 具体比较路径、采样 case、容差与残差记录见 [conjunction 验证页](../../validation/conjunction.md)。
+- TLE（V3）与 CZML（V4）入口整体为`未解析`：最近距离、相对速度、最近距离时刻（TCA）与轨道面夹角等个别字段有验证证据；`collision_probability` 只能作为服务端返回标量，不能赋予统计学碰撞概率语义。
+- 具体比较路径、采样 case 与容差见 [conjunction 验证页](../../validation/conjunction.md)。
 
 ## 约定说明
 

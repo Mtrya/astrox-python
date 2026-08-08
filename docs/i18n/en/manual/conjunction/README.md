@@ -153,9 +153,8 @@ result = conjunction.find_czml_close_approaches(
 
 ## Verified scope
 
-- The TLE (V3) and CZML (V4) entries are `partial` overall: individual fields such as minimum range, relative speed, and orbital-plane angle have verification evidence; `collision_probability` remains uninterpretable.
-- `collision_probability` is described only as a server-returned scalar and is not assigned statistical collision-probability semantics.
-- The specific comparison paths, sampling cases, tolerances, and residuals are recorded on the [conjunction validation page](../../../../validation/conjunction.md).
+- The TLE (V3) and CZML (V4) entries are `unresolved` as a whole: individual fields such as minimum range, relative speed, time of closest approach (TCA), and orbital-plane angle have verification evidence; `collision_probability` can only be used as a server-returned scalar and is not assigned statistical collision-probability semantics.
+- The specific comparison paths, sampling cases, and tolerances are recorded on the [conjunction validation page](../../../../validation/conjunction.md).
 
 ## Convention notes
 

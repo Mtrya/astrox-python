@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from fractions import Fraction
 from inspect import signature
 from typing import Any
 
@@ -185,6 +186,40 @@ def test_find_tle_close_approaches_omits_optional_server_defaults(
         calls[0]["json"],
         {"Start_UTCG": START, "Stop_UTCG": STOP, "SAT1": PRIMARY.to_tle_info_wire()},
     )
+
+
+@pytest.mark.parametrize(
+    "function_name",
+    ["find_tle_close_approaches", "find_czml_close_approaches"],
+)
+def test_conjunction_validates_times_and_normalizes_numeric_options(
+    monkeypatch: pytest.MonkeyPatch,
+    function_name: str,
+) -> None:
+    response = {
+        **(V3_RESPONSE if function_name == "find_tle_close_approaches" else V4_RESPONSE),
+        "CA_Results": [],
+    }
+    calls = record_raw_post(monkeypatch, response)
+    function = getattr(conjunction, function_name)
+    primary = (
+        {"tle": PRIMARY}
+        if function_name == "find_tle_close_approaches"
+        else {"position": position()}
+    )
+
+    with pytest.raises(TypeError, match="start must be a string"):
+        function(start=1, stop=STOP, **primary)
+    with pytest.raises(TypeError, match="stop must be a string"):
+        function(start=START, stop=1, **primary)
+
+    function(
+        start=START,
+        stop=STOP,
+        tol_max_distance_km=Fraction(5, 2),
+        **primary,
+    )
+    assert calls[0]["json"]["TolMaxDistance"] == 2.5
 
 
 def test_find_czml_close_approaches_preserves_position_type_discriminator(

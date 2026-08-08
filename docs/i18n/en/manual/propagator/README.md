@@ -10,7 +10,7 @@ This page is organized by concept, return-value conventions, function-family ref
 
 ## Orbit Input
 
-Propagation functions accept `orbits.KeplerianElements` or `orbits.CartesianState` as the orbit description; `propagator.sgp4` accepts `orbits.Tle` two-line element data. `orbits.keplerian(...)` constructs an orbit from six Keplerian elements, `orbits.cartesian_state(...)` constructs a Cartesian state from position/velocity, and `orbits.tle(...)` constructs a TLE from two-line element data. The epoch `orbit_epoch` is separate from the elements or state and is passed to the propagation function directly.
+Propagation functions accept `orbits.KeplerianElements` or `orbits.CartesianState` as the orbit description; `propagator.sgp4` accepts `orbits.Tle` two-line element data. `orbits.keplerian(...)` constructs an orbit from six Keplerian elements, `orbits.cartesian_state(...)` constructs a Cartesian state from position/velocity, and `orbits.tle(...)` constructs a TLE from two-line element data. The epoch `orbit_epoch` applies only to `KeplerianElements` or `CartesianState` orbit input; it is separate from the elements or state and is received by the propagation function on its own. `propagator.sgp4` does not accept `orbit_epoch`; its propagation epoch comes from the epoch encoded in the TLE.
 
 ```python
 orbit = orbits.keplerian(

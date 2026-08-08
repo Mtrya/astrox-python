@@ -63,7 +63,7 @@ print(tle.line1)
 print(tle.line2)
 ```
 
-`is_mean_elements=True` 时，服务端会把输入的真近点角转换为平近点角写入 TLE。该分支为 `partial`：中高偏心率下的转换有验证证据，近圆分支仍有未解释的状态残差，完整的真近点角→平近点角转换尚不能宣布已完全验证。
+`is_mean_elements=True` 时，服务端会把输入的真近点角转换为平近点角写入 TLE。该分支整体为`未解析`：非赤道案例已观察到真近点角→平近点角转换，且输出 TLE 的近地点幅角与平近点角保持输入的平均经度；赤道特例（如零倾角输入）的行为仍无法依赖，完整的转换语义尚不能宣布已验证。
 
 生成结果可直接用于 `propagator.sgp4`、`conjunction` 与下面的寿命估算、解体模拟函数。
 
@@ -107,7 +107,12 @@ result = cat.estimate_tle_lifetime(
 print(result.life_years)
 ```
 
-`life_years` 的输出主要取决于 `sm` 与 `mass` 的比值，低比值时服务端返回 25 年上限；它不能作为绝对物理寿命预测，绝对寿命数值未验证。
+`estimate_tle_lifetime` 整体为`未解析`：`life_years` 只能作为相对估计，不能作为绝对寿命预测。已验证的约定行为：
+
+- 输出取决于 `sm` 与 `mass` 的比值：相同比值下逐值一致，比值增大时输出单调下降；低比值时服务端返回 25 年上限。
+- `sm` 与解体接口的 `area_to_mass_ratio_m2_kg` 按同一比例解释：`sm=ratio, mass=1.0` 与 `area_to_mass_ratio_m2_kg=ratio` 的 `life_years` 逐值一致（已覆盖 ratio 0.001、0.002、0.01）。
+- 未提供 `sm`/`mass` 时，服务端默认行为与 `sm=0.01, mass=1.0` 一致。
+- 服务器未计算、计算失败与寿命超过上限都可能返回相同的 25 年值，因此 25 年不携带具体寿命语义。
 
 ## 碎片解体模拟
 
@@ -244,20 +249,20 @@ result = cat.simulate_debris_breakup_nasa(
 | `is_success` | `bool` | 是否成功 |
 | `message` | `str` | 服务器消息 |
 | `debris_tles` | `tuple[Tle, ...]` | 所有碎片的 TLE |
-| `impulses` | `tuple[DebrisImpulse, ...]` | 请求中的解体行（breakup rows） |
-| `life_years` | `tuple[float, ...]` | 每块碎片的轨道寿命，单位年；服务端在未计算或计算失败时回退为 25 年 |
+| `impulses` | `tuple[DebrisImpulse, ...]` | 服务端返回的解体行（breakup rows） |
+| `life_years` | `tuple[float, ...]` | 每块碎片的轨道寿命，单位年；`compute_lifetime=False` 时返回 25 年，未计算或计算失败时回退为 25 年 |
 | `altitude_of_perigee_km` | `tuple[float, ...]` | 每块碎片的近地点高度，单位 km |
 | `altitude_of_apogee_km` | `tuple[float, ...]` | 每块碎片的远地点高度，单位 km |
 | `periods_min` | `tuple[float, ...]` | 每块碎片的轨道周期，单位 min |
 
-返回数组必须同步等长：`debris_tles`、`impulses`、`life_years`、`altitude_of_perigee_km`、`altitude_of_apogee_km` 与 `periods_min` 按返回位置一一对应，SDK parser 在长度不一致时抛出 `TypeError`。`impulses` 是请求中的解体行（breakup rows），返回的碎片数量与顺序由服务端决定。`life_years` 与寿命估算一样包含服务端回退，不能作为准确寿命预测。
+返回数组必须同步等长：`debris_tles`、`impulses`、`life_years`、`altitude_of_perigee_km`、`altitude_of_apogee_km` 与 `periods_min` 按返回位置一一对应，SDK parser 在长度不一致时抛出 `TypeError`。`impulses` 是服务端返回的解体行（breakup rows）：只有 `simulate_debris_breakup` 会回显请求中的解体行，`simulate_debris_breakup_simple` 与 `simulate_debris_breakup_nasa` 分支的行来自服务端响应。返回的碎片数量与顺序由服务端决定。`life_years` 与寿命估算一样不能作为准确寿命预测：`compute_lifetime=False`、未计算或计算失败时都返回 25 年，此时 25 年不携带真实寿命语义。
 
 ## 验证状态
 
-- `generate_tle` 的瞬时根数分支（`is_mean_elements` 省略或为 `False`）与返回碎片的轨道量（周期、近地点/远地点高度）有验证证据；平均根数分支为 `partial`，近圆情形仍有未解释的状态残差。
-- `estimate_tle_lifetime` 的 `life_years` 只验证到相对语义：输出取决于 `sm`/`mass` 比值，低比值返回 25 年上限；绝对寿命数值未验证。
+- `generate_tle` 的瞬时根数分支（`is_mean_elements` 省略或为 `False`）与返回碎片的轨道量（周期、近地点/远地点高度）有验证证据；平均根数分支（`is_mean_elements=True`）整体为`未解析`：非赤道案例已观察到真近点角→平近点角转换与平均经度保持，赤道特例仍无法依赖。
+- `estimate_tle_lifetime` 整体为`未解析`：`life_years` 只有相对语义——依赖 `sm`/`mass` 比值、未提供参数时的默认面积质量比约定，以及解体分支的逐值一致；绝对寿命数值未验证，25 年封顶与服务器回退无法区分。
 - 碎片解体模型本身的科学合理性（碎片数量、速度分布、质量分布）与绝对寿命数值均不是 SDK 已验证的语义。
-- 具体比较路径、case、容差与残差记录见 [cat 验证页](../../validation/cat.md)。
+- 具体比较路径、case 与容差见 [cat 验证页](../../validation/cat.md)。
 
 ## 约定说明
 

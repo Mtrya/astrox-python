@@ -63,7 +63,7 @@ print(tle.line1)
 print(tle.line2)
 ```
 
-With `is_mean_elements=True`, the server converts the input true anomaly to mean anomaly when writing the TLE. This branch is `partial`: the conversion at moderate/high eccentricity has verification evidence, while the near-circular branch still retains an unexplained state residual, so the full true-anomaly-to-mean-anomaly conversion cannot yet be declared fully verified.
+With `is_mean_elements=True`, the server converts the input true anomaly to mean anomaly when writing the TLE. The branch as a whole is `unresolved`: non-equatorial cases have been observed to convert the input true anomaly to mean anomaly, and the output TLE's argument of perigee and mean anomaly preserve the input mean longitude; the behavior of equatorial special cases (such as zero-inclination input) cannot yet be relied upon, so the full conversion semantics cannot yet be declared verified.
 
 The generated result can be used directly with `propagator.sgp4`, `conjunction`, and the lifetime estimation and breakup simulation functions below.
 
@@ -107,7 +107,12 @@ result = cat.estimate_tle_lifetime(
 print(result.life_years)
 ```
 
-The output of `life_years` depends mainly on the `sm`/`mass` ratio, and the server returns the 25-year cap at low ratios; it cannot be used as an absolute physical lifetime prediction, and absolute lifetime values remain unverified.
+`estimate_tle_lifetime` is `unresolved` as a whole: `life_years` can only be used as a relative estimate, not as an absolute lifetime prediction. The verified conventional behaviors are:
+
+- The output depends on the `sm`/`mass` ratio: equal ratios agree value-for-value, the output decreases monotonically as the ratio increases, and low ratios return the 25-year cap.
+- `sm` is interpreted on the same ratio scale as the `area_to_mass_ratio_m2_kg` of the breakup interfaces: `sm=ratio, mass=1.0` and `area_to_mass_ratio_m2_kg=ratio` produce value-for-value identical `life_years` (covered for ratios 0.001, 0.002, and 0.01).
+- When `sm`/`mass` are omitted, the server default behavior matches `sm=0.01, mass=1.0`.
+- The server may return the same 25-year value when it does not compute the lifetime, when the computation fails, and when the lifetime exceeds the cap, so 25 years does not carry a specific lifetime meaning.
 
 ## Debris breakup simulation
 
@@ -244,20 +249,20 @@ result = cat.simulate_debris_breakup_nasa(
 | `is_success` | `bool` | Whether the call succeeded |
 | `message` | `str` | Server message |
 | `debris_tles` | `tuple[Tle, ...]` | TLEs of all debris pieces |
-| `impulses` | `tuple[DebrisImpulse, ...]` | The breakup rows from the request |
-| `life_years` | `tuple[float, ...]` | Orbital lifetime of each debris piece, in years; the server falls back to 25 years when lifetime is not computed or the computation fails |
+| `impulses` | `tuple[DebrisImpulse, ...]` | The breakup rows returned by the server |
+| `life_years` | `tuple[float, ...]` | Orbital lifetime of each debris piece, in years; returns 25 years when `compute_lifetime=False`, and falls back to 25 years when the lifetime is not computed or the computation fails |
 | `altitude_of_perigee_km` | `tuple[float, ...]` | Perigee altitude of each debris piece, in km |
 | `altitude_of_apogee_km` | `tuple[float, ...]` | Apogee altitude of each debris piece, in km |
 | `periods_min` | `tuple[float, ...]` | Orbital period of each debris piece, in min |
 
-The returned arrays must be synchronized and equal in length: `debris_tles`, `impulses`, `life_years`, `altitude_of_perigee_km`, `altitude_of_apogee_km`, and `periods_min` correspond positionally by return position, and the SDK parser raises `TypeError` when the lengths do not match. `impulses` is the breakup rows from the request; the number and order of the returned debris pieces are determined by the server. Like the lifetime estimation, `life_years` includes server fallback values and cannot be used as an accurate lifetime prediction.
+The returned arrays must be synchronized and equal in length: `debris_tles`, `impulses`, `life_years`, `altitude_of_perigee_km`, `altitude_of_apogee_km`, and `periods_min` correspond positionally by return position, and the SDK parser raises `TypeError` when the lengths do not match. `impulses` is the breakup rows returned by the server: only `simulate_debris_breakup` echoes the breakup rows from the request, while the rows of the `simulate_debris_breakup_simple` and `simulate_debris_breakup_nasa` branches come from the server response. The number and order of the returned debris pieces are determined by the server. Like the lifetime estimation, `life_years` cannot be used as an accurate lifetime prediction: `compute_lifetime=False`, a skipped computation, and a failed computation all return 25 years, and in those cases 25 years carries no real lifetime meaning.
 
 ## Verified scope
 
-- The instantaneous-elements branch of `generate_tle` (`is_mean_elements` omitted or `False`) and the returned debris orbital quantities (period, perigee/apogee altitude) have verification evidence; the mean-elements branch is `partial`, and the near-circular case still retains an unexplained state residual.
-- `estimate_tle_lifetime`'s `life_years` is verified only up to relative semantics: the output depends on the `sm`/`mass` ratio, and low ratios return the 25-year cap; absolute lifetime values are not verified.
+- The instantaneous-elements branch of `generate_tle` (`is_mean_elements` omitted or `False`) and the returned debris orbital quantities (period, perigee/apogee altitude) have verification evidence; the mean-elements branch (`is_mean_elements=True`) is `unresolved` as a whole: non-equatorial cases have been observed to convert true anomaly to mean anomaly and preserve mean longitude, while equatorial special cases cannot yet be relied upon.
+- `estimate_tle_lifetime` is `unresolved` as a whole: `life_years` has only relative semantics — it depends on the `sm`/`mass` ratio, the default area-to-mass-ratio convention when parameters are omitted, and value-for-value agreement with the breakup branches; absolute lifetime values are unverified, and the 25-year cap cannot be distinguished from server fallbacks.
 - The scientific plausibility of the debris breakup model itself (debris counts, velocity distribution, mass distribution) and the absolute lifetime values are not SDK-verified semantics.
-- The specific comparison paths, cases, tolerances, and residuals are recorded on the [cat validation page](../../../../validation/cat.md).
+- The specific comparison paths, cases, and tolerances are recorded on the [cat validation page](../../../../validation/cat.md).
 
 ## Convention notes
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import FrozenInstanceError, asdict, fields, is_dataclass
+from fractions import Fraction
 from inspect import signature
 from typing import Any
 
@@ -153,6 +154,48 @@ def test_generate_tle_lowers_exact_payload_and_returns_tle(
             "IsMeanElements": False,
         },
     )
+
+
+def test_cat_real_numbers_lower_to_json_compatible_floats(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(monkeypatch, GET_TLE_RESPONSE)
+
+    cat.generate_tle(
+        name="generated",
+        catalog_number="25544",
+        epoch=START,
+        bstar=Fraction(1, 100),
+        semi_major_axis_km=Fraction(6794),
+        eccentricity=Fraction(1, 1000),
+        inclination_deg=Fraction(51, 1),
+        argument_of_perigee_deg=Fraction(64, 1),
+        raan_deg=Fraction(339, 1),
+        true_anomaly_deg=Fraction(295, 1),
+    )
+
+    assert_canonical_equal(
+        calls[0]["json"],
+        {
+            "Name": "generated",
+            "SSC": "25544",
+            "Epoch": START,
+            "BStar": 0.01,
+            "Sma": 6794.0,
+            "Ecc": 0.001,
+            "Inc": 51.0,
+            "W": 64.0,
+            "RAAN": 339.0,
+            "TA": 295.0,
+        },
+    )
+    impulse = cat.DebrisImpulse(
+        azimuth_deg=Fraction(40),
+        elevation_deg=Fraction(1, 2),
+        delta_v_m_s=Fraction(10),
+        area_to_mass_ratio_m2_kg=Fraction(1, 500),
+    )
+    assert impulse.to_wire() == [40.0, 0.5, 10.0, 0.002]
 
 
 def test_generate_tle_omits_server_default_mean_elements_flag(

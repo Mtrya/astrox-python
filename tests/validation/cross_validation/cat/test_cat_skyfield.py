@@ -5,19 +5,21 @@
 #   Branches:
 #     - GetTLE with IsMeanElements=false or omitted: verified against a TEME
 #       Keplerian state oracle for two element cases for both request forms
-#     - GetTLE with IsMeanElements=true: partial; true-anomaly-to-mean-anomaly
-#       interpretation is verified for moderate/high eccentricity, while the
-#       near-circular angle allocation remains a strict calibration xfail
-#     - LifeTimeTLE: partial; area-to-mass-ratio monotonicity, independent sm /
-#       mass variation, 25-year cap behavior, and breakup A2M equivalence are
-#       verified, while absolute physical lifetime semantics remain unknown
+#     - GetTLE with IsMeanElements=true: unresolved overall; non-equatorial
+#       mean-longitude preservation and the near-circular eccentricity-vector
+#       translation are calibrated, while the equatorial special case remains a
+#       strict calibration xfail
+#     - LifeTimeTLE: unresolved overall; area-to-mass-ratio behavior, omitted
+#       defaults, 25-year sentinel behavior, and breakup A2M equivalence are
+#       calibrated, while the absolute decay model has unexplained discontinuous
+#       branches and no credible independent lifetime oracle
 #     - DebrisBreakupSimple, DebrisBreakup, and DebrisBreakupNASA: verified for
 #       returned TLE/period/perigee/apogee consistency against Skyfield SGP4
 #   Fields:
 #     - TLE identifiers, requested epoch, and TEME state: verified for the
 #       false-element and omitted-element GetTLE forms
-#     - LifeYears: partial (relative estimator and cross-endpoint equivalence;
-#       absolute prediction remains unknown)
+#     - LifeYears: unresolved as an absolute prediction; verified for documented
+#       relative, default, sentinel, and cross-endpoint behavior
 #     - debris TLEs, Periods, AltitudeOfPerigee, AltitudeOfApogee: verified as
 #       internally consistent orbital quantities
 #     - AzElVel: verified for explicit breakup as an input echo whose delta-v
@@ -42,11 +44,15 @@
 #     in raw SGP4 TEME coordinates at the requested epoch for both explicit false
 #     and omitted IsMeanElements requests; the generated TLE epoch is checked
 #     against START before the state comparison.
-#   - IsMeanElements=true converts input true anomaly to mean anomaly for the
-#     generated TLE. At moderate/high eccentricity, the output argument of
-#     perigee plus mean anomaly preserves the corresponding input longitude;
-#     near-circular cases redistribute those angles and retain an unexplained
-#     kilometre-scale state residual.
+#   - IsMeanElements=true converts input true anomaly to mean anomaly and
+#     preserves mean longitude for the calibrated non-equatorial cases. Its
+#     eccentricity vector follows the observed translation
+#     e_out = e_in - K*(Re/a)*sin(i)*j_node, with K=1.1726e-3, through the
+#     near-circular cases; the equatorial normalization remains unresolved.
+#   - Four additional lifetime rounds covered ratio sweeps, orbit/epoch/BStar
+#     changes, an independent decay-model comparison, and all breakup branches.
+#     The relative and cross-endpoint behavior is reproducible, but the absolute
+#     model has discontinuities and no credible independent lifetime oracle.
 #   - Explicit breakup echoes AzElVel. At the epoch, azimuth 0° is +along-track,
 #     azimuth 90° is -cross-track, and positive elevation is +radial. A2M does
 #     not change the generated orbit but changes the returned lifetime.
@@ -74,17 +80,21 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from astrox import cat, orbits  # noqa: E402
+from astrox.exceptions import AstroxAPIError  # noqa: E402
 from tests.validation._support import configure_astrox_from_env  # noqa: E402
 
 
 START = "2024-01-01T00:00:00.000Z"
 MU_M3_S2 = 398600441500000.0
 EARTH_RADIUS_M = 6378140.0
+MEAN_ECCENTRICITY_VECTOR_COEFFICIENT = 1.1726e-3
+MEAN_ECCENTRICITY_VECTOR_ABS = 3.0e-6
 EPOCH_ABS_S = 0.01
 GENERATED_STATE_ABS_M = 10.0
 GENERATED_VELOCITY_ABS_M_S = 0.02
 DEBRIS_ALTITUDE_ABS_KM = 0.001
 DEBRIS_PERIOD_ABS_MIN = 1.0e-5
+TIMESCALE = load.timescale(builtin=True)
 MOTHER_LINE1 = (
     "1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9995"
 )
@@ -95,6 +105,10 @@ MOTHER_LINE2 = (
 
 class CrossValidationError(Exception):
     """Raised when ASTROX and an independent CAT comparison disagree."""
+
+
+class UnresolvedSemanticsError(Exception):
+    """Raised when an intentionally unresolved CAT convention still mismatches."""
 
 
 def mother_tle() -> orbits.Tle:
@@ -146,7 +160,7 @@ def tle_mean_fields(tle: orbits.Tle) -> dict[str, float]:
         tle.line1,
         tle.line2,
         tle.catalog_number or "generated",
-        load.timescale(builtin=True),
+        TIMESCALE,
     )
     model = satellite.model
     return {
@@ -160,6 +174,31 @@ def tle_mean_fields(tle: orbits.Tle) -> dict[str, float]:
 
 def circular_error_deg(actual: float, expected: float) -> float:
     return ((actual - expected + 180.0) % 360.0) - 180.0
+
+
+def eccentricity_vector(eccentricity: float, argument_of_perigee_deg: float) -> np.ndarray:
+    argument_of_perigee_rad = math.radians(argument_of_perigee_deg)
+    return eccentricity * np.array(
+        [math.cos(argument_of_perigee_rad), math.sin(argument_of_perigee_rad)]
+    )
+
+
+def expected_mean_eccentricity_vector(
+    *,
+    semi_major_axis_km: float,
+    eccentricity: float,
+    inclination_deg: float,
+    argument_of_perigee_deg: float,
+) -> np.ndarray:
+    offset = (
+        MEAN_ECCENTRICITY_VECTOR_COEFFICIENT
+        * EARTH_RADIUS_M
+        / (semi_major_axis_km * 1000.0)
+        * math.sin(math.radians(inclination_deg))
+    )
+    return eccentricity_vector(eccentricity, argument_of_perigee_deg) + np.array(
+        [0.0, -offset]
+    )
 
 
 def generated_tle_case(
@@ -187,7 +226,7 @@ def generated_tle_case(
     )
     if generated.name != "probe" or generated.catalog_number != "25544":
         raise CrossValidationError("GetTLE did not preserve the TLE identifiers")
-    timescale = load.timescale(builtin=True)
+    timescale = TIMESCALE
     requested_epoch = timescale.utc(2024, 1, 1, 0, 0, 0)
     satellite = EarthSatellite(
         generated.line1,
@@ -306,56 +345,131 @@ def test_get_tle_mean_elements_converts_true_anomaly_to_mean_longitude() -> None
             )
 
 
+def test_get_tle_mean_elements_calibrates_eccentricity_vector_translation() -> None:
+    configure_astrox_from_env()
+    cases = (
+        (6794.0, 0.0, 51.6461, 64.8995, 339.8014, 0.0),
+        (6794.0, 0.0001882, 51.6461, 64.8995, 339.8014, 295.2305),
+        (6794.0, 0.001, 51.6461, 64.8995, 339.8014, 90.0),
+        (7000.0, 0.0005, 63.0, 10.0, 120.0, 35.0),
+        (7000.0, 0.001, 88.0, 210.0, 250.0, 145.0),
+    )
+    for (
+        sma_km,
+        eccentricity,
+        inclination_deg,
+        argument_of_perigee_deg,
+        raan_deg,
+        true_anomaly_deg,
+    ) in cases:
+        generated = cat.generate_tle(
+            name="mean-probe",
+            catalog_number="25544",
+            epoch=START,
+            bstar=0.00004142,
+            semi_major_axis_km=sma_km,
+            eccentricity=eccentricity,
+            inclination_deg=inclination_deg,
+            argument_of_perigee_deg=argument_of_perigee_deg,
+            raan_deg=raan_deg,
+            true_anomaly_deg=true_anomaly_deg,
+            is_mean_elements=True,
+        )
+        fields = tle_mean_fields(generated)
+        expected_mean_longitude_deg = (
+            argument_of_perigee_deg + true_to_mean_deg(true_anomaly_deg, eccentricity)
+        ) % 360.0
+        actual_mean_longitude_deg = (
+            fields["argument_of_perigee_deg"] + fields["mean_anomaly_deg"]
+        ) % 360.0
+        longitude_error_deg = circular_error_deg(
+            actual_mean_longitude_deg,
+            expected_mean_longitude_deg,
+        )
+        if abs(longitude_error_deg) > 0.1:
+            raise CrossValidationError(
+                f"IsMeanElements mean-longitude residual for e={eccentricity:g}: "
+                f"{longitude_error_deg:.12g} deg"
+            )
+        if abs(fields["inclination_deg"] - inclination_deg) > 0.02:
+            raise CrossValidationError(
+                f"IsMeanElements inclination residual for i={inclination_deg:g}: "
+                f"{fields['inclination_deg'] - inclination_deg:.12g} deg"
+            )
+        if abs(circular_error_deg(fields["raan_deg"], raan_deg)) > 0.02:
+            raise CrossValidationError(
+                f"IsMeanElements RAAN residual for RAAN={raan_deg:g}: "
+                f"{circular_error_deg(fields['raan_deg'], raan_deg):.12g} deg"
+            )
+        actual_vector = eccentricity_vector(
+            fields["eccentricity"],
+            fields["argument_of_perigee_deg"],
+        )
+        expected_vector = expected_mean_eccentricity_vector(
+            semi_major_axis_km=sma_km,
+            eccentricity=eccentricity,
+            inclination_deg=inclination_deg,
+            argument_of_perigee_deg=argument_of_perigee_deg,
+        )
+        vector_error = float(np.max(np.abs(actual_vector - expected_vector)))
+        if vector_error > MEAN_ECCENTRICITY_VECTOR_ABS:
+            raise CrossValidationError(
+                f"IsMeanElements eccentricity-vector residual for e={eccentricity:g}: "
+                f"{vector_error:.12g} exceeds {MEAN_ECCENTRICITY_VECTOR_ABS:g}"
+            )
+
+
 @pytest.mark.calibration
 @pytest.mark.xfail(
     reason=(
-        "The moderate/high-eccentricity mean-element interpretation is verified, "
-        "but the near-circular branch redistributes argument of perigee and mean "
-        "anomaly and retains an unexplained kilometre-scale state residual."
+        "The general non-equatorial mean-element translation does not explain "
+        "the server's equatorial normalization and response behavior."
     ),
-    raises=CrossValidationError,
+    raises=UnresolvedSemanticsError,
     strict=True,
 )
-def test_get_tle_mean_elements_branch_remains_unresolved() -> None:
+def test_get_tle_mean_elements_equatorial_case_remains_unresolved() -> None:
     configure_astrox_from_env()
-    generated = cat.generate_tle(
-        name="probe",
-        catalog_number="25544",
-        epoch=START,
-        bstar=0.00004142,
+    try:
+        generated = cat.generate_tle(
+            name="equatorial-probe",
+            catalog_number="25544",
+            epoch=START,
+            bstar=0.00004142,
+            semi_major_axis_km=6794.0,
+            eccentricity=0.0001882,
+            inclination_deg=0.0,
+            argument_of_perigee_deg=64.8995,
+            raan_deg=120.0,
+            true_anomaly_deg=295.2305,
+            is_mean_elements=True,
+        )
+    except AstroxAPIError as exc:
+        raise UnresolvedSemanticsError(
+            "IsMeanElements=true equatorial input is rejected by the server"
+        ) from exc
+    fields = tle_mean_fields(generated)
+    expected_vector = expected_mean_eccentricity_vector(
         semi_major_axis_km=6794.0,
         eccentricity=0.0001882,
-        inclination_deg=51.6461,
+        inclination_deg=0.0,
         argument_of_perigee_deg=64.8995,
-        raan_deg=339.8014,
-        true_anomaly_deg=295.2305,
-        is_mean_elements=True,
     )
-    satellite = EarthSatellite(
-        generated.line1,
-        generated.line2,
-        generated.catalog_number or "generated",
-        load.timescale(builtin=True),
+    actual_vector = eccentricity_vector(
+        fields["eccentricity"],
+        fields["argument_of_perigee_deg"],
     )
-    _, position, velocity = satellite.model.sgp4_tsince(0.0)
-    expected_position, expected_velocity = input_teme_state(
-        semi_major_axis_km=6794.0,
-        eccentricity=0.0001882,
-        inclination_deg=51.6461,
-        argument_of_perigee_deg=64.8995,
-        raan_deg=339.8014,
-        true_anomaly_deg=295.2305,
+    vector_error = float(np.max(np.abs(actual_vector - expected_vector)))
+    longitude_error_deg = circular_error_deg(
+        fields["argument_of_perigee_deg"] + fields["mean_anomaly_deg"],
+        64.8995 + true_to_mean_deg(295.2305, 0.0001882),
     )
-    position_error_m = float(np.max(np.abs(np.asarray(position) * 1000.0 - expected_position)))
-    velocity_error_m_s = float(np.max(np.abs(np.asarray(velocity) * 1000.0 - expected_velocity)))
-    if (
-        position_error_m <= GENERATED_STATE_ABS_M
-        and velocity_error_m_s <= GENERATED_VELOCITY_ABS_M_S
-    ):
+    if vector_error <= MEAN_ECCENTRICITY_VECTOR_ABS and abs(longitude_error_deg) <= 0.1:
         return
-    raise CrossValidationError(
-        "IsMeanElements=true naive osculating residual: "
-        f"position={position_error_m:.6g} m, velocity={velocity_error_m_s:.6g} m/s"
+    raise UnresolvedSemanticsError(
+        "equatorial mean-element normalization residual: "
+        f"eccentricity_vector={vector_error:.6g}, "
+        f"mean_longitude={longitude_error_deg:.6g} deg"
     )
 
 
@@ -375,6 +489,50 @@ def test_lifetime_parameter_ratio_is_monotonic() -> None:
         raise CrossValidationError(
             f"LifeYears did not decrease with the tested parameter ratio: {lifetimes!r}"
         )
+
+
+@pytest.mark.calibration
+@pytest.mark.xfail(
+    reason=(
+        "LifeTimeTLE remains unresolved as an absolute model: the four new "
+        "investigation rounds found a reproducible discontinuity in the A2M "
+        "response surface that no independent smooth decay oracle explains."
+    ),
+    raises=UnresolvedSemanticsError,
+    strict=True,
+)
+def test_lifetime_absolute_model_remains_unresolved() -> None:
+    configure_astrox_from_env()
+    generated = cat.generate_tle(
+        name="lifetime-probe",
+        catalog_number="25544",
+        epoch=START,
+        bstar=0.00004142,
+        semi_major_axis_km=EARTH_RADIUS_M / 1000.0 + 400.0,
+        eccentricity=0.0,
+        inclination_deg=51.6461,
+        argument_of_perigee_deg=0.0,
+        raan_deg=0.0,
+        true_anomaly_deg=0.0,
+        is_mean_elements=False,
+    )
+    lifetimes = {
+        ratio: cat.estimate_tle_lifetime(
+            epoch=START,
+            tle=generated,
+            sm=ratio,
+            mass=1.0,
+        ).life_years
+        for ratio in (0.95, 0.98)
+    }
+    low, high = lifetimes.values()
+    jump_factor = max(low, high) / min(low, high)
+    if jump_factor <= 1.1:
+        return
+    raise UnresolvedSemanticsError(
+        "LifeTimeTLE A2M discontinuity near 400 km: "
+        f"values={lifetimes!r}, jump_factor={jump_factor:.6g}"
+    )
 
 
 def test_lifetime_separates_sm_mass_and_matches_breakup_a2m() -> None:
@@ -438,15 +596,110 @@ def test_lifetime_separates_sm_mass_and_matches_breakup_a2m() -> None:
                 f"{breakup.life_years[0]:.12g} vs {direct.life_years:.12g}"
             )
 
+    default = cat.estimate_tle_lifetime(epoch=START, tle=mother)
+    explicit_default = cat.estimate_tle_lifetime(
+        epoch=START,
+        tle=mother,
+        sm=0.01,
+        mass=1.0,
+    )
+    if abs(default.life_years - explicit_default.life_years) > 1.0e-12:
+        raise CrossValidationError(
+            "LifeTimeTLE omitted Sm/Mass did not match the observed default A2M"
+        )
+
+    simple_without_lifetime = cat.simulate_debris_breakup_simple(
+        mother_tle=mother,
+        epoch=START,
+        count=1,
+        ssc_prefix="AF",
+        delta_v_m_s=0.0,
+        area_to_mass_ratio_m2_kg=0.01,
+        compute_lifetime=False,
+    )
+    explicit_without_lifetime = cat.simulate_debris_breakup(
+        mother_tle=mother,
+        epoch=START,
+        ssc_prefix="AF",
+        impulses=[
+            cat.DebrisImpulse(
+                azimuth_deg=0.0,
+                elevation_deg=0.0,
+                delta_v_m_s=0.0,
+                area_to_mass_ratio_m2_kg=0.01,
+            )
+        ],
+        compute_lifetime=False,
+    )
+    for label, value in (
+        ("simple", simple_without_lifetime.life_years[0]),
+        ("explicit", explicit_without_lifetime.life_years[0]),
+    ):
+        if value != 25.0:
+            raise CrossValidationError(
+                f"{label} compute_lifetime=False did not return the 25-year sentinel: "
+                f"{value!r}"
+            )
+
+
+def test_lifetime_matches_simple_and_nasa_breakup_a2m() -> None:
+    configure_astrox_from_env()
+    mother = mother_tle()
+    simple = cat.simulate_debris_breakup_simple(
+        mother_tle=mother,
+        epoch=START,
+        count=2,
+        ssc_prefix="AF",
+        delta_v_m_s=0.0,
+        area_to_mass_ratio_m2_kg=0.002,
+        compute_lifetime=True,
+    )
+    for index, ratio in enumerate(
+        impulse.area_to_mass_ratio_m2_kg for impulse in simple.impulses
+    ):
+        direct = cat.estimate_tle_lifetime(
+            epoch=START,
+            tle=simple.debris_tles[index],
+            sm=ratio,
+            mass=1.0,
+        )
+        if abs(simple.life_years[index] - direct.life_years) > 1.0e-12:
+            raise CrossValidationError(
+                f"simple breakup lifetime disagreed at index={index}: "
+                f"{simple.life_years[index]:.12g} vs {direct.life_years:.12g}"
+            )
+
+    nasa = cat.simulate_debris_breakup_nasa(
+        mother_tle=mother,
+        epoch=START,
+        ssc_prefix="AF",
+        total_mass=100.0,
+        minimum_characteristic_length=0.1,
+    )
+    indexes = (0, len(nasa.debris_tles) // 2, len(nasa.debris_tles) - 1)
+    for index in indexes:
+        ratio = nasa.impulses[index].area_to_mass_ratio_m2_kg
+        direct = cat.estimate_tle_lifetime(
+            epoch=START,
+            tle=nasa.debris_tles[index],
+            sm=ratio,
+            mass=1.0,
+        )
+        if abs(nasa.life_years[index] - direct.life_years) > 1.0e-12:
+            raise CrossValidationError(
+                f"NASA breakup lifetime disagreed at index={index}: "
+                f"{nasa.life_years[index]:.12g} vs {direct.life_years:.12g}"
+            )
+
 
 def osculating_orbit_values(tle: orbits.Tle) -> tuple[float, float, float, float]:
     satellite = EarthSatellite(
         tle.line1,
         tle.line2,
         tle.catalog_number or "debris",
-        load.timescale(builtin=True),
+        TIMESCALE,
     )
-    state = satellite.at(load.timescale(builtin=True).utc(2024, 1, 1, 0, 0, 0))
+    state = satellite.at(TIMESCALE.utc(2024, 1, 1, 0, 0, 0))
     position_m = np.asarray(state.position.m)
     velocity_m_s = np.asarray(state.velocity.m_per_s)
     radius_m = float(np.linalg.norm(position_m))
@@ -562,7 +815,7 @@ def test_debris_orbital_outputs_match_skyfield_osculating_invariants() -> None:
 def test_explicit_breakup_delta_v_uses_rtn_and_a2m_only_changes_lifetime() -> None:
     configure_astrox_from_env()
     mother = mother_tle()
-    scale = load.timescale(builtin=True)
+    scale = TIMESCALE
     epoch = scale.utc(2024, 1, 1, 0, 0, 0)
     primary_state = EarthSatellite(MOTHER_LINE1, MOTHER_LINE2, "25544", scale).at(epoch)
     position_m = np.asarray(primary_state.position.m)
@@ -668,14 +921,16 @@ def main() -> int:
         configure_astrox_from_env()
         test_get_tle_false_elements_matches_teme_state()
         test_get_tle_mean_elements_converts_true_anomaly_to_mean_longitude()
+        test_get_tle_mean_elements_calibrates_eccentricity_vector_translation()
         test_lifetime_parameter_ratio_is_monotonic()
         test_lifetime_separates_sm_mass_and_matches_breakup_a2m()
+        test_lifetime_matches_simple_and_nasa_breakup_a2m()
         test_debris_orbital_outputs_match_skyfield_osculating_invariants()
         test_explicit_breakup_delta_v_uses_rtn_and_a2m_only_changes_lifetime()
     except Exception as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    print("CROSS_VALIDATION_CHECKED=6")
+    print("CROSS_VALIDATION_CHECKED=8")
     print("CROSS_VALIDATION_FAILED=0")
     return 0
 

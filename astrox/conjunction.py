@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from numbers import Real
 from typing import Any, TypeAlias
@@ -66,7 +66,7 @@ def _request_optional_number(value: float | None, *, parameter: str) -> float | 
         return None
     if isinstance(value, bool) or not isinstance(value, Real):
         raise TypeError(f"{parameter} must be a number")
-    return value
+    return float(value)
 
 
 def _tle_to_wire(value: Tle, *, parameter: str) -> dict[str, str]:
@@ -158,7 +158,7 @@ def _czml_close_approach_from_wire(value: Any) -> CzmlCloseApproach:
 def _close_approaches_result_from_wire(
     value: Any,
     *,
-    item_parser: Any,
+    item_parser: Callable[[Any], CloseApproachItem],
 ) -> CloseApproachesResult:
     payload = _mapping(value, field="CA response")
     return CloseApproachesResult(
@@ -192,8 +192,8 @@ def _ca_request_payload(
     tol_dh_km: float | None,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
-        "Start_UTCG": start,
-        "Stop_UTCG": stop,
+        "Start_UTCG": _string(start, field="start"),
+        "Stop_UTCG": _string(stop, field="stop"),
         "SAT1": primary,
     }
     _include_if_supplied(
