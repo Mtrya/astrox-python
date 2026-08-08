@@ -3,8 +3,8 @@
 
 # Coverage:
 #   Branches:
-#     - GetTLE with IsMeanElements=false: verified against a TEME Keplerian
-#       state oracle for two element cases
+#     - GetTLE with IsMeanElements=false or omitted: verified against a TEME
+#       Keplerian state oracle for two element cases for both request forms
 #     - GetTLE with IsMeanElements=true: partial; true-anomaly-to-mean-anomaly
 #       interpretation is verified for moderate/high eccentricity, while the
 #       near-circular angle allocation remains a strict calibration xfail
@@ -14,8 +14,8 @@
 #     - DebrisBreakupSimple, DebrisBreakup, and DebrisBreakupNASA: verified for
 #       returned TLE/period/perigee/apogee consistency against Skyfield SGP4
 #   Fields:
-#     - TLE identifiers, epoch, and TEME state: verified for the false-element
-#       GetTLE branch
+#     - TLE identifiers, requested epoch, and TEME state: verified for the
+#       false-element and omitted-element GetTLE forms
 #     - LifeYears: partial (relative estimator and cross-endpoint equivalence;
 #       absolute prediction remains unknown)
 #     - debris TLEs, Periods, AltitudeOfPerigee, AltitudeOfApogee: verified as
@@ -24,7 +24,7 @@
 #       uses m/s and whose direction follows the observed RTN convention
 #   Parameters:
 #     - GetTLE: two true-element cases, mean-element interpretation cases, and
-#       both IsMeanElements values
+#       explicit false plus omitted IsMeanElements requests
 #     - LifeTimeTLE: independent sm and mass sweeps plus matched-ratio cases
 #     - Debris branches: explicit RTN impulses, simple bounded-angle input, and
 #       NASA mass/length input
@@ -33,14 +33,15 @@
 #       and local two-body energy / angular-momentum derivation
 #     - Constants: MU=398600441500000 m^3/s^2; calibrated server Earth radius
 #       6378140 m; UTC epoch 2024-01-01T00:00:00Z
-#     - Tolerances: generated-TLE state 10 m / 0.02 m/s; mean-element longitude
-#       0.1 deg; RTN delta-v 0.02 m/s; debris orbital quantities 0.001 km for
-#       altitude and 1e-5 min for period
+#     - Tolerances: TLE epoch 0.01 s; generated-TLE state 10 m / 0.02 m/s;
+#       mean-element longitude 0.1 deg; RTN delta-v 0.02 m/s; debris orbital
+#       quantities 0.001 km for altitude and 1e-5 min for period
 #
 # Calibration notes:
 #   - GetTLE false-element output matches the independent input osculating state
-#     in raw SGP4 TEME coordinates after one direct comparison; the residual is
-#     a few metres and is covered by the stated numerical precision bound.
+#     in raw SGP4 TEME coordinates at the requested epoch for both explicit false
+#     and omitted IsMeanElements requests; the generated TLE epoch is checked
+#     against START before the state comparison.
 #   - IsMeanElements=true converts input true anomaly to mean anomaly for the
 #     generated TLE. At moderate/high eccentricity, the output argument of
 #     perigee plus mean anomaly preserves the corresponding input longitude;
@@ -79,6 +80,7 @@ from tests.validation._support import configure_astrox_from_env  # noqa: E402
 START = "2024-01-01T00:00:00.000Z"
 MU_M3_S2 = 398600441500000.0
 EARTH_RADIUS_M = 6378140.0
+EPOCH_ABS_S = 0.01
 GENERATED_STATE_ABS_M = 10.0
 GENERATED_VELOCITY_ABS_M_S = 0.02
 DEBRIS_ALTITUDE_ABS_KM = 0.001
@@ -168,6 +170,7 @@ def generated_tle_case(
     argument_of_perigee_deg: float,
     raan_deg: float,
     true_anomaly_deg: float,
+    is_mean_elements: bool | None = False,
 ) -> None:
     generated = cat.generate_tle(
         name="probe",
@@ -180,17 +183,25 @@ def generated_tle_case(
         argument_of_perigee_deg=argument_of_perigee_deg,
         raan_deg=raan_deg,
         true_anomaly_deg=true_anomaly_deg,
-        is_mean_elements=False,
+        is_mean_elements=is_mean_elements,
     )
     if generated.name != "probe" or generated.catalog_number != "25544":
         raise CrossValidationError("GetTLE did not preserve the TLE identifiers")
+    timescale = load.timescale(builtin=True)
+    requested_epoch = timescale.utc(2024, 1, 1, 0, 0, 0)
     satellite = EarthSatellite(
         generated.line1,
         generated.line2,
         generated.catalog_number or "generated",
-        load.timescale(builtin=True),
+        timescale,
     )
-    error, position, velocity = satellite.model.sgp4_tsince(0.0)
+    epoch_error_s = abs((satellite.epoch.tt - requested_epoch.tt) * 86400.0)
+    if epoch_error_s > EPOCH_ABS_S:
+        raise CrossValidationError(
+            f"GetTLE epoch error {epoch_error_s:.12g} s exceeds {EPOCH_ABS_S:g} s"
+        )
+    tsince_minutes = (requested_epoch.tt - satellite.epoch.tt) * 1440.0
+    error, position, velocity = satellite.model.sgp4_tsince(tsince_minutes)
     if error != 0:
         raise CrossValidationError(f"generated TLE SGP4 error code={error}")
     actual_position = np.asarray(position) * 1000.0
@@ -219,22 +230,25 @@ def generated_tle_case(
 
 def test_get_tle_false_elements_matches_teme_state() -> None:
     configure_astrox_from_env()
-    generated_tle_case(
-        semi_major_axis_km=6794.0,
-        eccentricity=0.0001882,
-        inclination_deg=51.6461,
-        argument_of_perigee_deg=64.8995,
-        raan_deg=339.8014,
-        true_anomaly_deg=295.2305,
-    )
-    generated_tle_case(
-        semi_major_axis_km=7000.0,
-        eccentricity=0.01,
-        inclination_deg=63.0,
-        argument_of_perigee_deg=10.0,
-        raan_deg=120.0,
-        true_anomaly_deg=35.0,
-    )
+    for is_mean_elements in (False, None):
+        generated_tle_case(
+            semi_major_axis_km=6794.0,
+            eccentricity=0.0001882,
+            inclination_deg=51.6461,
+            argument_of_perigee_deg=64.8995,
+            raan_deg=339.8014,
+            true_anomaly_deg=295.2305,
+            is_mean_elements=is_mean_elements,
+        )
+        generated_tle_case(
+            semi_major_axis_km=7000.0,
+            eccentricity=0.01,
+            inclination_deg=63.0,
+            argument_of_perigee_deg=10.0,
+            raan_deg=120.0,
+            true_anomaly_deg=35.0,
+            is_mean_elements=is_mean_elements,
+        )
 
 
 def test_get_tle_mean_elements_converts_true_anomaly_to_mean_longitude() -> None:
@@ -334,6 +348,11 @@ def test_get_tle_mean_elements_branch_remains_unresolved() -> None:
     )
     position_error_m = float(np.max(np.abs(np.asarray(position) * 1000.0 - expected_position)))
     velocity_error_m_s = float(np.max(np.abs(np.asarray(velocity) * 1000.0 - expected_velocity)))
+    if (
+        position_error_m <= GENERATED_STATE_ABS_M
+        and velocity_error_m_s <= GENERATED_VELOCITY_ABS_M_S
+    ):
+        return
     raise CrossValidationError(
         "IsMeanElements=true naive osculating residual: "
         f"position={position_error_m:.6g} m, velocity={velocity_error_m_s:.6g} m/s"

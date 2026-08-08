@@ -4,37 +4,40 @@ This page records the cross-validation and live-snapshot evidence for `astrox.co
 
 ## TLE entry (V3)
 
-Status of `conjunction.find_tle_close_approaches`:
+Status of `conjunction.find_tle_close_approaches`: `partial`.
 
-- TLE primary plus TLE targets branch: `verified` for four target mean-anomaly cases (135°, 137.7421°, 140°, 145°) at 60-second sampling over a 10-minute window.
-- `min_range_time`: `verified` as the nearest sampled epoch on the server's 60-second grid.
-- `min_range_km`: `verified` against the GCRS 3-D separation, rounded to 0.001 km.
-- `relative_speed_km_s`: `verified` against the GCRS relative speed, rounded to 1e-6 km/s.
-- `orbital_plane_angle_deg`: `verified` as the absolute TLE inclination difference, rounded to 0.01 deg.
+- TLE primary plus TLE targets branch: `partial`; range, relative speed, continuous TCA, and the TLE-defined plane angle are calibrated across target mean-anomaly, RAAN, inclination, and stop-time cases, while `collision_probability` remains unresolved.
+- `min_range_km`: `verified` against the GCRS 3-D separation within `RANGE_ABS_KM = 0.001` km.
+- `relative_speed_km_s`: `verified` against the GCRS relative speed within `RELATIVE_SPEED_ABS_KM_S = 5.0e-7` km/s.
+- `min_range_time` (TCA): compared with an independent continuous local minimum of the Skyfield GCRS range (1-second coarse scan plus golden-section local refinement). The interior off-grid case (target mean anomaly 142.85°, TCA ≈ 534.305 s) lands inside the window but off the 60-second grid and matches the independent continuous minimum within one second, so V3 is not described as a sampled-grid convention; boundary-only cases cannot distinguish sampled-time from continuous-time behavior.
+- `orbital_plane_angle_deg`: compared with the full plane angle derived from both TLE inclinations and RAANs within `V3_ANGLE_ABS_DEG = 0.01` deg. Independent RAAN-only and inclination-only probes distinguish the result from the absolute TLE inclination difference.
 - Stop-time coverage: `verified` at 5, 8, and 10 minutes; the sample at Stop participates in reporting.
-- No-result filter boundary: the 130° mean-anomaly case is retained as a filtered-empty case (`total_number = 1` with an empty `results` list).
+- Target mean-anomaly cases: 135°, 137.7421°, 140°, and 145°; the 130° case is retained as a no-result filter boundary (`total_number = 1` with an empty `results` list).
+- `collision_probability`: `unresolved`; see the dedicated section below.
 
-Comparison path: Skyfield 1.54 `EarthSatellite` GCRS state propagation on checked-in TLEs with UTC epochs and a 60-second sample interval.
+Comparison path: Skyfield 1.54 `EarthSatellite` GCRS state propagation on checked-in TLEs with UTC epochs, a 1-second coarse scan plus golden-section local refinement for the continuous TCA minimum, and the TLE inclination/RAAN plane-angle derivation for the V3 plane angle.
 
 Key constants and tolerances from [`tests/validation/cross_validation/conjunction/test_close_approaches_skyfield.py`](../../tests/validation/cross_validation/conjunction/test_close_approaches_skyfield.py):
 
 - `START = "2024-01-01T00:00:00.000Z"`.
 - `SAMPLE_STEP_S = 60`.
+- TCA tolerance: 1 second.
 - Range tolerance: `RANGE_ABS_KM = 0.001`.
 - Relative-speed tolerance: `RELATIVE_SPEED_ABS_KM_S = 5.0e-7`.
-- V3 plane-angle tolerance: `V3_ANGLE_ABS_DEG = 0.0051`.
+- V3 plane-angle tolerance: `V3_ANGLE_ABS_DEG = 0.01`.
 - V4 plane-angle tolerance: `V4_ANGLE_ABS_DEG = 0.00051`.
 
-Known residuals and conventions: the naive continuous-time interpretation is not used as the maintained oracle. ASTROX reports the nearest one-minute sampled epoch for these requests, and a 1-second Skyfield scan confirmed that the reported samples are the nearest values on the server's 60-second grid. The V3 plane angle matches the absolute TLE inclination difference instead of the instantaneous GCRS angular-momentum angle.
+Known residuals and conventions: the V3 TCA matches the independent continuous minimum within one second, including the interior off-grid case, so the 60-second grid is a property of the tested input sampling, not a claimed server convention. The V3 plane angle follows the full angle derived from the two TLE inclinations and RAANs instead of the absolute inclination difference or the instantaneous GCRS angular-momentum angle.
 
 ## CZML entry (V4)
 
-Status of `conjunction.find_czml_close_approaches`:
+Status of `conjunction.find_czml_close_approaches`: `partial`.
 
-- CZML primary plus TLE targets branch: `verified` for three stop-time cases (5, 8, and 10 minutes) using a 60-second public SGP4 position.
-- `min_range_km` and `relative_speed_km_s`: `verified` against the same GCRS geometry as the TLE entry.
-- `orbital_plane_angle_deg`: `verified` against the instantaneous GCRS angular-momentum angle, rounded to 0.001 deg.
-- Interval convention: the final CZML sample at Stop is excluded by the observed server interval convention, so the reported closest-approach time falls on the sample one step before Stop.
+- CZML primary plus TLE targets branch: `partial`; range, relative speed, the supplied-sample boundary behavior, and the GCRS plane angle are calibrated across three stop-time cases (5, 8, and 10 minutes) using a 60-second public SGP4 position, while `collision_probability` remains unresolved.
+- `min_range_km` and `relative_speed_km_s`: `verified` against the same GCRS geometry as the TLE entry within the same tolerances.
+- `orbital_plane_angle_deg`: `verified` against the instantaneous GCRS angular-momentum angle within `V4_ANGLE_ABS_DEG = 0.00051` deg.
+- `min_range_time`: compared with the supplied 60-second CZML sample boundary convention. The final CZML sample at Stop is excluded by the observed server interval convention, so the reported closest-approach time falls on the supplied sample one step before Stop.
+- `collision_probability`: `unresolved`; see the dedicated section below.
 
 The CZML primary is produced with the public `propagator.sgp4` at 60-second sampling and converted to `components.czml_position`, so this branch also exercises the public propagation surface.
 
@@ -42,9 +45,9 @@ Comparison path and tolerances: the same Skyfield GCRS oracle and the constants 
 
 ## Collision probability
 
-Status of `collision_probability`:
+Status of `collision_probability`: `unresolved`.
 
-- `unresolved`: four live probe rounds — repeated V3/V4 calls; target-distance changes via target mean anomalies 135° and 140°; a plane-angle change via target inclination +5°; a relative-speed change via target mean motion 16.52489080 rev/day; and filter thresholds from 1000 km to 10000 km — all observed `collision_probability = 0.0`. The promoted requests expose no covariance, hard-body radius, or equivalent error model, and there is no independent probability oracle, so the field is classified as a stable server-owned opaque scalar rather than a verified statistical collision probability. The case is retained as a strict calibration xfail in the cross-validation script.
+Four live probe rounds — repeated V3/V4 calls; target-distance changes via target mean anomalies 135° and 140°; a plane-angle change via target inclination +5°; a relative-speed change via target mean motion 16.52489080 rev/day; and filter thresholds from 1000 km to 10000 km — all observed `collision_probability = 0.0`. The promoted requests expose no covariance, hard-body radius, or equivalent error model, and there is no independent probability oracle, so the field is classified as a stable server-owned opaque scalar rather than a verified statistical collision probability. The case is retained as a strict calibration xfail in [`tests/validation/cross_validation/conjunction/test_close_approaches_skyfield.py`](../../tests/validation/cross_validation/conjunction/test_close_approaches_skyfield.py).
 
 ## Live snapshot coverage
 

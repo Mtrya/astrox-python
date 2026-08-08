@@ -22,13 +22,15 @@ Both functions share the same parameter set:
 | `start` | — | Analysis start time string (UTC, `yyyy-MM-ddTHH:mm:ss.fffZ` format) |
 | `stop` | — | Analysis stop time string (UTC) |
 | `tle` / `position` | — | Primary vehicle: an `orbits.Tle` instance or a `components.CzmlPosition` instance |
-| `targets` | — | Target list, a sequence of `orbits.Tle`; when omitted, nothing is sent to ASTROX |
+| `targets` | — | Target list, a sequence of `orbits.Tle`; when omitted, the SDK does not send the `Targets` field to ASTROX |
 | `tol_max_distance_km` | km | Maximum distance for reporting a close approach, server default 5 km |
 | `tol_cross_dt_s` | s | Time-error tolerance for the crossing-time screening, server default 10 s |
 | `tol_theta_deg` | deg | Orbital-plane angle threshold, server default 1°; below this value the server does not apply plane-angle screening |
 | `tol_dh_km` | km | Perigee/apogee altitude screening tolerance, server default 30 km |
 
-Optional parameters are not sent to ASTROX when omitted; the server retains its default values, and those default filters may exclude a target before the distance search. `tol_max_distance_km` sets the distance threshold; when the target count is large, tightening it can markedly reduce the number of candidates. The examples explicitly set the other three screening tolerances to reproduce the verified result.
+Optional parameters are not sent to ASTROX when omitted; the server retains its default values, and those default filters may exclude a target before the distance search. `tol_max_distance_km` sets the distance threshold; when the target count is large, tightening it can markedly reduce the number of candidates. To reproduce the examples on this page, the example code explicitly sets the other three screening tolerances.
+
+When `targets` is omitted or `None`, the SDK omits the `Targets` field from the request by convention, preserving the server's default behavior; per the OpenAPI/server contract, the server then loads all targets from the server satellite catalog for the computation, which may trigger large-scale computation when the target count is large. Callers are advised to pass an explicit target list to limit the computation scope to the desired targets.
 
 ## `conjunction.find_tle_close_approaches`
 
@@ -147,13 +149,13 @@ result = conjunction.find_czml_close_approaches(
 | `min_range_km` | `float` | Minimum range, in km |
 | `orbital_plane_angle_deg` | `float` | Orbital-plane angle, in deg |
 | `relative_speed_km_s` | `float` | Relative speed, in km/s |
-| `collision_probability` | `float` | A server-returned scalar observed as 0.0; unchanged across four probe rounds (repeated V3/V4, changing target distance, orbital-plane angle, relative speed, and filter thresholds), stable but unexplained, kept unresolved without statistical collision-probability semantics |
+| `collision_probability` | `float` | A server-returned scalar; it can currently only be used as a server-returned scalar and is not assigned statistical collision-probability semantics |
 
 ## Verified scope
 
-- TLE entry: the time of closest approach matches the nearest sampled time of an independent SGP4 propagation at 60-second sampling; the minimum range matches the 3-D geometric distance; the relative speed matches the geometric relative speed; the orbital-plane angle matches the inclination difference of the two TLEs (returned at the server's decimal precision). Samples at both the start and stop times participate in reporting.
-- CZML entry: minimum range, relative speed, and orbital-plane angle were verified using a public SGP4 trajectory sampled at 60 seconds; the closest-approach time reported by the server usually falls on the sample point before Stop, and the sample at Stop does not participate in reporting.
-- Collision probability (`collision_probability`) remains unresolved: four probe rounds of repeated V3/V4 calls with changes to target distance, orbital-plane angle, relative speed, and filter thresholds all observed 0.0; the requests expose no covariance, hard-body radius, or equivalent error-model input and there is no independent probability oracle to compare against, so it is described as a stable but unexplained server-owned scalar (opaque scalar) without statistical collision-probability semantics, and neither this page nor the examples treat it as a recommended basis for decisions.
+- The TLE (V3) and CZML (V4) entries are `partial` overall: individual fields such as minimum range, relative speed, and orbital-plane angle have verification evidence; `collision_probability` remains uninterpretable.
+- `collision_probability` is described only as a server-returned scalar and is not assigned statistical collision-probability semantics.
+- The specific comparison paths, sampling cases, tolerances, and residuals are recorded on the [conjunction validation page](../../../../validation/conjunction.md).
 
 ## Convention notes
 

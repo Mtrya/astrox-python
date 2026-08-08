@@ -46,7 +46,6 @@ def generate_tle() -> orbits.Tle:
         argument_of_perigee_deg=64.8995,
         raan_deg=339.8014,
         true_anomaly_deg=295.2305,
-        is_mean_elements=False,
     )
 
 

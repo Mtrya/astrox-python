@@ -63,7 +63,7 @@ print(tle.line1)
 print(tle.line2)
 ```
 
-With `is_mean_elements=True`, the server converts the input true anomaly to mean anomaly when writing the TLE: at moderate/high eccentricity (e = 0.01, 0.05), the output argument of perigee plus mean anomaly preserves the corresponding input mean longitude (0.1 deg tolerance). At near-circular eccentricity (e ≈ 0.0001882), the server redistributes argument of perigee and mean anomaly and retains a kilometre-scale state residual; that branch remains a strict xfail/unresolved, so the full true-anomaly-to-mean-anomaly conversion is not yet claimed fully verified.
+With `is_mean_elements=True`, the server converts the input true anomaly to mean anomaly when writing the TLE. This branch is `partial`: the conversion at moderate/high eccentricity has verification evidence, while the near-circular branch still retains an unexplained state residual, so the full true-anomaly-to-mean-anomaly conversion cannot yet be declared fully verified.
 
 The generated result can be used directly with `propagator.sgp4`, `conjunction`, and the lifetime estimation and breakup simulation functions below.
 
@@ -107,11 +107,11 @@ result = cat.estimate_tle_lifetime(
 print(result.life_years)
 ```
 
-`life_years` cannot be used as an absolute physical lifetime prediction. This round verified that the output depends on the `sm`/`mass` ratio: sweeps with fixed `sm` or fixed `mass` and matched-ratio cases (such as `(0.1, 100)` and `(1, 1000)`) agree value-for-value; low ratios (long-lived cases) return the 25-year cap; changing `bstar` does not affect the observed results; debris lifetimes from breakup simulation agree value-for-value with `estimate_tle_lifetime` at the same area-to-mass ratio. Absolute lifetime values remain unverified.
+The output of `life_years` depends mainly on the `sm`/`mass` ratio, and the server returns the 25-year cap at low ratios; it cannot be used as an absolute physical lifetime prediction, and absolute lifetime values remain unverified.
 
 ## Debris breakup simulation
 
-The three functions simulate debris produced by the breakup of a mother satellite and all return `DebrisBreakupResult`. They simulate the breakup event itself and return the debris TLEs and orbital parameters; the debris orbital periods and perigee/apogee altitudes have been cross-checked against the orbital invariants of independent SGP4 states, but the scientific validity of the debris breakup model itself is outside the verified scope.
+The three functions simulate debris produced by the breakup of a mother satellite and all return `DebrisBreakupResult`. They simulate the mother-satellite breakup event itself and return the debris TLEs and orbital parameters; the scientific validity of the debris breakup model itself (debris counts, velocity and mass distributions, etc.) is not SDK-verified semantics.
 
 ### `cat.simulate_debris_breakup_simple`
 
@@ -132,7 +132,7 @@ cat.simulate_debris_breakup_simple(
 ) -> DebrisBreakupResult
 ```
 
-All debris pieces use the same relative speed and area-to-mass ratio; azimuth/elevation are generated uniformly within the given ranges.
+All debris pieces use the same relative speed and area-to-mass ratio; the specific azimuth/elevation distribution is determined by the server and is not verified within this SDK's evidence scope.
 
 | Parameter | Unit | Description |
 | --- | --- | --- |
@@ -177,7 +177,7 @@ cat.simulate_debris_breakup(
 ) -> DebrisBreakupResult
 ```
 
-Gives the breakup parameters for each debris piece individually. `impulses` is a sequence of `DebrisImpulse`, one per debris piece:
+Gives the breakup parameters row by row. `impulses` is the breakup rows in the request, each row being a set of breakup parameters; the number and order of the returned debris pieces are determined by the server:
 
 | Field | Unit | Description |
 | --- | --- | --- |
@@ -210,7 +210,7 @@ result = cat.simulate_debris_breakup(
 )
 ```
 
-The `AzElVel` convention of explicit breakup has been verified: the `impulses` rows in the returned result echo the input; the `delta_v_m_s` speed norm matches the input and is in m/s; at the breakup epoch the direction follows the RTN observation convention — azimuth 0° → +along-track, 90° → −cross-track, 180° → −along-track, and positive elevation → +radial. Changing `area_to_mass_ratio_m2_kg` does not change the period/perigee/apogee of the generated orbit but does change the returned `life_years`.
+The direction of explicit breakup follows the RTN convention: azimuth 0° → +along-track, 90° → −cross-track, 180° → −along-track, and positive elevation → +radial; the `delta_v_m_s` speed norm is in m/s. Changing `area_to_mass_ratio_m2_kg` does not change the period/perigee/apogee of the generated orbit but does change the returned `life_years`.
 
 ### `cat.simulate_debris_breakup_nasa`
 
@@ -244,28 +244,26 @@ result = cat.simulate_debris_breakup_nasa(
 | `is_success` | `bool` | Whether the call succeeded |
 | `message` | `str` | Server message |
 | `debris_tles` | `tuple[Tle, ...]` | TLEs of all debris pieces |
-| `impulses` | `tuple[DebrisImpulse, ...]` | Breakup parameters of each debris piece |
+| `impulses` | `tuple[DebrisImpulse, ...]` | The breakup rows from the request |
 | `life_years` | `tuple[float, ...]` | Orbital lifetime of each debris piece, in years; the server falls back to 25 years when lifetime is not computed or the computation fails |
 | `altitude_of_perigee_km` | `tuple[float, ...]` | Perigee altitude of each debris piece, in km |
 | `altitude_of_apogee_km` | `tuple[float, ...]` | Apogee altitude of each debris piece, in km |
 | `periods_min` | `tuple[float, ...]` | Orbital period of each debris piece, in min |
 
-Each array corresponds to `debris_tles` by debris position, but the SDK does not enforce equal array lengths; lengths follow the server response. Like the lifetime estimation, `life_years` includes server fallback values and cannot be used as an accurate lifetime prediction.
+The returned arrays must be synchronized and equal in length: `debris_tles`, `impulses`, `life_years`, `altitude_of_perigee_km`, `altitude_of_apogee_km`, and `periods_min` correspond positionally by return position, and the SDK parser raises `TypeError` when the lengths do not match. `impulses` is the breakup rows from the request; the number and order of the returned debris pieces are determined by the server. Like the lifetime estimation, `life_years` includes server fallback values and cannot be used as an accurate lifetime prediction.
 
 ## Verified scope
 
-- The instantaneous-elements branch of `generate_tle` (`is_mean_elements` omitted or `False`) is consistent with an independent TEME Keplerian state.
-- The mean-elements branch of `generate_tle` (`True`): the true-anomaly-to-mean-anomaly conversion and mean-longitude preservation (0.1 deg tolerance) are verified at moderate/high eccentricity; the near-circular (e ≈ 0.0001882) angle redistribution and kilometre-scale state residual remain a strict xfail, and the full conversion is not yet verified.
-- `estimate_tle_lifetime`'s `life_years` is verified only up to the parameter-ratio semantics: the output depends on the `sm`/`mass` ratio, matched ratios agree value-for-value, low ratios return the 25-year cap, and it agrees value-for-value with the breakup branch at the same area-to-mass ratio; absolute lifetime values are unverified.
-- The `AzElVel` of explicit breakup (`simulate_debris_breakup`): the returned rows echo the input, the `delta_v_m_s` speed norm is in m/s, and the direction at the breakup epoch follows the RTN convention (0° → +along-track, 90° → −cross-track, 180° → −along-track, positive elevation → +radial); `area_to_mass_ratio_m2_kg` does not change the generated orbit (period/perigee/apogee) and only changes the returned lifetime.
-- The debris periods, perigee altitudes, and apogee altitudes returned by the three breakup-simulation branches are consistent with the orbital invariants of independent SGP4 states of the debris.
-- The debris breakup model itself (the physical plausibility of debris counts, velocity distribution, and mass distribution) and the absolute lifetime values are unverified.
+- The instantaneous-elements branch of `generate_tle` (`is_mean_elements` omitted or `False`) and the returned debris orbital quantities (period, perigee/apogee altitude) have verification evidence; the mean-elements branch is `partial`, and the near-circular case still retains an unexplained state residual.
+- `estimate_tle_lifetime`'s `life_years` is verified only up to relative semantics: the output depends on the `sm`/`mass` ratio, and low ratios return the 25-year cap; absolute lifetime values are not verified.
+- The scientific plausibility of the debris breakup model itself (debris counts, velocity distribution, mass distribution) and the absolute lifetime values are not SDK-verified semantics.
+- The specific comparison paths, cases, tolerances, and residuals are recorded on the [cat validation page](../../../../validation/cat.md).
 
 ## Convention notes
 
 - Optional parameters are not sent to ASTROX when omitted; the server retains its default values.
 - The azimuth/elevation ranges of the simple breakup branch are defined in the VVLH axes of the TEME reference frame.
-- The azimuth/elevation of the explicit breakup branch follow the verified RTN convention: azimuth 0° → +along-track, 90° → −cross-track, 180° → −along-track, and positive elevation → +radial.
+- The azimuth/elevation of the explicit breakup branch follow the RTN convention: azimuth 0° → +along-track, 90° → −cross-track, 180° → −along-track, and positive elevation → +radial.
 
 A complete runnable example is available at `examples/09_cat/cat_workflows.py`.
 

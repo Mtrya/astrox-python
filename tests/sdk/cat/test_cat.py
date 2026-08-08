@@ -523,20 +523,28 @@ def test_debris_parser_rejects_mistyped_fields(
         cat.simulate_debris_breakup_simple(mother_tle=MOTHER, epoch=START)
 
 
-def test_debris_parser_keeps_output_arrays_independent(
+@pytest.mark.parametrize(
+    "field",
+    [
+        "DebrisTLEs",
+        "AzElVel",
+        "LifeYears",
+        "AltitudeOfPerigee",
+        "AltitudeOfApogee",
+        "Periods",
+    ],
+)
+def test_debris_parser_rejects_unsynchronized_output_arrays(
     monkeypatch: pytest.MonkeyPatch,
+    field: str,
 ) -> None:
     response = dict(DEBRIS_RESPONSE)
-    response["LifeYears"] = [25.0, 26.0]
-    response["AltitudeOfApogee"] = []
-    response["Periods"] = [93.3, 94.0]
+    values = response[field]
+    response[field] = [*values, values[0]]
     record_raw_post(monkeypatch, response)
 
-    result = cat.simulate_debris_breakup_simple(mother_tle=MOTHER, epoch=START)
-
-    assert result.life_years == (25.0, 26.0)
-    assert result.altitude_of_apogee_km == ()
-    assert result.periods_min == (93.3, 94.0)
+    with pytest.raises(TypeError, match="synchronized"):
+        cat.simulate_debris_breakup_simple(mother_tle=MOTHER, epoch=START)
 
 
 @pytest.mark.parametrize(

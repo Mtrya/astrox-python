@@ -165,7 +165,7 @@ class TleLifetimeResult:
 
 @dataclass(frozen=True, kw_only=True)
 class DebrisBreakupResult:
-    """Typed debris breakup response with independently sized output arrays."""
+    """Typed debris breakup response with synchronized output arrays."""
 
     is_success: bool
     message: str
@@ -213,24 +213,43 @@ def _impulses_from_wire(value: Any) -> tuple[DebrisImpulse, ...]:
 
 def _debris_breakup_result_from_wire(value: Any) -> DebrisBreakupResult:
     payload = _mapping(value, field="DebrisBreakup response")
+    debris_tles = tuple(
+        Tle.from_tle_info_wire(item)
+        for item in _sequence(payload["DebrisTLEs"], field="DebrisTLEs")
+    )
+    impulses = _impulses_from_wire(payload["AzElVel"])
+    life_years = _number_tuple(payload["LifeYears"], field="LifeYears")
+    altitude_of_perigee_km = _number_tuple(
+        payload["AltitudeOfPerigee"],
+        field="AltitudeOfPerigee",
+    )
+    altitude_of_apogee_km = _number_tuple(
+        payload["AltitudeOfApogee"],
+        field="AltitudeOfApogee",
+    )
+    periods_min = _number_tuple(payload["Periods"], field="Periods")
+    lengths = {
+        "DebrisTLEs": len(debris_tles),
+        "AzElVel": len(impulses),
+        "LifeYears": len(life_years),
+        "AltitudeOfPerigee": len(altitude_of_perigee_km),
+        "AltitudeOfApogee": len(altitude_of_apogee_km),
+        "Periods": len(periods_min),
+    }
+    if len(set(lengths.values())) != 1:
+        raise TypeError(
+            "DebrisBreakup response arrays must have synchronized lengths: "
+            + ", ".join(f"{field}={length}" for field, length in lengths.items())
+        )
     return DebrisBreakupResult(
         is_success=_boolean(payload["IsSuccess"], field="IsSuccess"),
         message=_string(payload["Message"], field="Message"),
-        debris_tles=tuple(
-            Tle.from_tle_info_wire(item)
-            for item in _sequence(payload["DebrisTLEs"], field="DebrisTLEs")
-        ),
-        impulses=_impulses_from_wire(payload["AzElVel"]),
-        life_years=_number_tuple(payload["LifeYears"], field="LifeYears"),
-        altitude_of_perigee_km=_number_tuple(
-            payload["AltitudeOfPerigee"],
-            field="AltitudeOfPerigee",
-        ),
-        altitude_of_apogee_km=_number_tuple(
-            payload["AltitudeOfApogee"],
-            field="AltitudeOfApogee",
-        ),
-        periods_min=_number_tuple(payload["Periods"], field="Periods"),
+        debris_tles=debris_tles,
+        impulses=impulses,
+        life_years=life_years,
+        altitude_of_perigee_km=altitude_of_perigee_km,
+        altitude_of_apogee_km=altitude_of_apogee_km,
+        periods_min=periods_min,
     )
 
 
