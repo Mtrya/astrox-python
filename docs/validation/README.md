@@ -8,6 +8,7 @@ Per-domain validation evidence: what is verified, against what, with which toler
 - [Access (includes components evidence)](access.md)
 - [Coverage](coverage.md)
 - [Rocket](rocket.md)
+- [Astrogator](astrogator.md)
 
 Two evidence layers back these pages:
 

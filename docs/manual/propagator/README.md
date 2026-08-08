@@ -375,10 +375,11 @@ propagator.hpop_two_body_gravity(
     name: str | None = None,
     description: str | None = None,
     user_comment: str | None = None,
+    gravitational_parameter_m3_s2: float | None = None,
 ) -> HpopGravity
 ```
 
-使用二体重力模型。该分支的引力参数由 ASTROX 内部管理；如需覆盖，请使用 `hpop` 顶层的 `gravitational_parameter_m3_s2`。
+使用二体重力模型。`gravitational_parameter_m3_s2` 提供时会被写入请求中重力模型的 `Mu` 字段，用于覆盖中心天体的默认引力参数（单位 m³/s²）；未提供时该字段不会发往 ASTROX，由服务器采用中心天体默认值。显式提供 `Mu` 是已验证 RunMCS 二体传播场景使用的配置值；该场景下省略时不能宣称具有同样的二体物理语义。
 
 #### `propagator.hpop_gravity_field`
 
@@ -631,4 +632,4 @@ period_s, position = propagator.ballistic_delta_v(
 
 ## 错误处理
 
-当 ASTROX 返回不成功响应或网络请求失败时，所有传播函数都会抛出 `astrox.exceptions.AstroxAPIError`。SDK 不会隐藏或改写服务器错误信息。需要完整原始响应时，请直接使用 `astrox.raw.post`。
+当 ASTROX 返回不成功响应或网络请求失败时，所有传播函数都会抛出 `astrox.exceptions` 下的异常：服务器响应 `IsSuccess=false` 抛 `AstroxAPIError`，HTTP 4xx/5xx 抛 `AstroxHTTPError`，请求超时抛 `AstroxTimeoutError`，连接失败抛 `AstroxConnectionError`。它们都是 `AstroxError` 的并列子类。SDK 不会隐藏或改写服务器错误信息。需要完整原始响应时，请直接使用 `astrox.raw.post`。

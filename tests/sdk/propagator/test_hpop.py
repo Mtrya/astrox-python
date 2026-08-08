@@ -125,6 +125,12 @@ def test_hpop_branch_constructors_emit_exact_wire_fragments() -> None:
         (propagator.hpop_rkf78(), {"$type": "RKF7th8th"}),
         (propagator.hpop_two_body_gravity(), {"$type": "TwoBody"}),
         (
+            propagator.hpop_two_body_gravity(
+                gravitational_parameter_m3_s2=398600441500000.0,
+            ),
+            {"$type": "TwoBody", "Mu": 398600441500000.0},
+        ),
+        (
             propagator.hpop_gravity_field(
                 gravity_file_name="EGM2008.grv",
                 degree=2,
