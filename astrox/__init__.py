@@ -26,7 +26,7 @@ Raw route access is available for advanced callers:
 
 from importlib.metadata import PackageNotFoundError, version
 
-from astrox import access, coverage, components, lighting, orbits, propagator, rocket
+from astrox import access, astrogator, coverage, components, lighting, orbits, propagator, rocket
 from astrox._http import Client, configure, get_session, raw
 
 try:
@@ -39,6 +39,7 @@ __all__ = [
     "configure",
     "get_session",
     "access",
+    "astrogator",
     "coverage",
     "components",
     "lighting",

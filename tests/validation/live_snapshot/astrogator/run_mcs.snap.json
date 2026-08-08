@@ -1,0 +1,2571 @@
+{
+  "cases": [
+    {
+      "description": "Keplerian InitialState result and returned state views.",
+      "id": "initial_state",
+      "return": {
+        "is_success": true,
+        "main_sequence_results": [
+          {
+            "description": "初始段参数",
+            "duration_s": 0.0,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "name": "Init",
+            "scalar_results": {},
+            "type_name": "InitialState",
+            "unknown_fields": {},
+            "user_comment": "初始段参数",
+            "wire_type": null
+          }
+        ],
+        "message": "Success",
+        "positions": {
+          "central_body": "Earth",
+          "positions": [
+            {
+              "cartesian": null,
+              "cartesian_velocity": [
+                0.0,
+                -1787681.754178897,
+                3096355.626001708,
+                3575363.5083577964,
+                -9049.974810442445,
+                -4256.1815885684555,
+                839.0260264013318
+              ],
+              "central_body": "Earth",
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "interpolation_algorithm": "HERMITE",
+              "interpolation_degree": 7,
+              "interval": "2026-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z",
+              "reference_frame": "INERTIAL"
+            }
+          ]
+        },
+        "unknown_fields": {}
+      }
+    },
+    {
+      "description": "One-second propagation with a registered custom HPOP model.",
+      "id": "propagate",
+      "return": {
+        "is_success": true,
+        "main_sequence_results": [
+          {
+            "description": "初始段参数",
+            "duration_s": 0.0,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "name": "Init",
+            "scalar_results": {},
+            "type_name": "InitialState",
+            "unknown_fields": {},
+            "user_comment": "初始段参数",
+            "wire_type": null
+          },
+          {
+            "description": "轨道递推段",
+            "duration_s": 1.0,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -9044.471330024384,
+                "vy_m_s": -4265.682477113214,
+                "vz_m_s": 827.9893354849997,
+                "x_m": -1796728.9792417781,
+                "y_m": 3092094.692321372,
+                "z_m": 3576197.0156037407
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:01.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92829269624686,
+              "geocentric_longitude_deg": 19.954113574638296,
+              "geodetic_altitude_m": -1309919.0280370049,
+              "geodetic_latitude_deg": 45.170554838335974,
+              "geodetic_longitude_deg": 19.954113574638292,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99982400040014,
+                "eccentricity": 0.30000112620004193,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.00000022854905,
+                "mean_anomaly_deg": 15.801508436281463,
+                "period_s": 5828.522479924421,
+                "raan_deg": 29.99967259398457,
+                "semi_major_axis_m": 7000004.6758962255,
+                "true_anomaly_deg": 30.11330617546179,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 44.99988854126363,
+                "horizontal_fpa_deg": 6.814639938304272,
+                "radius_m": 5057516.1596916625,
+                "right_ascension_deg": 120.15966261572693,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 90.11312995623894,
+                "velocity_magnitude_m_s": 10034.14545314451
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "name": "Prop",
+            "scalar_results": {},
+            "stopped_on_maximum_duration": false,
+            "stopping_condition_name": "Duration",
+            "type_name": "Propagate",
+            "unknown_fields": {},
+            "user_comment": "轨道递推段",
+            "wire_type": "PropagateResult"
+          }
+        ],
+        "message": "Success",
+        "positions": {
+          "central_body": "Earth",
+          "positions": [
+            {
+              "cartesian": null,
+              "cartesian_velocity": {
+                "first": [
+                  0.0,
+                  -1787681.754178897,
+                  3096355.626001708,
+                  3575363.5083577964,
+                  -9049.974810442445,
+                  -4256.1815885684555,
+                  839.0260264013318,
+                  0.09999999999854481,
+                  -1788586.7241983558,
+                  3095929.9602922876
+                ],
+                "last": [
+                  -9045.022753710757,
+                  -4264.733278070551,
+                  829.0927693391591,
+                  1.0,
+                  -1796728.9792417781,
+                  3092094.692321372,
+                  3576197.0156037407,
+                  -9044.471330024384,
+                  -4265.682477113214,
+                  827.9893354849997
+                ],
+                "length": 77
+              },
+              "central_body": "Earth",
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "interpolation_algorithm": "HERMITE",
+              "interpolation_degree": 7,
+              "interval": "2026-01-01T00:00:00.000Z/2026-01-01T00:00:01.000Z",
+              "reference_frame": "INERTIAL"
+            }
+          ]
+        },
+        "unknown_fields": {}
+      }
+    },
+    {
+      "description": "One-second propagation with sampled CZML positions enabled.",
+      "id": "propagate_czml",
+      "return": {
+        "is_success": true,
+        "main_sequence_results": [
+          {
+            "description": "初始段参数",
+            "duration_s": 0.0,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "name": "Init",
+            "scalar_results": {},
+            "type_name": "InitialState",
+            "unknown_fields": {},
+            "user_comment": "初始段参数",
+            "wire_type": null
+          },
+          {
+            "description": "轨道递推段",
+            "duration_s": 1.0,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -9044.471330024384,
+                "vy_m_s": -4265.682477113214,
+                "vz_m_s": 827.9893354849997,
+                "x_m": -1796728.9792417781,
+                "y_m": 3092094.692321372,
+                "z_m": 3576197.0156037407
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:01.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92829269624686,
+              "geocentric_longitude_deg": 19.954113574638296,
+              "geodetic_altitude_m": -1309919.0280370049,
+              "geodetic_latitude_deg": 45.170554838335974,
+              "geodetic_longitude_deg": 19.954113574638292,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99982400040014,
+                "eccentricity": 0.30000112620004193,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.00000022854905,
+                "mean_anomaly_deg": 15.801508436281463,
+                "period_s": 5828.522479924421,
+                "raan_deg": 29.99967259398457,
+                "semi_major_axis_m": 7000004.6758962255,
+                "true_anomaly_deg": 30.11330617546179,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 44.99988854126363,
+                "horizontal_fpa_deg": 6.814639938304272,
+                "radius_m": 5057516.1596916625,
+                "right_ascension_deg": 120.15966261572693,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 90.11312995623894,
+                "velocity_magnitude_m_s": 10034.14545314451
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "name": "Prop",
+            "scalar_results": {},
+            "stopped_on_maximum_duration": false,
+            "stopping_condition_name": "Duration",
+            "type_name": "Propagate",
+            "unknown_fields": {},
+            "user_comment": "轨道递推段",
+            "wire_type": "PropagateResult"
+          }
+        ],
+        "message": "Success",
+        "positions": {
+          "central_body": "Earth",
+          "positions": [
+            {
+              "cartesian": null,
+              "cartesian_velocity": {
+                "first": [
+                  0.0,
+                  -1787681.754178897,
+                  3096355.626001708,
+                  3575363.5083577964,
+                  -9049.974810442445,
+                  -4256.1815885684555,
+                  839.0260264013318,
+                  0.09999999999854481,
+                  -1788586.7241983558,
+                  3095929.9602922876
+                ],
+                "last": [
+                  -9045.022753710757,
+                  -4264.733278070551,
+                  829.0927693391591,
+                  1.0,
+                  -1796728.9792417781,
+                  3092094.692321372,
+                  3576197.0156037407,
+                  -9044.471330024384,
+                  -4265.682477113214,
+                  827.9893354849997
+                ],
+                "length": 77
+              },
+              "central_body": "Earth",
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "interpolation_algorithm": "HERMITE",
+              "interpolation_degree": 7,
+              "interval": "2026-01-01T00:00:00.000Z/2026-01-01T00:00:01.000Z",
+              "reference_frame": "INERTIAL"
+            }
+          ]
+        },
+        "unknown_fields": {}
+      }
+    },
+    {
+      "description": "Impulsive velocity-vector maneuver result.",
+      "id": "impulsive",
+      "return": {
+        "is_success": true,
+        "main_sequence_results": [
+          {
+            "description": "初始段参数",
+            "duration_s": 0.0,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "name": "Init",
+            "scalar_results": {},
+            "type_name": "InitialState",
+            "unknown_fields": {},
+            "user_comment": "初始段参数",
+            "wire_type": null
+          },
+          {
+            "description": "轨道机动段",
+            "duration_s": 0.0,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -9140.150020133791,
+                "vy_m_s": -4298.590774811798,
+                "vz_m_s": 847.3861986064452,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 61.77380361753448,
+                "eccentricity": 0.3235076661311762,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 13.925488344583743,
+                "period_s": 6152.533385359879,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7257081.474435336,
+                "true_anomaly_deg": 28.22619638246551,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10135.989759734248
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "maneuver_information": {
+              "delta_v_body": null,
+              "delta_v_inertial": [
+                -90.17520969134603,
+                -42.40918624334245,
+                8.360172205113372,
+                -154.81251016096263,
+                4.795623235913524,
+                99.99999999999942
+              ],
+              "delta_v_magnitude_m_s": 100.0,
+              "delta_v_vnc": [
+                99.99999999999943,
+                3.197442310920451e-13,
+                -3.304023721284466e-13,
+                1.831999496522996e-13,
+                -1.8474111129762605e-13,
+                99.99999999999943
+              ],
+              "duration_s": 0.0,
+              "estimated_fuel_used_kg": 33.419351970949805,
+              "fuel_used_kg": 0.0,
+              "maneuver_attitude_name": "AgVAAttitudeControlImpulsiveVelocityVector",
+              "quaternion": null,
+              "start": "2026-01-01T00:00:00.000Z",
+              "stop": "2026-01-01T00:00:00.000Z",
+              "unknown_fields": {},
+              "update_mass": false
+            },
+            "name": "Burn",
+            "scalar_results": {},
+            "type_name": "ManeuverImpulsive",
+            "unknown_fields": {},
+            "user_comment": "轨道机动段",
+            "wire_type": "ManeuverImpulsiveResult"
+          }
+        ],
+        "message": "Success",
+        "positions": {
+          "central_body": "Earth",
+          "positions": [
+            {
+              "cartesian": null,
+              "cartesian_velocity": [
+                0.0,
+                -1787681.754178897,
+                3096355.626001708,
+                3575363.5083577964,
+                -9049.974810442445,
+                -4256.1815885684555,
+                839.0260264013318
+              ],
+              "central_body": "Earth",
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "interpolation_algorithm": "HERMITE",
+              "interpolation_degree": 7,
+              "interval": "2026-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z",
+              "reference_frame": "INERTIAL"
+            },
+            {
+              "cartesian": null,
+              "cartesian_velocity": [
+                0.0,
+                -1787681.754178897,
+                3096355.626001708,
+                3575363.5083577964,
+                -9140.150020133791,
+                -4298.590774811798,
+                847.3861986064452
+              ],
+              "central_body": "Earth",
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "interpolation_algorithm": "HERMITE",
+              "interpolation_degree": 7,
+              "interval": "2026-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z",
+              "reference_frame": "INERTIAL"
+            }
+          ]
+        },
+        "unknown_fields": {}
+      }
+    },
+    {
+      "description": "One-second finite velocity-vector maneuver with a constant engine.",
+      "id": "finite",
+      "return": {
+        "is_success": true,
+        "main_sequence_results": [
+          {
+            "description": "初始段参数",
+            "duration_s": 0.0,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "name": "Init",
+            "scalar_results": {},
+            "type_name": "InitialState",
+            "unknown_fields": {},
+            "user_comment": "初始段参数",
+            "wire_type": null
+          },
+          {
+            "description": "轨道机动段",
+            "duration_s": 1.0,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -9044.922129429884,
+                "vy_m_s": -4265.8947881578,
+                "vz_m_s": 828.0308670112431,
+                "x_m": -1796729.2046542857,
+                "y_m": 3092094.5862100134,
+                "z_m": 3576197.0364143895
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:01.000Z",
+              "fuel_mass_kg": 499.9150236489187,
+              "geocentric_latitude_deg": 44.92829268192781,
+              "geocentric_longitude_deg": 19.954117546292462,
+              "geodetic_altitude_m": -1309918.9981224309,
+              "geodetic_latitude_deg": 45.17055482258428,
+              "geodetic_longitude_deg": 19.954117546292466,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 60.009353199476486,
+                "eccentricity": 0.3001172838251227,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.00000022854524,
+                "mean_anomaly_deg": 15.791760480790442,
+                "period_s": 5830.063667903138,
+                "raan_deg": 29.999672602141843,
+                "semi_major_axis_m": 7001238.59040383,
+                "true_anomaly_deg": 30.103779782550006,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 44.99988853571901,
+                "horizontal_fpa_deg": 6.814644949620273,
+                "radius_m": 5057516.189611849,
+                "right_ascension_deg": 120.15966659238471,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 90.11313276238708,
+                "velocity_magnitude_m_s": 10034.645473947034
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "maneuver_information": {
+              "delta_v_body": null,
+              "delta_v_inertial": [
+                5.052681012561152,
+                -9.713199589344185,
+                -10.995159390088702,
+                -62.517131228175394,
+                -45.12109097418241,
+                15.516744558398447
+              ],
+              "delta_v_magnitude_m_s": 0.5000212452906211,
+              "delta_v_vnc": [
+                -1.3561910533174624,
+                -0.04026357045532514,
+                -15.457311744361752,
+                -178.29946141014773,
+                -84.98363429415915,
+                15.516744558398448
+              ],
+              "duration_s": 1.0,
+              "estimated_fuel_used_kg": null,
+              "fuel_used_kg": 0.08497635108130908,
+              "maneuver_attitude_name": "AgVAAttitudeControlFiniteVelocityVector",
+              "quaternion": null,
+              "start": "2026-01-01T00:00:00.000Z",
+              "stop": "2026-01-01T00:00:01.000Z",
+              "unknown_fields": {},
+              "update_mass": null
+            },
+            "name": "Burn",
+            "scalar_results": {},
+            "type_name": "ManeuverFinite",
+            "unknown_fields": {},
+            "user_comment": "轨道机动段",
+            "wire_type": "ManeuverFiniteResult"
+          }
+        ],
+        "message": "Success",
+        "positions": {
+          "central_body": "Earth",
+          "positions": [
+            {
+              "cartesian": null,
+              "cartesian_velocity": {
+                "first": [
+                  0.0,
+                  -1787681.754178897,
+                  3096355.626001708,
+                  3575363.5083577964,
+                  -9049.974810442445,
+                  -4256.1815885684555,
+                  839.0260264013318,
+                  0.09999999999854481,
+                  -1788586.7264527106,
+                  3095929.9592319694
+                ],
+                "last": [
+                  -9045.428480103392,
+                  -4264.92433417208,
+                  829.1301719490514,
+                  1.0,
+                  -1796729.2046542857,
+                  3092094.5862100134,
+                  3576197.0364143895,
+                  -9044.922129429884,
+                  -4265.8947881578,
+                  828.0308670112431
+                ],
+                "length": 77
+              },
+              "central_body": "Earth",
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "interpolation_algorithm": "HERMITE",
+              "interpolation_degree": 7,
+              "interval": "2026-01-01T00:00:00.000Z/2026-01-01T00:00:01.000Z",
+              "reference_frame": "INERTIAL"
+            }
+          ]
+        },
+        "unknown_fields": {}
+      }
+    },
+    {
+      "description": "Custom gravity, atmosphere, SRP, and third-body model collection.",
+      "id": "all_force_models",
+      "return": {
+        "is_success": true,
+        "main_sequence_results": [
+          {
+            "description": "初始段参数",
+            "duration_s": 0.0,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "name": "Init",
+            "scalar_results": {},
+            "type_name": "InitialState",
+            "unknown_fields": {},
+            "user_comment": "初始段参数",
+            "wire_type": null
+          },
+          {
+            "description": "轨道递推段",
+            "duration_s": 1.0,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -9037.493488545706,
+                "vy_m_s": -4262.415998057808,
+                "vz_m_s": 827.3304905003278,
+                "x_m": -1796725.4889450138,
+                "y_m": 3092096.325462017,
+                "z_m": 3576196.6853561685
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:01.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92829292208303,
+              "geocentric_longitude_deg": 19.95405215691547,
+              "geodetic_altitude_m": -1309919.5029474155,
+              "geodetic_latitude_deg": 45.17055508691642,
+              "geodetic_longitude_deg": 19.954052156915473,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.85214309213169,
+                "eccentricity": 0.29820570270672125,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.000000223394466,
+                "mean_anomaly_deg": 15.952871482811455,
+                "period_s": 5804.784474442693,
+                "raan_deg": 29.99967937311414,
+                "semi_major_axis_m": 6980985.65963958,
+                "true_anomaly_deg": 30.260938806368852,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 44.999888631411835,
+                "horizontal_fpa_deg": 6.81442264115419,
+                "radius_m": 5057515.684692718,
+                "right_ascension_deg": 120.15960112060867,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 90.11308167913903,
+                "velocity_magnitude_m_s": 10026.412839920202
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "name": "Prop",
+            "scalar_results": {},
+            "stopped_on_maximum_duration": false,
+            "stopping_condition_name": "Duration",
+            "type_name": "Propagate",
+            "unknown_fields": {},
+            "user_comment": "轨道递推段",
+            "wire_type": "PropagateResult"
+          }
+        ],
+        "message": "Success",
+        "positions": {
+          "central_body": "Earth",
+          "positions": [
+            {
+              "cartesian": null,
+              "cartesian_velocity": {
+                "first": [
+                  0.0,
+                  -1787681.754178897,
+                  3096355.626001708,
+                  3575363.5083577964,
+                  -9049.974810442445,
+                  -4256.1815885684555,
+                  839.0260264013318,
+                  0.09999999999854481,
+                  -1788586.689270619,
+                  3095929.9766219016
+                ],
+                "last": [
+                  -9038.74195333792,
+                  -4261.793500096812,
+                  828.4993635201998,
+                  1.0,
+                  -1796725.4889450138,
+                  3092096.325462017,
+                  3576196.6853561685,
+                  -9037.493488545706,
+                  -4262.415998057808,
+                  827.3304905003278
+                ],
+                "length": 77
+              },
+              "central_body": "Earth",
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "interpolation_algorithm": "HERMITE",
+              "interpolation_degree": 7,
+              "interval": "2026-01-01T00:00:00.000Z/2026-01-01T00:00:01.000Z",
+              "reference_frame": "INERTIAL"
+            }
+          ]
+        },
+        "unknown_fields": {}
+      }
+    },
+    {
+      "description": "Nested Sequence result with recursive child results.",
+      "id": "sequence",
+      "return": {
+        "is_success": true,
+        "main_sequence_results": [
+          {
+            "description": "序列段",
+            "duration_s": 1.0,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -9044.471330024384,
+                "vy_m_s": -4265.682477113214,
+                "vz_m_s": 827.9893354849997,
+                "x_m": -1796728.9792417781,
+                "y_m": 3092094.692321372,
+                "z_m": 3576197.0156037407
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:01.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92829269624686,
+              "geocentric_longitude_deg": 19.954113574638296,
+              "geodetic_altitude_m": -1309919.0280370049,
+              "geodetic_latitude_deg": 45.170554838335974,
+              "geodetic_longitude_deg": 19.954113574638292,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99982400040014,
+                "eccentricity": 0.30000112620004193,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.00000022854905,
+                "mean_anomaly_deg": 15.801508436281463,
+                "period_s": 5828.522479924421,
+                "raan_deg": 29.99967259398457,
+                "semi_major_axis_m": 7000004.6758962255,
+                "true_anomaly_deg": 30.11330617546179,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 44.99988854126363,
+                "horizontal_fpa_deg": 6.814639938304272,
+                "radius_m": 5057516.1596916625,
+                "right_ascension_deg": 120.15966261572693,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 90.11312995623894,
+                "velocity_magnitude_m_s": 10034.14545314451
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "name": "Mission",
+            "scalar_results": {},
+            "segment_results": [
+              {
+                "description": "初始段参数",
+                "duration_s": 0.0,
+                "final_state": {
+                  "cartesian": {
+                    "vx_m_s": -9049.974810442445,
+                    "vy_m_s": -4256.1815885684555,
+                    "vz_m_s": 839.0260264013318,
+                    "x_m": -1787681.754178897,
+                    "y_m": 3096355.626001708,
+                    "z_m": 3575363.5083577964
+                  },
+                  "coefficient_of_drag": 2.2,
+                  "coefficient_of_srp": 1.0,
+                  "coord_system_name": "Earth Inertial",
+                  "drag_area_m2": 20.0,
+                  "dry_mass_kg": 500.0,
+                  "epoch": "2026-01-01T00:00:00.000Z",
+                  "fuel_mass_kg": 500.0,
+                  "geocentric_latitude_deg": 44.92875672648178,
+                  "geocentric_longitude_deg": 19.79882895073371,
+                  "geodetic_altitude_m": -1311107.4399778228,
+                  "geodetic_latitude_deg": 45.171075798828625,
+                  "geodetic_longitude_deg": 19.798828950733714,
+                  "keplerian": {
+                    "anomaly_type": "True",
+                    "argument_of_periapsis_deg": 59.99999999999997,
+                    "eccentricity": 0.29999999999999966,
+                    "element_type": "Osculating",
+                    "gravitational_parameter_m3_s2": 398600441500000.0,
+                    "inclination_deg": 45.0,
+                    "mean_anomaly_deg": 15.739564141988456,
+                    "period_s": 5828.516639879385,
+                    "raan_deg": 29.999999999999996,
+                    "semi_major_axis_m": 7000000.000000002,
+                    "true_anomaly_deg": 30.000000000000018,
+                    "unknown_fields": {}
+                  },
+                  "spherical": {
+                    "declination_deg": 45.00000000000001,
+                    "horizontal_fpa_deg": 6.790001605990564,
+                    "radius_m": 5056327.563933446,
+                    "right_ascension_deg": 119.99999999999999,
+                    "unknown_fields": {},
+                    "velocity_azimuth_deg": 89.99999999999999,
+                    "velocity_magnitude_m_s": 10035.989759734246
+                  },
+                  "srp_area_m2": 20.0,
+                  "unknown_fields": {}
+                },
+                "initial_state": {
+                  "cartesian": {
+                    "vx_m_s": -9049.974810442445,
+                    "vy_m_s": -4256.1815885684555,
+                    "vz_m_s": 839.0260264013318,
+                    "x_m": -1787681.754178897,
+                    "y_m": 3096355.626001708,
+                    "z_m": 3575363.5083577964
+                  },
+                  "coefficient_of_drag": 2.2,
+                  "coefficient_of_srp": 1.0,
+                  "coord_system_name": "Earth Inertial",
+                  "drag_area_m2": 20.0,
+                  "dry_mass_kg": 500.0,
+                  "epoch": "2026-01-01T00:00:00.000Z",
+                  "fuel_mass_kg": 500.0,
+                  "geocentric_latitude_deg": 44.92875672648178,
+                  "geocentric_longitude_deg": 19.79882895073371,
+                  "geodetic_altitude_m": -1311107.4399778228,
+                  "geodetic_latitude_deg": 45.171075798828625,
+                  "geodetic_longitude_deg": 19.798828950733714,
+                  "keplerian": {
+                    "anomaly_type": "True",
+                    "argument_of_periapsis_deg": 59.99999999999997,
+                    "eccentricity": 0.29999999999999966,
+                    "element_type": "Osculating",
+                    "gravitational_parameter_m3_s2": 398600441500000.0,
+                    "inclination_deg": 45.0,
+                    "mean_anomaly_deg": 15.739564141988456,
+                    "period_s": 5828.516639879385,
+                    "raan_deg": 29.999999999999996,
+                    "semi_major_axis_m": 7000000.000000002,
+                    "true_anomaly_deg": 30.000000000000018,
+                    "unknown_fields": {}
+                  },
+                  "spherical": {
+                    "declination_deg": 45.00000000000001,
+                    "horizontal_fpa_deg": 6.790001605990564,
+                    "radius_m": 5056327.563933446,
+                    "right_ascension_deg": 119.99999999999999,
+                    "unknown_fields": {},
+                    "velocity_azimuth_deg": 89.99999999999999,
+                    "velocity_magnitude_m_s": 10035.989759734246
+                  },
+                  "srp_area_m2": 20.0,
+                  "unknown_fields": {}
+                },
+                "name": "Init",
+                "scalar_results": {},
+                "type_name": "InitialState",
+                "unknown_fields": {},
+                "user_comment": "初始段参数",
+                "wire_type": null
+              },
+              {
+                "description": "轨道递推段",
+                "duration_s": 1.0,
+                "final_state": {
+                  "cartesian": {
+                    "vx_m_s": -9044.471330024384,
+                    "vy_m_s": -4265.682477113214,
+                    "vz_m_s": 827.9893354849997,
+                    "x_m": -1796728.9792417781,
+                    "y_m": 3092094.692321372,
+                    "z_m": 3576197.0156037407
+                  },
+                  "coefficient_of_drag": 2.2,
+                  "coefficient_of_srp": 1.0,
+                  "coord_system_name": "Earth Inertial",
+                  "drag_area_m2": 20.0,
+                  "dry_mass_kg": 500.0,
+                  "epoch": "2026-01-01T00:00:01.000Z",
+                  "fuel_mass_kg": 500.0,
+                  "geocentric_latitude_deg": 44.92829269624686,
+                  "geocentric_longitude_deg": 19.954113574638296,
+                  "geodetic_altitude_m": -1309919.0280370049,
+                  "geodetic_latitude_deg": 45.170554838335974,
+                  "geodetic_longitude_deg": 19.954113574638292,
+                  "keplerian": {
+                    "anomaly_type": "True",
+                    "argument_of_periapsis_deg": 59.99982400040014,
+                    "eccentricity": 0.30000112620004193,
+                    "element_type": "Osculating",
+                    "gravitational_parameter_m3_s2": 398600441500000.0,
+                    "inclination_deg": 45.00000022854905,
+                    "mean_anomaly_deg": 15.801508436281463,
+                    "period_s": 5828.522479924421,
+                    "raan_deg": 29.99967259398457,
+                    "semi_major_axis_m": 7000004.6758962255,
+                    "true_anomaly_deg": 30.11330617546179,
+                    "unknown_fields": {}
+                  },
+                  "spherical": {
+                    "declination_deg": 44.99988854126363,
+                    "horizontal_fpa_deg": 6.814639938304272,
+                    "radius_m": 5057516.1596916625,
+                    "right_ascension_deg": 120.15966261572693,
+                    "unknown_fields": {},
+                    "velocity_azimuth_deg": 90.11312995623894,
+                    "velocity_magnitude_m_s": 10034.14545314451
+                  },
+                  "srp_area_m2": 20.0,
+                  "unknown_fields": {}
+                },
+                "initial_state": {
+                  "cartesian": {
+                    "vx_m_s": -9049.974810442445,
+                    "vy_m_s": -4256.1815885684555,
+                    "vz_m_s": 839.0260264013318,
+                    "x_m": -1787681.754178897,
+                    "y_m": 3096355.626001708,
+                    "z_m": 3575363.5083577964
+                  },
+                  "coefficient_of_drag": 2.2,
+                  "coefficient_of_srp": 1.0,
+                  "coord_system_name": "Earth Inertial",
+                  "drag_area_m2": 20.0,
+                  "dry_mass_kg": 500.0,
+                  "epoch": "2026-01-01T00:00:00.000Z",
+                  "fuel_mass_kg": 500.0,
+                  "geocentric_latitude_deg": 44.92875672648178,
+                  "geocentric_longitude_deg": 19.79882895073371,
+                  "geodetic_altitude_m": -1311107.4399778228,
+                  "geodetic_latitude_deg": 45.171075798828625,
+                  "geodetic_longitude_deg": 19.798828950733714,
+                  "keplerian": {
+                    "anomaly_type": "True",
+                    "argument_of_periapsis_deg": 59.99999999999997,
+                    "eccentricity": 0.29999999999999966,
+                    "element_type": "Osculating",
+                    "gravitational_parameter_m3_s2": 398600441500000.0,
+                    "inclination_deg": 45.0,
+                    "mean_anomaly_deg": 15.739564141988456,
+                    "period_s": 5828.516639879385,
+                    "raan_deg": 29.999999999999996,
+                    "semi_major_axis_m": 7000000.000000002,
+                    "true_anomaly_deg": 30.000000000000018,
+                    "unknown_fields": {}
+                  },
+                  "spherical": {
+                    "declination_deg": 45.00000000000001,
+                    "horizontal_fpa_deg": 6.790001605990564,
+                    "radius_m": 5056327.563933446,
+                    "right_ascension_deg": 119.99999999999999,
+                    "unknown_fields": {},
+                    "velocity_azimuth_deg": 89.99999999999999,
+                    "velocity_magnitude_m_s": 10035.989759734246
+                  },
+                  "srp_area_m2": 20.0,
+                  "unknown_fields": {}
+                },
+                "name": "Prop",
+                "scalar_results": {},
+                "stopped_on_maximum_duration": false,
+                "stopping_condition_name": "Duration",
+                "type_name": "Propagate",
+                "unknown_fields": {},
+                "user_comment": "轨道递推段",
+                "wire_type": "PropagateResult"
+              }
+            ],
+            "type_name": "Sequence",
+            "unknown_fields": {},
+            "user_comment": "序列段",
+            "wire_type": "SequenceResult"
+          }
+        ],
+        "message": "Success",
+        "positions": {
+          "central_body": "Earth",
+          "positions": [
+            {
+              "cartesian": null,
+              "cartesian_velocity": {
+                "first": [
+                  0.0,
+                  -1787681.754178897,
+                  3096355.626001708,
+                  3575363.5083577964,
+                  -9049.974810442445,
+                  -4256.1815885684555,
+                  839.0260264013318,
+                  0.09999999999854481,
+                  -1788586.7241983558,
+                  3095929.9602922876
+                ],
+                "last": [
+                  -9045.022753710757,
+                  -4264.733278070551,
+                  829.0927693391591,
+                  1.0,
+                  -1796728.9792417781,
+                  3092094.692321372,
+                  3576197.0156037407,
+                  -9044.471330024384,
+                  -4265.682477113214,
+                  827.9893354849997
+                ],
+                "length": 77
+              },
+              "central_body": "Earth",
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "interpolation_algorithm": "HERMITE",
+              "interpolation_degree": 7,
+              "interval": "2026-01-01T00:00:00.000Z/2026-01-01T00:00:01.000Z",
+              "reference_frame": "INERTIAL"
+            }
+          ]
+        },
+        "unknown_fields": {}
+      }
+    },
+    {
+      "description": "Duration, epoch, orbital, cartographic, point, and spherical scalar results.",
+      "id": "scalar_results",
+      "return": {
+        "is_success": true,
+        "main_sequence_results": [
+          {
+            "description": "初始段参数",
+            "duration_s": 0.0,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "name": "Init",
+            "scalar_results": {},
+            "type_name": "InitialState",
+            "unknown_fields": {},
+            "user_comment": "初始段参数",
+            "wire_type": null
+          },
+          {
+            "description": "轨道递推段",
+            "duration_s": 1.0,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -9044.471330024384,
+                "vy_m_s": -4265.682477113214,
+                "vz_m_s": 827.9893354849997,
+                "x_m": -1796728.9792417781,
+                "y_m": 3092094.692321372,
+                "z_m": 3576197.0156037407
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:01.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92829269624686,
+              "geocentric_longitude_deg": 19.954113574638296,
+              "geodetic_altitude_m": -1309919.0280370049,
+              "geodetic_latitude_deg": 45.170554838335974,
+              "geodetic_longitude_deg": 19.954113574638292,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99982400040014,
+                "eccentricity": 0.30000112620004193,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.00000022854905,
+                "mean_anomaly_deg": 15.801508436281463,
+                "period_s": 5828.522479924421,
+                "raan_deg": 29.99967259398457,
+                "semi_major_axis_m": 7000004.6758962255,
+                "true_anomaly_deg": 30.11330617546179,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 44.99988854126363,
+                "horizontal_fpa_deg": 6.814639938304272,
+                "radius_m": 5057516.1596916625,
+                "right_ascension_deg": 120.15966261572693,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 90.11312995623894,
+                "velocity_magnitude_m_s": 10034.14545314451
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "name": "Prop",
+            "scalar_results": {
+              "Elapsed": 1,
+              "EpochValue": "2026-01-01T00:00:01.000Z",
+              "FinalTA": 30.11330617546179,
+              "Latitude": 45.170554838335974,
+              "ModifiedTA": 30.11330617546179,
+              "PointX": -1796728.9792417781,
+              "SphericalRA": 120.15966261572693
+            },
+            "stopped_on_maximum_duration": false,
+            "stopping_condition_name": "Duration",
+            "type_name": "Propagate",
+            "unknown_fields": {},
+            "user_comment": "轨道递推段",
+            "wire_type": "PropagateResult"
+          }
+        ],
+        "message": "Success",
+        "positions": {
+          "central_body": "Earth",
+          "positions": [
+            {
+              "cartesian": null,
+              "cartesian_velocity": {
+                "first": [
+                  0.0,
+                  -1787681.754178897,
+                  3096355.626001708,
+                  3575363.5083577964,
+                  -9049.974810442445,
+                  -4256.1815885684555,
+                  839.0260264013318,
+                  0.09999999999854481,
+                  -1788586.7241983558,
+                  3095929.9602922876
+                ],
+                "last": [
+                  -9045.022753710757,
+                  -4264.733278070551,
+                  829.0927693391591,
+                  1.0,
+                  -1796728.9792417781,
+                  3092094.692321372,
+                  3576197.0156037407,
+                  -9044.471330024384,
+                  -4265.682477113214,
+                  827.9893354849997
+                ],
+                "length": 77
+              },
+              "central_body": "Earth",
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "interpolation_algorithm": "HERMITE",
+              "interpolation_degree": 7,
+              "interval": "2026-01-01T00:00:00.000Z/2026-01-01T00:00:01.000Z",
+              "reference_frame": "INERTIAL"
+            }
+          ]
+        },
+        "unknown_fields": {}
+      }
+    },
+    {
+      "description": "Active differential-corrector TargetSequence result and operator trace.",
+      "id": "target_sequence",
+      "return": {
+        "is_success": true,
+        "main_sequence_results": [
+          {
+            "description": "初始段参数",
+            "duration_s": 0.0,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "name": "Init",
+            "scalar_results": {},
+            "type_name": "InitialState",
+            "unknown_fields": {},
+            "user_comment": "初始段参数",
+            "wire_type": null
+          },
+          {
+            "description": "目标轨道段",
+            "duration_s": 53.19050290506857,
+            "final_state": {
+              "cartesian": {
+                "vx_m_s": -8725.680260035064,
+                "vy_m_s": -4733.530756240982,
+                "vz_m_s": 260.5411026753595,
+                "x_m": -2260707.698129368,
+                "y_m": 2857016.66091425,
+                "z_m": 3604523.795848744
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:53.190503Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.604899730617575,
+              "geocentric_longitude_deg": 27.917625207410968,
+              "geodetic_altitude_m": -1242526.211208982,
+              "geodetic_latitude_deg": 44.84396655033281,
+              "geodetic_longitude_deg": 27.917625207410964,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99405488247721,
+                "eccentricity": 0.30008538532211837,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.000622173195566,
+                "mean_anomaly_deg": 19.031011062491437,
+                "period_s": 5829.152074696399,
+                "raan_deg": 29.982985855285676,
+                "semi_major_axis_m": 7000508.7587089045,
+                "true_anomaly_deg": 35.94615432869002,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 44.69378219787345,
+                "horizontal_fpa_deg": 8.066607716422958,
+                "radius_m": 5125030.272297212,
+                "right_ascension_deg": 128.35395708380506,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 95.90866653631262,
+                "velocity_magnitude_m_s": 9930.341942089819
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "initial_state": {
+              "cartesian": {
+                "vx_m_s": -9049.974810442445,
+                "vy_m_s": -4256.1815885684555,
+                "vz_m_s": 839.0260264013318,
+                "x_m": -1787681.754178897,
+                "y_m": 3096355.626001708,
+                "z_m": 3575363.5083577964
+              },
+              "coefficient_of_drag": 2.2,
+              "coefficient_of_srp": 1.0,
+              "coord_system_name": "Earth Inertial",
+              "drag_area_m2": 20.0,
+              "dry_mass_kg": 500.0,
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "fuel_mass_kg": 500.0,
+              "geocentric_latitude_deg": 44.92875672648178,
+              "geocentric_longitude_deg": 19.79882895073371,
+              "geodetic_altitude_m": -1311107.4399778228,
+              "geodetic_latitude_deg": 45.171075798828625,
+              "geodetic_longitude_deg": 19.798828950733714,
+              "keplerian": {
+                "anomaly_type": "True",
+                "argument_of_periapsis_deg": 59.99999999999997,
+                "eccentricity": 0.29999999999999966,
+                "element_type": "Osculating",
+                "gravitational_parameter_m3_s2": 398600441500000.0,
+                "inclination_deg": 45.0,
+                "mean_anomaly_deg": 15.739564141988456,
+                "period_s": 5828.516639879385,
+                "raan_deg": 29.999999999999996,
+                "semi_major_axis_m": 7000000.000000002,
+                "true_anomaly_deg": 30.000000000000018,
+                "unknown_fields": {}
+              },
+              "spherical": {
+                "declination_deg": 45.00000000000001,
+                "horizontal_fpa_deg": 6.790001605990564,
+                "radius_m": 5056327.563933446,
+                "right_ascension_deg": 119.99999999999999,
+                "unknown_fields": {},
+                "velocity_azimuth_deg": 89.99999999999999,
+                "velocity_magnitude_m_s": 10035.989759734246
+              },
+              "srp_area_m2": 20.0,
+              "unknown_fields": {}
+            },
+            "name": "Target",
+            "operator_results": [
+              {
+                "control_parameters": [
+                  {
+                    "correction": 43.19050290507166,
+                    "dimension": "",
+                    "enable": true,
+                    "final_value": "53.19050290507166",
+                    "initial_value": "10.0",
+                    "last_update": 0.0,
+                    "max_step": 600.0,
+                    "name": "StopConditions.Duration",
+                    "parent_name": "Coast",
+                    "perturbation": 1.0,
+                    "scaling_method": "NoScaling",
+                    "scaling_value": 1.0,
+                    "tolerance": 0.0001,
+                    "unit": "",
+                    "unknown_fields": {},
+                    "values": [
+                      53.19050290507166
+                    ]
+                  }
+                ],
+                "converged": true,
+                "description": "描述",
+                "name": "DC1",
+                "results": [
+                  {
+                    "current_value": "35.94615432869002",
+                    "desired_value": "36.0",
+                    "difference": -0.05384567130997908,
+                    "enable": true,
+                    "name": "FinalTA",
+                    "parent_name": "Coast",
+                    "scaling_method": "NoScaling",
+                    "scaling_value": 1.0,
+                    "tolerance": 0.1,
+                    "unit": "",
+                    "unknown_fields": {},
+                    "values": [
+                      35.94615432869002
+                    ],
+                    "weight": 1.0
+                  }
+                ],
+                "total_iterations": 1,
+                "type_name": "DifferentialCorrector",
+                "unknown_fields": {},
+                "user_comment": "用户注释",
+                "wire_type": "DifferentialCorrectorResults"
+              }
+            ],
+            "scalar_results": {},
+            "segment_results": [
+              {
+                "description": "轨道递推段",
+                "duration_s": 53.19050290506857,
+                "final_state": {
+                  "cartesian": {
+                    "vx_m_s": -8725.680260035064,
+                    "vy_m_s": -4733.530756240982,
+                    "vz_m_s": 260.5411026753595,
+                    "x_m": -2260707.698129368,
+                    "y_m": 2857016.66091425,
+                    "z_m": 3604523.795848744
+                  },
+                  "coefficient_of_drag": 2.2,
+                  "coefficient_of_srp": 1.0,
+                  "coord_system_name": "Earth Inertial",
+                  "drag_area_m2": 20.0,
+                  "dry_mass_kg": 500.0,
+                  "epoch": "2026-01-01T00:00:53.190503Z",
+                  "fuel_mass_kg": 500.0,
+                  "geocentric_latitude_deg": 44.604899730617575,
+                  "geocentric_longitude_deg": 27.917625207410968,
+                  "geodetic_altitude_m": -1242526.211208982,
+                  "geodetic_latitude_deg": 44.84396655033281,
+                  "geodetic_longitude_deg": 27.917625207410964,
+                  "keplerian": {
+                    "anomaly_type": "True",
+                    "argument_of_periapsis_deg": 59.99405488247721,
+                    "eccentricity": 0.30008538532211837,
+                    "element_type": "Osculating",
+                    "gravitational_parameter_m3_s2": 398600441500000.0,
+                    "inclination_deg": 45.000622173195566,
+                    "mean_anomaly_deg": 19.031011062491437,
+                    "period_s": 5829.152074696399,
+                    "raan_deg": 29.982985855285676,
+                    "semi_major_axis_m": 7000508.7587089045,
+                    "true_anomaly_deg": 35.94615432869002,
+                    "unknown_fields": {}
+                  },
+                  "spherical": {
+                    "declination_deg": 44.69378219787345,
+                    "horizontal_fpa_deg": 8.066607716422958,
+                    "radius_m": 5125030.272297212,
+                    "right_ascension_deg": 128.35395708380506,
+                    "unknown_fields": {},
+                    "velocity_azimuth_deg": 95.90866653631262,
+                    "velocity_magnitude_m_s": 9930.341942089819
+                  },
+                  "srp_area_m2": 20.0,
+                  "unknown_fields": {}
+                },
+                "initial_state": {
+                  "cartesian": {
+                    "vx_m_s": -9049.974810442445,
+                    "vy_m_s": -4256.1815885684555,
+                    "vz_m_s": 839.0260264013318,
+                    "x_m": -1787681.754178897,
+                    "y_m": 3096355.626001708,
+                    "z_m": 3575363.5083577964
+                  },
+                  "coefficient_of_drag": 2.2,
+                  "coefficient_of_srp": 1.0,
+                  "coord_system_name": "Earth Inertial",
+                  "drag_area_m2": 20.0,
+                  "dry_mass_kg": 500.0,
+                  "epoch": "2026-01-01T00:00:00.000Z",
+                  "fuel_mass_kg": 500.0,
+                  "geocentric_latitude_deg": 44.92875672648178,
+                  "geocentric_longitude_deg": 19.79882895073371,
+                  "geodetic_altitude_m": -1311107.4399778228,
+                  "geodetic_latitude_deg": 45.171075798828625,
+                  "geodetic_longitude_deg": 19.798828950733714,
+                  "keplerian": {
+                    "anomaly_type": "True",
+                    "argument_of_periapsis_deg": 59.99999999999997,
+                    "eccentricity": 0.29999999999999966,
+                    "element_type": "Osculating",
+                    "gravitational_parameter_m3_s2": 398600441500000.0,
+                    "inclination_deg": 45.0,
+                    "mean_anomaly_deg": 15.739564141988456,
+                    "period_s": 5828.516639879385,
+                    "raan_deg": 29.999999999999996,
+                    "semi_major_axis_m": 7000000.000000002,
+                    "true_anomaly_deg": 30.000000000000018,
+                    "unknown_fields": {}
+                  },
+                  "spherical": {
+                    "declination_deg": 45.00000000000001,
+                    "horizontal_fpa_deg": 6.790001605990564,
+                    "radius_m": 5056327.563933446,
+                    "right_ascension_deg": 119.99999999999999,
+                    "unknown_fields": {},
+                    "velocity_azimuth_deg": 89.99999999999999,
+                    "velocity_magnitude_m_s": 10035.989759734246
+                  },
+                  "srp_area_m2": 20.0,
+                  "unknown_fields": {}
+                },
+                "name": "Coast",
+                "scalar_results": {
+                  "FinalTA": 35.94615432869002
+                },
+                "stopped_on_maximum_duration": false,
+                "stopping_condition_name": "Duration",
+                "type_name": "Propagate",
+                "unknown_fields": {},
+                "user_comment": "轨道递推段",
+                "wire_type": "PropagateResult"
+              }
+            ],
+            "type_name": "TargetSequence",
+            "unknown_fields": {},
+            "user_comment": "目标轨道段",
+            "wire_type": "TargetSequenceResult"
+          }
+        ],
+        "message": "Success",
+        "positions": {
+          "central_body": "Earth",
+          "positions": [
+            {
+              "cartesian": null,
+              "cartesian_velocity": {
+                "first": [
+                  0.0,
+                  -1787681.754178897,
+                  3096355.626001708,
+                  3575363.5083577964,
+                  -9049.974810442445,
+                  -4256.1815885684555,
+                  839.0260264013318,
+                  0.09999999999854481,
+                  -1788586.7241983558,
+                  3095929.9602922876
+                ],
+                "last": [
+                  -8726.283842059918,
+                  -4732.767859114642,
+                  261.5084160318535,
+                  53.19050290506857,
+                  -2260707.698129368,
+                  2857016.66091425,
+                  3604523.795848744,
+                  -8725.680260035064,
+                  -4733.530756240982,
+                  260.5411026753595
+                ],
+                "length": 3731
+              },
+              "central_body": "Earth",
+              "epoch": "2026-01-01T00:00:00.000Z",
+              "interpolation_algorithm": "HERMITE",
+              "interpolation_degree": 7,
+              "interval": "2026-01-01T00:00:00.000Z/2026-01-01T00:00:53.190503Z",
+              "reference_frame": "INERTIAL"
+            }
+          ]
+        },
+        "unknown_fields": {}
+      }
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-08-08T08:21:25Z"
+  }
+}

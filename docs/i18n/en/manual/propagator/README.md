@@ -375,10 +375,11 @@ propagator.hpop_two_body_gravity(
     name: str | None = None,
     description: str | None = None,
     user_comment: str | None = None,
+    gravitational_parameter_m3_s2: float | None = None,
 ) -> HpopGravity
 ```
 
-Uses the two-body gravity model. The gravitational parameter for this branch is managed internally by ASTROX; to override it, use the top-level `gravitational_parameter_m3_s2` in `hpop`.
+Uses the two-body gravity model. When `gravitational_parameter_m3_s2` is supplied, it is written into the `Mu` field of the gravity model in the request, overriding the central body's default gravitational constant; when omitted, the field is not sent to ASTROX and the server uses the central body default. The verified RunMCS two-body propagation path needs this parameter supplied explicitly; an omission cannot be claimed to carry the same two-body physical semantics.
 
 #### `propagator.hpop_gravity_field`
 
@@ -631,4 +632,4 @@ Complete runnable examples are available at `examples/01_propagation/ballistic_d
 
 ## Error Handling
 
-All propagation functions raise `astrox.exceptions.AstroxAPIError` when ASTROX returns an unsuccessful response or when the network request fails. The SDK does not hide or rewrite server error messages. For the full raw response, use `astrox.raw.post` directly.
+When ASTROX returns an unsuccessful response or a network request fails, all propagation functions raise an exception from `astrox.exceptions`: an `IsSuccess=false` response raises `AstroxAPIError`, an HTTP 4xx/5xx response raises `AstroxHTTPError`, a request timeout raises `AstroxTimeoutError`, and a connection failure raises `AstroxConnectionError`. They are all sibling subclasses of `AstroxError`. The SDK does not hide or rewrite server error messages. For the full raw response, use `astrox.raw.post` directly.

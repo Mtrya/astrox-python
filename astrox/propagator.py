@@ -136,6 +136,7 @@ class HpopTwoBodyGravity:
     name: str | None = None
     description: str | None = None
     user_comment: str | None = None
+    gravitational_parameter_m3_s2: float | None = None
 
     def to_wire(self) -> dict[str, Any]:
         """Lower to the ASTROX two-body gravity fragment."""
@@ -143,6 +144,7 @@ class HpopTwoBodyGravity:
         _include_if_supplied(payload, "Name", self.name)
         _include_if_supplied(payload, "Description", self.description)
         _include_if_supplied(payload, "UserComment", self.user_comment)
+        _include_if_supplied(payload, "Mu", self.gravitational_parameter_m3_s2)
         return payload
 
 
@@ -406,17 +408,14 @@ def hpop_two_body_gravity(
     name: str | None = None,
     description: str | None = None,
     user_comment: str | None = None,
+    gravitational_parameter_m3_s2: float | None = None,
 ) -> HpopGravity:
-    """Create an HPOP two-body gravity fragment.
-
-    ASTROX owns the two-body gravity constants for this branch; use
-    ``hpop(...)`` top-level scalar arguments for spacecraft and central-body
-    propagation knobs exposed by the curated SDK.
-    """
+    """Create an HPOP two-body gravity fragment."""
     return HpopTwoBodyGravity(
         name=name,
         description=description,
         user_comment=user_comment,
+        gravitational_parameter_m3_s2=gravitational_parameter_m3_s2,
     )
 
 
