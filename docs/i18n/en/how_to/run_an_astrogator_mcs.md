@@ -75,7 +75,7 @@ print(f"Final position X: {coast.final_state.cartesian.x_m:.3f} m")
 ## Running the example
 
 ```bash
-python run_an_astrogator_mcs.py
+python examples/07_astrogator/run_mcs.py
 ```
 
 The actual output is as follows (values come from the ASTROX server and may differ slightly from your run):

@@ -134,7 +134,7 @@ def compare_sequence_and_czml() -> None:
     if position.interval != "2026-01-01T00:00:00.000Z/2026-01-01T00:00:01.000Z":
         raise CrossValidationError(f"unexpected CZML interval {position.interval!r}")
     samples = position.cartesian_velocity
-    if samples is None or len(samples) % 7 != 0:
+    if samples is None or len(samples) == 0 or len(samples) % 7 != 0:
         raise CrossValidationError("CZML cartesianVelocity is missing or not seven-value sampled data")
 
     elements = np.array([7_000_000.0, 0.3, 45.0, 30.0, 60.0, true_to_mean_deg(30.0, 0.3)])

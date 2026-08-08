@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from copy import deepcopy
-
 import pytest
 
 from astrox import astrogator
@@ -209,6 +207,41 @@ def test_parser_builds_czml_positions_only_when_positions_are_present() -> None:
     assert result.positions.positions[0].cartesian_velocity == (0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
 
 
+def test_parser_treats_null_positions_as_absent() -> None:
+    response = _response(_base_result())
+    response["Positions"] = None
+
+    result = run_mcs_result_from_wire(response)
+
+    assert result.positions is None
+
+
+def test_parser_accepts_position_only_czml_samples() -> None:
+    response = _response(_base_result())
+    response["Positions"] = {
+        "CentralBody": "Earth",
+        "CzmlPositions": [
+            {
+                "CentralBody": "Earth",
+                "interpolationAlgorithm": "LAGRANGE",
+                "interpolationDegree": 7,
+                "referenceFrame": "INERTIAL",
+                "epoch": "2026-01-01T00:00:00.000Z",
+                "interval": None,
+                "cartesian": [0.0, 1.0, 2.0, 3.0],
+            }
+        ],
+    }
+
+    result = run_mcs_result_from_wire(response)
+
+    assert result.positions is not None
+    position = result.positions.positions[0]
+    assert position.interval is None
+    assert position.cartesian == (0.0, 1.0, 2.0, 3.0)
+    assert position.cartesian_velocity is None
+
+
 def test_parser_fails_loudly_when_required_state_field_is_missing() -> None:
     response = _response(_base_result())
     del response["MainSequenceResults"][0]["FinalState"]["Keplerian"]["Period"]  # type: ignore[index]
@@ -218,7 +251,10 @@ def test_parser_fails_loudly_when_required_state_field_is_missing() -> None:
 
 def test_parser_fails_loudly_when_required_result_field_is_missing() -> None:
     response = _response(_base_result("Propagate", wire_type="PropagateResult"))
-    response["MainSequenceResults"][0]["StoppedOnMaximumDuration"] = False  # type: ignore[index]
+    response["MainSequenceResults"][0].update(  # type: ignore[union-attr]
+        {"StoppedOnMaximumDuration": False, "StoppingConditionName": "Duration"}
+    )
+    del response["MainSequenceResults"][0]["StoppingConditionName"]  # type: ignore[index]
     with pytest.raises(KeyError):
         run_mcs_result_from_wire(response)
 

@@ -56,7 +56,7 @@ Cross-validation script: [`tests/validation/cross_validation/astrogator/test_run
 
 ## Stopping conditions
 
-Status of the four stopping conditions:
+Status of the stopping conditions:
 
 - `Duration`: `verified` (stops at the requested duration and returns the exact boundary epoch; the `DurationSec` field is Brahe cross-validated in the two-body suite above).
 - `Epoch`: `verified` (a target 600 s after the start returned `DurationSec == 600` and the exact target epoch, checked with independent UTC epoch arithmetic; the `StoppingConditionName` echo is also checked).
@@ -212,7 +212,7 @@ The following branches are structurally reachable and the request/response shape
 - **Scalar stopping condition**: a duration-scalar-threshold stop fails deterministically with `The method or operation is not implemented.`; the server specifically reports failure creating `AgVAScalarStoppingCondition`. This branch is upstream-blocked; the SDK provides no constructor.
 - **Constant-acceleration engine**: two targeted requests failed with `The provided value cannot be null. Property name: ScalarDerivative`. This branch is upstream-blocked; the SDK provides no constructor.
 - **`Cartographic(Latitude)` scalar semantics**: `unresolved`; the naive geocentric-latitude oracle `asin(z/|r|)` leaves a stable residual of approximately `0.170666` deg against the server value, so the server applies a fixed-frame/geodetic-style convention that is not yet independently calibrated.
-- **`DeltaSpherical`, `Relative`, and `BPlane` scalar semantics**: the constructors can generate requests, but the result semantics have no independent evidence and should not be relied on in a mission. The server currently returns an empty result dict for `DeltaSpherical` and `Relative`, and the `BPlane` sign convention cannot be pinned by the exercised geometry. These four scalar branches are represented by strict calibration xfails in `test_scalar_invariants.py`; a snapshot or a successful request must not be read as semantic proof for them.
+- **`DeltaSpherical`, `Relative`, and `BPlane` scalar semantics**: the constructors can generate requests, but the result semantics have no independent evidence and should not be relied on in a mission. The server currently returns an empty result dict for `DeltaSpherical` and `Relative`, and the `BPlane` sign convention cannot be pinned by the exercised geometry. These three scalar branches, together with `Cartographic(Latitude)` above, are represented by strict calibration xfails in `test_scalar_invariants.py`; a snapshot or a successful request must not be read as semantic proof for them.
 
 ## Coverage summary
 

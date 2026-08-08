@@ -52,11 +52,11 @@ astrogator.run_mcs(
 | `main_sequence` | `Sequence[MCSSegment]` | — | Main-sequence segment list, executed in order |
 | `central_body` | `str` | `"Earth"` | Central body. All verified paths use `Earth`; behavior for other bodies is partially verified |
 | `out_czml_frame_name` | `str` | `"INERTIAL"` | CZML output reference-frame name. The `INERTIAL` frame is verified; conventions for frames such as `FIXED`, `J2000`, and `MEANECLPJ2000` are partially verified |
-| `compute_czml_positions` | `bool | None` | `None` | Whether to compute CZML-style position samples (see the CZML positions section below). When omitted, the SDK does not send this field to ASTROX and the server retains its default |
-| `entities` | `Sequence[EntityPath] | None` | Entity definitions. Currently relevant only to the unverified Follow segment; see Limitations |
-| `propagators` | `Sequence[HpopConfig] | None` | Registered custom propagators; segments reference them through `propagator_name` |
-| `engine_models` | `Sequence[EngineConstant] | None` | Registered engines; maneuver segments reference them through `propulsion_method_value` |
-| `text` | `str | None` | Mission remark text. Partially verified: the server accepts this input, but its semantics beyond input annotation are not verified |
+| `compute_czml_positions` | `bool \| None` | `None` | Whether to compute CZML-style position samples (see the CZML positions section below). When omitted, the SDK does not send this field to ASTROX and the server retains its default |
+| `entities` | `Sequence[EntityPath] \| None` | `None` | Entity definitions. Currently relevant only to the unverified Follow segment; see Limitations |
+| `propagators` | `Sequence[HpopConfig] \| None` | `None` | Registered custom propagators; segments reference them through `propagator_name` |
+| `engine_models` | `Sequence[EngineConstant] \| None` | `None` | Registered engines; maneuver segments reference them through `propulsion_method_value` |
+| `text` | `str \| None` | `None` | Mission remark text. Partially verified: the server accepts this input, but its semantics beyond input annotation are not verified |
 
 Every item in `main_sequence` must be an SDK value object returned by a segment constructor; raw dictionaries are not accepted. Once the request is constructed, it is sent via `raw.post("/Astrogator/RunMCS", ...)`.
 
@@ -235,7 +235,7 @@ astrogator.propagate(
     propagator_name: str,
     stop_conditions: Sequence[StoppingCondition],
     variable_names: str | None = None,
-    max_propagation_time_s: float | None = None,
+    max_propagation_time_s: int | None = None,
     description: str | None = None,
     user_comment: str | None = None,
     results: Sequence[CalcScalar] | None = None,
@@ -247,7 +247,7 @@ astrogator.propagate(
 | `propagator_name` | — | Must match a propagator name registered in `run_mcs(propagators=...)` |
 | `stop_conditions` | — | Stopping-condition list; propagation stops when any one triggers (event order is verified) |
 | `variable_names` | — | Variable-path declaration. Partially verified: only the differential-correction usage has verified behavior, see the Differential correction section |
-| `max_propagation_time_s` | s | Maximum propagation duration. Partially verified: when exceeded, propagation terminates and sets `stopped_on_maximum_duration`; the triggering semantics of this flag are partially verified |
+| `max_propagation_time_s` | s | Maximum propagation duration, in integer seconds. Partially verified: when exceeded, propagation terminates and sets `stopped_on_maximum_duration`; the triggering semantics of this flag are partially verified |
 
 The propagation result returns a `PropagateResult`, where `stopping_condition_name` is the name of the stopping condition that actually triggered and `duration_s` is the propagation duration. When multiple stopping conditions are enabled at once, the server returns the name of the one that triggers first.
 
@@ -559,7 +559,7 @@ Scalar results appear in the segment result's `scalar_results` dictionary by nam
 | `is_success` | `bool` | Whether the call succeeded. When the server returns a failure, the transport layer raises `AstroxAPIError`, so this field is `True` whenever a parsed result is available |
 | `message` | `str` | Message text returned by the server. Partially verified: it is only an echo of the returned value |
 | `main_sequence_results` | `tuple[SegmentResultValue, ...]` | Segment results in execution order for the segments that actually execute and produce output. With an enabled Stop, the Stop segment itself and the segments after it produce no results (see the `stop` section) |
-| `positions` | `components.CzmlPositions | None` | CZML position samples; parsed as `CzmlPositions` when the response contains the field, otherwise `None`. When `compute_czml_positions` is not explicitly passed, whether samples are returned is decided by the server default (the baseline OpenAPI declares a default of `true`) |
+| `positions` | `components.CzmlPositions \| None` | CZML position samples; parsed as `CzmlPositions` when the response contains the field, otherwise `None`. When `compute_czml_positions` is not explicitly passed, whether samples are returned is decided by the server default (the baseline OpenAPI declares a default of `true`) |
 | `unknown_fields` | `Mapping` | Response fields not consumed by the parser, preserved as-is |
 
 ### Segment results
@@ -569,10 +569,10 @@ Every segment result shares the following fields:
 | Field | Type | Description |
 | --- | --- | --- |
 | `type_name` | `str` | Segment type name, such as `InitialState`, `Propagate` |
-| `wire_type` | `str | None` | The `$type` discriminator value in the response (some segment results do not have this field) |
+| `wire_type` | `str \| None` | The `$type` discriminator value in the response (some segment results do not have this field) |
 | `name` | `str` | Segment name from the request, echoed as-is |
-| `description` | `str | None` | Description echo. Partially verified |
-| `user_comment` | `str | None` | Comment echo. Partially verified |
+| `description` | `str \| None` | Description echo. Partially verified |
+| `user_comment` | `str \| None` | Comment echo. Partially verified |
 | `initial_state` | `SegmentState` | Segment initial state |
 | `final_state` | `SegmentState` | Segment final state |
 | `duration_s` | `float` | Segment duration, in seconds |
@@ -627,14 +627,14 @@ The `maneuver_information` field of impulsive and finite maneuver results:
 | `start` / `stop` | `str` | Maneuver boundary epochs |
 | `duration_s` | `float` | Maneuver duration. 0 for impulsive maneuvers |
 | `fuel_used_kg` | `float` | Actual fuel consumption. 0 for impulsive maneuvers with `update_mass=False` |
-| `estimated_fuel_used_kg` | `float | None` | Estimated fuel consumption, consistent with the rocket equation |
-| `delta_v_magnitude_m_s` | `float` | Scalar velocity-increment magnitude. For finite maneuvers it equals the rocket-equation exhaust velocity |
+| `estimated_fuel_used_kg` | `float \| None` | Estimated fuel consumption, consistent with the rocket equation |
+| `delta_v_magnitude_m_s` | `float` | Scalar velocity-increment magnitude. For finite maneuvers it is the delta-v predicted by the Tsiolkovsky equation |
 | `delta_v_inertial` | `tuple[float, ...]` | Inertial-frame velocity increment, a six-value array |
 | `delta_v_vnc` | `tuple[float, ...]` | VNC-frame velocity increment, a six-value array |
 | `maneuver_attitude_name` | `str` | Attitude implementation name |
-| `update_mass` | `bool | None` | Whether mass is updated (finite maneuvers do not return this field) |
-| `delta_v_body` | `tuple[float, ...] | None` | Body-frame velocity increment. The server currently does not return this field |
-| `quaternion` | `tuple[float, ...] | None` | Attitude quaternion. The server currently does not return this field |
+| `update_mass` | `bool \| None` | Whether mass is updated (finite maneuvers do not return this field) |
+| `delta_v_body` | `tuple[float, ...] \| None` | Body-frame velocity increment. The server currently does not return this field |
+| `quaternion` | `tuple[float, ...] \| None` | Attitude quaternion. The server currently does not return this field |
 | `unknown_fields` | `Mapping` | Unconsumed fields |
 
 The six-value array convention is verified: the first three values are the boundary velocity difference (in the inertial or VNC frame, including gravity acting during the maneuver), and the last three values are the azimuth, elevation, and magnitude of the first three values. `delta_v_magnitude_m_s` contains only the thrust contribution; do not confuse it with the norm of the first three array values.

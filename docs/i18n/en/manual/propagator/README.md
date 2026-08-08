@@ -379,7 +379,7 @@ propagator.hpop_two_body_gravity(
 ) -> HpopGravity
 ```
 
-Uses the two-body gravity model. When `gravitational_parameter_m3_s2` is supplied, it is written into the `Mu` field of the gravity model in the request, overriding the central body's default gravitational constant; when omitted, the field is not sent to ASTROX and the server uses the central body default. The verified RunMCS two-body propagation path needs this parameter supplied explicitly; an omission cannot be claimed to carry the same two-body physical semantics.
+Uses the two-body gravity model. When `gravitational_parameter_m3_s2` is supplied, it is written into the `Mu` field of the gravity model in the request, overriding the central body's default gravitational parameter (units m³/s²); when omitted, the field is not sent to ASTROX and the server uses the central body default. Explicit `Mu` is the value used by the validated RunMCS two-body propagation scenario; in that scenario an omission cannot be claimed to carry the same two-body physical semantics.
 
 #### `propagator.hpop_gravity_field`
 

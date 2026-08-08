@@ -52,11 +52,11 @@ astrogator.run_mcs(
 | `main_sequence` | `Sequence[MCSSegment]` | — | 主序列段列表，按顺序执行 |
 | `central_body` | `str` | `"Earth"` | 中心天体。已验证路径均使用 `Earth`，其他天体的行为部分验证 |
 | `out_czml_frame_name` | `str` | `"INERTIAL"` | CZML 输出参考系名称。`INERTIAL` 帧已验证；`FIXED`、`J2000`、`MEANECLPJ2000` 等帧的约定部分验证 |
-| `compute_czml_positions` | `bool | None` | `None` | 是否计算 CZML 风格的位置采样（见下文 CZML 位置一节）。未提供时该字段不会发往 ASTROX，由服务器保留默认 |
-| `entities` | `Sequence[EntityPath] | None` | 实体定义。当前仅与未验证的 Follow 段相关，见限制 |
-| `propagators` | `Sequence[HpopConfig] | None` | 注册的自定义传播器，段通过 `propagator_name` 引用 |
-| `engine_models` | `Sequence[EngineConstant] | None` | 注册的发动机，机动段通过 `propulsion_method_value` 引用 |
-| `text` | `str | None` | 任务备注文本。部分验证：该输入被服务器接受，但除输入注解外的语义未验证 |
+| `compute_czml_positions` | `bool \| None` | `None` | 是否计算 CZML 风格的位置采样（见下文 CZML 位置一节）。未提供时该字段不会发往 ASTROX，由服务器保留默认 |
+| `entities` | `Sequence[EntityPath] \| None` | `None` | 实体定义。当前仅与未验证的 Follow 段相关，见限制 |
+| `propagators` | `Sequence[HpopConfig] \| None` | `None` | 注册的自定义传播器，段通过 `propagator_name` 引用 |
+| `engine_models` | `Sequence[EngineConstant] \| None` | `None` | 注册的发动机，机动段通过 `propulsion_method_value` 引用 |
+| `text` | `str \| None` | `None` | 任务备注文本。部分验证：该输入被服务器接受，但除输入注解外的语义未验证 |
 
 `main_sequence` 中的每一项都必须是段构造器返回的 SDK 值对象，原始字典不会被接受。请求构造完成后由 `raw.post("/Astrogator/RunMCS", ...)` 发送。
 
@@ -235,7 +235,7 @@ astrogator.propagate(
     propagator_name: str,
     stop_conditions: Sequence[StoppingCondition],
     variable_names: str | None = None,
-    max_propagation_time_s: float | None = None,
+    max_propagation_time_s: int | None = None,
     description: str | None = None,
     user_comment: str | None = None,
     results: Sequence[CalcScalar] | None = None,
@@ -247,7 +247,7 @@ astrogator.propagate(
 | `propagator_name` | — | 必须与 `run_mcs(propagators=...)` 中注册的传播器名称一致 |
 | `stop_conditions` | — | 停止条件列表，任一触发即停止（事件顺序已验证） |
 | `variable_names` | — | 变量路径声明。部分验证：仅在差分修正场景有已验证的用法，见「差分修正」一节 |
-| `max_propagation_time_s` | s | 最大传播时长。部分验证：超过时传播终止并置 `stopped_on_maximum_duration`，该标志的触发语义部分验证 |
+| `max_propagation_time_s` | s | 最大传播时长，整数秒。部分验证：超过时传播终止并置 `stopped_on_maximum_duration`，该标志的触发语义部分验证 |
 
 传播结果返回 `PropagateResult`，其中 `stopping_condition_name` 是实际触发的停止条件名称，`duration_s` 是传播耗时。多个停止条件同时启用时，服务器返回先触发者的名称。
 
@@ -559,7 +559,7 @@ astrogator.b_plane_scalar(name: str, component_name: str, *, gravitational_param
 | `is_success` | `bool` | 是否成功。服务器返回 `IsSuccess=false` 时传输层会抛出 `AstroxAPIError`，因此能拿到解析结果时该字段为 `True` |
 | `message` | `str` | 服务器返回的消息文本。部分验证：仅为返回值的回显 |
 | `main_sequence_results` | `tuple[SegmentResultValue, ...]` | 按执行顺序返回实际执行并产生输出的段结果。启用 Stop 时，Stop 段自身及其后的段不产生结果（见 `stop` 一节） |
-| `positions` | `components.CzmlPositions | None` | CZML 位置采样。响应中包含该字段时解析为 `CzmlPositions`，否则为 `None`；未显式传 `compute_czml_positions` 时，是否返回由服务器默认决定（基线 OpenAPI 声明缺省为 `true`） |
+| `positions` | `components.CzmlPositions \| None` | CZML 位置采样。响应中包含该字段时解析为 `CzmlPositions`，否则为 `None`；未显式传 `compute_czml_positions` 时，是否返回由服务器默认决定（基线 OpenAPI 声明缺省为 `true`） |
 | `unknown_fields` | `Mapping` | 解析器未消费的响应字段，原样保留 |
 
 ### 段结果
@@ -569,10 +569,10 @@ astrogator.b_plane_scalar(name: str, component_name: str, *, gravitational_param
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
 | `type_name` | `str` | 段类型名称，如 `InitialState`、`Propagate` |
-| `wire_type` | `str | None` | 响应中的 `$type` 判别值（部分段结果没有该字段） |
+| `wire_type` | `str \| None` | 响应中的 `$type` 判别值（部分段结果没有该字段） |
 | `name` | `str` | 请求中的段名称，原样回显 |
-| `description` | `str | None` | 描述回显。部分验证 |
-| `user_comment` | `str | None` | 备注回显。部分验证 |
+| `description` | `str \| None` | 描述回显。部分验证 |
+| `user_comment` | `str \| None` | 备注回显。部分验证 |
 | `initial_state` | `SegmentState` | 段起始状态 |
 | `final_state` | `SegmentState` | 段结束状态 |
 | `duration_s` | `float` | 段耗时，秒 |
@@ -627,14 +627,14 @@ astrogator.b_plane_scalar(name: str, component_name: str, *, gravitational_param
 | `start` / `stop` | `str` | 机动边界历元 |
 | `duration_s` | `float` | 机动时长。冲量机动为 0 |
 | `fuel_used_kg` | `float` | 实际燃料消耗。冲量机动 `update_mass=False` 时为 0 |
-| `estimated_fuel_used_kg` | `float | None` | 估算燃料消耗，与火箭方程一致 |
-| `delta_v_magnitude_m_s` | `float` | 标量速度增量大小。有限机动时等于火箭方程排气速度 |
+| `estimated_fuel_used_kg` | `float \| None` | 估算燃料消耗，与火箭方程一致 |
+| `delta_v_magnitude_m_s` | `float` | 标量速度增量大小。有限机动时为齐奥尔科夫斯基方程预测的 delta-v |
 | `delta_v_inertial` | `tuple[float, ...]` | 惯性系速度增量，六值数组 |
 | `delta_v_vnc` | `tuple[float, ...]` | VNC 坐标速度增量，六值数组 |
 | `maneuver_attitude_name` | `str` | 姿态实现名称 |
-| `update_mass` | `bool | None` | 是否更新质量（有限机动不返回该字段） |
-| `delta_v_body` | `tuple[float, ...] | None` | 本体坐标速度增量。服务器当前不返回该字段 |
-| `quaternion` | `tuple[float, ...] | None` | 姿态四元数。服务器当前不返回该字段 |
+| `update_mass` | `bool \| None` | 是否更新质量（有限机动不返回该字段） |
+| `delta_v_body` | `tuple[float, ...] \| None` | 本体坐标速度增量。服务器当前不返回该字段 |
+| `quaternion` | `tuple[float, ...] \| None` | 姿态四元数。服务器当前不返回该字段 |
 | `unknown_fields` | `Mapping` | 未消费字段 |
 
 六值数组的约定已经验证：前三个值是边界速度差（惯性系或 VNC 系，包含机动期间的重力作用），后三个值依次是前三个值的方位角、仰角与大小。`delta_v_magnitude_m_s` 只含推力贡献，不要与数组前三个值的模长混淆。

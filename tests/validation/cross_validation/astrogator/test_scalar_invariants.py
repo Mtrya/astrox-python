@@ -57,6 +57,10 @@ class CrossValidationError(Exception):
     """Raised when a verified scalar branch disagrees with its oracle."""
 
 
+class BranchResolvedError(Exception):
+    """Raised when an unresolved branch starts to match its oracle."""
+
+
 def brahe_epoch(value: str) -> bh.Epoch:
     date, time = value.replace("Z", "").split("T")
     year, month, day = (int(part) for part in date.split("-"))
@@ -252,7 +256,7 @@ def compare_cartographic_latitude_naive_oracle() -> None:
             "follows a fixed-frame/geodetic-style convention the naive inertial oracle "
             "does not model, so the branch stays unresolved"
         )
-    raise CrossValidationError(
+    raise BranchResolvedError(
         "Cartographic(Latitude) matched the naive geocentric oracle; promote the branch "
         "out of the calibration xfail and move this comparison into the verified suite"
     )
@@ -304,7 +308,7 @@ def compare_delta_spherical_missing_result() -> None:
                 f"DeltaSpherical({key}): observed={float(value):.12g}, "
                 f"independent candidate={candidate:.12g}; residual exceeds {SCALAR_EPS:g}"
             )
-    raise CrossValidationError(
+    raise BranchResolvedError(
         "DeltaSpherical returned finite values matching the independent RA/radius "
         "oracle; promote the branch out of the calibration xfail"
     )
@@ -381,7 +385,7 @@ def compare_relative_scalar_missing_result() -> None:
             f"Relative(TrueAnomaly): observed={float(value):.12g}, "
             f"independent candidate={candidate:.12g}; residual exceeds {SCALAR_EPS:g}"
         )
-    raise CrossValidationError(
+    raise BranchResolvedError(
         "Relative(TrueAnomaly) returned a finite value matching the independent element "
         "oracle; promote the branch out of the calibration xfail"
     )
@@ -514,7 +518,8 @@ def test_scalar_branches_match_independent_invariants() -> None:
 # a real comparison outcome (residual, result-missing, or convention mismatch).
 # configure_astrox_from_env() runs inside each test so that a missing live
 # configuration raises LiveConfigError, which `raises=CrossValidationError`
-# does not swallow.
+# does not swallow. A matching oracle raises BranchResolvedError so strict xfail
+# reports the branch as a real failure that needs promotion.
 
 
 @pytest.mark.calibration

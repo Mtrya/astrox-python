@@ -379,7 +379,7 @@ propagator.hpop_two_body_gravity(
 ) -> HpopGravity
 ```
 
-使用二体重力模型。`gravitational_parameter_m3_s2` 提供时会被写入请求中重力模型的 `Mu` 字段，用于覆盖中心天体的默认引力常数；未提供时该字段不会发往 ASTROX，由服务器采用中心天体默认值。RunMCS 已验证的二体传播路径需要显式提供该参数，省略时不能宣称具有同样的二体物理语义。
+使用二体重力模型。`gravitational_parameter_m3_s2` 提供时会被写入请求中重力模型的 `Mu` 字段，用于覆盖中心天体的默认引力参数（单位 m³/s²）；未提供时该字段不会发往 ASTROX，由服务器采用中心天体默认值。显式提供 `Mu` 是已验证 RunMCS 二体传播场景使用的配置值；该场景下省略时不能宣称具有同样的二体物理语义。
 
 #### `propagator.hpop_gravity_field`
 

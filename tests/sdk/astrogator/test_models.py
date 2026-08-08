@@ -501,6 +501,24 @@ def test_curated_constructors_reject_raw_dicts() -> None:
         astrogator.entity_path("Entity", position={})
 
 
+def test_propagate_rejects_fractional_maximum_propagation_time() -> None:
+    with pytest.raises(TypeError, match="max_propagation_time_s must be an integer"):
+        astrogator.propagate(
+            "Prop",
+            propagator_name="P",
+            stop_conditions=[],
+            max_propagation_time_s=1.5,
+        )
+
+    fragment = astrogator.propagate(
+        "Prop",
+        propagator_name="P",
+        stop_conditions=[],
+        max_propagation_time_s=2,
+    )
+    assert fragment.to_wire()["MaxPropagationTime"] == 2
+
+
 def test_stop_conditions_and_follow_lower_all_server_branches() -> None:
     assert astrogator.duration_stop("Duration", 10.0).to_wire() == {
         "$type": "Duration", "Name": "Duration", "Trip": 10.0,

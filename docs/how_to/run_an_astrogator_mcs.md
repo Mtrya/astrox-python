@@ -75,7 +75,7 @@ print(f"终止位置 X: {coast.final_state.cartesian.x_m:.3f} m")
 ## 运行结果
 
 ```bash
-python run_an_astrogator_mcs.py
+python examples/07_astrogator/run_mcs.py
 ```
 
 实际输出如下（数值来自 ASTROX 服务器，可能与你的运行略有差异）：

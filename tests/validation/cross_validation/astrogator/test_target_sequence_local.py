@@ -190,7 +190,12 @@ def compare_target() -> None:
         ("control correction", control.correction, expected_correction, 1.0e-7),
         ("FinalTA", observed_true_anomaly, expected_true_anomaly, 1.0e-7),
         ("constraint current value", float(constraint.current_value), expected_true_anomaly, 1.0e-7),
-        ("constraint difference", constraint.difference, expected_true_anomaly - DESIRED_TRUE_ANOMALY_DEG, 1.0e-10),
+        (
+            "constraint difference",
+            constraint.difference,
+            float(constraint.current_value) - DESIRED_TRUE_ANOMALY_DEG,
+            1.0e-10,
+        ),
     )
     for name, observed, expected, tolerance in checks:
         if abs(float(observed) - float(expected)) > tolerance:

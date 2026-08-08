@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import Any, TypeAlias
 
 from astrox import components
-from astrox.orbits import CartesianState
+from astrox.orbits import CartesianState as OrbitsCartesianState
 
 
 def _mapping(value: Any, *, field: str) -> Mapping[str, Any]:
@@ -119,7 +119,7 @@ class SegmentState:
 
     epoch: str
     coord_system_name: str
-    cartesian: CartesianState
+    cartesian: OrbitsCartesianState
     keplerian: ReturnedKeplerianState
     spherical: ReturnedSphericalState
     dry_mass_kg: float
@@ -380,7 +380,7 @@ def _segment_state_from_wire(value: Any) -> SegmentState:
     return SegmentState(
         epoch=_string(payload["Epoch"], field="Epoch"),
         coord_system_name=_string(payload["CoordSystemName"], field="CoordSystemName"),
-        cartesian=CartesianState(
+        cartesian=OrbitsCartesianState(
             x_m=_number(cartesian["X"], field="Cartesian.X"),
             y_m=_number(cartesian["Y"], field="Cartesian.Y"),
             z_m=_number(cartesian["Z"], field="Cartesian.Z"),
@@ -668,9 +668,13 @@ def _czml_position_from_wire(value: Any) -> components.CzmlPosition:
         interpolation_algorithm=_string(payload["interpolationAlgorithm"], field="interpolationAlgorithm"),
         interpolation_degree=_integer(payload["interpolationDegree"], field="interpolationDegree"),
         reference_frame=_string(payload["referenceFrame"], field="referenceFrame"),
-        interval=_string(payload["interval"], field="interval"),
+        interval=(
+            _optional_string(payload["interval"], field="interval")
+            if "interval" in payload
+            else None
+        ),
         cartesian=_optional_number_tuple(payload, "cartesian"),
-        cartesian_velocity=_number_tuple(payload["cartesianVelocity"], field="cartesianVelocity"),
+        cartesian_velocity=_optional_number_tuple(payload, "cartesianVelocity"),
     )
 
 
@@ -679,7 +683,8 @@ def run_mcs_result_from_wire(value: Any) -> RunMCSResult:
 
     payload = _mapping(value, field="RunMCS response")
     consumed = {"IsSuccess", "Message", "MainSequenceResults", "Positions"}
-    positions = _positions_from_wire(payload["Positions"]) if "Positions" in payload else None
+    positions_value = payload["Positions"] if "Positions" in payload else None
+    positions = _positions_from_wire(positions_value) if positions_value is not None else None
     return RunMCSResult(
         is_success=_boolean(payload["IsSuccess"], field="IsSuccess"),
         message=_string(payload["Message"], field="Message"),

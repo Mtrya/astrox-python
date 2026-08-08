@@ -246,7 +246,9 @@ def compare_periapsis_stop() -> None:
             f"Periapsis stop DurationSec={segment.duration_s:.12g}, expected "
             f"half period {expected_duration:.12g}"
         )
-    residual = abs(segment.final_state.keplerian.true_anomaly_deg)
+    residual = abs(
+        (segment.final_state.keplerian.true_anomaly_deg + 180.0) % 360.0 - 180.0
+    )
     if residual > TRUE_ANOMALY_EPS_DEG:
         raise CrossValidationError(
             f"Periapsis stop true anomaly={segment.final_state.keplerian.true_anomaly_deg:.12g} "
@@ -471,7 +473,8 @@ def compare_impulsive_update_mass() -> None:
             f"EstimatedFuelUsed {information.estimated_fuel_used_kg!r} differs from "
             f"FuelUsed {information.fuel_used_kg}"
         )
-    rocket_delta_v = isp_s * gravity_m_s2 * math.log(initial_total / expected_final_total)
+    observed_final_total = segment.final_state.dry_mass_kg + final_fuel
+    rocket_delta_v = isp_s * gravity_m_s2 * math.log(initial_total / observed_final_total)
     if abs(information.delta_v_magnitude_m_s - delta_v_m_s) > DELTA_V_EPS_M_S:
         raise CrossValidationError(
             f"DeltaV_Mag {information.delta_v_magnitude_m_s!r} differs from the "

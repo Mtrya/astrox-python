@@ -108,17 +108,14 @@ def test_run_mcs_lowers_entities_and_custom_propagators(monkeypatch: pytest.Monk
 def test_run_mcs_omits_unsupplied_optional_top_level_values(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    captured: list[object] = []
+
     def fake_post(endpoint: str, *, json: object) -> dict[str, object]:
+        captured.append(json)
         return {"wire": "response"}
 
     monkeypatch.setattr(_api.raw, "post", fake_post)
     monkeypatch.setattr(_api, "run_mcs_result_from_wire", lambda value: value)
-    captured: list[object] = []
-    monkeypatch.setattr(
-        _api.raw,
-        "post",
-        lambda endpoint, *, json: captured.append(json) or {"wire": "response"},
-    )
 
     astrogator.run_mcs([_initial()])
     payload = captured[0]
