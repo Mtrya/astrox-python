@@ -6,7 +6,7 @@ from typing import get_type_hints
 
 import pytest
 
-from astrox import exceptions, propagator
+from astrox import exceptions, orbits, propagator
 from tests.sdk.propagator.helpers import (
     REPRESENTATIVE_PROPAGATOR_RESPONSE,
     REPRESENTATIVE_RETURN_SNAPSHOT,
@@ -27,8 +27,11 @@ def test_sgp4_emits_representative_payload(
         start=SGP4_REQUEST["Start"],
         stop=SGP4_REQUEST["Stop"],
         step_s=SGP4_REQUEST["Step"],
-        satellite_number=SGP4_REQUEST["SatelliteNumber"],
-        tle_lines=tuple(SGP4_REQUEST["TLEs"]),
+        tle=orbits.tle(
+            line1=SGP4_REQUEST["TLEs"][0],
+            line2=SGP4_REQUEST["TLEs"][1],
+            catalog_number=SGP4_REQUEST["SatelliteNumber"],
+        ),
     )
 
     assert_canonical_equal(
@@ -47,7 +50,10 @@ def test_sgp4_omits_server_owned_optional_knobs_when_not_provided(
     propagator.sgp4(
         start=SGP4_REQUEST["Start"],
         stop=SGP4_REQUEST["Stop"],
-        tle_lines=tuple(SGP4_REQUEST["TLEs"]),
+        tle=orbits.tle(
+            line1=SGP4_REQUEST["TLEs"][0],
+            line2=SGP4_REQUEST["TLEs"][1],
+        ),
     )
 
     assert calls[0]["endpoint"] == "/Propagator/sgp4"
@@ -61,43 +67,12 @@ def test_sgp4_omits_server_owned_optional_knobs_when_not_provided(
     )
 
 
-def test_sgp4_accepts_two_item_tle_list(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    calls = record_raw_post(monkeypatch)
-
-    propagator.sgp4(
-        start=SGP4_REQUEST["Start"],
-        stop=SGP4_REQUEST["Stop"],
-        tle_lines=SGP4_REQUEST["TLEs"],
-    )
-
-    assert calls[0]["endpoint"] == "/Propagator/sgp4"
-    assert_canonical_equal(
-        calls[0]["json"],
-        {
-            "Start": SGP4_REQUEST["Start"],
-            "Stop": SGP4_REQUEST["Stop"],
-            "TLEs": SGP4_REQUEST["TLEs"],
-        },
-    )
-
-
-@pytest.mark.parametrize(
-    "tle_lines",
-    [
-        (SGP4_REQUEST["TLEs"][0],),
-        tuple(SGP4_REQUEST["TLEs"] + ["extra"]),
-        "not-a-tle-pair",
-        (SGP4_REQUEST["TLEs"][0], 123),
-    ],
-)
-def test_sgp4_rejects_malformed_tle_lines(tle_lines: object) -> None:
-    with pytest.raises(TypeError, match="tle_lines must be a two-item sequence"):
+def test_sgp4_rejects_raw_tle_fragments() -> None:
+    with pytest.raises(TypeError, match="tle must be an astrox.orbits.Tle"):
         propagator.sgp4(
             start=SGP4_REQUEST["Start"],
             stop=SGP4_REQUEST["Stop"],
-            tle_lines=tle_lines,
+            tle={"TLEs": SGP4_REQUEST["TLEs"]},
         )
 
 
@@ -207,7 +182,10 @@ def test_new_single_result_propagator_parsers_fail_loudly_for_missing_required_f
             propagator.sgp4(
                 start=SGP4_REQUEST["Start"],
                 stop=SGP4_REQUEST["Stop"],
-                tle_lines=tuple(SGP4_REQUEST["TLEs"]),
+                tle=orbits.tle(
+                    line1=SGP4_REQUEST["TLEs"][0],
+                    line2=SGP4_REQUEST["TLEs"][1],
+                ),
             )
         else:
             propagator.simple_ascent(
@@ -238,7 +216,10 @@ def test_new_single_result_propagators_propagate_api_errors(
             propagator.sgp4(
                 start=SGP4_REQUEST["Start"],
                 stop=SGP4_REQUEST["Stop"],
-                tle_lines=tuple(SGP4_REQUEST["TLEs"]),
+                tle=orbits.tle(
+                    line1=SGP4_REQUEST["TLEs"][0],
+                    line2=SGP4_REQUEST["TLEs"][1],
+                ),
             )
         else:
             propagator.simple_ascent(

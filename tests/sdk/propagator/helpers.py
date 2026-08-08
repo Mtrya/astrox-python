@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from astrox import propagator
+from astrox import orbits, propagator
 from tests.sdk.helpers import assert_canonical_equal, canonical_bytes
 
 
@@ -23,6 +23,7 @@ __all__ = [
     "REPRESENTATIVE_PROPAGATOR_RESPONSE",
     "REPRESENTATIVE_RETURN_SNAPSHOT",
     "SGP4_REQUEST",
+    "SGP4_TLE",
     "SIMPLE_ASCENT_REQUEST",
     "TWO_BODY_REQUEST",
     "assert_canonical_equal",
@@ -144,6 +145,12 @@ SGP4_REQUEST: dict[str, Any] = {
         "2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456",
     ],
 }
+
+SGP4_TLE = orbits.tle(
+    line1=SGP4_REQUEST["TLEs"][0],
+    line2=SGP4_REQUEST["TLEs"][1],
+    catalog_number=SGP4_REQUEST["SatelliteNumber"],
+)
 
 SIMPLE_ASCENT_REQUEST: dict[str, Any] = {
     "Start": "2024-01-01T03:00:00.000Z",

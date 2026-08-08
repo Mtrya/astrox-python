@@ -7,6 +7,8 @@ Per-domain validation evidence: what is verified, against what, with which toler
 - [Lighting](lighting.md)
 - [Access (includes components evidence)](access.md)
 - [Coverage](coverage.md)
+- [Conjunction](conjunction.md)
+- [CAT](cat.md)
 - [Rocket](rocket.md)
 - [Astrogator](astrogator.md)
 

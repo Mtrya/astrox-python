@@ -1,0 +1,66 @@
+{
+  "cases": [
+    {
+      "description": "V3 close-approach call with a TLE primary and target.",
+      "id": "tle_v3",
+      "return": {
+        "after_apo_peri_filter_number": 1,
+        "after_cross_plane_number": 1,
+        "is_success": true,
+        "message": "OK",
+        "results": [
+          {
+            "collision_probability": 0.0,
+            "min_range_km": 604.822,
+            "min_range_time": "2024-01-01T00:10:00.000Z",
+            "orbital_plane_angle_deg": 0.02,
+            "primary": {
+              "catalog_number": "25544",
+              "line1": "1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9995",
+              "line2": "2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456",
+              "name": "ISS"
+            },
+            "relative_speed_km_s": 0.683166,
+            "target": {
+              "catalog_number": "25545",
+              "line1": "1 25545U 99999A   24001.00000000  .00000000  00000-0  00000-0 0  9993",
+              "line2": "2 25545  51.6264 339.8059 0009386 217.1816 137.7421 15.52489080    03",
+              "name": "probe"
+            }
+          }
+        ],
+        "total_number": 1
+      }
+    },
+    {
+      "description": "V4 close-approach call with a propagated CZML position and target.",
+      "id": "czml_v4",
+      "return": {
+        "after_apo_peri_filter_number": 1,
+        "after_cross_plane_number": 1,
+        "is_success": true,
+        "message": "OK",
+        "results": [
+          {
+            "collision_probability": 0.0,
+            "min_range_km": 604.863,
+            "min_range_time": "2024-01-01T00:09:00.000Z",
+            "orbital_plane_angle_deg": 0.017,
+            "relative_speed_km_s": 0.683812,
+            "target": {
+              "catalog_number": "25545",
+              "line1": "1 25545U 99999A   24001.00000000  .00000000  00000-0  00000-0 0  9993",
+              "line2": "2 25545  51.6264 339.8059 0009386 217.1816 137.7421 15.52489080    03",
+              "name": "probe"
+            }
+          }
+        ],
+        "total_number": 1
+      }
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-08-08T10:49:00Z"
+  }
+}

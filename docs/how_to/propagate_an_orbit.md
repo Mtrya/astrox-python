@@ -63,8 +63,11 @@ period_s, position = propagator.sgp4(
     start="2024-01-01T00:00:00.000Z",
     stop="2024-01-01T00:10:00.000Z",
     step_s=300.0,
-    satellite_number="25544",
-    tle_lines=ISS_TLE,
+    tle=orbits.tle(
+        line1=ISS_TLE[0],
+        line2=ISS_TLE[1],
+        catalog_number="25544",
+    ),
 )
 print_first_sample("SGP4 传播", period_s, position)
 

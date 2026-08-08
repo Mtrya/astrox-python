@@ -78,6 +78,28 @@ state = orbits.cartesian_state(
 | `longitude_of_perigee_deg` | deg | 近地点经度 |
 | `mean_longitude_deg` | deg | 平经度 |
 
+### `orbits.Tle` / `orbits.tle(...)`
+
+```python
+tle = orbits.tle(
+    line1="1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9995",
+    line2="2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456",
+    name="ISS",
+    catalog_number="25544",
+)
+```
+
+`orbits.tle(...)` 返回 `orbits.Tle` 冻结数据类，用于携带两行根数（TLE）及可选编目元数据。SDK 不校验校验和或轨道物理合理性。
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `line1` | `str` | TLE 第一行（必填） |
+| `line2` | `str` | TLE 第二行（必填） |
+| `name` | `str \| None` | 名称（可选） |
+| `catalog_number` | `str \| None` | 编目号（可选） |
+
+`name` 与 `catalog_number` 未提供时不会被发往 ASTROX，由服务器保留默认值。`Tle` 用于 `propagator.sgp4`、`astrox.cat` 与 `astrox.conjunction` 的 TLE 输入；需要查看 SDK 将发送的请求片段时，可使用 `to_lines_wire()` 或 `to_tle_info_wire()`。
+
 ## 轨道转换
 
 ### `orbits.keplerian_to_cartesian`

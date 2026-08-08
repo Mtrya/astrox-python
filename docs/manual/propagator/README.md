@@ -10,7 +10,7 @@ from astrox import orbits, propagator
 
 ## 轨道输入
 
-传播函数接受 `orbits.KeplerianElements` 或 `orbits.CartesianState` 作为轨道描述。`orbits.keplerian(...)` 用六个开普勒根数构造轨道，`orbits.cartesian_state(...)` 用位置/速度构造笛卡尔状态。历元 `orbit_epoch` 与根数或状态分离，由传播函数单独接收。
+传播函数接受 `orbits.KeplerianElements` 或 `orbits.CartesianState` 作为轨道描述；`propagator.sgp4` 接受 `orbits.Tle` 两行根数。`orbits.keplerian(...)` 用六个开普勒根数构造轨道，`orbits.cartesian_state(...)` 用位置/速度构造笛卡尔状态，`orbits.tle(...)` 用两行根数构造 TLE。历元 `orbit_epoch` 与根数或状态分离，由传播函数单独接收。
 
 ```python
 orbit = orbits.keplerian(
@@ -195,21 +195,19 @@ propagator.sgp4(
     *,
     start: str,
     stop: str,
-    tle_lines: tuple[str, str] | list[str],
+    tle: Tle,
     step_s: float | None = None,
-    satellite_number: str | None = None,
 ) -> tuple[float, PropagatorPosition]
 ```
 
-从两行根数（TLE）出发，用 SGP4 模型传播卫星轨道。`tle_lines` 必须是包含 TLE 第一行和第二行的二元组。
+从两行根数（TLE）出发，用 SGP4 模型传播卫星轨道。`tle` 必须是 `orbits.tle(...)` 构造的 `orbits.Tle` 实例；TLE 中提供 `catalog_number` 时，SDK 会将其作为卫星编号发送给 ASTROX，未提供时不发送。
 
 | 参数 | 说明 |
 | --- | --- |
 | `start` | 传播起始时间字符串 |
 | `stop` | 传播结束时间字符串 |
-| `tle_lines` | TLE 第一行与第二行组成的二元组 |
+| `tle` | `orbits.Tle` 实例，包含 TLE 第一行与第二行 |
 | `step_s` | 采样步长 |
-| `satellite_number` | 卫星编号 |
 
 ```python
 ISS_TLE = (
@@ -221,12 +219,15 @@ period_s, position = propagator.sgp4(
     start="2024-01-01T00:00:00.000Z",
     stop="2024-01-01T00:10:00.000Z",
     step_s=300.0,
-    satellite_number="25544",
-    tle_lines=ISS_TLE,
+    tle=orbits.tle(
+        line1=ISS_TLE[0],
+        line2=ISS_TLE[1],
+        catalog_number="25544",
+    ),
 )
 ```
 
-完整可运行示例见 `examples/01_propagation/sgp4_tle.py`。
+`orbits.tle(...)` 的字段说明见 [orbits 手册](../orbits/README.md)。完整可运行示例见 `examples/01_propagation/sgp4_tle.py`。
 
 ## 简单上升
 

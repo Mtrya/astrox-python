@@ -78,6 +78,28 @@ state = orbits.cartesian_state(
 | `longitude_of_perigee_deg` | deg | Longitude of perigee |
 | `mean_longitude_deg` | deg | Mean longitude |
 
+### `orbits.Tle` / `orbits.tle(...)`
+
+```python
+tle = orbits.tle(
+    line1="1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9995",
+    line2="2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456",
+    name="ISS",
+    catalog_number="25544",
+)
+```
+
+`orbits.tle(...)` returns an `orbits.Tle` frozen dataclass for carrying a two-line element set (TLE) with optional catalog metadata. The SDK does not validate checksums or orbital physical plausibility.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `line1` | `str` | TLE first line (required) |
+| `line2` | `str` | TLE second line (required) |
+| `name` | `str \| None` | Name (optional) |
+| `catalog_number` | `str \| None` | Catalog number (optional) |
+
+When `name` and `catalog_number` are not provided, they are not sent to ASTROX and the server retains its default values. `Tle` is used for the TLE inputs of `propagator.sgp4`, `astrox.cat`, and `astrox.conjunction`; use `to_lines_wire()` or `to_tle_info_wire()` when you need to inspect the request fragment the SDK will send.
+
 ## Orbit Conversions
 
 ### `orbits.keplerian_to_cartesian`
