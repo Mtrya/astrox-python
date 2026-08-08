@@ -103,8 +103,11 @@ def main() -> None:
         start="2024-01-01T00:00:00.000Z",
         stop="2024-01-01T00:10:00.000Z",
         step_s=300.0,
-        satellite_number="25544",
-        tle_lines=ISS_TLE,
+        tle=orbits.tle(
+            line1=ISS_TLE[0],
+            line2=ISS_TLE[1],
+            catalog_number="25544",
+        ),
     )
     print(f"SGP4 轨道周期: {sgp4_period_s:.3f} s")
     print(f"SGP4 参考系: {sgp4_position.reference_frame} (GCRF/GCRS 风格惯性系)")

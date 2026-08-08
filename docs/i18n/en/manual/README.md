@@ -8,5 +8,7 @@ Comprehensive reference organized by domain. One page per domain, covering conce
 - [lighting](lighting/README.md)
 - [access](access/README.md)
 - [coverage](coverage/README.md)
+- [conjunction](conjunction/README.md)
+- [cat](cat/README.md)
 - [rocket](rocket/README.md)
 - [astrogator](astrogator/README.md)

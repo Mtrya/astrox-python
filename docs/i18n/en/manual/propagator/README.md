@@ -10,7 +10,7 @@ This page is organized by concept, return-value conventions, function-family ref
 
 ## Orbit Input
 
-Propagation functions accept `orbits.KeplerianElements` or `orbits.CartesianState` as the orbit description. `orbits.keplerian(...)` constructs an orbit from six Keplerian elements, and `orbits.cartesian_state(...)` constructs a Cartesian state from position/velocity. The epoch `orbit_epoch` is separate from the elements or state and is passed to the propagation function directly.
+Propagation functions accept `orbits.KeplerianElements` or `orbits.CartesianState` as the orbit description; `propagator.sgp4` accepts `orbits.Tle` two-line element data. `orbits.keplerian(...)` constructs an orbit from six Keplerian elements, `orbits.cartesian_state(...)` constructs a Cartesian state from position/velocity, and `orbits.tle(...)` constructs a TLE from two-line element data. The epoch `orbit_epoch` applies only to `KeplerianElements` or `CartesianState` orbit input; it is separate from the elements or state and is received by the propagation function on its own. `propagator.sgp4` does not accept `orbit_epoch`; its propagation epoch comes from the epoch encoded in the TLE.
 
 ```python
 orbit = orbits.keplerian(
@@ -195,21 +195,19 @@ propagator.sgp4(
     *,
     start: str,
     stop: str,
-    tle_lines: tuple[str, str] | list[str],
+    tle: Tle,
     step_s: float | None = None,
-    satellite_number: str | None = None,
 ) -> tuple[float, PropagatorPosition]
 ```
 
-Propagates a satellite orbit from a two-line element set (TLE) using the SGP4 model. `tle_lines` must be a pair containing the first and second TLE lines.
+Propagates a satellite orbit from a two-line element set (TLE) using the SGP4 model. `tle` must be an `orbits.Tle` instance constructed with `orbits.tle(...)`; when the TLE provides a `catalog_number`, the SDK sends it to ASTROX as the satellite number, and when it is not provided nothing is sent.
 
 | Parameter | Description |
 | --- | --- |
 | `start` | Propagation start time string |
 | `stop` | Propagation stop time string |
-| `tle_lines` | Pair consisting of the first and second TLE lines |
+| `tle` | `orbits.Tle` instance containing the first and second TLE lines |
 | `step_s` | Sampling step size |
-| `satellite_number` | Satellite number |
 
 ```python
 ISS_TLE = (
@@ -221,12 +219,15 @@ period_s, position = propagator.sgp4(
     start="2024-01-01T00:00:00.000Z",
     stop="2024-01-01T00:10:00.000Z",
     step_s=300.0,
-    satellite_number="25544",
-    tle_lines=ISS_TLE,
+    tle=orbits.tle(
+        line1=ISS_TLE[0],
+        line2=ISS_TLE[1],
+        catalog_number="25544",
+    ),
 )
 ```
 
-A complete runnable example is available at `examples/01_propagation/sgp4_tle.py`.
+For the field descriptions of `orbits.tle(...)`, see the [orbits manual](../orbits/README.md). A complete runnable example is available at `examples/01_propagation/sgp4_tle.py`.
 
 ## Simple Ascent
 

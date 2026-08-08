@@ -8,5 +8,6 @@
 - [计算光照条件](compute_lighting_conditions.md)：光照/半影/本影区间、太阳辐射强度与太阳 AER 采样。
 - [计算地面站与卫星之间的访问区间](compute_access_intervals.md)：直接访问计算、AER 输出与仰角约束。
 - [运行一个 Astrogator 任务序列](run_an_astrogator_mcs.md)：用初始状态、自定义二体传播器与时长停止条件跑一条 RunMCS 任务并读取段结果。
+- [筛查卫星与空间目标的近距离交会](screen_close_approaches.md)：用主卫星 TLE 与目标 TLE 列表找出分析窗口内的近距离交会，并读懂筛选计数与结果字段。
 
 每篇指南的完整参数说明见对应的[手册](../manual/README.md)条目，验证证据见[验证文档](../validation/README.md)。

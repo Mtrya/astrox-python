@@ -26,14 +26,14 @@ def print_first_sample(label, period_s, position):
     t = samples[0]
     x, y, z, vx, vy, vz = samples[1:7]
     print(f"\n{label}")
-    print(f"  轨道周期: {period_s:.3f} s")
-    print(f"  参考系: {position.reference_frame}")
-    print(f"  首个采样 t={t:.3f} s")
-    print(f"  位置 (m): x={x:.3f}, y={y:.3f}, z={z:.3f}")
-    print(f"  速度 (m/s): vx={vx:.6f}, vy={vy:.6f}, vz={vz:.6f}")
+    print(f"  Orbital period: {period_s:.3f} s")
+    print(f"  Reference frame: {position.reference_frame}")
+    print(f"  First sample t={t:.3f} s")
+    print(f"  Position (m): x={x:.3f}, y={y:.3f}, z={z:.3f}")
+    print(f"  Velocity (m/s): vx={vx:.6f}, vy={vy:.6f}, vz={vz:.6f}")
 
 
-# 1. 开普勒根数 + J2 模型
+# 1. Keplerian elements + J2 model
 orbit = orbits.keplerian(
     semi_major_axis_m=6778137.0,
     eccentricity=0.001,
@@ -50,10 +50,10 @@ period_s, position = propagator.j2(
     orbit=orbit,
     step_s=300.0,
 )
-print_first_sample("J2 传播", period_s, position)
+print_first_sample("J2 propagation", period_s, position)
 
 
-# 2. 两行根数（TLE）+ SGP4 模型
+# 2. Two-line element set (TLE) + SGP4 model
 ISS_TLE = (
     "1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9995",
     "2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456",
@@ -63,13 +63,16 @@ period_s, position = propagator.sgp4(
     start="2024-01-01T00:00:00.000Z",
     stop="2024-01-01T00:10:00.000Z",
     step_s=300.0,
-    satellite_number="25544",
-    tle_lines=ISS_TLE,
+    tle=orbits.tle(
+        line1=ISS_TLE[0],
+        line2=ISS_TLE[1],
+        catalog_number="25544",
+    ),
 )
-print_first_sample("SGP4 传播", period_s, position)
+print_first_sample("SGP4 propagation", period_s, position)
 
 
-# 3. 开普勒根数 + HPOP 力模型配置
+# 3. Keplerian elements + HPOP force model config
 config = propagator.hpop_config(
     central_body="Earth",
     gravity=propagator.hpop_two_body_gravity(),
@@ -83,7 +86,7 @@ period_s, position = propagator.hpop(
     coord_system="Inertial",
     config=config,
 )
-print_first_sample("HPOP 传播", period_s, position)
+print_first_sample("HPOP propagation", period_s, position)
 ```
 
 ## Run
@@ -95,26 +98,26 @@ python propagate_an_orbit.py
 Actual output:
 
 ```text
-J2 传播
-  轨道周期: 5553.624 s
-  参考系: INERTIAL
-  首个采样 t=0.000 s
-  位置 (m): x=6771358.863, y=0.000, z=0.000
-  速度 (m/s): vx=-0.000000, vy=6746.002785, vz=3662.780662
+J2 propagation
+  Orbital period: 5553.624 s
+  Reference frame: INERTIAL
+  First sample t=0.000 s
+  Position (m): x=6771358.863, y=0.000, z=0.000
+  Velocity (m/s): vx=-0.000000, vy=6746.002785, vz=3662.780662
 
-SGP4 传播
-  轨道周期: 5578.082 s
-  参考系: INERTIAL
-  首个采样 t=0.000 s
-  位置 (m): x=6367734.323, y=-2380661.222, z=-13622.073
-  速度 (m/s): vx=1669.577611, vy=4453.974636, vz=6005.161261
+SGP4 propagation
+  Orbital period: 5578.082 s
+  Reference frame: INERTIAL
+  First sample t=0.000 s
+  Position (m): x=6367734.323, y=-2380661.222, z=-13622.073
+  Velocity (m/s): vx=1669.577611, vy=4453.974636, vz=6005.161261
 
-HPOP 传播
-  轨道周期: 6000.000 s
-  参考系: INERTIAL
-  首个采样 t=0.000 s
-  位置 (m): x=6771358.863, y=0.000, z=0.000
-  速度 (m/s): vx=0.000000, vy=6746.002785, vz=3662.780662
+HPOP propagation
+  Orbital period: 6000.000 s
+  Reference frame: INERTIAL
+  First sample t=0.000 s
+  Position (m): x=6771358.863, y=0.000, z=0.000
+  Velocity (m/s): vx=0.000000, vy=6746.002785, vz=3662.780662
 ```
 
 ## Return value description

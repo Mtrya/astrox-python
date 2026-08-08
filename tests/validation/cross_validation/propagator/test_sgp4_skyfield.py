@@ -27,10 +27,13 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from skyfield.api import EarthSatellite, load
+from skyfield.api import EarthSatellite, load  # noqa: E402
 
-from astrox import propagator
-from tests.validation._support import LiveConfigError, configure_astrox_from_env
+from astrox import orbits, propagator  # noqa: E402
+from tests.validation._support import (  # noqa: E402
+    LiveConfigError,
+    configure_astrox_from_env,
+)
 
 
 PERIOD_ABS_S = 1.0e-9
@@ -63,8 +66,11 @@ def astrox_sgp4() -> tuple[float, dict[float, StateSample]]:
         start=START,
         stop=STOP,
         step_s=STEP_S,
-        satellite_number=SATELLITE_NUMBER,
-        tle_lines=TLE_LINES,
+        tle=orbits.tle(
+            line1=TLE_LINES[0],
+            line2=TLE_LINES[1],
+            catalog_number=SATELLITE_NUMBER,
+        ),
     )
     return period_s, samples_from_astrox(position.cartesian_velocity)
 

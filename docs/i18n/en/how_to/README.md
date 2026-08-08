@@ -8,5 +8,6 @@ Task-oriented how-to guides; each one solves a specific problem.
 - [Compute lighting conditions](compute_lighting_conditions.md): sunlight/penumbra/umbra intervals, solar intensity, and solar AER samples.
 - [Compute access intervals between a ground station and a satellite](compute_access_intervals.md): direct access computation, AER output, and elevation constraints.
 - [Run an Astrogator mission sequence](run_an_astrogator_mcs.md): run a RunMCS mission from an initial state with a registered custom two-body propagator and a duration stop condition, then read the segment results.
+- [Screen close approaches between a satellite and space objects](screen_close_approaches.md): use the primary satellite TLE and a list of target TLEs to find close approaches within the analysis window, and understand the filter counts and result fields.
 
 For full parameter descriptions for each guide, see the corresponding [manual](../manual/README.md) entries; validation evidence is in the [validation documents](../../../validation/README.md).

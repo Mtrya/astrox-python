@@ -397,8 +397,11 @@ def test_new_single_result_propagators_use_configured_client_routes() -> None:
         start=SGP4_REQUEST["Start"],
         stop=SGP4_REQUEST["Stop"],
         step_s=SGP4_REQUEST["Step"],
-        satellite_number=SGP4_REQUEST["SatelliteNumber"],
-        tle_lines=tuple(SGP4_REQUEST["TLEs"]),
+        tle=orbits.tle(
+            line1=SGP4_REQUEST["TLEs"][0],
+            line2=SGP4_REQUEST["TLEs"][1],
+            catalog_number=SGP4_REQUEST["SatelliteNumber"],
+        ),
     )
 
     propagator.simple_ascent(

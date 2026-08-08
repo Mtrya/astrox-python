@@ -10,8 +10,8 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrox import propagator
-from tests.validation._support import (
+from astrox import orbits, propagator  # noqa: E402
+from tests.validation._support import (  # noqa: E402
     LiveSnapshotCase,
     check_snapshot,
     configure_astrox_from_env,
@@ -27,10 +27,10 @@ def iss_tle() -> tuple[float, propagator.PropagatorPosition]:
         start="2024-01-01T00:00:00.000Z",
         stop="2024-01-01T00:10:00.000Z",
         step_s=300.0,
-        satellite_number="25544",
-        tle_lines=(
-            "1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9995",
-            "2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456",
+        tle=orbits.tle(
+            line1="1 25544U 98067A   24001.00000000  .00002182  00000-0  41420-4 0  9995",
+            line2="2 25544  51.6461 339.8014 0001882  64.8995 295.2305 15.48919393123456",
+            catalog_number="25544",
         ),
     )
 

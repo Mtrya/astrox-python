@@ -4,7 +4,7 @@
 # ///
 """从两行根数（TLE）出发进行 SGP4 传播。"""
 
-from astrox import propagator
+from astrox import orbits, propagator
 
 
 ISS_TLE = (
@@ -18,8 +18,11 @@ def main() -> None:
         start="2024-01-01T00:00:00.000Z",
         stop="2024-01-01T00:10:00.000Z",
         step_s=300.0,
-        satellite_number="25544",
-        tle_lines=ISS_TLE,
+        tle=orbits.tle(
+            line1=ISS_TLE[0],
+            line2=ISS_TLE[1],
+            catalog_number="25544",
+        ),
     )
 
     print(f"轨道周期: {period_s:.3f} s")

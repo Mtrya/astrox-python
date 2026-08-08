@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -12,6 +12,7 @@ __all__ = [
     "CartesianState",
     "KeplerianElements",
     "MeanKeplerianElements",
+    "Tle",
     "cartesian_state",
     "cartesian_to_keplerian",
     "convert_czml_position",
@@ -25,6 +26,7 @@ __all__ = [
     "lla_at_ascending_node",
     "molniya",
     "sso",
+    "tle",
     "walker_custom",
     "walker_delta",
     "walker_star",
@@ -78,6 +80,77 @@ class KeplerianElements:
 
 
 @dataclass(frozen=True, kw_only=True)
+class Tle:
+    """Two-line element data and optional catalog metadata."""
+
+    line1: str
+    line2: str
+    name: str | None = None
+    catalog_number: str | None = None
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.line1, str):
+            raise TypeError("line1 must be a string")
+        if not isinstance(self.line2, str):
+            raise TypeError("line2 must be a string")
+        if self.name is not None and not isinstance(self.name, str):
+            raise TypeError("name must be a string or None")
+        if self.catalog_number is not None and not isinstance(self.catalog_number, str):
+            raise TypeError("catalog_number must be a string or None")
+
+    @classmethod
+    def from_tle_info_wire(
+        cls,
+        payload: Mapping[str, Any],
+        *,
+        prefix: str | None = None,
+    ) -> Tle:
+        """Build from a complete ASTROX TleInfo or CA-prefixed TLE field set."""
+        if not isinstance(payload, Mapping):
+            raise TypeError("payload must be a mapping")
+
+        if prefix is None:
+            name_key = "SAT_Name"
+            number_key = "SAT_Number"
+            line1_key = "TLE_Line1"
+            line2_key = "TLE_Line2"
+        else:
+            name_key = f"{prefix}_Name"
+            number_key = f"{prefix}_Number"
+            line1_key = f"{prefix}_TLE_Line1"
+            line2_key = f"{prefix}_TLE_Line2"
+
+        def required_string(key: str) -> str:
+            value = payload[key]
+            if not isinstance(value, str):
+                raise TypeError(f"{key} must be a string")
+            return value
+
+        return cls(
+            name=required_string(name_key),
+            catalog_number=required_string(number_key),
+            line1=required_string(line1_key),
+            line2=required_string(line2_key),
+        )
+
+    def to_tle_info_wire(self) -> dict[str, str]:
+        """Lower to the ASTROX TleInfo object without server defaults."""
+        payload: dict[str, str] = {
+            "TLE_Line1": self.line1,
+            "TLE_Line2": self.line2,
+        }
+        if self.name is not None:
+            payload["SAT_Name"] = self.name
+        if self.catalog_number is not None:
+            payload["SAT_Number"] = self.catalog_number
+        return payload
+
+    def to_lines_wire(self) -> list[str]:
+        """Lower to the two-line list accepted by single-object SGP4."""
+        return [self.line1, self.line2]
+
+
+@dataclass(frozen=True, kw_only=True)
 class MeanKeplerianElements:
     """Kozai-Izsak mean Keplerian elements returned by ASTROX."""
 
@@ -109,6 +182,22 @@ def keplerian(
         argument_of_periapsis_deg=argument_of_periapsis_deg,
         raan_deg=raan_deg,
         true_anomaly_deg=true_anomaly_deg,
+    )
+
+
+def tle(
+    *,
+    line1: str,
+    line2: str,
+    name: str | None = None,
+    catalog_number: str | None = None,
+) -> Tle:
+    """Create two-line element data without validating checksum or physics."""
+    return Tle(
+        line1=line1,
+        line2=line2,
+        name=name,
+        catalog_number=catalog_number,
     )
 
 
