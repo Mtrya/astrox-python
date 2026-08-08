@@ -147,13 +147,13 @@ result = conjunction.find_czml_close_approaches(
 | `min_range_km` | `float` | 最近距离，单位 km |
 | `orbital_plane_angle_deg` | `float` | 轨道面夹角，单位 deg |
 | `relative_speed_km_s` | `float` | 相对速度，单位 km/s |
-| `collision_probability` | `float` | 碰撞概率，0 到 1；未验证，按服务器原样返回 |
+| `collision_probability` | `float` | 服务端返回的标量，观测值为 0.0；四轮 probe（重复 V3/V4、改变目标距离、轨道面角度、相对速度与筛选阈值）均未变化，稳定但不可解释，保留 unresolved，不赋予统计学碰撞概率语义 |
 
 ## 已验证范围
 
 - TLE 入口：最近距离时刻与 60 秒采样下的独立 SGP4 最近采样时刻一致，最近距离与三维几何距离一致，相对速度与几何相对速度一致；轨道面夹角与两条 TLE 的倾角差一致（按服务器小数精度返回）。开始与结束时刻的采样点都会参与报告。
 - CZML 入口：使用 60 秒采样的公开 SGP4 轨迹验证了最近距离、相对速度与轨道面夹角；服务端报告的最近距离时刻通常落在 Stop 前一个采样点上，Stop 时刻的采样点不参与报告。
-- 碰撞概率（`collision_probability`）没有独立的概率计算依据可对照，属于未验证字段，文档与示例均不把它作为推荐依据。
+- 碰撞概率（`collision_probability`）保留为 unresolved：重复 V3/V4 调用并改变目标距离、轨道面角度、相对速度与筛选阈值共四轮 probe，观测值均为 0.0；请求不暴露 covariance、hard-body radius 或等效误差模型输入，也没有独立的概率 oracle 可对照，因此把它描述为稳定但不可解释的服务端标量（opaque scalar），不赋予统计学碰撞概率语义，文档与示例均不把它作为推荐依据。
 
 ## 约定说明
 

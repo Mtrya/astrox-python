@@ -8,14 +8,15 @@ Status of `cat.generate_tle`:
 
 - Instantaneous-elements branch (`is_mean_elements` omitted or `False`): `verified` against an independent TEME Keplerian state oracle for two element cases.
 - TLE identifiers, epoch, and TEME state: `verified` for the false-element branch.
-- Mean-elements branch (`is_mean_elements=True`): `unresolved`, retained as a strict calibration xfail. An independent mean-to-osculating SGP4 conversion oracle would be required; the naive comparison with the input osculating elements remains mismatched after the bounded probe.
+- Mean-elements branch (`is_mean_elements=True`): `partial`. For moderate/high eccentricity (e = 0.01, 0.05), the input true anomaly is converted to mean anomaly and the output argument-of-perigee plus mean-anomaly preserves the corresponding input mean longitude within 0.1 deg, read from independent Skyfield TLE mean fields (eccentricity within 0.0012, inclination and RAAN within 0.02 deg). The near-circular branch (e ≈ 0.0001882) redistributes argument of perigee and mean anomaly and retains an unexplained kilometre-scale state residual; it remains a strict calibration xfail, so the full true-to-mean conversion is not claimed verified.
 
-Comparison path: Skyfield 1.54 raw SGP4 TEME state at epoch, checked against a local Keplerian state derived from the input elements (Brahe `state_koe_to_eci` with a true-to-mean anomaly conversion).
+Comparison path: Skyfield 1.54 raw SGP4 TEME state at epoch, checked against a local Keplerian state derived from the input elements (Brahe `state_koe_to_eci` with a true-to-mean anomaly conversion); Skyfield TLE mean fields (`ecco`, `inclo`, `argpo`, `nodeo`, `mo`) as the independent mean-element readout for the mean-elements branch.
 
 Key constants and tolerances from [`tests/validation/cross_validation/cat/test_cat_skyfield.py`](../../tests/validation/cross_validation/cat/test_cat_skyfield.py):
 
 - `MU_M3_S2 = 398600441500000.0`.
 - Generated-state tolerances: `GENERATED_STATE_ABS_M = 10.0` and `GENERATED_VELOCITY_ABS_M_S = 0.02`.
+- Mean-element longitude tolerance: 0.1 deg, with eccentricity within 0.0012 and inclination / RAAN within 0.02 deg.
 
 Known residuals and conventions: the false-element output matches the independent input osculating state in raw SGP4 TEME coordinates after one direct comparison; the residual is a few meters and is covered by the stated numerical precision bound.
 
@@ -23,8 +24,9 @@ Known residuals and conventions: the false-element output matches the independen
 
 Status of `cat.estimate_tle_lifetime`:
 
-- `life_years`: `partial`. The monotonic direction of the response is verified for three increasing numeric parameter-ratio cases (`(1.0, 1000.0)`, `(10.0, 10.0)`, `(100.0, 1.0)`); the observed lifetimes decrease strictly across the ratios.
-- Absolute lifetime semantics: unknown. The live endpoint returns a documented fallback value for some cases, so the script checks only the observed monotonic direction for non-fallback cases and does not promote an absolute lifetime oracle.
+- `life_years`: `partial` as a relative estimator. The response depends on the `sm`/`mass` ratio: matched-ratio cases (`(0.1, 100)` vs `(1, 1000)`, `(1, 100)` vs `(10, 1000)`, `(10, 100)` vs `(1, 10)`) agree value-for-value within 1e-12, and the three-ratio sweep (`(1.0, 1000.0)`, `(10.0, 10.0)`, `(100.0, 1.0)`) decreases strictly. Low ratios return the 25-year cap. A BStar change did not affect the observed lifetimes in this round's probe (probe observation, not covered by the retained tests).
+- Breakup A2M equivalence: debris `life_years` from `simulate_debris_breakup` with `area_to_mass_ratio_m2_kg = ratio` agree value-for-value with `estimate_tle_lifetime(sm=ratio, mass=1.0)` for ratios 0.001, 0.002, and 0.01 within 1e-12.
+- Absolute lifetime semantics: unknown. `life_years` is not promoted as an absolute physical lifetime prediction; the 25-year cap and the documented fallback values are server-owned.
 
 ## Debris breakup
 
@@ -33,7 +35,8 @@ Status of `cat.simulate_debris_breakup_simple`, `cat.simulate_debris_breakup`, a
 - Returned debris TLEs, `periods_min`, `altitude_of_perigee_km`, and `altitude_of_apogee_km`: `verified` as internally consistent orbital quantities.
 - Comparison: each returned debris TLE is propagated with Skyfield 1.54 raw SGP4, and period / perigee / apogee are derived from the state's two-body energy and angular momentum.
 - Parameter coverage: simple bounded-angle input (count 2, azimuth 40°–180°, elevation 0°–2°), explicit two-impulse input, and NASA mass/length input.
-- Impulse semantics: outside this comparison. The impulse values are only wire-shape verified by behavior and live snapshot tests; no physical impulse convention is asserted here.
+- AzElVel (`impulses` in the response): `verified` for explicit breakup as an input echo whose delta-v norm matches m/s. At the epoch, the direction follows an RTN convention — azimuth 0° → +along-track, 90° → −cross-track, 180° → −along-track, and positive elevation → +radial — within 0.02 m/s across five azimuth/elevation cases.
+- A2M sweep: `area_to_mass_ratio_m2_kg` over 0.0002, 0.002, and 0.02 does not change the generated orbit (period, perigee, and apogee within the stated tolerances) but changes the returned lifetime monotonically.
 
 Key constants and tolerances:
 
@@ -41,6 +44,7 @@ Key constants and tolerances:
 - Calibrated server Earth radius: `EARTH_RADIUS_M = 6378140.0`.
 - Altitude tolerance: `DEBRIS_ALTITUDE_ABS_KM = 0.001`.
 - Period tolerance: `DEBRIS_PERIOD_ABS_MIN = 1.0e-5`.
+- RTN delta-v tolerance: 0.02 m/s.
 
 Known residuals and conventions: debris periods match the two-body period derived from the returned TLE state. Altitudes match when the local derivation uses the server's apparent 6378.140 km Earth radius; the radius constant was changed once from the common 6378.1363 km candidate after the stable residual showed a 3.9 m offset.
 

@@ -63,6 +63,8 @@ print(tle.line1)
 print(tle.line2)
 ```
 
+`is_mean_elements=True` 时，服务端会把输入的真近点角转换为平近点角写入 TLE：中高偏心率（e=0.01、0.05）下，输出近地点幅角与平近点角之和保持输入对应的平经度（mean longitude，0.1° 容差）。近圆（e≈0.0001882）时服务端会重新分配近地点幅角与平近点角，并保留公里级状态残差，该分支仍是 strict xfail/unresolved，完整的真近点角→平近点角转换尚不能宣布已完全验证。
+
 生成结果可直接用于 `propagator.sgp4`、`conjunction` 与下面的寿命估算、解体模拟函数。
 
 ## 轨道寿命估算
@@ -105,7 +107,7 @@ result = cat.estimate_tle_lifetime(
 print(result.life_years)
 ```
 
-`life_years` 包含服务端回退值，不能作为准确寿命预测。目前只验证了参数比例变化时寿命的单调方向，绝对寿命数值未验证。
+`life_years` 不能作为绝对物理寿命预测。本轮已验证：输出由 `sm`/`mass` 的比值决定——固定 `sm` 或固定 `mass` 的 sweep 与等比值 case（如 `(0.1, 100)` 与 `(1, 1000)`）逐值一致；低比值（长寿命情形）返回 25 年上限；改变 `bstar` 不影响观测结果；解体模拟的碎片寿命与 `estimate_tle_lifetime` 在相同面积质量比下逐值一致。绝对寿命数值仍未验证。
 
 ## 碎片解体模拟
 
@@ -208,6 +210,8 @@ result = cat.simulate_debris_breakup(
 )
 ```
 
+显式解体的 `AzElVel` 约定已经过验证：返回结果中的 `impulses` 行原样回显输入；`delta_v_m_s` 的速度范数与输入一致，单位为 m/s；解体时刻的方向符合 RTN 观测约定——方位角 0° → +沿迹（along-track），90° → −横向（cross-track），180° → −沿迹，正仰角 → +径向（radial）。改变 `area_to_mass_ratio_m2_kg` 不改变生成轨道的周期/近地点/远地点，但会改变返回的 `life_years`。
+
 ### `cat.simulate_debris_breakup_nasa`
 
 ```python
@@ -250,14 +254,18 @@ result = cat.simulate_debris_breakup_nasa(
 
 ## 已验证范围
 
-- `generate_tle` 的瞬时根数分支（`is_mean_elements` 省略或为 `False`）与独立的 TEME 开普勒状态一致；平均根数分支（`True`）未验证。
+- `generate_tle` 的瞬时根数分支（`is_mean_elements` 省略或为 `False`）与独立的 TEME 开普勒状态一致。
+- `generate_tle` 的平均根数分支（`True`）：中高偏心率下验证了真近点角→平近点角的转换与平经度保持（0.1° 容差）；近圆（e≈0.0001882）的角度重分配与公里级状态残差仍保留为 strict xfail，完整转换尚未验证。
+- `estimate_tle_lifetime` 的 `life_years` 只验证到参数比值语义：输出由 `sm`/`mass` 比值决定，等比值逐值一致，低比值返回 25 年上限，且与解体分支在同一面积质量比下逐值一致；绝对寿命数值未验证。
+- 显式解体（`simulate_debris_breakup`）的 `AzElVel`：返回行回显输入，`delta_v_m_s` 速度范数单位为 m/s，解体时刻方向符合 RTN 约定（0° → +沿迹、90° → −横向、180° → −沿迹、正仰角 → +径向）；`area_to_mass_ratio_m2_kg` 不改变生成轨道（周期/近地点/远地点），只改变返回寿命。
 - 三个解体模拟分支返回的碎片周期、近地点高度与远地点高度，与碎片的独立 SGP4 状态轨道不变量一致。
-- 碎片解体模型本身（碎片数量、速度分布、质量分布的物理合理性）与寿命数值均未验证。
+- 碎片解体模型本身（碎片数量、速度分布、质量分布的物理合理性）与绝对寿命数值均未验证。
 
 ## 约定说明
 
 - 可选参数在未提供时不会被发往 ASTROX，由服务器保留默认值。
-- 解体模拟的方位角/仰角范围定义在 TEME 参考系下的 VVLH 轴系中（简单分支）。
+- 简单解体分支的方位角/仰角范围定义在 TEME 参考系下的 VVLH 轴系中。
+- 显式解体分支的方位角/仰角遵循已验证的 RTN 约定：方位角 0° → +沿迹、90° → −横向、180° → −沿迹，正仰角 → +径向。
 
 完整可运行示例见 `examples/09_cat/cat_workflows.py`。
 

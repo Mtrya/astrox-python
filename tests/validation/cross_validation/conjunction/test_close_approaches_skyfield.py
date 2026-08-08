@@ -14,14 +14,18 @@
 #     - CA_Theta: verified as the TLE inclination difference for V3 and the
 #       GCRS angular-momentum angle for V4; V3 is rounded to 0.01 deg and V4
 #       to 0.001 deg
-#     - CA_Probability: unresolved (no covariance input or independent probability
-#       oracle is exposed by the promoted request)
+#     - CA_Probability: unresolved; four probe rounds observed a stable zero
+#       scalar but found no covariance or independent probability oracle
 #   Parameters:
-#     - target TLE mean anomaly: verified for 130/135/137.7421/140/145 deg;
+#     - target TLE mean anomaly: verified for 130/135/137.7421/140/145/150 deg;
 #       130 deg is also retained as a no-result filter boundary
+#     - target inclination and mean motion: probed across plane-angle and
+#       relative-speed changes without changing the observed probability scalar
 #     - V3 stop time: verified at 5, 8, and 10 minutes
 #     - V4 stop time: verified at 5, 8, and 10 minutes; the final CZML sample
 #       is excluded by the observed server interval convention
+#     - V3 filter thresholds: probed from narrow to broad values; they changed
+#       selection counts, not the probability value for a returned result
 #   Comparison:
 #     - External: Skyfield 1.54 EarthSatellite GCRS state propagation
 #     - Constants: checked-in TLEs, UTC epochs, 60-second sample interval
@@ -39,6 +43,10 @@
 #   - Skyfield GCRS is the comparison frame for range, relative speed, and V4
 #     plane angle. V3's plane angle matches the absolute TLE inclination
 #     difference instead of the instantaneous GCRS angular-momentum angle.
+#   - Repeated V3/V4 calls and geometry probes produced `CA_Probability=0.0`.
+#     Because the promoted request exposes no covariance, hard-body radius, or
+#     equivalent error model, this is classified as a stable server-owned
+#     opaque scalar rather than a verified statistical collision probability.
 
 from __future__ import annotations
 
@@ -70,8 +78,8 @@ TARGET_LINE1 = (
     "1 25545U 99999A   24001.00000000  .00000000  00000-0  00000-0 0  9993"
 )
 TARGET_LINE2_TEMPLATE = (
-    "2 25545  51.6264 339.8059 0009386 217.1816 {mean_anomaly:07.4f} "
-    "15.52489080    03"
+    "2 25545 {inclination:8.4f} 339.8059 0009386 217.1816 "
+    "{mean_anomaly:8.4f} {mean_motion:11.8f}    03"
 )
 SAMPLE_STEP_S = 60
 RANGE_ABS_KM = 0.001
@@ -104,14 +112,23 @@ def primary_tle() -> orbits.Tle:
     )
 
 
-def target_tle(mean_anomaly_deg: float) -> orbits.Tle:
+def target_tle(
+    mean_anomaly_deg: float,
+    *,
+    inclination_deg: float = 51.6264,
+    mean_motion_rev_day: float = 15.52489080,
+) -> orbits.Tle:
     line2 = tle_checksum(
-        TARGET_LINE2_TEMPLATE.format(mean_anomaly=mean_anomaly_deg)
+        TARGET_LINE2_TEMPLATE.format(
+            inclination=inclination_deg,
+            mean_anomaly=mean_anomaly_deg,
+            mean_motion=mean_motion_rev_day,
+        )
     )
     return orbits.tle(
         line1=TARGET_LINE1,
         line2=line2,
-        name=f"probe-{mean_anomaly_deg:g}",
+        name=f"probe-{mean_anomaly_deg:g}-{inclination_deg:g}",
         catalog_number="25545",
     )
 
@@ -348,29 +365,55 @@ def test_ca_v4_matches_skyfield_czml_sample_boundary() -> None:
 @pytest.mark.calibration
 @pytest.mark.xfail(
     reason=(
-        "CA_Probability remains unresolved: the promoted requests expose no "
-        "covariance or collision-probability oracle, and live zero values alone "
-        "cannot establish probability semantics."
+        "CA_Probability remains unresolved: four live probe rounds observed a "
+        "stable zero scalar across geometry, velocity, plane angle, V3/V4, and "
+        "filter-threshold changes, but the promoted requests expose no covariance "
+        "or collision-probability oracle."
     ),
     raises=CrossValidationError,
     strict=True,
 )
 def test_ca_collision_probability_remains_unresolved() -> None:
     configure_astrox_from_env()
-    result = conjunction.find_tle_close_approaches(
+    observed: list[tuple[str, float]] = []
+    probe_cases = (
+        ("distance_135", target_tle(135.0)),
+        ("distance_140", target_tle(140.0)),
+        ("plane_plus_5", target_tle(137.7421, inclination_deg=56.6264)),
+        ("faster_target", target_tle(137.7421, mean_motion_rev_day=16.52489080)),
+    )
+    for label, target in probe_cases:
+        result = conjunction.find_tle_close_approaches(
+            start=START,
+            stop="2024-01-01T00:10:00.000Z",
+            tle=primary_tle(),
+            targets=[target],
+            tol_max_distance_km=10000.0,
+            tol_cross_dt_s=10000.0,
+            tol_theta_deg=180.0,
+            tol_dh_km=10000.0,
+        )
+        if not result.results:
+            raise CrossValidationError(f"CA probability probe returned no result: {label}")
+        observed.append((label, result.results[0].collision_probability))
+
+    position = propagated_czml_position("2024-01-01T00:10:00.000Z")
+    v4_result = conjunction.find_czml_close_approaches(
         start=START,
         stop="2024-01-01T00:10:00.000Z",
-        tle=primary_tle(),
+        position=position,
         targets=[target_tle(137.7421)],
-        tol_max_distance_km=1000.0,
-        tol_cross_dt_s=1000.0,
+        tol_max_distance_km=10000.0,
+        tol_cross_dt_s=10000.0,
         tol_theta_deg=180.0,
-        tol_dh_km=1000.0,
+        tol_dh_km=10000.0,
     )
-    if not result.results:
-        raise CrossValidationError("CA probability case returned no result")
+    if not v4_result.results:
+        raise CrossValidationError("CA V4 probability probe returned no result")
+    observed.append(("v4_baseline", v4_result.results[0].collision_probability))
     raise CrossValidationError(
-        "CA_Probability has no independent covariance-based comparison path"
+        "CA_Probability observed probe values="
+        f"{observed!r}; no independent covariance-based comparison path exists"
     )
 
 

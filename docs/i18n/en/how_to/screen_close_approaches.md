@@ -58,7 +58,7 @@ for approach in result.results:
 
 `total_number` is the total number of targets, `after_apo_peri_filter_number` and `after_cross_plane_number` are the numbers of targets remaining after the altitude and plane-angle filters, and `results` is the list of actually reported close approaches. The meaning and units of each result field are in the [conjunction analysis manual](../manual/conjunction/README.md).
 
-The `collision_probability` field is unverified and returned as-is from the server; do not use it as a basis for decisions. Base your screening decisions on the minimum range and the relative speed.
+The `collision_probability` field remains unresolved: repeated calls with changes to target distance, orbital-plane angle, relative speed, and filter thresholds always observed 0.0; it is only a stable but unexplained scalar (opaque scalar) returned by the server without statistical collision-probability semantics, so do not use it as a basis for decisions. Base your screening decisions on the minimum range and the relative speed.
 
 ## Learn more
 

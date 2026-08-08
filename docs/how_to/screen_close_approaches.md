@@ -58,7 +58,7 @@ for approach in result.results:
 
 `total_number` 是目标总数，`after_apo_peri_filter_number` 与 `after_cross_plane_number` 是经过高度、轨道面两道筛选后剩余的目标数，`results` 是实际报告的交会列表。每个结果项的字段含义与单位见[交会分析手册](../manual/conjunction/README.md)。
 
-`collision_probability`（碰撞概率）字段未验证，按服务器原样返回，不要把它当作决策依据；筛查决策请基于最近距离与相对速度。
+`collision_probability`（碰撞概率）字段保留为 unresolved：重复调用并改变目标距离、轨道面角度、相对速度与筛选阈值，观测到的值始终为 0.0；它只是服务端返回的稳定但不可解释的标量（opaque scalar），不承担统计学碰撞概率语义，不要把它当作决策依据。筛查决策请基于最近距离与相对速度。
 
 ## 了解更多
 

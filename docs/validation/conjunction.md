@@ -44,7 +44,7 @@ Comparison path and tolerances: the same Skyfield GCRS oracle and the constants 
 
 Status of `collision_probability`:
 
-- `unresolved`: the promoted requests expose no covariance input and no independent collision-probability oracle, and live zero values alone cannot establish probability semantics. The case is retained as a strict calibration xfail in the cross-validation script.
+- `unresolved`: four live probe rounds — repeated V3/V4 calls; target-distance changes via target mean anomalies 135° and 140°; a plane-angle change via target inclination +5°; a relative-speed change via target mean motion 16.52489080 rev/day; and filter thresholds from 1000 km to 10000 km — all observed `collision_probability = 0.0`. The promoted requests expose no covariance, hard-body radius, or equivalent error model, and there is no independent probability oracle, so the field is classified as a stable server-owned opaque scalar rather than a verified statistical collision probability. The case is retained as a strict calibration xfail in the cross-validation script.
 
 ## Live snapshot coverage
 

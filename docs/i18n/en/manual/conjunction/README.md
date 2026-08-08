@@ -147,13 +147,13 @@ result = conjunction.find_czml_close_approaches(
 | `min_range_km` | `float` | Minimum range, in km |
 | `orbital_plane_angle_deg` | `float` | Orbital-plane angle, in deg |
 | `relative_speed_km_s` | `float` | Relative speed, in km/s |
-| `collision_probability` | `float` | Collision probability, 0 to 1; unverified, returned as-is from the server |
+| `collision_probability` | `float` | A server-returned scalar observed as 0.0; unchanged across four probe rounds (repeated V3/V4, changing target distance, orbital-plane angle, relative speed, and filter thresholds), stable but unexplained, kept unresolved without statistical collision-probability semantics |
 
 ## Verified scope
 
 - TLE entry: the time of closest approach matches the nearest sampled time of an independent SGP4 propagation at 60-second sampling; the minimum range matches the 3-D geometric distance; the relative speed matches the geometric relative speed; the orbital-plane angle matches the inclination difference of the two TLEs (returned at the server's decimal precision). Samples at both the start and stop times participate in reporting.
 - CZML entry: minimum range, relative speed, and orbital-plane angle were verified using a public SGP4 trajectory sampled at 60 seconds; the closest-approach time reported by the server usually falls on the sample point before Stop, and the sample at Stop does not participate in reporting.
-- Collision probability (`collision_probability`) has no independent probability computation to compare against and is an unverified field; neither this page nor the examples treat it as a recommended basis for decisions.
+- Collision probability (`collision_probability`) remains unresolved: four probe rounds of repeated V3/V4 calls with changes to target distance, orbital-plane angle, relative speed, and filter thresholds all observed 0.0; the requests expose no covariance, hard-body radius, or equivalent error-model input and there is no independent probability oracle to compare against, so it is described as a stable but unexplained server-owned scalar (opaque scalar) without statistical collision-probability semantics, and neither this page nor the examples treat it as a recommended basis for decisions.
 
 ## Convention notes
 
