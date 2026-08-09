@@ -1,0 +1,194 @@
+{
+  "cases": [
+    {
+      "description": "Nested CZML-like ephemeris types and 7-value sample layout for an explicit Moon window.",
+      "id": "ephemeris_moon_explicit_window",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "shape": {
+          "fields": {
+            "IsSuccess": {
+              "kind": "boolean"
+            },
+            "Message": {
+              "kind": "string"
+            },
+            "Period": {
+              "kind": "number"
+            },
+            "Position": {
+              "fields": {
+                "CentralBody": {
+                  "kind": "string"
+                },
+                "cartesianVelocity": {
+                  "group_size": 7,
+                  "item": {
+                    "kind": "number"
+                  },
+                  "kind": "array",
+                  "length": 14
+                },
+                "epoch": {
+                  "kind": "string"
+                },
+                "interpolationAlgorithm": {
+                  "kind": "string"
+                },
+                "interpolationDegree": {
+                  "kind": "number"
+                },
+                "interval": {
+                  "kind": "string"
+                },
+                "referenceFrame": {
+                  "kind": "string"
+                }
+              },
+              "kind": "object"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Nested quaternion response shape with the order-0 length contract.",
+      "id": "cb_axes_rotation_order_0",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "shape": {
+          "fields": {
+            "IsSuccess": {
+              "kind": "boolean"
+            },
+            "Message": {
+              "kind": "string"
+            },
+            "Rotation": {
+              "item": {
+                "kind": "number"
+              },
+              "kind": "array",
+              "length": 4
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Nested quaternion-plus-angular-velocity response shape with the order-1 length contract.",
+      "id": "cb_axes_rotation_order_1",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "shape": {
+          "fields": {
+            "IsSuccess": {
+              "kind": "boolean"
+            },
+            "Message": {
+              "kind": "string"
+            },
+            "Rotation": {
+              "item": {
+                "kind": "number"
+              },
+              "kind": "array",
+              "length": 7
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Nested MPC response shape using the server-owned orbital-epoch default window; external numeric values are not frozen.",
+      "id": "mpc_ceres_server_default_window",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "shape": {
+          "fields": {
+            "IsSuccess": {
+              "kind": "boolean"
+            },
+            "Message": {
+              "kind": "string"
+            },
+            "OrbitElements": {
+              "fields": {
+                "ArgOfPeriapsis": {
+                  "kind": "number"
+                },
+                "Eccentricity": {
+                  "kind": "number"
+                },
+                "EpochMjdTdt": {
+                  "kind": "number"
+                },
+                "Inclination": {
+                  "kind": "number"
+                },
+                "MeanAnomaly": {
+                  "kind": "number"
+                },
+                "PeriTimeMjdTdt": {
+                  "kind": "number"
+                },
+                "Q": {
+                  "kind": "number"
+                },
+                "Raan": {
+                  "kind": "number"
+                },
+                "SemimajorAxis": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "Position": {
+              "fields": {
+                "CentralBody": {
+                  "kind": "string"
+                },
+                "cartesianVelocity": {
+                  "group_size": 7,
+                  "item": {
+                    "kind": "number"
+                  },
+                  "kind": "array"
+                },
+                "epoch": {
+                  "kind": "string"
+                },
+                "interpolationAlgorithm": {
+                  "kind": "string"
+                },
+                "interpolationDegree": {
+                  "kind": "number"
+                },
+                "interval": {
+                  "kind": "string"
+                },
+                "referenceFrame": {
+                  "kind": "string"
+                }
+              },
+              "kind": "object"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-08-09T06:27:02Z"
+  }
+}

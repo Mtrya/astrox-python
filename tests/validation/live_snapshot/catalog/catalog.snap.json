@@ -1,0 +1,200 @@
+{
+  "cases": [
+    {
+      "description": "Stable response envelope and nested record value kinds for a named city query.",
+      "id": "query_cities_by_name",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "shape": {
+          "fields": {
+            "Cities": {
+              "item": {
+                "fields": {
+                  "CentralBodyName": {
+                    "kind": "string"
+                  },
+                  "CityName": {
+                    "kind": "string"
+                  },
+                  "CountryName": {
+                    "kind": "string"
+                  },
+                  "Latitude": {
+                    "kind": "number"
+                  },
+                  "Longitude": {
+                    "kind": "number"
+                  },
+                  "Population": {
+                    "kind": "number"
+                  },
+                  "ProvinceName": {
+                    "kind": "string"
+                  },
+                  "ProvinceRank": {
+                    "kind": "number"
+                  },
+                  "TypeOfCity": {
+                    "kind": "string"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            },
+            "IsSuccess": {
+              "kind": "boolean"
+            },
+            "Message": {
+              "kind": "string"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Stable response envelope and nested record value kinds for a named facility query.",
+      "id": "query_facilities_by_name",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "shape": {
+          "fields": {
+            "Facilities": {
+              "item": {
+                "fields": {
+                  "Altitude": {
+                    "kind": "number"
+                  },
+                  "CentralBodyName": {
+                    "kind": "string"
+                  },
+                  "FacilityName": {
+                    "kind": "string"
+                  },
+                  "Latitude": {
+                    "kind": "number"
+                  },
+                  "Longitude": {
+                    "kind": "number"
+                  },
+                  "NetworkName": {
+                    "kind": "string"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            },
+            "IsSuccess": {
+              "kind": "boolean"
+            },
+            "Message": {
+              "kind": "string"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Stable response envelope and nested record value kinds for an active satellite query; database rows and values are intentionally not frozen.",
+      "id": "query_satellites_by_name_active",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "shape": {
+          "fields": {
+            "IsSuccess": {
+              "kind": "boolean"
+            },
+            "Message": {
+              "kind": "string"
+            },
+            "TLEs": {
+              "item": {
+                "fields": {
+                  "Active": {
+                    "kind": "boolean"
+                  },
+                  "Apogee": {
+                    "kind": "number"
+                  },
+                  "CommonName": {
+                    "kind": "string"
+                  },
+                  "Inclination": {
+                    "kind": "number"
+                  },
+                  "InternationalDesignator": {
+                    "kind": "string"
+                  },
+                  "LastDatabaseUpdate": {
+                    "kind": "string"
+                  },
+                  "LaunchDateString": {
+                    "kind": "string"
+                  },
+                  "LaunchSite": {
+                    "kind": "string"
+                  },
+                  "Mass": {
+                    "kind": "number"
+                  },
+                  "Mission": {
+                    "kind": "string"
+                  },
+                  "OfficialName": {
+                    "kind": "string"
+                  },
+                  "OrbitDescription": {
+                    "kind": "string"
+                  },
+                  "Owner": {
+                    "kind": "string"
+                  },
+                  "Perigee": {
+                    "kind": "number"
+                  },
+                  "Period": {
+                    "kind": "number"
+                  },
+                  "RevolutionNumber": {
+                    "kind": "number"
+                  },
+                  "SatelliteNumber": {
+                    "kind": "string"
+                  },
+                  "TLE_Line1": {
+                    "kind": "string"
+                  },
+                  "TLE_Line2": {
+                    "kind": "string"
+                  },
+                  "TleEpoch": {
+                    "kind": "string"
+                  },
+                  "WriteUp": {
+                    "kind": "string"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            },
+            "TotalCount": {
+              "kind": "number"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-08-09T06:27:26Z"
+  }
+}

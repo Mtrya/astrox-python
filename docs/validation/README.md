@@ -11,6 +11,9 @@ Per-domain validation evidence: what is verified, against what, with which toler
 - [CAT](cat.md)
 - [Rocket](rocket.md)
 - [Astrogator](astrogator.md)
+- [Catalog](catalog.md)
+- [Celestial](celestial.md)
+- [Terrain](terrain.md)
 
 Two evidence layers back these pages:
 

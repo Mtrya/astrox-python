@@ -12,3 +12,6 @@ Comprehensive reference organized by domain. One page per domain, covering conce
 - [cat](cat/README.md)
 - [rocket](rocket/README.md)
 - [astrogator](astrogator/README.md)
+- [catalog](catalog/README.md)
+- [celestial](celestial/README.md)
+- [terrain](terrain/README.md)
