@@ -1,0 +1,61 @@
+{
+  "cases": [
+    {
+      "description": "Full terrain mask structure using the documented Moon polar DEM configuration.",
+      "id": "azimuth_elevation_mask_explicit_polar_config",
+      "return": {
+        "AzElMaskData": {
+          "item_keys": [
+            "Azimuth",
+            "Elevation",
+            "Items"
+          ],
+          "length": 361
+        },
+        "IsSuccess": true,
+        "Message": "Success",
+        "response_keys": [
+          "AzElMaskData",
+          "IsSuccess",
+          "Message",
+          "sitePosition"
+        ],
+        "sitePosition_keys": [
+          "CentralBody",
+          "HeightAboveGround",
+          "cartographicDegrees",
+          "clampToGround"
+        ]
+      }
+    },
+    {
+      "description": "Simplified terrain mask pair structure using the documented Moon polar DEM configuration.",
+      "id": "azimuth_elevation_mask_simple_explicit_polar_config",
+      "return": {
+        "AzElMaskData": {
+          "even_length": true,
+          "item_type": "number",
+          "length": 722
+        },
+        "IsSuccess": true,
+        "Message": "Success",
+        "response_keys": [
+          "AzElMaskData",
+          "IsSuccess",
+          "Message",
+          "sitePosition"
+        ],
+        "sitePosition_keys": [
+          "CentralBody",
+          "HeightAboveGround",
+          "cartographicDegrees",
+          "clampToGround"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-08-09T04:46:33Z"
+  }
+}

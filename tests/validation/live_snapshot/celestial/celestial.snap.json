@@ -1,0 +1,96 @@
+{
+  "cases": [
+    {
+      "description": "CZML-like ephemeris response shape for an explicit Moon window.",
+      "id": "ephemeris_moon_explicit_window",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "Period_type": "int",
+        "Position_keys": [
+          "CentralBody",
+          "cartesianVelocity",
+          "epoch",
+          "interpolationAlgorithm",
+          "interpolationDegree",
+          "interval",
+          "referenceFrame"
+        ],
+        "response_keys": [
+          "IsSuccess",
+          "Message",
+          "Period",
+          "Position"
+        ]
+      }
+    },
+    {
+      "description": "Quaternion-only rotation response shape.",
+      "id": "cb_axes_rotation_order_0",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "response_keys": [
+          "IsSuccess",
+          "Message",
+          "Rotation"
+        ],
+        "rotation_item_type": "number",
+        "rotation_length": 4
+      }
+    },
+    {
+      "description": "Quaternion-plus-angular-velocity response shape.",
+      "id": "cb_axes_rotation_order_1",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "response_keys": [
+          "IsSuccess",
+          "Message",
+          "Rotation"
+        ],
+        "rotation_item_type": "number",
+        "rotation_length": 7
+      }
+    },
+    {
+      "description": "MPC-backed response keys for a current valid orbital window; numeric orbital values remain external-data-owned.",
+      "id": "mpc_ceres_explicit_window",
+      "return": {
+        "IsSuccess": true,
+        "Message": "Success",
+        "OrbitElements_keys": [
+          "ArgOfPeriapsis",
+          "Eccentricity",
+          "EpochMjdTdt",
+          "Inclination",
+          "MeanAnomaly",
+          "PeriTimeMjdTdt",
+          "Q",
+          "Raan",
+          "SemimajorAxis"
+        ],
+        "Position_keys": [
+          "CentralBody",
+          "cartesianVelocity",
+          "epoch",
+          "interpolationAlgorithm",
+          "interpolationDegree",
+          "interval",
+          "referenceFrame"
+        ],
+        "response_keys": [
+          "IsSuccess",
+          "Message",
+          "OrbitElements",
+          "Position"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-08-09T04:46:31Z"
+  }
+}

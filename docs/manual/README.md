@@ -12,3 +12,6 @@
 - [cat](cat/README.md)
 - [rocket](rocket/README.md)
 - [astrogator](astrogator/README.md)
+- [catalog](catalog/README.md)
+- [celestial](celestial/README.md)
+- [terrain](terrain/README.md)
