@@ -46,7 +46,7 @@ python compute_lambert_transfer.py
 
 1. **Choose the departure and arrival bodies**: `departure_body`/`arrival_body` accept server-supported body names (e.g. `Earth`, `Mars`, `Ceres`) and MPC numbers or names (e.g. `2015 XF261`). When the matching `*_elements` argument is omitted for an asteroid, the server queries the MPC elements over the network.
 2. **Set the two time windows**: `departure_start`/`departure_stop` and `arrival_start`/`arrival_stop` each define a UTC time window, which the SDK combines into the `"start/stop"` string of `DepartureInterval`/`ArrivalInterval` respectively. `departure_step_days` and `arrival_step_days` (unit d) control the sample step within each window; the number of results is roughly the product of the two windows' sample counts — the 2 departure days × 3 arrival days in the example produce 6 results. `min_time_of_flight_days` (unit d, integer) filters out combinations whose transfer time is too short; the server default is 10.
-3. **Choose the output reference frame**: the server default for `sun_frame` is `MeanEclpJ2000`; the transfer velocities of the `ICRF` branch agree with an independent zero-revolution prograde Lambert solution, while the exact relationship between `MeanEclpJ2000` and ICRF is not yet independently confirmed, so pass `sun_frame="ICRF"` explicitly when you need numbers with an identified frame.
+3. **Choose the output reference frame**: the server default for `sun_frame` is `MeanEclpJ2000`; the transfer velocities of the `ICRF` branch agree with an independent zero-revolution prograde Lambert solution, and the endpoint position directions have also been identified as ICRF axes, while the exact relationship between `MeanEclpJ2000` and ICRF is not yet independently confirmed, so pass `sun_frame="ICRF"` explicitly when you need numbers with an identified frame.
 
 ## Reading the results
 
@@ -54,7 +54,7 @@ Each result object contains:
 
 - `DepartureTime`/`ArrivalTime`: departure/arrival times (UTC strings).
 - `DeltaV1`/`DeltaV2`: departure/arrival velocity-increment vectors (m/s); `DV1_Mag`/`DV2_Mag` are their Euclidean norms (m/s). The physical meaning of `DeltaV` relative to the endpoint bodies' velocities is not yet independently confirmed, so verify it yourself when you need a strict physical interpretation.
-- `RV1`/`RV2`: heliocentric position and velocity at departure/arrival `[x, y, z, vx, vy, vz]` (positions m, velocities m/s); under the ICRF branch the transfer velocities agree with the independent Lambert solution.
+- `RV1`/`RV2`: heliocentric position and velocity at departure/arrival `[x, y, z, vx, vy, vz]` (positions m, velocities m/s); under the ICRF branch the transfer velocities agree with the independent Lambert solution, and the endpoint position directions match the ICRF axes.
 
 ## Asteroids and explicit MPC elements
 

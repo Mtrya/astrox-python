@@ -17,22 +17,29 @@ server's element convention is identified.
 #       element/frame/time convention
 #   Fields:
 #     - RV1/RV2 transfer velocities: verified against lamberthub for ICRF
-#     - RV1/RV2 endpoint positions: used as the independent solver inputs;
-#       their celestial-state meaning is not promoted here
+#     - RV1/RV2 endpoint position directions: verified against independent
+#       Skyfield heliocentric Earth/Mars directions for ICRF; state-model
+#       precision and MeanEclpJ2000 semantics remain separate questions
 #     - DV1_Mag/DV2_Mag: verified as Euclidean norms of DeltaV1/DeltaV2
 #     - DeltaV1/DeltaV2 physical body-velocity interpretation: unresolved
 #   Parameters:
 #     - departure and arrival sampling: verified for two departure dates and
 #       three arrival dates in the maintained ICRF case
-#     - SunFrameName=ICRF: verified for the Lambert-state comparison
+#     - MinTofDays: verified by exact timestamp-pair filtering on 2, 4, 12,
+#       and 14 day transfer durations
+#     - SunFrameName=ICRF: verified for the Lambert-state comparison and the
+#       independent axis-identification comparison
 #     - omitted MeanEclpJ2000 frame: unresolved against fixed obliquity rotations
 #     - explicit MPC elements: unresolved after independent element/time/frame
 #       convention probes
 #   Comparison:
 #     - External: lamberthub.izzo2015 with Sun mu, M=0, prograde=True
+#     - External frame anchor: Skyfield DE421 heliocentric Earth/Mars position
+#       directions at the returned UTC epochs
 #     - Local: standard elliptic Kepler propagation for the supplied MPC values
-#     - Tolerances: solver precision bounds and diagnostic thresholds below;
-#       they are not fitted envelopes for unexplained model differences
+#     - Tolerances: solver precision bounds, a 0.01-degree axis-identification
+#       bound, and a 1-degree wrong-frame separation; none is a fitted envelope
+#       for unexplained model differences
 
 from __future__ import annotations
 
@@ -68,6 +75,8 @@ NORM_ABS_TOL_M_S = 1.0e-9
 FRAME_POSITION_DIAGNOSTIC_TOL_M = 1.0
 FRAME_VELOCITY_DIAGNOSTIC_TOL_M_S = 1.0e-6
 ELEMENT_POSITION_DIAGNOSTIC_TOL_M = 1.0
+ICRF_AXIS_IDENTIFICATION_MAX_ANGLE_DEG = 0.01
+WRONG_FRAME_MIN_SEPARATION_DEG = 1.0
 
 DEPARTURE_START = "2028-06-01T00:00:00Z"
 DEPARTURE_STOP = "2028-06-03T00:00:00Z"
@@ -79,6 +88,8 @@ EXPECTED_ARRIVAL_TIMES = (
     "2029-04-02T00:00:00Z",
     ARRIVAL_STOP,
 )
+FILTER_DEPARTURE_TIMES = ("2028-06-01T00:00:00Z", "2028-06-03T00:00:00Z")
+FILTER_ARRIVAL_TIMES = ("2028-06-05T00:00:00Z", "2028-06-15T00:00:00Z")
 
 EXPLICIT_ELEMENTS = celestial.mpc_orbital_elements(
     epoch_mjd_tdt=61000.0,
@@ -171,17 +182,24 @@ def _time(value: str) -> datetime:
     return parsed.astimezone(UTC)
 
 
+def _timestamp_pairs(results: list[dict[str, Any]]) -> list[tuple[datetime, datetime]]:
+    return sorted(
+        [
+            (_time(result["DepartureTime"]), _time(result["ArrivalTime"]))
+            for result in results
+        ]
+    )
+
+
 def _assert_sampling_grid(results: list[dict[str, Any]]) -> None:
-    expected_pairs = [
-        (_time(departure), _time(arrival))
-        for departure in EXPECTED_DEPARTURE_TIMES
-        for arrival in EXPECTED_ARRIVAL_TIMES
-    ]
-    actual_pairs = [
-        (_time(result["DepartureTime"]), _time(result["ArrivalTime"]))
-        for result in results
-    ]
-    if sorted(actual_pairs) != sorted(expected_pairs):
+    expected_pairs = sorted(
+        [
+            (_time(departure), _time(arrival))
+            for departure in EXPECTED_DEPARTURE_TIMES
+            for arrival in EXPECTED_ARRIVAL_TIMES
+        ]
+    )
+    if _timestamp_pairs(results) != expected_pairs:
         raise ResponseShapeError(
             "TransferResults timestamps do not match the maintained 2x3 sampling grid"
         )
@@ -277,6 +295,60 @@ def test_transfer_delta_v_magnitudes_match_vector_norms() -> None:
                 )
 
 
+def _short_window_results(*, min_tof_days: int) -> Any:
+    return celestial.lambert_transfer_window(
+        departure_body="Earth",
+        arrival_body="Mars",
+        departure_start=FILTER_DEPARTURE_TIMES[0],
+        departure_stop=FILTER_DEPARTURE_TIMES[1],
+        arrival_start=FILTER_ARRIVAL_TIMES[0],
+        arrival_stop=FILTER_ARRIVAL_TIMES[1],
+        sun_frame="ICRF",
+        min_time_of_flight_days=min_tof_days,
+        departure_step_days=2.0,
+        arrival_step_days=10.0,
+    )
+
+
+def test_min_time_of_flight_filters_short_sampling_pairs() -> None:
+    configure_astrox_from_env()
+    expected_all_pairs = sorted(
+        [
+            (_time(departure), _time(arrival))
+            for departure in FILTER_DEPARTURE_TIMES
+            for arrival in FILTER_ARRIVAL_TIMES
+        ]
+    )
+    expected_long_pairs = [
+        pair
+        for pair in expected_all_pairs
+        if (pair[1] - pair[0]).total_seconds() / 86400.0 >= 10.0
+    ]
+    unfiltered = _require_results(
+        _short_window_results(min_tof_days=1),
+        expected_count=len(expected_all_pairs),
+    )
+    filtered = _require_results(
+        _short_window_results(min_tof_days=10),
+        expected_count=len(expected_long_pairs),
+    )
+    if _timestamp_pairs(unfiltered) != expected_all_pairs:
+        raise CrossValidationError(
+            "the low-threshold Lambert case did not return the complete 2x2 grid"
+        )
+    if _timestamp_pairs(filtered) != expected_long_pairs:
+        raise CrossValidationError(
+            "MinTofDays=10 did not retain exactly the transfer pairs at least 10 days long"
+        )
+    print(
+        "MIN_TOF_FILTERED_PAIRS="
+        + ",".join(
+            f"{departure.isoformat()}->{arrival.isoformat()}"
+            for departure, arrival in expected_long_pairs
+        )
+    )
+
+
 def _obliquity_rotation(sign: float) -> np.ndarray:
     angle = math.radians(sign * MEAN_OBLIQUITY_DEG)
     return np.array(
@@ -368,17 +440,90 @@ def test_mean_ecliptic_frame_relation_remains_unresolved() -> None:
         )
 
 
+def _body_state_from_skyfield(
+    ephemeris: Any,
+    *,
+    body: str,
+    timestamp: str,
+) -> tuple[np.ndarray, np.ndarray]:
+    loader = skyfield_loader_from_env()
+    time = loader.timescale(builtin=True).from_datetime(_time(timestamp))
+    body_state = ephemeris[body.lower()].at(time)
+    sun_state = ephemeris["sun"].at(time)
+    position_m = (np.asarray(body_state.position.km) - np.asarray(sun_state.position.km)) * 1000.0
+    velocity_m_s = (np.asarray(body_state.velocity.km_per_s) - np.asarray(sun_state.velocity.km_per_s)) * 1000.0
+    return position_m, velocity_m_s
+
+
 def _body_velocity_from_skyfield(
     ephemeris: Any,
     *,
     body: str,
     timestamp: str,
 ) -> np.ndarray:
+    return _body_state_from_skyfield(ephemeris, body=body, timestamp=timestamp)[1]
+
+
+def _unit_vector(value: np.ndarray, *, field: str) -> np.ndarray:
+    norm = float(np.linalg.norm(value))
+    if norm == 0.0:
+        raise ResponseShapeError(f"{field} must not be the zero vector")
+    return value / norm
+
+
+def _angular_separation_deg(left: np.ndarray, right: np.ndarray) -> float:
+    left_unit = _unit_vector(left, field="left position")
+    right_unit = _unit_vector(right, field="right position")
+    cosine = float(np.clip(np.dot(left_unit, right_unit), -1.0, 1.0))
+    return math.degrees(math.acos(cosine))
+
+
+def test_icrf_axes_match_independent_skyfield_orientation() -> None:
+    configure_astrox_from_env()
     loader = skyfield_loader_from_env()
-    time = loader.timescale(builtin=True).from_datetime(_time(timestamp))
-    body_state = ephemeris[body.lower()].at(time)
-    sun_state = ephemeris["sun"].at(time)
-    return (np.asarray(body_state.velocity.km_per_s) - np.asarray(sun_state.velocity.km_per_s)) * 1000.0
+    ephemeris = load_skyfield_ephemeris(loader, "de421.bsp")
+    results = _astrox_transfer_results(frame="ICRF", explicit_elements=False)
+    comparisons: list[tuple[np.ndarray, np.ndarray]] = []
+    for result in results:
+        for body, state_key, timestamp_key in (
+            ("earth", "RV1", "DepartureTime"),
+            ("mars", "RV2", "ArrivalTime"),
+        ):
+            actual_position, _ = _state(result, state_key)
+            expected_position, _ = _body_state_from_skyfield(
+                ephemeris,
+                body=body,
+                timestamp=result[timestamp_key],
+            )
+            comparisons.append((actual_position, expected_position))
+
+    direct_angles = [
+        _angular_separation_deg(actual, expected)
+        for actual, expected in comparisons
+    ]
+    wrong_frame_max_angles = [
+        max(
+            _angular_separation_deg(actual, rotation @ expected)
+            for actual, expected in comparisons
+        )
+        for rotation in (_obliquity_rotation(1.0), _obliquity_rotation(-1.0))
+    ]
+    direct_max_angle = max(direct_angles)
+    best_wrong_frame_max_angle = min(wrong_frame_max_angles)
+    print(
+        "ICRF_AXIS_DIAGNOSTIC="
+        f"direct_max_deg={direct_max_angle:.12g} "
+        f"best_wrong_frame_max_deg={best_wrong_frame_max_angle:.12g}"
+    )
+    if (
+        direct_max_angle > ICRF_AXIS_IDENTIFICATION_MAX_ANGLE_DEG
+        or best_wrong_frame_max_angle < WRONG_FRAME_MIN_SEPARATION_DEG
+    ):
+        raise CrossValidationError(
+            "independent heliocentric directions do not identify the ASTROX ICRF axes: "
+            f"direct max={direct_max_angle:.12g} deg, "
+            f"best fixed-obliquity max={best_wrong_frame_max_angle:.12g} deg"
+        )
 
 
 @pytest.mark.calibration
@@ -553,10 +698,12 @@ def main() -> int:
     try:
         test_transfer_states_match_lamberthub_zero_revolution_prograde()
         test_transfer_delta_v_magnitudes_match_vector_norms()
+        test_min_time_of_flight_filters_short_sampling_pairs()
+        test_icrf_axes_match_independent_skyfield_orientation()
     except Exception as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    print("CROSS_VALIDATION_CHECKED=2")
+    print("CROSS_VALIDATION_CHECKED=4")
     print("CROSS_VALIDATION_FAILED=0")
     return 0
 

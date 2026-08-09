@@ -261,7 +261,7 @@ The response contains `TransferResults` (an array of transfer results; each elem
 | `DV1_Mag` / `DV2_Mag` | number | Departure/arrival velocity-increment magnitude, m/s; verified to be the Euclidean norm of the corresponding `DeltaV` vector |
 | `RV1` / `RV2` | number[6] | Position and velocity at departure/arrival (heliocentric) `[x, y, z, vx, vy, vz]`, positions m, velocities m/s |
 
-Verified (supported by independent cross-validation): with `sun_frame="ICRF"`, on the maintained Earth→Mars result grid of 2 departure sample days × 3 arrival sample days, the transfer velocities in `RV1`/`RV2` agree with the independent zero-revolution prograde Lambert solution. Unresolved: the exact coordinate relationship between `MeanEclpJ2000` and ICRF, the physical meaning of `DeltaV` relative to the endpoint-body velocities, and independent Kepler propagation of explicit MPC elements. These branches currently have only request-construction and response-structure evidence, so verify their meaning yourself before use.
+Verified (supported by independent cross-validation): with `sun_frame="ICRF"`, the transfer velocities in `RV1`/`RV2` follow the zero-revolution prograde Lambert relationship, and the endpoint position directions use the ICRF axes. Unresolved: the exact coordinate relationship between `MeanEclpJ2000` and ICRF, the physical meaning of `DeltaV` relative to the endpoint-body velocities, and independent Kepler propagation of explicit MPC elements. These branches currently have only request-construction and response-structure evidence, so verify their meaning yourself before use.
 
 ## Convention notes
 
