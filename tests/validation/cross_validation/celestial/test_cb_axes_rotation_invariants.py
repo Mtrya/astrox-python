@@ -96,11 +96,10 @@ def rotation_response(
         to_frame=to_frame,
         order=order,
     )
-    if not isinstance(response, dict) or response.get("IsSuccess") is not True:
+    if not isinstance(response, dict):
         raise ResponseShapeError(
             f"{from_central_body}->{to_central_body} {from_frame}->{to_frame} "
-            f"order={order} returned IsSuccess={response.get('IsSuccess') if isinstance(response, dict) else None!r}: "
-            f"{response.get('Message') if isinstance(response, dict) else None!r}"
+            f"order={order} response must be an object"
         )
     rotation = response.get("Rotation")
     expected_length = 4 if order == 0 else 7

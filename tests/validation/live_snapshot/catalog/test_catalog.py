@@ -28,25 +28,14 @@ SNAPSHOT_PATH = Path(__file__).with_name("catalog.snap.json")
 def _catalog_shape(response: Any, *, collection_field: str) -> dict[str, Any]:
     if not isinstance(response, dict):
         raise SnapshotError("catalog response must be an object")
-    for key in ("IsSuccess", "Message", collection_field):
-        if key not in response:
-            raise SnapshotError(f"catalog response missing {key}")
-    if not isinstance(response["IsSuccess"], bool):
-        raise SnapshotError("catalog IsSuccess must be a boolean")
-    if not isinstance(response["Message"], str):
-        raise SnapshotError("catalog Message must be a string")
-    if response["IsSuccess"] is not True:
-        raise SnapshotError(f"catalog returned IsSuccess={response['IsSuccess']!r}: {response['Message']!r}")
+    if collection_field not in response:
+        raise SnapshotError(f"catalog response missing {collection_field}")
     collection = response[collection_field]
     if collection is not None and (
         not isinstance(collection, list) or not all(isinstance(item, dict) for item in collection)
     ):
         raise SnapshotError(f"{collection_field} must be a list of object records or null")
-    return {
-        "IsSuccess": response["IsSuccess"],
-        "Message": response["Message"],
-        "shape": describe_json_shape(response, field="catalog response"),
-    }
+    return {"shape": describe_json_shape(response, field="catalog response")}
 
 
 def query_city_shape() -> dict[str, Any]:

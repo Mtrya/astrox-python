@@ -43,6 +43,16 @@ def _optional_boolean_query(value: bool | None, *, parameter: str) -> str | None
     return "true" if value else "false"
 
 
+def _without_status_fields(value: Any, *, endpoint: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise TypeError(f"{endpoint} response must be an object")
+    return {
+        key: item
+        for key, item in value.items()
+        if key not in {"IsSuccess", "Message"}
+    }
+
+
 def query_cities(
     *,
     city_name: str | None = None,
@@ -72,7 +82,10 @@ def query_cities(
         "typeOfCity",
         _optional_string(city_type, parameter="city_type"),
     )
-    return raw.get("/city", params=params)
+    return _without_status_fields(
+        raw.get("/city", params=params),
+        endpoint="/city",
+    )
 
 
 def query_facilities(
@@ -92,7 +105,10 @@ def query_facilities(
         "networkName",
         _optional_string(network_name, parameter="network_name"),
     )
-    return raw.get("/facility", params=params)
+    return _without_status_fields(
+        raw.get("/facility", params=params),
+        endpoint="/facility",
+    )
 
 
 def query_satellites(
@@ -172,4 +188,7 @@ def query_satellites(
             parameter="maximum_inclination_deg",
         ),
     )
-    return raw.get("/ssc", params=params)
+    return _without_status_fields(
+        raw.get("/ssc", params=params),
+        endpoint="/ssc",
+    )

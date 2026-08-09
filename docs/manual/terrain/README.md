@@ -79,7 +79,7 @@ terrain.azimuth_elevation_mask(
 | `config` | `TerrainMaskPara` | 遮罩计算参数；省略时服务端使用缺省配置 |
 | `text` | `Text` | 请求说明 |
 
-响应包含 `IsSuccess`、`Message`、`sitePosition`（请求位置回显）与 `AzElMaskData`。`AzElMaskData` 是记录数组，每条记录键为 `Azimuth`（方位角，rad）、`Elevation`（仰角数值，rad）与 `Items`（不同距离对应的明细数组）；`Items` 中每条含 `Distance`（距中心点的距离，m）与 `Elevation`（该距离对应的仰角数值，rad）。服务端文档把这些仰角数值描述为对应方位角/距离处地形遮挡的最大高度角。使用本页示例的月球极区配置时，服务端返回 361 个方位条目，方位角从 0 单调增加到 2π。
+响应包含 `sitePosition`（请求位置回显）与 `AzElMaskData`。`AzElMaskData` 是记录数组，每条记录键为 `Azimuth`（方位角，rad）、`Elevation`（仰角数值，rad）与 `Items`（不同距离对应的明细数组）；`Items` 中每条含 `Distance`（距中心点的距离，m）与 `Elevation`（该距离对应的仰角数值，rad）。服务端文档把这些仰角数值描述为对应方位角/距离处地形遮挡的最大高度角。使用本页示例的月球极区配置时，服务端返回 361 个方位条目，方位角从 0 单调增加到 2π。
 
 ```python
 site = components.site_position(
@@ -91,7 +91,7 @@ site = components.site_position(
 
 full = terrain.azimuth_elevation_mask(site_position=site, config=config)
 
-print(f"完整遮罩: {full['IsSuccess']}, {len(full['AzElMaskData'])} 个方位条目")
+print(f"完整遮罩: {len(full['AzElMaskData'])} 个方位条目")
 print(f"首个完整条目: {full['AzElMaskData'][0]}")
 ```
 
@@ -113,7 +113,7 @@ terrain.azimuth_elevation_mask_simple(
 ```python
 simple = terrain.azimuth_elevation_mask_simple(site_position=site, config=config)
 
-print(f"简化遮罩: {simple['IsSuccess']}, {len(simple['AzElMaskData']) // 2} 个方位-仰角对")
+print(f"简化遮罩: {len(simple['AzElMaskData']) // 2} 个方位-仰角对")
 ```
 
 响应中的 `AzElMaskData` 是扁平数值数组，按 `[方位角1, 仰角1, 方位角2, 仰角2, ...]` 交替排列，单位均为 rad。使用本页示例的月球极区配置时，服务端返回 722 个数值，即 361 个方位-仰角对；简化响应与完整响应携带相同的方位角-仰角数值。

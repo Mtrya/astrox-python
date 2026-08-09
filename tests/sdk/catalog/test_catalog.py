@@ -67,7 +67,7 @@ def test_query_cities_lowers_complete_params_and_returns_raw_response(
         city_type="NationalCapital",
     )
 
-    assert response is CITY_RESPONSE
+    assert response == {"Cities": [{"CityName": "Beijing", "Latitude": 0.6969}]}
     assert_canonical_equal(
         calls[0],
         {
@@ -87,8 +87,9 @@ def test_query_facilities_omits_unsupplied_filters(
 ) -> None:
     calls = record_raw_get(monkeypatch, FACILITY_RESPONSE)
 
-    catalog.query_facilities(facility_name="Goldstone")
+    response = catalog.query_facilities(facility_name="Goldstone")
 
+    assert response == {"Facilities": [{"FacilityName": "Goldstone", "Latitude": 0.6177}]}
     assert_canonical_equal(
         calls[0],
         {"endpoint": "/facility", "params": {"facilityName": "Goldstone"}},
@@ -100,7 +101,7 @@ def test_query_satellites_lowers_units_and_server_spelling_exactly(
 ) -> None:
     calls = record_raw_get(monkeypatch, SATELLITE_RESPONSE)
 
-    catalog.query_satellites(
+    response = catalog.query_satellites(
         name="FENGYUN",
         catalog_number="12345",
         mission="Comm",
@@ -114,6 +115,10 @@ def test_query_satellites_lowers_units_and_server_spelling_exactly(
         maximum_inclination_deg=80,
     )
 
+    assert response == {
+        "TotalCount": 1,
+        "TLEs": [{"CommonName": "FENGYUN 3A", "Inclination": 1.72}],
+    }
     assert_canonical_equal(
         calls[0],
         {

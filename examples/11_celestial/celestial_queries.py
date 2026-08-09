@@ -2,7 +2,7 @@
 # dependencies = []
 # requires-python = ">=3.10"
 # ///
-"""演示显式时间窗口的天体星历和坐标轴旋转查询。"""
+"""演示显式时间窗口的天体星历、坐标轴旋转、Lambert 转移窗口与 MPC 轨道根数。"""
 
 from astrox import celestial
 
@@ -22,7 +22,7 @@ def main() -> None:
             step_s=43200.0,
         )
         samples = ephemeris["Position"]["cartesianVelocity"]
-        print(f"Moon {frame}: {ephemeris['IsSuccess']}, {len(samples) // 7} 个状态样本")
+        print(f"Moon {frame}: {len(samples) // 7} 个状态样本")
 
     rotation = celestial.cb_axes_rotation(
         from_central_body="Earth",
@@ -32,10 +32,43 @@ def main() -> None:
         to_frame="INERTIAL",
         order=1,
     )
-    print(f"Earth→Moon 旋转: {rotation['IsSuccess']}, {len(rotation['Rotation'])} 个数值")
+    print(f"Earth→Moon 旋转: {len(rotation['Rotation'])} 个数值")
 
     mpc = celestial.mpc_ephemeris(target_name="Ceres")
-    print(f"Ceres MPC 星历: {mpc['IsSuccess']}, {mpc['Message']}")
+    print(f"Ceres MPC 星历: {len(mpc['Position']['cartesianVelocity']) // 7} 个状态样本")
+
+    transfer = celestial.lambert_transfer_window(
+        departure_body="Earth",
+        arrival_body="Mars",
+        departure_start="2028-06-01T00:00:00Z",
+        departure_stop="2028-06-03T00:00:00Z",
+        arrival_start="2029-04-01T00:00:00Z",
+        arrival_stop="2029-04-03T00:00:00Z",
+        sun_frame="ICRF",
+        min_time_of_flight_days=10,
+        departure_step_days=2.0,
+        arrival_step_days=1.0,
+    )
+    results = transfer["TransferResults"]
+    first = results[0]
+    print(f"Lambert 窗口: {len(results)} 个转移结果")
+    print(
+        f"  首个: {first['DepartureTime']} → {first['ArrivalTime']}, "
+        f"|DeltaV1|={first['DV1_Mag']:.1f} m/s, |DeltaV2|={first['DV2_Mag']:.1f} m/s"
+    )
+
+    elements = celestial.mpc_orbital_elements(
+        epoch_mjd_tdt=61000.0,
+        periapsis_time_mjd_tdt=60900.0,
+        periapsis_distance_au=0.6740515,
+        semi_major_axis_au=0.9898367,
+        eccentricity=0.3190276,
+        inclination_deg=0.79379,
+        raan_deg=209.81829,
+        argument_of_periapsis_deg=100.88187,
+        mean_anomaly_deg=120.0,
+    )
+    print(f"MPC 根数片段: {elements.to_wire()}")
 
 
 if __name__ == "__main__":

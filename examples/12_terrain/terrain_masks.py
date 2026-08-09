@@ -27,8 +27,8 @@ CONFIG = terrain.TerrainMaskConfig(
 def main() -> None:
     full = terrain.azimuth_elevation_mask(site_position=SITE, config=CONFIG)
     simple = terrain.azimuth_elevation_mask_simple(site_position=SITE, config=CONFIG)
-    print(f"完整遮罩: {full['IsSuccess']}, {len(full['AzElMaskData'])} 个方位条目")
-    print(f"简化遮罩: {simple['IsSuccess']}, {len(simple['AzElMaskData']) // 2} 个方位-仰角对")
+    print(f"完整遮罩: {len(full['AzElMaskData'])} 个方位条目")
+    print(f"简化遮罩: {len(simple['AzElMaskData']) // 2} 个方位-仰角对")
     print(f"首个完整条目: {full['AzElMaskData'][0]}")
 
 

@@ -103,7 +103,7 @@ def test_full_terrain_mask_lowers_complete_payload(
         text="request text",
     )
 
-    assert response is RESPONSE
+    assert response == {"AzElMaskData": []}
     assert_canonical_equal(
         calls[0],
         {
@@ -125,8 +125,9 @@ def test_simple_terrain_mask_omits_server_owned_optional_fields(
 ) -> None:
     calls = record_raw_post(monkeypatch, RESPONSE)
 
-    terrain.azimuth_elevation_mask_simple(site_position=SITE)
+    response = terrain.azimuth_elevation_mask_simple(site_position=SITE)
 
+    assert response == {"AzElMaskData": []}
     assert_canonical_equal(
         calls[0],
         {
