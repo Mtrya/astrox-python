@@ -35,8 +35,9 @@ catalog.query_cities(
 
 ```python
 cities = catalog.query_cities(city_name="Beijing")
+city_rows = cities.get("Cities") or []
 
-print(f"城市查询: {cities['IsSuccess']}, {len(cities.get('Cities', []))} 条结果")
+print(f"城市查询: {cities['IsSuccess']}, {len(city_rows)} 条结果")
 ```
 
 响应中的 `Cities` 是记录数组，记录键为 `CityName`、`TypeOfCity`、`ProvinceName`、`CountryName`、`ProvinceRank`、`Population`、`Latitude`、`Longitude`、`CentralBodyName`。其中 `Latitude` 与 `Longitude` 的单位为弧度（rad），`ProvinceRank` 与 `Population` 为整数。
@@ -62,8 +63,9 @@ catalog.query_facilities(
 
 ```python
 facilities = catalog.query_facilities(facility_name="Goldstone")
+facility_rows = facilities.get("Facilities") or []
 
-print(f"设施查询: {facilities['IsSuccess']}, {len(facilities.get('Facilities', []))} 条结果")
+print(f"设施查询: {facilities['IsSuccess']}, {len(facility_rows)} 条结果")
 ```
 
 响应中的 `Facilities` 是记录数组，记录键为 `FacilityName`、`NetworkName`、`Latitude`、`Longitude`、`Altitude`、`CentralBodyName`。`Latitude` 与 `Longitude` 的单位为弧度（rad），`Altitude` 的单位为米（m）。

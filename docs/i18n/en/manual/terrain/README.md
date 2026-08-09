@@ -129,4 +129,11 @@ A complete runnable example is available at `examples/12_terrain/terrain_masks.p
 
 ## Error handling
 
-When ASTROX returns an unsuccessful response or the network request fails, the functions in this module raise `astrox.exceptions.AstroxAPIError`. The SDK does not rewrite server error messages. When you need full control over the request payload or want to handle the raw response, use `astrox.raw.post`.
+When an ASTROX call fails, the functions in this module raise the corresponding exception from `astrox.exceptions`:
+
+- `astrox.exceptions.AstroxAPIError`: ASTROX returns an unsuccessful response (e.g. `IsSuccess` is false).
+- `astrox.exceptions.AstroxHTTPError`: ASTROX returns an unsuccessful HTTP status code.
+- `astrox.exceptions.AstroxTimeoutError`: the request times out.
+- `astrox.exceptions.AstroxConnectionError`: connecting to ASTROX fails.
+
+The SDK does not rewrite server error messages. When you need full control over the request payload or want to handle the raw response, use `astrox.raw.post`.

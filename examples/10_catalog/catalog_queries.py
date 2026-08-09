@@ -1,5 +1,5 @@
 # /// script
-# dependencies = ["astrox-python"]
+# dependencies = []
 # requires-python = ">=3.10"
 # ///
 """演示城市、设施和卫星目录查询。"""
@@ -9,12 +9,14 @@ from astrox import catalog
 
 def main() -> None:
     cities = catalog.query_cities(city_name="Beijing")
-    print(f"城市查询: {cities['IsSuccess']}, {len(cities.get('Cities', []))} 条结果")
+    city_rows = cities.get("Cities") or []
+    print(f"城市查询: {cities['IsSuccess']}, {len(city_rows)} 条结果")
 
     facilities = catalog.query_facilities(facility_name="Goldstone")
+    facility_rows = facilities.get("Facilities") or []
     print(
         f"设施查询: {facilities['IsSuccess']}, "
-        f"{len(facilities.get('Facilities', []))} 条结果"
+        f"{len(facility_rows)} 条结果"
     )
 
     satellites = catalog.query_satellites(name="FENGYUN", active=True)

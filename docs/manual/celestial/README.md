@@ -1,6 +1,6 @@
 # 天体星历与坐标轴旋转
 
-`astrox.celestial` 提供天体星历与天体坐标系旋转的只读查询 API：`celestial.ephemeris` 计算目标天体在显式时间窗口内的星历，`celestial.cb_axes_rotation` 计算两个中心天体坐标轴之间的旋转，`celestial.mpc_ephemeris` 计算小行星（MPC 数据）星历。推荐导入方式：
+`astrox.celestial` 提供天体星历与天体坐标系旋转的只读查询 API：`celestial.ephemeris` 计算目标天体在时间窗口内的星历（`start`/`stop` 可选，省略时由服务端选择当年 1 月 1 日至 12 月 31 日），`celestial.cb_axes_rotation` 计算两个中心天体坐标轴之间的旋转，`celestial.mpc_ephemeris` 计算小行星（MPC 数据）星历。推荐导入方式：
 
 ```python
 from astrox import celestial
@@ -16,26 +16,26 @@ from astrox import celestial
 celestial.ephemeris(
     *,
     target_name: str,
-    start: str,
-    stop: str,
+    start: str | None = None,
+    stop: str | None = None,
     observer_name: str | None = None,
     observer_frame: str | None = None,
     step_s: float | None = None,
 ) -> dict[str, Any]
 ```
 
-计算目标天体在显式时间窗口内的星历，返回原始 JSON 响应字典。
+计算目标天体在时间窗口内的星历，返回原始 JSON 响应字典。`start` 与 `stop` 可选，省略时由服务端选择当年 1 月 1 日至 12 月 31 日作为窗口。
 
 | 参数 | wire 参数 | 说明 |
 | --- | --- | --- |
 | `target_name` | `TargetName` | 目标天体名称，如 `Moon`、`Mars`（服务端支持 `Moon`、`Mars`、`Venus`、`Mercury`、`Jupiter`、`Saturn`、`Uranus`、`Neptune` 等） |
-| `start` | `Start` | 分析开始时刻（UTC，`yyyy-MM-ddTHH:mm:ssZ`）。在 curated surface 中显式必传；服务端缺省为当年 1 月 1 日，但显式传入窗口是受支持用法 |
-| `stop` | `Stop` | 分析结束时刻（UTC）。在 curated surface 中显式必传；服务端缺省为当年 12 月 31 日 |
+| `start` | `Start` | 分析开始时刻（UTC，`yyyy-MM-ddTHH:mm:ssZ`）。可选；服务端缺省为当年 1 月 1 日 |
+| `stop` | `Stop` | 分析结束时刻（UTC）。可选；服务端缺省为当年 12 月 31 日 |
 | `observer_name` | `ObserverName` | 观测者名称，如 `Earth`；服务端缺省为 `Sun` |
 | `observer_frame` | `ObserverFrame` | 观测者坐标系，服务端可选 `FIXED`、`INERTIAL`、`MeanEclpJ2000`、`J2000`，缺省为 `MeanEclpJ2000` |
 | `step_s` | `Step` | 采样步长，单位 s，服务端缺省 86400 s |
 
-`start` 与 `stop` 是本函数唯一必填的两个请求字段；未提供的可选字段不会被发往 ASTROX，由服务器保留默认值。
+`target_name` 是本函数唯一必填的请求字段；`start` 与 `stop` 可选，省略时不会被发往 ASTROX，由服务端选择当年 1 月 1 日至 12 月 31 日作为窗口，其它未提供的可选字段同样不会被发往 ASTROX，由服务器保留默认值。
 
 ```python
 from astrox import celestial
@@ -135,7 +135,7 @@ print(f"Ceres MPC 星历: {mpc['IsSuccess']}, {mpc['Message']}")
 
 ## 约定说明
 
-- `ephemeris` 的 `start` 与 `stop` 在 curated surface 中显式必传，不依赖服务端年度缺省窗口。
+- `ephemeris` 的 `start` 与 `stop` 可选；省略时不会被发往 ASTROX，由服务端选择当年 1 月 1 日至 12 月 31 日作为窗口。
 - `cartesianVelocity` 每个样本为 `[Time, X, Y, Z, dX, dY, dZ]`，`Time` 为相对历元的秒数，位置 m、速度 m/s。
 - `cb_axes_rotation` 的 `order` 是整数，SDK 原样传递；`Rotation` 长度与 `order` 对应（`0` → 4，`1` → 7）。
 - `mpc_ephemeris` 省略 `start`/`stop` 时由服务端使用轨道历元默认窗口；显式固定窗口可能因外部 MPC 轨道历元更新而过期。

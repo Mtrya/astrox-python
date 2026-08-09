@@ -92,6 +92,22 @@ def test_ephemeris_omits_server_owned_optional_fields(
     )
 
 
+def test_ephemeris_omits_server_owned_window_defaults(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(monkeypatch, RESPONSE)
+
+    celestial.ephemeris(target_name="Moon")
+
+    assert_canonical_equal(
+        calls[0],
+        {
+            "endpoint": "/celestial/ephemeris",
+            "json": {"TargetName": "Moon"},
+        },
+    )
+
+
 def test_cb_axes_rotation_preserves_order_branch_and_frame_options(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -1,5 +1,5 @@
 # /// script
-# dependencies = ["astrox-python"]
+# dependencies = []
 # requires-python = ">=3.10"
 # ///
 """演示显式地形配置下的完整和简化方位角-仰角遮罩查询。"""

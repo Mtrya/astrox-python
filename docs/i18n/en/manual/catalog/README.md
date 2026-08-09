@@ -35,8 +35,9 @@ Queries the server-owned city catalog and returns a raw JSON response dictionary
 
 ```python
 cities = catalog.query_cities(city_name="Beijing")
+city_rows = cities.get("Cities") or []
 
-print(f"City query: {cities['IsSuccess']}, {len(cities.get('Cities', []))} results")
+print(f"City query: {cities['IsSuccess']}, {len(city_rows)} results")
 ```
 
 The `Cities` field of the response is an array of records with keys `CityName`, `TypeOfCity`, `ProvinceName`, `CountryName`, `ProvinceRank`, `Population`, `Latitude`, `Longitude`, and `CentralBodyName`. `Latitude` and `Longitude` are in radians (rad), and `ProvinceRank` and `Population` are integers.
@@ -62,8 +63,9 @@ Queries the server-owned ground station catalog and returns a raw JSON response 
 
 ```python
 facilities = catalog.query_facilities(facility_name="Goldstone")
+facility_rows = facilities.get("Facilities") or []
 
-print(f"Facility query: {facilities['IsSuccess']}, {len(facilities.get('Facilities', []))} results")
+print(f"Facility query: {facilities['IsSuccess']}, {len(facility_rows)} results")
 ```
 
 The `Facilities` field of the response is an array of records with keys `FacilityName`, `NetworkName`, `Latitude`, `Longitude`, `Altitude`, and `CentralBodyName`. `Latitude` and `Longitude` are in radians (rad), and `Altitude` is in meters (m).

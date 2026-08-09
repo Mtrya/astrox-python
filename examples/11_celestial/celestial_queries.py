@@ -1,5 +1,5 @@
 # /// script
-# dependencies = ["astrox-python"]
+# dependencies = []
 # requires-python = ">=3.10"
 # ///
 """演示显式时间窗口的天体星历和坐标轴旋转查询。"""

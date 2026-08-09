@@ -1,6 +1,6 @@
 # Celestial Ephemeris and Axes Rotation
 
-`astrox.celestial` provides read-only query APIs for celestial ephemeris and central-body axes rotation: `celestial.ephemeris` computes an ephemeris for a target body over an explicit time window, `celestial.cb_axes_rotation` computes the rotation between the coordinate axes of two central bodies, and `celestial.mpc_ephemeris` computes minor-planet (MPC data) ephemerides. The recommended import style is:
+`astrox.celestial` provides read-only query APIs for celestial ephemeris and central-body axes rotation: `celestial.ephemeris` computes an ephemeris for a target body over a time window (`start`/`stop` are optional — when omitted, the server selects January 1 to December 31 of the current year), `celestial.cb_axes_rotation` computes the rotation between the coordinate axes of two central bodies, and `celestial.mpc_ephemeris` computes minor-planet (MPC data) ephemerides. The recommended import style is:
 
 ```python
 from astrox import celestial
@@ -16,26 +16,26 @@ All three functions send HTTP POST requests through `astrox.raw.post` and return
 celestial.ephemeris(
     *,
     target_name: str,
-    start: str,
-    stop: str,
+    start: str | None = None,
+    stop: str | None = None,
     observer_name: str | None = None,
     observer_frame: str | None = None,
     step_s: float | None = None,
 ) -> dict[str, Any]
 ```
 
-Computes an ephemeris for a target body over an explicit time window and returns a raw JSON response dictionary.
+Computes an ephemeris for a target body over a time window and returns a raw JSON response dictionary. `start` and `stop` are optional; when omitted, the server selects January 1 to December 31 of the current year as the window.
 
 | Parameter | Wire parameter | Description |
 | --- | --- | --- |
 | `target_name` | `TargetName` | Target body name, e.g. `Moon`, `Mars` (the server supports `Moon`, `Mars`, `Venus`, `Mercury`, `Jupiter`, `Saturn`, `Uranus`, `Neptune`, and others) |
-| `start` | `Start` | Analysis start time (UTC, `yyyy-MM-ddTHH:mm:ssZ`). Explicitly required on the curated surface; the server default is January 1 of the current year, but passing an explicit window is the supported usage |
-| `stop` | `Stop` | Analysis stop time (UTC). Explicitly required on the curated surface; the server default is December 31 of the current year |
+| `start` | `Start` | Analysis start time (UTC, `yyyy-MM-ddTHH:mm:ssZ`). Optional; the server default is January 1 of the current year |
+| `stop` | `Stop` | Analysis stop time (UTC). Optional; the server default is December 31 of the current year |
 | `observer_name` | `ObserverName` | Observer name, e.g. `Earth`; the server default is `Sun` |
 | `observer_frame` | `ObserverFrame` | Observer frame, server options `FIXED`, `INERTIAL`, `MeanEclpJ2000`, `J2000`, default `MeanEclpJ2000` |
 | `step_s` | `Step` | Sample step, in s, server default 86400 s |
 
-`start` and `stop` are the only two required request fields of this function; optional fields that are not supplied are not sent to ASTROX and the server retains its default values.
+`target_name` is the only required request field of this function; `start` and `stop` are optional — when omitted they are not sent to ASTROX and the server selects January 1 to December 31 of the current year as the window. Other optional fields that are not supplied are likewise not sent to ASTROX, and the server retains its default values.
 
 ```python
 from astrox import celestial
@@ -135,7 +135,7 @@ print(f"Ceres MPC ephemeris: {mpc['IsSuccess']}, {mpc['Message']}")
 
 ## Convention notes
 
-- `ephemeris` requires `start` and `stop` explicitly on the curated surface and does not rely on the server's annual default window.
+- `ephemeris` `start` and `stop` are optional; when omitted they are not sent to ASTROX and the server selects January 1 to December 31 of the current year as the window.
 - Each `cartesianVelocity` sample is `[Time, X, Y, Z, dX, dY, dZ]`, with `Time` in seconds from the reference epoch, positions in m, and velocities in m/s.
 - `cb_axes_rotation` passes the integer `order` through as-is; the `Rotation` length corresponds to `order` (`0` → 4, `1` → 7).
 - `mpc_ephemeris` relies on the server's orbital-epoch default window when `start`/`stop` are omitted; an explicit fixed window may expire when the external MPC orbital epoch updates.

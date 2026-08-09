@@ -50,18 +50,26 @@ def _optional_integer(value: int | None, *, parameter: str) -> int | None:
 def ephemeris(
     *,
     target_name: str,
-    start: str,
-    stop: str,
+    start: str | None = None,
+    stop: str | None = None,
     observer_name: str | None = None,
     observer_frame: str | None = None,
     step_s: float | None = None,
 ) -> dict[str, Any]:
-    """Return ASTROX ephemeris output for a target and explicit time window."""
+    """Return ASTROX ephemeris output for a target and optional time window."""
     payload: dict[str, Any] = {
         "TargetName": _string(target_name, parameter="target_name"),
-        "Start": _string(start, parameter="start"),
-        "Stop": _string(stop, parameter="stop"),
     }
+    _include_if_supplied(
+        payload,
+        "Start",
+        _optional_string(start, parameter="start"),
+    )
+    _include_if_supplied(
+        payload,
+        "Stop",
+        _optional_string(stop, parameter="stop"),
+    )
     _include_if_supplied(
         payload,
         "ObserverName",

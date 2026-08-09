@@ -129,4 +129,11 @@ print(f"简化遮罩: {simple['IsSuccess']}, {len(simple['AzElMaskData']) // 2} 
 
 ## 错误处理
 
-当 ASTROX 返回不成功响应或网络请求失败时，本模块函数会抛出 `astrox.exceptions.AstroxAPIError`。SDK 不会改写服务器错误信息。需要完全控制请求载荷或处理原始响应时，请使用 `astrox.raw.post`。
+当 ASTROX 调用失败时，本模块函数抛出 `astrox.exceptions` 下对应的异常：
+
+- `astrox.exceptions.AstroxAPIError`：ASTROX 返回不成功响应（如 `IsSuccess` 为 false）。
+- `astrox.exceptions.AstroxHTTPError`：ASTROX 返回不成功的 HTTP 状态码。
+- `astrox.exceptions.AstroxTimeoutError`：请求超时。
+- `astrox.exceptions.AstroxConnectionError`：连接 ASTROX 失败。
+
+SDK 不会改写服务器错误信息。需要完全控制请求载荷或处理原始响应时，请使用 `astrox.raw.post`。
