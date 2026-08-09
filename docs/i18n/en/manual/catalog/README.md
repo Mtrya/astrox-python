@@ -37,7 +37,7 @@ Queries the server-owned city catalog and returns a raw JSON response dictionary
 cities = catalog.query_cities(city_name="Beijing")
 city_rows = cities.get("Cities") or []
 
-print(f"City query: {cities['IsSuccess']}, {len(city_rows)} results")
+print(f"City query: {len(city_rows)} results")
 ```
 
 The `Cities` field of the response is an array of records with keys `CityName`, `TypeOfCity`, `ProvinceName`, `CountryName`, `ProvinceRank`, `Population`, `Latitude`, `Longitude`, and `CentralBodyName`. `Latitude` and `Longitude` are in radians (rad), and `ProvinceRank` and `Population` are integers.
@@ -65,7 +65,7 @@ Queries the server-owned ground station catalog and returns a raw JSON response 
 facilities = catalog.query_facilities(facility_name="Goldstone")
 facility_rows = facilities.get("Facilities") or []
 
-print(f"Facility query: {facilities['IsSuccess']}, {len(facility_rows)} results")
+print(f"Facility query: {len(facility_rows)} results")
 ```
 
 The `Facilities` field of the response is an array of records with keys `FacilityName`, `NetworkName`, `Latitude`, `Longitude`, `Altitude`, and `CentralBodyName`. `Latitude` and `Longitude` are in radians (rad), and `Altitude` is in meters (m).
@@ -113,12 +113,12 @@ Queries the server-owned satellite catalog with filters and returns a raw JSON r
 satellites = catalog.query_satellites(name="FENGYUN", active=True)
 
 rows = satellites.get("TLEs", [])
-print(f"Active satellite query: {satellites['IsSuccess']}, TotalCount={satellites.get('TotalCount')}")
+print(f"Active satellite query: TotalCount={satellites.get('TotalCount')}")
 if rows:
     print(f"First record: {rows[0].get('CommonName', '<unnamed>')}")
 ```
 
-The response contains `IsSuccess`, `Message`, `TotalCount` (the total number of satellites found, an integer) and `TLEs` (an array of satellite records). Record keys are `Active`, `CommonName`, `OfficialName`, `SatelliteNumber`, `TleEpoch`, `RevolutionNumber`, `TLE_Line1`, `TLE_Line2`, `InternationalDesignator`, `Owner`, `Mission`, `LaunchSite`, `LaunchDateString`, `OrbitDescription`, `Mass`, `Apogee`, `Perigee`, `Period`, `Inclination`, `LastDatabaseUpdate`, and `WriteUp`. `Active` is a boolean; the server documentation states that `Mass` is in kg, `Apogee`/`Perigee` in m, `Period` in s, and `Inclination` in rad, and the meaning of these values is determined by the server's data source.
+The response contains `TotalCount` (the total number of satellites found, an integer) and `TLEs` (an array of satellite records). Record keys are `Active`, `CommonName`, `OfficialName`, `SatelliteNumber`, `TleEpoch`, `RevolutionNumber`, `TLE_Line1`, `TLE_Line2`, `InternationalDesignator`, `Owner`, `Mission`, `LaunchSite`, `LaunchDateString`, `OrbitDescription`, `Mass`, `Apogee`, `Perigee`, `Period`, `Inclination`, `LastDatabaseUpdate`, and `WriteUp`. `Active` is a boolean; the server documentation states that `Mass` is in kg, `Apogee`/`Perigee` in m, `Period` in s, and `Inclination` in rad, and the meaning of these values is determined by the server's data source.
 
 Satellite catalog data is volatile: database rows change as the server data updates, and no promise is made about the number of results or the specific row content.
 

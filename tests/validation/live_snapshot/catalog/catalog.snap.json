@@ -4,8 +4,6 @@
       "description": "Stable response envelope and nested record value kinds for a named city query.",
       "id": "query_cities_by_name",
       "return": {
-        "IsSuccess": true,
-        "Message": "Success",
         "shape": {
           "fields": {
             "Cities": {
@@ -42,12 +40,6 @@
                 "kind": "object"
               },
               "kind": "array"
-            },
-            "IsSuccess": {
-              "kind": "boolean"
-            },
-            "Message": {
-              "kind": "string"
             }
           },
           "kind": "object"
@@ -58,8 +50,6 @@
       "description": "Stable response envelope and nested record value kinds for a named facility query.",
       "id": "query_facilities_by_name",
       "return": {
-        "IsSuccess": true,
-        "Message": "Success",
         "shape": {
           "fields": {
             "Facilities": {
@@ -87,12 +77,6 @@
                 "kind": "object"
               },
               "kind": "array"
-            },
-            "IsSuccess": {
-              "kind": "boolean"
-            },
-            "Message": {
-              "kind": "string"
             }
           },
           "kind": "object"
@@ -103,16 +87,8 @@
       "description": "Stable response envelope and nested record value kinds for an active satellite query; database rows and values are intentionally not frozen.",
       "id": "query_satellites_by_name_active",
       "return": {
-        "IsSuccess": true,
-        "Message": "Success",
         "shape": {
           "fields": {
-            "IsSuccess": {
-              "kind": "boolean"
-            },
-            "Message": {
-              "kind": "string"
-            },
             "TLEs": {
               "item": {
                 "fields": {
@@ -195,6 +171,6 @@
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-08-09T06:27:26Z"
+    "refreshed_at": "2026-08-09T10:08:24Z"
   }
 }

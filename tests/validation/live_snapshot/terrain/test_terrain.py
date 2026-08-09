@@ -61,24 +61,14 @@ def _shape(value: Any, *, field: str) -> dict[str, Any]:
 def _mask_shape(response: Any) -> dict[str, Any]:
     if not isinstance(response, dict):
         raise SnapshotError("terrain response must be an object")
-    for key in ("IsSuccess", "Message", "sitePosition", "AzElMaskData"):
+    for key in ("sitePosition", "AzElMaskData"):
         if key not in response:
             raise SnapshotError(f"terrain response missing {key}")
-    if not isinstance(response["IsSuccess"], bool):
-        raise SnapshotError("terrain IsSuccess must be a boolean")
-    if not isinstance(response["Message"], str):
-        raise SnapshotError("terrain Message must be a string")
-    if response["IsSuccess"] is not True:
-        raise SnapshotError(f"terrain returned IsSuccess={response['IsSuccess']!r}: {response['Message']!r}")
     if not isinstance(response["sitePosition"], dict):
         raise SnapshotError("terrain sitePosition must be an object")
     shape = describe_json_shape(response, field="terrain response")
     shape["fields"]["AzElMaskData"] = _shape(response["AzElMaskData"], field="AzElMaskData")
-    return {
-        "IsSuccess": response["IsSuccess"],
-        "Message": response["Message"],
-        "shape": shape,
-    }
+    return {"shape": shape}
 
 
 def full_mask_shape() -> dict[str, Any]:

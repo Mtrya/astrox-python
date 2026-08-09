@@ -4,16 +4,8 @@
       "description": "Nested CZML-like ephemeris types and 7-value sample layout for an explicit Moon window.",
       "id": "ephemeris_moon_explicit_window",
       "return": {
-        "IsSuccess": true,
-        "Message": "Success",
         "shape": {
           "fields": {
-            "IsSuccess": {
-              "kind": "boolean"
-            },
-            "Message": {
-              "kind": "string"
-            },
             "Period": {
               "kind": "number"
             },
@@ -57,16 +49,8 @@
       "description": "Nested quaternion response shape with the order-0 length contract.",
       "id": "cb_axes_rotation_order_0",
       "return": {
-        "IsSuccess": true,
-        "Message": "Success",
         "shape": {
           "fields": {
-            "IsSuccess": {
-              "kind": "boolean"
-            },
-            "Message": {
-              "kind": "string"
-            },
             "Rotation": {
               "item": {
                 "kind": "number"
@@ -83,16 +67,8 @@
       "description": "Nested quaternion-plus-angular-velocity response shape with the order-1 length contract.",
       "id": "cb_axes_rotation_order_1",
       "return": {
-        "IsSuccess": true,
-        "Message": "Success",
         "shape": {
           "fields": {
-            "IsSuccess": {
-              "kind": "boolean"
-            },
-            "Message": {
-              "kind": "string"
-            },
             "Rotation": {
               "item": {
                 "kind": "number"
@@ -109,16 +85,8 @@
       "description": "Nested MPC response shape using the server-owned orbital-epoch default window; external numeric values are not frozen.",
       "id": "mpc_ceres_server_default_window",
       "return": {
-        "IsSuccess": true,
-        "Message": "Success",
         "shape": {
           "fields": {
-            "IsSuccess": {
-              "kind": "boolean"
-            },
-            "Message": {
-              "kind": "string"
-            },
             "OrbitElements": {
               "fields": {
                 "ArgOfPeriapsis": {
@@ -185,10 +153,130 @@
           "kind": "object"
         }
       }
+    },
+    {
+      "description": "Transfer-window result grid and six-state vector layout for a maintained Earth-to-Mars case.",
+      "id": "lambert_transfer_earth_mars_mean_ecliptic",
+      "return": {
+        "shape": {
+          "fields": {
+            "TransferResults": {
+              "item": {
+                "fields": {
+                  "ArrivalTime": {
+                    "kind": "string"
+                  },
+                  "DV1_Mag": {
+                    "kind": "number"
+                  },
+                  "DV2_Mag": {
+                    "kind": "number"
+                  },
+                  "DeltaV1": {
+                    "item": {
+                      "kind": "number"
+                    },
+                    "kind": "array",
+                    "length": 3
+                  },
+                  "DeltaV2": {
+                    "item": {
+                      "kind": "number"
+                    },
+                    "kind": "array",
+                    "length": 3
+                  },
+                  "DepartureTime": {
+                    "kind": "string"
+                  },
+                  "RV1": {
+                    "item": {
+                      "kind": "number"
+                    },
+                    "kind": "array",
+                    "length": 6
+                  },
+                  "RV2": {
+                    "item": {
+                      "kind": "number"
+                    },
+                    "kind": "array",
+                    "length": 6
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array",
+              "length": 6
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Transfer-window result grid using explicit MPC elements and the ICRF output branch.",
+      "id": "lambert_transfer_asteroid_explicit_elements_icrf",
+      "return": {
+        "shape": {
+          "fields": {
+            "TransferResults": {
+              "item": {
+                "fields": {
+                  "ArrivalTime": {
+                    "kind": "string"
+                  },
+                  "DV1_Mag": {
+                    "kind": "number"
+                  },
+                  "DV2_Mag": {
+                    "kind": "number"
+                  },
+                  "DeltaV1": {
+                    "item": {
+                      "kind": "number"
+                    },
+                    "kind": "array",
+                    "length": 3
+                  },
+                  "DeltaV2": {
+                    "item": {
+                      "kind": "number"
+                    },
+                    "kind": "array",
+                    "length": 3
+                  },
+                  "DepartureTime": {
+                    "kind": "string"
+                  },
+                  "RV1": {
+                    "item": {
+                      "kind": "number"
+                    },
+                    "kind": "array",
+                    "length": 6
+                  },
+                  "RV2": {
+                    "item": {
+                      "kind": "number"
+                    },
+                    "kind": "array",
+                    "length": 6
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array",
+              "length": 6
+            }
+          },
+          "kind": "object"
+        }
+      }
     }
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-08-09T06:27:02Z"
+    "refreshed_at": "2026-08-09T10:08:21Z"
   }
 }

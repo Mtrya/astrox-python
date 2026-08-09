@@ -45,6 +45,16 @@ def _optional_integer(value: int | None, *, parameter: str) -> int | None:
     return value
 
 
+def _without_status_fields(value: Any, *, endpoint: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise TypeError(f"{endpoint} response must be an object")
+    return {
+        key: item
+        for key, item in value.items()
+        if key not in {"IsSuccess", "Message"}
+    }
+
+
 def _site_position_to_wire(
     value: components.SitePosition,
     *,
@@ -164,7 +174,10 @@ def _mask_request(
         "TerrainMaskPara",
         _terrain_mask_config_to_wire(config, parameter="config"),
     )
-    return raw.post(endpoint, json=payload)
+    return _without_status_fields(
+        raw.post(endpoint, json=payload),
+        endpoint=endpoint,
+    )
 
 
 def azimuth_elevation_mask(

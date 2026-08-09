@@ -79,7 +79,7 @@ Requests the full terrain mask for a site and returns a raw JSON response dictio
 | `config` | `TerrainMaskPara` | Mask computation parameters; when omitted, the server uses its default configuration |
 | `text` | `Text` | Request description |
 
-The response contains `IsSuccess`, `Message`, `sitePosition` (echo of the request position) and `AzElMaskData`. `AzElMaskData` is an array of records with keys `Azimuth` (azimuth, rad), `Elevation` (elevation value, rad), and `Items` (per-distance detail array); each `Items` entry contains `Distance` (distance from the center point, m) and `Elevation` (elevation value at that distance, rad). The server documentation describes these elevation values as the maximum elevation angle occluded by terrain at the corresponding azimuth/distance. With the lunar polar configuration shown in this page's example, the server returns 361 azimuth entries and azimuth increases monotonically from 0 to 2π.
+The response contains `sitePosition` (echo of the request position) and `AzElMaskData`. `AzElMaskData` is an array of records with keys `Azimuth` (azimuth, rad), `Elevation` (elevation value, rad), and `Items` (per-distance detail array); each `Items` entry contains `Distance` (distance from the center point, m) and `Elevation` (elevation value at that distance, rad). The server documentation describes these elevation values as the maximum elevation angle occluded by terrain at the corresponding azimuth/distance. With the lunar polar configuration shown in this page's example, the server returns 361 azimuth entries and azimuth increases monotonically from 0 to 2π.
 
 ```python
 site = components.site_position(
@@ -91,7 +91,7 @@ site = components.site_position(
 
 full = terrain.azimuth_elevation_mask(site_position=site, config=config)
 
-print(f"Full mask: {full['IsSuccess']}, {len(full['AzElMaskData'])} azimuth entries")
+print(f"Full mask: {len(full['AzElMaskData'])} azimuth entries")
 print(f"First full entry: {full['AzElMaskData'][0]}")
 ```
 
@@ -113,7 +113,7 @@ Requests the simplified terrain mask for a site and returns a raw JSON response 
 ```python
 simple = terrain.azimuth_elevation_mask_simple(site_position=site, config=config)
 
-print(f"Simple mask: {simple['IsSuccess']}, {len(simple['AzElMaskData']) // 2} azimuth-elevation pairs")
+print(f"Simple mask: {len(simple['AzElMaskData']) // 2} azimuth-elevation pairs")
 ```
 
 The `AzElMaskData` field of the response is a flat numeric array alternating as `[azimuth1, elevation1, azimuth2, elevation2, ...]`, all in rad. With the lunar polar configuration shown in this page's example, the server returns 722 values, i.e. 361 azimuth-elevation pairs; the simple response and the full response carry the same azimuth-elevation values.

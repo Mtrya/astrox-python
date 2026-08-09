@@ -92,10 +92,6 @@ def require_numeric(value: Any, *, field: str) -> float:
 
 
 def samples_from_response(response: dict[str, Any], *, frame: str) -> list[tuple[float, np.ndarray, np.ndarray]]:
-    if response.get("IsSuccess") is not True:
-        raise ResponseShapeError(
-            f"ephemeris returned IsSuccess={response.get('IsSuccess')!r}: {response.get('Message')!r}"
-        )
     position = response.get("Position")
     if not isinstance(position, dict):
         raise ResponseShapeError("ephemeris Position must be an object")

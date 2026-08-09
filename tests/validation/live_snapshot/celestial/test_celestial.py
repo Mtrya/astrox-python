@@ -27,18 +27,12 @@ START = "2026-01-01T00:00:00.000Z"
 STOP = "2026-01-02T00:00:00.000Z"
 
 
-def _require_success(response: Any, *, field: str, keys: tuple[str, ...]) -> dict[str, Any]:
+def _require_response(response: Any, *, field: str, keys: tuple[str, ...]) -> dict[str, Any]:
     if not isinstance(response, dict):
         raise SnapshotError(f"{field} response must be an object")
     for key in keys:
         if key not in response:
             raise SnapshotError(f"{field} response missing {key}")
-    if not isinstance(response["IsSuccess"], bool):
-        raise SnapshotError(f"{field} IsSuccess must be a boolean")
-    if not isinstance(response["Message"], str):
-        raise SnapshotError(f"{field} Message must be a string")
-    if response["IsSuccess"] is not True:
-        raise SnapshotError(f"{field} returned IsSuccess={response['IsSuccess']!r}: {response['Message']!r}")
     return response
 
 
@@ -63,21 +57,12 @@ def _numeric_series_shape(
     return shape
 
 
-def _response_snapshot(
-    response: dict[str, Any],
-    *,
-    field: str,
-    shape: dict[str, Any],
-) -> dict[str, Any]:
-    return {
-        "IsSuccess": response["IsSuccess"],
-        "Message": response["Message"],
-        "shape": shape,
-    }
+def _response_snapshot(shape: dict[str, Any]) -> dict[str, Any]:
+    return {"shape": shape}
 
 
 def ephemeris_shape() -> dict[str, Any]:
-    response = _require_success(
+    response = _require_response(
         celestial.ephemeris(
             target_name="Moon",
             start=START,
@@ -85,7 +70,7 @@ def ephemeris_shape() -> dict[str, Any]:
             step_s=86400.0,
         ),
         field="ephemeris",
-        keys=("IsSuccess", "Message", "Position", "Period"),
+        keys=("Position", "Period"),
     )
     if not isinstance(response["Position"], dict):
         raise SnapshotError("ephemeris Position must be an object")
@@ -99,11 +84,11 @@ def ephemeris_shape() -> dict[str, Any]:
         group_size=7,
         exact_length=14,
     )
-    return _response_snapshot(response, field="ephemeris", shape=shape)
+    return _response_snapshot(shape)
 
 
 def rotation_shape(order: int) -> dict[str, Any]:
-    response = _require_success(
+    response = _require_response(
         celestial.cb_axes_rotation(
             from_central_body="Earth",
             to_central_body="Moon",
@@ -111,7 +96,7 @@ def rotation_shape(order: int) -> dict[str, Any]:
             order=order,
         ),
         field="rotation",
-        keys=("IsSuccess", "Message", "Rotation"),
+        keys=("Rotation",),
     )
     rotation = response["Rotation"]
     if not isinstance(rotation, list):
@@ -127,14 +112,14 @@ def rotation_shape(order: int) -> dict[str, Any]:
         "length": expected_length,
         "item": {"kind": "number"},
     }
-    return _response_snapshot(response, field="rotation", shape=shape)
+    return _response_snapshot(shape)
 
 
 def mpc_shape() -> dict[str, Any]:
-    response = _require_success(
+    response = _require_response(
         celestial.mpc_ephemeris(target_name="Ceres"),
         field="MPC",
-        keys=("IsSuccess", "Message", "OrbitElements", "Position"),
+        keys=("OrbitElements", "Position"),
     )
     if not isinstance(response["OrbitElements"], dict):
         raise SnapshotError("MPC OrbitElements must be an object")
@@ -147,7 +132,96 @@ def mpc_shape() -> dict[str, Any]:
         field="MPC Position.cartesianVelocity",
         group_size=7,
     )
-    return _response_snapshot(response, field="MPC", shape=shape)
+    return _response_snapshot(shape)
+
+
+def _transfer_result_shape(value: Any, *, field: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise SnapshotError(f"{field} must be an object")
+    required = (
+        "DepartureTime",
+        "ArrivalTime",
+        "DeltaV1",
+        "DV1_Mag",
+        "DeltaV2",
+        "DV2_Mag",
+        "RV1",
+        "RV2",
+    )
+    for key in required:
+        if key not in value:
+            raise SnapshotError(f"{field} missing {key}")
+    for key in ("DepartureTime", "ArrivalTime"):
+        if not isinstance(value[key], str):
+            raise SnapshotError(f"{field}.{key} must be a string")
+    for key in ("DV1_Mag", "DV2_Mag"):
+        if not isinstance(value[key], int | float) or isinstance(value[key], bool):
+            raise SnapshotError(f"{field}.{key} must be numeric")
+    for key, expected_length in (("DeltaV1", 3), ("DeltaV2", 3), ("RV1", 6), ("RV2", 6)):
+        series = value[key]
+        if (
+            not isinstance(series, list)
+            or len(series) != expected_length
+            or not all(isinstance(item, int | float) and not isinstance(item, bool) for item in series)
+        ):
+            raise SnapshotError(f"{field}.{key} must be a numeric array of length {expected_length}")
+    return {
+        "kind": "object",
+        "fields": {
+            "ArrivalTime": {"kind": "string"},
+            "DV1_Mag": {"kind": "number"},
+            "DV2_Mag": {"kind": "number"},
+            "DeltaV1": {"kind": "array", "length": 3, "item": {"kind": "number"}},
+            "DeltaV2": {"kind": "array", "length": 3, "item": {"kind": "number"}},
+            "DepartureTime": {"kind": "string"},
+            "RV1": {"kind": "array", "length": 6, "item": {"kind": "number"}},
+            "RV2": {"kind": "array", "length": 6, "item": {"kind": "number"}},
+        },
+    }
+
+
+def transfer_shape(*, frame: str | None, explicit_elements: bool) -> dict[str, Any]:
+    kwargs: dict[str, Any] = {
+        "departure_body": "Earth",
+        "arrival_body": "2015 XF261" if explicit_elements else "Mars",
+        "departure_start": "2028-06-01T00:00:00Z",
+        "departure_stop": "2028-06-03T00:00:00Z",
+        "arrival_start": "2029-04-01T00:00:00Z",
+        "arrival_stop": "2029-04-03T00:00:00Z",
+        "departure_step_days": 2.0,
+        "arrival_step_days": 1.0,
+    }
+    if frame is not None:
+        kwargs["sun_frame"] = frame
+    if explicit_elements:
+        kwargs["arrival_elements"] = celestial.mpc_orbital_elements(
+            epoch_mjd_tdt=61000.0,
+            periapsis_time_mjd_tdt=60900.0,
+            periapsis_distance_au=0.6740515,
+            semi_major_axis_au=0.9898367,
+            eccentricity=0.3190276,
+            inclination_deg=0.79379,
+            raan_deg=209.81829,
+            argument_of_periapsis_deg=100.88187,
+            mean_anomaly_deg=120.0,
+        )
+    response = _require_response(
+        celestial.lambert_transfer_window(**kwargs),
+        field="transfer",
+        keys=("TransferResults",),
+    )
+    results = response["TransferResults"]
+    if not isinstance(results, list) or not results:
+        raise SnapshotError("transfer TransferResults must be a non-empty list")
+    shape = describe_json_shape(response, field="transfer response")
+    shape["fields"]["TransferResults"] = {
+        "kind": "array",
+        "length": len(results),
+        "item": _transfer_result_shape(results[0], field="TransferResults[0]"),
+    }
+    for index, result in enumerate(results[1:], start=1):
+        _transfer_result_shape(result, field=f"TransferResults[{index}]")
+    return _response_snapshot(shape)
 
 
 CASES = [
@@ -170,6 +244,16 @@ CASES = [
         id="mpc_ceres_server_default_window",
         description="Nested MPC response shape using the server-owned orbital-epoch default window; external numeric values are not frozen.",
         run=mpc_shape,
+    ),
+    LiveSnapshotCase(
+        id="lambert_transfer_earth_mars_mean_ecliptic",
+        description="Transfer-window result grid and six-state vector layout for a maintained Earth-to-Mars case.",
+        run=lambda: transfer_shape(frame=None, explicit_elements=False),
+    ),
+    LiveSnapshotCase(
+        id="lambert_transfer_asteroid_explicit_elements_icrf",
+        description="Transfer-window result grid using explicit MPC elements and the ICRF output branch.",
+        run=lambda: transfer_shape(frame="ICRF", explicit_elements=True),
     ),
 ]
 

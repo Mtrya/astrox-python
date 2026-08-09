@@ -62,14 +62,9 @@ def require_numeric(value: Any, *, field: str) -> float:
     return float(value)
 
 
-def require_success(response: Any, *, route: str) -> dict[str, Any]:
+def require_response(response: Any, *, route: str) -> dict[str, Any]:
     if not isinstance(response, dict):
         raise CrossValidationError(f"{route} response must be an object")
-    if response.get("IsSuccess") is not True:
-        raise CrossValidationError(
-            f"{route} returned IsSuccess={response.get('IsSuccess')!r}: "
-            f"{response.get('Message')!r}"
-        )
     data = response.get("AzElMaskData")
     if not isinstance(data, list):
         raise CrossValidationError(f"{route} AzElMaskData must be an array")
@@ -77,11 +72,11 @@ def require_success(response: Any, *, route: str) -> dict[str, Any]:
 
 
 def check_mask_invariants() -> None:
-    full_response = require_success(
+    full_response = require_response(
         terrain.azimuth_elevation_mask(site_position=SITE, config=CONFIG),
         route="AzElMask",
     )
-    simple_response = require_success(
+    simple_response = require_response(
         terrain.azimuth_elevation_mask_simple(site_position=SITE, config=CONFIG),
         route="AzElMaskSimple",
     )

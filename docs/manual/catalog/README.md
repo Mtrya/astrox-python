@@ -37,7 +37,7 @@ catalog.query_cities(
 cities = catalog.query_cities(city_name="Beijing")
 city_rows = cities.get("Cities") or []
 
-print(f"城市查询: {cities['IsSuccess']}, {len(city_rows)} 条结果")
+print(f"城市查询: {len(city_rows)} 条结果")
 ```
 
 响应中的 `Cities` 是记录数组，记录键为 `CityName`、`TypeOfCity`、`ProvinceName`、`CountryName`、`ProvinceRank`、`Population`、`Latitude`、`Longitude`、`CentralBodyName`。其中 `Latitude` 与 `Longitude` 的单位为弧度（rad），`ProvinceRank` 与 `Population` 为整数。
@@ -65,7 +65,7 @@ catalog.query_facilities(
 facilities = catalog.query_facilities(facility_name="Goldstone")
 facility_rows = facilities.get("Facilities") or []
 
-print(f"设施查询: {facilities['IsSuccess']}, {len(facility_rows)} 条结果")
+print(f"设施查询: {len(facility_rows)} 条结果")
 ```
 
 响应中的 `Facilities` 是记录数组，记录键为 `FacilityName`、`NetworkName`、`Latitude`、`Longitude`、`Altitude`、`CentralBodyName`。`Latitude` 与 `Longitude` 的单位为弧度（rad），`Altitude` 的单位为米（m）。
@@ -113,12 +113,12 @@ catalog.query_satellites(
 satellites = catalog.query_satellites(name="FENGYUN", active=True)
 
 rows = satellites.get("TLEs", [])
-print(f"活动卫星查询: {satellites['IsSuccess']}, TotalCount={satellites.get('TotalCount')}")
+print(f"活动卫星查询: TotalCount={satellites.get('TotalCount')}")
 if rows:
     print(f"第一条记录: {rows[0].get('CommonName', '<unnamed>')}")
 ```
 
-响应包含 `IsSuccess`、`Message`、`TotalCount`（查询到的卫星总数，整数）与 `TLEs`（卫星记录数组）。记录键为 `Active`、`CommonName`、`OfficialName`、`SatelliteNumber`、`TleEpoch`、`RevolutionNumber`、`TLE_Line1`、`TLE_Line2`、`InternationalDesignator`、`Owner`、`Mission`、`LaunchSite`、`LaunchDateString`、`OrbitDescription`、`Mass`、`Apogee`、`Perigee`、`Period`、`Inclination`、`LastDatabaseUpdate`、`WriteUp`。`Active` 为布尔值；服务端文档标注 `Mass` 单位为 kg、`Apogee`/`Perigee` 单位为 m、`Period` 单位为 s、`Inclination` 单位为 rad，这些数值的含义由服务端数据源决定。
+响应包含 `TotalCount`（查询到的卫星总数，整数）与 `TLEs`（卫星记录数组）。记录键为 `Active`、`CommonName`、`OfficialName`、`SatelliteNumber`、`TleEpoch`、`RevolutionNumber`、`TLE_Line1`、`TLE_Line2`、`InternationalDesignator`、`Owner`、`Mission`、`LaunchSite`、`LaunchDateString`、`OrbitDescription`、`Mass`、`Apogee`、`Perigee`、`Period`、`Inclination`、`LastDatabaseUpdate`、`WriteUp`。`Active` 为布尔值；服务端文档标注 `Mass` 单位为 kg、`Apogee`/`Perigee` 单位为 m、`Period` 单位为 s、`Inclination` 单位为 rad，这些数值的含义由服务端数据源决定。
 
 卫星目录数据易变：数据库行内容随服务端数据更新而变化，不承诺查询条数与具体行内容。
 
