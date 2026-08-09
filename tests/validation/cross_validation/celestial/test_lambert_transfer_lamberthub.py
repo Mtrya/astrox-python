@@ -44,6 +44,7 @@ from typing import Any
 
 import numpy as np
 import pytest
+from astropy.time import Time
 from lamberthub import izzo2015
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -72,6 +73,12 @@ DEPARTURE_START = "2028-06-01T00:00:00Z"
 DEPARTURE_STOP = "2028-06-03T00:00:00Z"
 ARRIVAL_START = "2029-04-01T00:00:00Z"
 ARRIVAL_STOP = "2029-04-03T00:00:00Z"
+EXPECTED_DEPARTURE_TIMES = (DEPARTURE_START, DEPARTURE_STOP)
+EXPECTED_ARRIVAL_TIMES = (
+    ARRIVAL_START,
+    "2029-04-02T00:00:00Z",
+    ARRIVAL_STOP,
+)
 
 EXPLICIT_ELEMENTS = celestial.mpc_orbital_elements(
     epoch_mjd_tdt=61000.0,
@@ -164,6 +171,22 @@ def _time(value: str) -> datetime:
     return parsed.astimezone(UTC)
 
 
+def _assert_sampling_grid(results: list[dict[str, Any]]) -> None:
+    expected_pairs = [
+        (_time(departure), _time(arrival))
+        for departure in EXPECTED_DEPARTURE_TIMES
+        for arrival in EXPECTED_ARRIVAL_TIMES
+    ]
+    actual_pairs = [
+        (_time(result["DepartureTime"]), _time(result["ArrivalTime"]))
+        for result in results
+    ]
+    if sorted(actual_pairs) != sorted(expected_pairs):
+        raise ResponseShapeError(
+            "TransferResults timestamps do not match the maintained 2x3 sampling grid"
+        )
+
+
 def _astrox_transfer_results(*, frame: str | None, explicit_elements: bool) -> list[dict[str, Any]]:
     kwargs: dict[str, Any] = {
         "departure_body": "Earth",
@@ -180,10 +203,13 @@ def _astrox_transfer_results(*, frame: str | None, explicit_elements: bool) -> l
         kwargs["sun_frame"] = frame
     if explicit_elements:
         kwargs["arrival_elements"] = EXPLICIT_ELEMENTS
-    return _require_results(
+    results = _require_results(
         celestial.lambert_transfer_window(**kwargs),
         expected_count=6,
     )
+    if not explicit_elements:
+        _assert_sampling_grid(results)
+    return results
 
 
 def _state(result: dict[str, Any], key: str) -> tuple[np.ndarray, np.ndarray]:
@@ -400,7 +426,7 @@ def test_delta_v_vectors_match_skyfield_body_velocity_interpretation() -> None:
 
 
 def _mjd_tdt_from_utc(value: str) -> float:
-    return _time(value).timestamp() / 86400.0 + 40587.0
+    return float(Time(value, scale="utc").tt.mjd)
 
 
 def _kepler_state_from_elements(

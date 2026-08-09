@@ -44,7 +44,7 @@ python compute_lambert_transfer.py
 
 ## 需要做的几个决定
 
-1. **选出发与到达天体**：`departure_body`/`arrival_body` 接受行星（如 `Earth`、`Mars`、`Ceres`）与小行星（MPC 编号或名称，如 `2015 XF261`）。小行星省略对应的 `*_elements` 参数时，服务端通过网络查询 MPC 根数。
+1. **选出发与到达天体**：`departure_body`/`arrival_body` 接受服务端支持的天体名称（如 `Earth`、`Mars`、`Ceres`）以及 MPC 编号或名称（如 `2015 XF261`）。小行星省略对应的 `*_elements` 参数时，服务端通过网络查询 MPC 根数。
 2. **定两个时间窗口**：`departure_start`/`departure_stop` 与 `arrival_start`/`arrival_stop` 各定义一个 UTC 时间窗口，SDK 分别组合为 `DepartureInterval`/`ArrivalInterval` 的 `"开始/结束"` 字符串。`departure_step_days` 与 `arrival_step_days`（单位 d）控制窗口内的采样步长，结果个数约等于两个窗口采样点数的乘积；示例中的 2 个出发日 × 3 个到达日产生 6 条结果。`min_time_of_flight_days`（单位 d，整数）过滤掉转移时间太短的组合，服务端缺省 10。
 3. **选输出参考系**：`sun_frame` 服务端缺省 `MeanEclpJ2000`；`ICRF` 分支的转移速度已与独立零圈顺行 Lambert 解一致，而 `MeanEclpJ2000` 与 ICRF 的精确关系尚未独立确认，需要参考系明确的数值时建议显式传 `sun_frame="ICRF"`。
 

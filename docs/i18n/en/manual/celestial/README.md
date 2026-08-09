@@ -152,7 +152,7 @@ celestial.mpc_orbital_elements(
 ) -> MpcOrbitalElements
 ```
 
-Builds a heliocentric MPC orbital-element fragment for the `departure_elements` and `arrival_elements` arguments of `lambert_transfer_window` (needed only when the departure/arrival body is an asteroid). The factory function returns the immutable (frozen) named dataclass `celestial.MpcOrbitalElements`; all fields are optional, and fields that are not supplied do not appear in the `to_wire()` fragment. The SDK only performs the type checks required for lowering (fields must be numeric) and does not perform physical-validity validation.
+Builds a heliocentric MPC orbital-element fragment. When either the departure or arrival endpoint is an asteroid, pass the fragment to the corresponding `departure_elements` or `arrival_elements` argument of `lambert_transfer_window`. The factory function returns the immutable (frozen) named dataclass `celestial.MpcOrbitalElements`; all fields are optional, and fields that are not supplied do not appear in the `to_wire()` fragment. The SDK only performs the type checks required for lowering (fields must be numeric) and does not perform physical-validity validation.
 
 | Field | Wire key | Unit |
 | --- | --- | --- |

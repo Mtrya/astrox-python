@@ -152,7 +152,7 @@ celestial.mpc_orbital_elements(
 ) -> MpcOrbitalElements
 ```
 
-构造日心 MPC 轨道根数片段，用于 `lambert_transfer_window` 的 `departure_elements` 与 `arrival_elements`（仅当出发/到达天体为小行星时需要）。工厂函数返回不可变（frozen）命名数据类 `celestial.MpcOrbitalElements`；所有字段都可选，未提供的字段不会出现在 `to_wire()` 片段中。SDK 只做 lowering 所需的类型检查（字段必须是数值），不做物理有效性校验。
+构造日心 MPC 轨道根数片段；当出发端或到达端为小行星时，可将片段分别传给 `lambert_transfer_window` 对应的 `departure_elements` 或 `arrival_elements`。工厂函数返回不可变（frozen）命名数据类 `celestial.MpcOrbitalElements`；所有字段都可选，未提供的字段不会出现在 `to_wire()` 片段中。SDK 只做 lowering 所需的类型检查（字段必须是数值），不做物理有效性校验。
 
 | 字段 | wire 键 | 单位 |
 | --- | --- | --- |

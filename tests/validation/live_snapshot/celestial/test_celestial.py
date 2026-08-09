@@ -214,12 +214,8 @@ def transfer_shape(*, frame: str | None, explicit_elements: bool) -> dict[str, A
     if not isinstance(results, list) or not results:
         raise SnapshotError("transfer TransferResults must be a non-empty list")
     shape = describe_json_shape(response, field="transfer response")
-    shape["fields"]["TransferResults"] = {
-        "kind": "array",
-        "length": len(results),
-        "item": _transfer_result_shape(results[0], field="TransferResults[0]"),
-    }
-    for index, result in enumerate(results[1:], start=1):
+    shape["fields"]["TransferResults"]["length"] = len(results)
+    for index, result in enumerate(results):
         _transfer_result_shape(result, field=f"TransferResults[{index}]")
     return _response_snapshot(shape)
 
