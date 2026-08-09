@@ -85,7 +85,7 @@ celestial.cb_axes_rotation(
 | `to_frame` | `ToCbFrame` | 目标坐标系，选项同上，缺省为 `FIXED` |
 | `order` | `Order` | 旋转运动阶数：`0` 仅返回四元数，`1` 返回四元数及角速度；整数原样传递 |
 
-`order` 保留为整数并原样 lower 到服务端，SDK 不做分支改写。响应中的 `Rotation` 是数值数组：`order=0` 时长度为 4（四元数 `[qx, qy, qz, qw]`），`order=1` 时长度为 7（四元数加角速度分量，服务端文档标注角速度单位为 rad/s）。同一中心天体、两侧均为 `INERTIAL` 时，服务端返回单位四元数且角速度为 0；任意中心天体/坐标系组合的变换数值不在 SDK 维护范围内，使用前请自行核对语义。
+`order` 保留为整数并原样 lower 到服务端，SDK 不做分支改写。响应中的 `Rotation` 是数值数组：`order=0` 时长度为 4（四元数 `[qx, qy, qz, qw]`），`order=1` 时长度为 7（四元数加角速度分量，服务端文档标注角速度单位为 rad/s）。已验证的数值语义包括：同一中心天体、两侧均为 `INERTIAL` 时，服务端返回单位四元数且 `order=1` 时角速度为 0；`Earth` 的 `INERTIAL`→`FIXED` 四元数与角速度；`Earth`→`Moon` 的 `INERTIAL`→`FIXED` 在 `order=1` 时的角速度。`Earth`→`Moon` 的 `INERTIAL`→`FIXED` 四元数尚未确认，其它组合未验证，使用前请自行核对。
 
 ```python
 rotation = celestial.cb_axes_rotation(
@@ -99,6 +99,8 @@ rotation = celestial.cb_axes_rotation(
 
 print(f"Earth→Moon 旋转: {rotation['IsSuccess']}, {len(rotation['Rotation'])} 个数值")
 ```
+
+示例仅演示请求方式与响应结构，不表示 Earth→Moon 四元数的数值语义已经验证。
 
 ## 小行星 MPC 星历
 
@@ -123,14 +125,10 @@ celestial.mpc_ephemeris(
 | `start` | `Start` | 开始时刻（UTC）；缺省为轨道历元时刻，不能早于轨道历元时刻（服务端规则） |
 | `stop` | `Stop` | 结束时刻（UTC）；缺省为 `Start` 起 1 年 |
 
-该路由从外部 MPC 数据源获取轨道根数（历元为 MJD TDT），由服务端以固定 1 天步长进行日心轨道递推，输出为日心系 CZML Position 结构。响应包含 `IsSuccess`、`Message`、`OrbitElements`（轨道根数，键为 `EpochMjdTdt`、`PeriTimeMjdTdt`、`Q`、`SemimajorAxis`、`Eccentricity`、`Inclination`、`Raan`、`ArgOfPeriapsis`、`MeanAnomaly`）与 `Position`（CZML 结构，同 `ephemeris`）。轨道根数的数值来自外部 MPC 数据，属于外部数据所有，可能随 MPC 数据更新而变化；请在小行星轨道历元之后选择查询窗口，早于轨道历元的窗口可能被服务端拒绝。
+该路由从外部 MPC 数据源获取轨道根数（历元为 MJD TDT），由服务端以固定 1 天步长进行日心轨道递推，输出为日心系 CZML Position 结构。响应包含 `IsSuccess`、`Message`、`OrbitElements`（轨道根数，键为 `EpochMjdTdt`、`PeriTimeMjdTdt`、`Q`、`SemimajorAxis`、`Eccentricity`、`Inclination`、`Raan`、`ArgOfPeriapsis`、`MeanAnomaly`）与 `Position`（CZML 结构，同 `ephemeris`）。轨道根数的数值来自外部 MPC 数据，属于外部数据所有，可能随 MPC 数据更新而变化。省略 `start`/`stop` 时，服务端使用轨道历元默认窗口（`start` 为轨道历元时刻，`stop` 为其后 1 年）；显式固定窗口依赖查询时的轨道历元，外部 MPC 轨道历元更新后，先前固定的窗口可能早于新历元而被服务端拒绝，建议省略窗口参数或跟随当前历元选择。
 
 ```python
-mpc = celestial.mpc_ephemeris(
-    target_name="Ceres",
-    start="2026-01-01T00:00:00.000Z",
-    stop="2026-01-02T00:00:00.000Z",
-)
+mpc = celestial.mpc_ephemeris(target_name="Ceres")
 
 print(f"Ceres MPC 星历: {mpc['IsSuccess']}, {mpc['Message']}")
 ```
@@ -140,6 +138,7 @@ print(f"Ceres MPC 星历: {mpc['IsSuccess']}, {mpc['Message']}")
 - `ephemeris` 的 `start` 与 `stop` 在 curated surface 中显式必传，不依赖服务端年度缺省窗口。
 - `cartesianVelocity` 每个样本为 `[Time, X, Y, Z, dX, dY, dZ]`，`Time` 为相对历元的秒数，位置 m、速度 m/s。
 - `cb_axes_rotation` 的 `order` 是整数，SDK 原样传递；`Rotation` 长度与 `order` 对应（`0` → 4，`1` → 7）。
+- `mpc_ephemeris` 省略 `start`/`stop` 时由服务端使用轨道历元默认窗口；显式固定窗口可能因外部 MPC 轨道历元更新而过期。
 - 未提供的可选参数不会被发往 ASTROX，由服务器保留默认值。
 - 验证证据见 [celestial 验证页](../../validation/celestial.md)。
 

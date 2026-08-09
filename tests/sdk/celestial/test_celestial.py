@@ -159,6 +159,53 @@ def test_mpc_ephemeris_preserves_external_route_defaults(
     )
 
 
+def test_mpc_ephemeris_lowers_optional_arguments(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(monkeypatch, RESPONSE)
+
+    celestial.mpc_ephemeris(
+        target_name="Ceres",
+        observer_frame="topocentric",
+        start=START,
+        stop=STOP,
+    )
+
+    assert_canonical_equal(
+        calls[0],
+        {
+            "endpoint": "/celestial/mpc",
+            "json": {
+                "TargetName": "Ceres",
+                "ObserverFrame": "topocentric",
+                "Start": START,
+                "Stop": STOP,
+            },
+        },
+    )
+
+
+def test_mpc_ephemeris_omits_none_optional_arguments(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(monkeypatch, RESPONSE)
+
+    celestial.mpc_ephemeris(
+        target_name="Ceres",
+        observer_frame=None,
+        start=START,
+        stop=None,
+    )
+
+    assert_canonical_equal(
+        calls[0],
+        {
+            "endpoint": "/celestial/mpc",
+            "json": {"TargetName": "Ceres", "Start": START},
+        },
+    )
+
+
 @pytest.mark.parametrize(
     ("function", "kwargs", "parameter"),
     [

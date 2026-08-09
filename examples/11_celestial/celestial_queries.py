@@ -34,11 +34,7 @@ def main() -> None:
     )
     print(f"Earth→Moon 旋转: {rotation['IsSuccess']}, {len(rotation['Rotation'])} 个数值")
 
-    mpc = celestial.mpc_ephemeris(
-        target_name="Ceres",
-        start=START,
-        stop=STOP,
-    )
+    mpc = celestial.mpc_ephemeris(target_name="Ceres")
     print(f"Ceres MPC 星历: {mpc['IsSuccess']}, {mpc['Message']}")
 
 

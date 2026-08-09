@@ -17,29 +17,12 @@ from tests.validation._support import (  # noqa: E402
     SnapshotError,
     check_snapshot,
     configure_astrox_from_env,
+    describe_json_shape,
     main as snapshot_main,
 )
 
 
 SNAPSHOT_PATH = Path(__file__).with_name("catalog.snap.json")
-
-
-def _record_shape(value: Any, *, field: str) -> dict[str, Any]:
-    if value is None:
-        return {"kind": "null"}
-    if not isinstance(value, list):
-        raise SnapshotError(f"{field} must be a list or null")
-    if not value:
-        return {"kind": "array", "item_keys": []}
-    if not all(isinstance(item, dict) for item in value):
-        raise SnapshotError(f"{field} must contain object records")
-    return {
-        "kind": "array",
-        "item_keys": {
-            str(key): True
-            for key in sorted({str(key) for item in value for key in item})
-        },
-    }
 
 
 def _catalog_shape(response: Any, *, collection_field: str) -> dict[str, Any]:
@@ -52,11 +35,17 @@ def _catalog_shape(response: Any, *, collection_field: str) -> dict[str, Any]:
         raise SnapshotError("catalog IsSuccess must be a boolean")
     if not isinstance(response["Message"], str):
         raise SnapshotError("catalog Message must be a string")
+    if response["IsSuccess"] is not True:
+        raise SnapshotError(f"catalog returned IsSuccess={response['IsSuccess']!r}: {response['Message']!r}")
+    collection = response[collection_field]
+    if collection is not None and (
+        not isinstance(collection, list) or not all(isinstance(item, dict) for item in collection)
+    ):
+        raise SnapshotError(f"{collection_field} must be a list of object records or null")
     return {
-        "response_keys": sorted(str(key) for key in response),
         "IsSuccess": response["IsSuccess"],
         "Message": response["Message"],
-        collection_field: _record_shape(response[collection_field], field=collection_field),
+        "shape": describe_json_shape(response, field="catalog response"),
     }
 
 
@@ -84,17 +73,17 @@ def query_satellite_shape() -> dict[str, Any]:
 CASES = [
     LiveSnapshotCase(
         id="query_cities_by_name",
-        description="Stable response envelope and record keys for a named city query.",
+        description="Stable response envelope and nested record value kinds for a named city query.",
         run=query_city_shape,
     ),
     LiveSnapshotCase(
         id="query_facilities_by_name",
-        description="Stable response envelope and record keys for a named facility query.",
+        description="Stable response envelope and nested record value kinds for a named facility query.",
         run=query_facility_shape,
     ),
     LiveSnapshotCase(
         id="query_satellites_by_name_active",
-        description="Stable response envelope and record keys for an active satellite query; database rows are intentionally not frozen.",
+        description="Stable response envelope and nested record value kinds for an active satellite query; database rows and values are intentionally not frozen.",
         run=query_satellite_shape,
     ),
 ]

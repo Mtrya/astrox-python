@@ -77,6 +77,21 @@ def test_terrain_mask_config_is_frozen_and_lowers_exactly() -> None:
         CONFIG.flag_pole = 0
 
 
+def test_terrain_mask_config_omits_none_fields() -> None:
+    config = terrain.TerrainMaskConfig(
+        text="terrain example",
+        polar_dem_file_name="Moon_LDEM_80s_20m",
+    )
+
+    assert_canonical_equal(
+        config.to_wire(),
+        {
+            "Text": "terrain example",
+            "PolarDemFileName": "Moon_LDEM_80s_20m",
+        },
+    )
+
+
 def test_full_terrain_mask_lowers_complete_payload(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

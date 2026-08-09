@@ -26,6 +26,64 @@ def test_normalize_for_snapshot_converts_dataclasses_and_samples_long_lists() ->
     assert snapshot["nested"]["vector"] == {"length": 22, "first": list(range(10)), "last": list(range(12, 22))}
 
 
+def test_describe_json_shape_preserves_nested_types_without_values() -> None:
+    assert contracts.describe_json_shape(
+        {
+            "success": True,
+            "rows": [
+                {"name": "first", "value": 1},
+                {"name": "second", "value": 2.5},
+            ],
+            "empty": [],
+        }
+    ) == {
+        "kind": "object",
+        "fields": {
+            "empty": {"kind": "array", "item": None},
+            "rows": {
+                "kind": "array",
+                "item": {
+                    "kind": "object",
+                    "fields": {
+                        "name": {"kind": "string"},
+                        "value": {"kind": "number"},
+                    },
+                },
+            },
+            "success": {"kind": "boolean"},
+        },
+    }
+
+
+def test_describe_json_shape_merges_optional_and_union_fields() -> None:
+    assert contracts.describe_json_shape(
+        [
+            {"value": None},
+            {"extra": "present", "value": 1},
+        ]
+    ) == {
+        "kind": "array",
+        "item": {
+            "kind": "object",
+            "fields": {
+                "extra": {"kind": "string", "optional": True},
+                "value": {
+                    "kind": "union",
+                    "variants": [
+                        {"kind": "null"},
+                        {"kind": "number"},
+                    ],
+                },
+            },
+        },
+    }
+
+
+def test_describe_json_shape_rejects_non_json_values() -> None:
+    with pytest.raises(contracts.SnapshotError, match=r"\$\.value has unsupported value type set"):
+        contracts.describe_json_shape({"value": {1, 2}})
+
+
 def test_canonical_snapshot_io_round_trips_sorted_json(tmp_path: Path) -> None:
     path = tmp_path / "sample.snap.json"
     snapshot = {

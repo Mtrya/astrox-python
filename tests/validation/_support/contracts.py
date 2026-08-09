@@ -88,6 +88,88 @@ def to_json_compatible(value: Any) -> Any:
     raise TypeError(f"value of type {type(value).__name__} is not JSON-compatible")
 
 
+def describe_json_shape(value: Any, *, field: str = "$") -> dict[str, Any]:
+    """Describe nested JSON types without freezing volatile values or array lengths."""
+    if value is None:
+        return {"kind": "null"}
+    if isinstance(value, bool):
+        return {"kind": "boolean"}
+    if isinstance(value, int | float):
+        return {"kind": "number"}
+    if isinstance(value, str):
+        return {"kind": "string"}
+    if isinstance(value, dict):
+        return {
+            "kind": "object",
+            "fields": {
+                str(key): describe_json_shape(item, field=f"{field}.{key}")
+                for key, item in sorted(value.items(), key=lambda entry: str(entry[0]))
+            },
+        }
+    if isinstance(value, list):
+        return {
+            "kind": "array",
+            "item": _merge_shape_descriptions(
+                [
+                    describe_json_shape(item, field=f"{field}[{index}]")
+                    for index, item in enumerate(value)
+                ]
+            ),
+        }
+    raise SnapshotError(f"{field} has unsupported value type {type(value).__name__}")
+
+
+def _merge_shape_descriptions(shapes: list[dict[str, Any]]) -> dict[str, Any] | None:
+    if not shapes:
+        return None
+
+    optional = any(shape.get("optional") is True for shape in shapes)
+    expanded: list[dict[str, Any]] = []
+    for shape in shapes:
+        normalized = {key: value for key, value in shape.items() if key != "optional"}
+        if normalized.get("kind") == "union":
+            expanded.extend(normalized["variants"])
+        else:
+            expanded.append(normalized)
+
+    unique_by_json = {
+        json.dumps(shape, sort_keys=True, separators=(",", ":")): shape
+        for shape in expanded
+    }
+    unique = [unique_by_json[key] for key in sorted(unique_by_json)]
+    kinds = {shape["kind"] for shape in unique}
+
+    if len(unique) == 1:
+        result = unique[0]
+    elif kinds == {"object"}:
+        fields = sorted(
+            {
+                key
+                for shape in unique
+                for key in shape["fields"]
+            }
+        )
+        merged_fields: dict[str, Any] = {}
+        for key in fields:
+            present = [shape["fields"][key] for shape in unique if key in shape["fields"]]
+            merged = _merge_shape_descriptions(present)
+            if merged is None:
+                raise SnapshotError(f"could not describe object field {key!r}")
+            if len(present) != len(unique):
+                merged = {**merged, "optional": True}
+            merged_fields[key] = merged
+        result = {"kind": "object", "fields": merged_fields}
+    elif kinds == {"array"}:
+        items = [shape["item"] for shape in unique if shape["item"] is not None]
+        result = {"kind": "array", "item": _merge_shape_descriptions(items)}
+    else:
+        result = {"kind": "union", "variants": unique}
+
+    if optional:
+        return {**result, "optional": True}
+    return result
+
+
 def normalize_for_snapshot(value: Any) -> Any:
     return _normalize_arrays(to_json_compatible(value))
 

@@ -1,99 +1,200 @@
 {
   "cases": [
     {
-      "description": "Stable response envelope and record keys for a named city query.",
+      "description": "Stable response envelope and nested record value kinds for a named city query.",
       "id": "query_cities_by_name",
       "return": {
-        "Cities": {
-          "item_keys": {
-            "CentralBodyName": true,
-            "CityName": true,
-            "CountryName": true,
-            "Latitude": true,
-            "Longitude": true,
-            "Population": true,
-            "ProvinceName": true,
-            "ProvinceRank": true,
-            "TypeOfCity": true
-          },
-          "kind": "array"
-        },
         "IsSuccess": true,
         "Message": "Success",
-        "response_keys": [
-          "Cities",
-          "IsSuccess",
-          "Message"
-        ]
+        "shape": {
+          "fields": {
+            "Cities": {
+              "item": {
+                "fields": {
+                  "CentralBodyName": {
+                    "kind": "string"
+                  },
+                  "CityName": {
+                    "kind": "string"
+                  },
+                  "CountryName": {
+                    "kind": "string"
+                  },
+                  "Latitude": {
+                    "kind": "number"
+                  },
+                  "Longitude": {
+                    "kind": "number"
+                  },
+                  "Population": {
+                    "kind": "number"
+                  },
+                  "ProvinceName": {
+                    "kind": "string"
+                  },
+                  "ProvinceRank": {
+                    "kind": "number"
+                  },
+                  "TypeOfCity": {
+                    "kind": "string"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            },
+            "IsSuccess": {
+              "kind": "boolean"
+            },
+            "Message": {
+              "kind": "string"
+            }
+          },
+          "kind": "object"
+        }
       }
     },
     {
-      "description": "Stable response envelope and record keys for a named facility query.",
+      "description": "Stable response envelope and nested record value kinds for a named facility query.",
       "id": "query_facilities_by_name",
       "return": {
-        "Facilities": {
-          "item_keys": {
-            "Altitude": true,
-            "CentralBodyName": true,
-            "FacilityName": true,
-            "Latitude": true,
-            "Longitude": true,
-            "NetworkName": true
-          },
-          "kind": "array"
-        },
         "IsSuccess": true,
         "Message": "Success",
-        "response_keys": [
-          "Facilities",
-          "IsSuccess",
-          "Message"
-        ]
+        "shape": {
+          "fields": {
+            "Facilities": {
+              "item": {
+                "fields": {
+                  "Altitude": {
+                    "kind": "number"
+                  },
+                  "CentralBodyName": {
+                    "kind": "string"
+                  },
+                  "FacilityName": {
+                    "kind": "string"
+                  },
+                  "Latitude": {
+                    "kind": "number"
+                  },
+                  "Longitude": {
+                    "kind": "number"
+                  },
+                  "NetworkName": {
+                    "kind": "string"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            },
+            "IsSuccess": {
+              "kind": "boolean"
+            },
+            "Message": {
+              "kind": "string"
+            }
+          },
+          "kind": "object"
+        }
       }
     },
     {
-      "description": "Stable response envelope and record keys for an active satellite query; database rows are intentionally not frozen.",
+      "description": "Stable response envelope and nested record value kinds for an active satellite query; database rows and values are intentionally not frozen.",
       "id": "query_satellites_by_name_active",
       "return": {
         "IsSuccess": true,
         "Message": "Success",
-        "TLEs": {
-          "item_keys": {
-            "Active": true,
-            "Apogee": true,
-            "CommonName": true,
-            "Inclination": true,
-            "InternationalDesignator": true,
-            "LastDatabaseUpdate": true,
-            "LaunchDateString": true,
-            "LaunchSite": true,
-            "Mass": true,
-            "Mission": true,
-            "OfficialName": true,
-            "OrbitDescription": true,
-            "Owner": true,
-            "Perigee": true,
-            "Period": true,
-            "RevolutionNumber": true,
-            "SatelliteNumber": true,
-            "TLE_Line1": true,
-            "TLE_Line2": true,
-            "TleEpoch": true,
-            "WriteUp": true
+        "shape": {
+          "fields": {
+            "IsSuccess": {
+              "kind": "boolean"
+            },
+            "Message": {
+              "kind": "string"
+            },
+            "TLEs": {
+              "item": {
+                "fields": {
+                  "Active": {
+                    "kind": "boolean"
+                  },
+                  "Apogee": {
+                    "kind": "number"
+                  },
+                  "CommonName": {
+                    "kind": "string"
+                  },
+                  "Inclination": {
+                    "kind": "number"
+                  },
+                  "InternationalDesignator": {
+                    "kind": "string"
+                  },
+                  "LastDatabaseUpdate": {
+                    "kind": "string"
+                  },
+                  "LaunchDateString": {
+                    "kind": "string"
+                  },
+                  "LaunchSite": {
+                    "kind": "string"
+                  },
+                  "Mass": {
+                    "kind": "number"
+                  },
+                  "Mission": {
+                    "kind": "string"
+                  },
+                  "OfficialName": {
+                    "kind": "string"
+                  },
+                  "OrbitDescription": {
+                    "kind": "string"
+                  },
+                  "Owner": {
+                    "kind": "string"
+                  },
+                  "Perigee": {
+                    "kind": "number"
+                  },
+                  "Period": {
+                    "kind": "number"
+                  },
+                  "RevolutionNumber": {
+                    "kind": "number"
+                  },
+                  "SatelliteNumber": {
+                    "kind": "string"
+                  },
+                  "TLE_Line1": {
+                    "kind": "string"
+                  },
+                  "TLE_Line2": {
+                    "kind": "string"
+                  },
+                  "TleEpoch": {
+                    "kind": "string"
+                  },
+                  "WriteUp": {
+                    "kind": "string"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            },
+            "TotalCount": {
+              "kind": "number"
+            }
           },
-          "kind": "array"
-        },
-        "response_keys": [
-          "IsSuccess",
-          "Message",
-          "TLEs",
-          "TotalCount"
-        ]
+          "kind": "object"
+        }
       }
     }
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-08-09T05:25:15Z"
+    "refreshed_at": "2026-08-09T06:27:26Z"
   }
 }

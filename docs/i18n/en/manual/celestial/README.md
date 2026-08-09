@@ -85,7 +85,7 @@ Computes the rotation from the coordinate axes of the source central body to tho
 | `to_frame` | `ToCbFrame` | Target frame, same options, default `FIXED` |
 | `order` | `Order` | Rotation motion order: `0` returns the quaternion only, `1` returns the quaternion and angular velocity; passed through as an integer |
 
-`order` is preserved as an integer and lowered to the server as-is; the SDK does not rewrite the branch. The `Rotation` field of the response is a numeric array: with `order=0` it has length 4 (quaternion `[qx, qy, qz, qw]`), and with `order=1` it has length 7 (quaternion plus angular-velocity components, unit rad/s per the server documentation). For the same central body on both sides with `INERTIAL` frames on both sides, the server returns the identity quaternion with zero angular velocity; transformation values for arbitrary central-body/frame combinations are outside the SDK-maintained scope, so verify their meaning yourself before use.
+`order` is preserved as an integer and lowered to the server as-is; the SDK does not rewrite the branch. The `Rotation` field of the response is a numeric array: with `order=0` it has length 4 (quaternion `[qx, qy, qz, qw]`), and with `order=1` it has length 7 (quaternion plus angular-velocity components, unit rad/s per the server documentation). Verified numeric semantics include: for the same central body on both sides with `INERTIAL` frames on both sides, the server returns the identity quaternion with zero angular velocity at `order=1`; the Earth `INERTIAL`→`FIXED` quaternion and angular velocity; and the Earth→Moon `INERTIAL`→`FIXED` angular velocity at `order=1`. The Earth→Moon `INERTIAL`→`FIXED` quaternion is unresolved, and other combinations are unverified, so verify their meaning yourself before use.
 
 ```python
 rotation = celestial.cb_axes_rotation(
@@ -99,6 +99,8 @@ rotation = celestial.cb_axes_rotation(
 
 print(f"Earth→Moon rotation: {rotation['IsSuccess']}, {len(rotation['Rotation'])} values")
 ```
+
+The example only demonstrates the request style and response structure; it does not mean that the numeric semantics of the Earth→Moon quaternion have been verified.
 
 ## Minor-planet MPC ephemeris
 
@@ -123,14 +125,10 @@ Queries an MPC minor-planet ephemeris by asteroid name or number and returns a r
 | `start` | `Start` | Start time (UTC); defaults to the orbital epoch and cannot be earlier than the orbital epoch (server rule) |
 | `stop` | `Stop` | Stop time (UTC); defaults to 1 year after `Start` |
 
-This route fetches orbital elements from the external MPC data source (element epoch in MJD TDT), which the server propagates heliocentrically with a fixed 1-day step, and outputs a heliocentric CZML Position structure. The response contains `IsSuccess`, `Message`, `OrbitElements` (orbital elements with keys `EpochMjdTdt`, `PeriTimeMjdTdt`, `Q`, `SemimajorAxis`, `Eccentricity`, `Inclination`, `Raan`, `ArgOfPeriapsis`, `MeanAnomaly`), and `Position` (CZML structure, same as `ephemeris`). The orbital-element values come from external MPC data, are owned by that external data source, and may change with MPC updates; choose query windows after the asteroid's orbital epoch, because windows earlier than the orbital epoch may be rejected by the server.
+This route fetches orbital elements from the external MPC data source (element epoch in MJD TDT), which the server propagates heliocentrically with a fixed 1-day step, and outputs a heliocentric CZML Position structure. The response contains `IsSuccess`, `Message`, `OrbitElements` (orbital elements with keys `EpochMjdTdt`, `PeriTimeMjdTdt`, `Q`, `SemimajorAxis`, `Eccentricity`, `Inclination`, `Raan`, `ArgOfPeriapsis`, `MeanAnomaly`), and `Position` (CZML structure, same as `ephemeris`). The orbital-element values come from external MPC data, are owned by that external data source, and may change with MPC updates. When `start`/`stop` are omitted, the server uses the orbital-epoch default window (`start` is the orbital epoch and `stop` is one year after it); an explicit fixed window depends on the orbital epoch at query time, and once the external MPC orbital epoch updates, a previously fixed window may fall before the new epoch and be rejected by the server, so prefer omitting the window parameters or following the current epoch.
 
 ```python
-mpc = celestial.mpc_ephemeris(
-    target_name="Ceres",
-    start="2026-01-01T00:00:00.000Z",
-    stop="2026-01-02T00:00:00.000Z",
-)
+mpc = celestial.mpc_ephemeris(target_name="Ceres")
 
 print(f"Ceres MPC ephemeris: {mpc['IsSuccess']}, {mpc['Message']}")
 ```
@@ -140,6 +138,7 @@ print(f"Ceres MPC ephemeris: {mpc['IsSuccess']}, {mpc['Message']}")
 - `ephemeris` requires `start` and `stop` explicitly on the curated surface and does not rely on the server's annual default window.
 - Each `cartesianVelocity` sample is `[Time, X, Y, Z, dX, dY, dZ]`, with `Time` in seconds from the reference epoch, positions in m, and velocities in m/s.
 - `cb_axes_rotation` passes the integer `order` through as-is; the `Rotation` length corresponds to `order` (`0` → 4, `1` → 7).
+- `mpc_ephemeris` relies on the server's orbital-epoch default window when `start`/`stop` are omitted; an explicit fixed window may expire when the external MPC orbital epoch updates.
 - Optional parameters that are not supplied are not sent to ASTROX; the server retains its default values.
 - Validation evidence is recorded on the [celestial validation page](../../../../validation/celestial.md).
 

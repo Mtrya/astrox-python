@@ -17,6 +17,7 @@ from tests.validation._support import (  # noqa: E402
     SnapshotError,
     check_snapshot,
     configure_astrox_from_env,
+    describe_json_shape,
     main as snapshot_main,
 )
 
@@ -43,14 +44,17 @@ def _shape(value: Any, *, field: str) -> dict[str, Any]:
     if not isinstance(value, list):
         raise SnapshotError(f"{field} must be a list")
     if not value:
-        return {"length": 0, "item_keys": []}
+        return {"kind": "array", "item": None}
     if all(isinstance(item, dict) for item in value):
+        return describe_json_shape(value, field=field)
+    if all(isinstance(item, int | float) and not isinstance(item, bool) for item in value):
+        if len(value) % 2 != 0:
+            raise SnapshotError(f"{field} numeric values must form azimuth/elevation pairs")
         return {
-            "length": len(value),
-            "item_keys": sorted({str(key) for item in value for key in item}),
+            "kind": "array",
+            "item": {"kind": "number"},
+            "pair_size": 2,
         }
-    if all(isinstance(item, (int, float)) and not isinstance(item, bool) for item in value):
-        return {"length": len(value), "item_type": "number", "even_length": len(value) % 2 == 0}
     raise SnapshotError(f"{field} has an unsupported item shape")
 
 
@@ -64,14 +68,16 @@ def _mask_shape(response: Any) -> dict[str, Any]:
         raise SnapshotError("terrain IsSuccess must be a boolean")
     if not isinstance(response["Message"], str):
         raise SnapshotError("terrain Message must be a string")
+    if response["IsSuccess"] is not True:
+        raise SnapshotError(f"terrain returned IsSuccess={response['IsSuccess']!r}: {response['Message']!r}")
     if not isinstance(response["sitePosition"], dict):
         raise SnapshotError("terrain sitePosition must be an object")
+    shape = describe_json_shape(response, field="terrain response")
+    shape["fields"]["AzElMaskData"] = _shape(response["AzElMaskData"], field="AzElMaskData")
     return {
-        "response_keys": sorted(str(key) for key in response),
         "IsSuccess": response["IsSuccess"],
         "Message": response["Message"],
-        "sitePosition_keys": sorted(str(key) for key in response["sitePosition"]),
-        "AzElMaskData": _shape(response["AzElMaskData"], field="AzElMaskData"),
+        "shape": shape,
     }
 
 

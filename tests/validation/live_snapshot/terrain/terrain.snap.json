@@ -4,58 +4,118 @@
       "description": "Full terrain mask structure using the documented Moon polar DEM configuration.",
       "id": "azimuth_elevation_mask_explicit_polar_config",
       "return": {
-        "AzElMaskData": {
-          "item_keys": [
-            "Azimuth",
-            "Elevation",
-            "Items"
-          ],
-          "length": 361
-        },
         "IsSuccess": true,
         "Message": "Success",
-        "response_keys": [
-          "AzElMaskData",
-          "IsSuccess",
-          "Message",
-          "sitePosition"
-        ],
-        "sitePosition_keys": [
-          "CentralBody",
-          "HeightAboveGround",
-          "cartographicDegrees",
-          "clampToGround"
-        ]
+        "shape": {
+          "fields": {
+            "AzElMaskData": {
+              "item": {
+                "fields": {
+                  "Azimuth": {
+                    "kind": "number"
+                  },
+                  "Elevation": {
+                    "kind": "number"
+                  },
+                  "Items": {
+                    "item": {
+                      "fields": {
+                        "Distance": {
+                          "kind": "number"
+                        },
+                        "Elevation": {
+                          "kind": "number"
+                        }
+                      },
+                      "kind": "object"
+                    },
+                    "kind": "array"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            },
+            "IsSuccess": {
+              "kind": "boolean"
+            },
+            "Message": {
+              "kind": "string"
+            },
+            "sitePosition": {
+              "fields": {
+                "CentralBody": {
+                  "kind": "string"
+                },
+                "HeightAboveGround": {
+                  "kind": "number"
+                },
+                "cartographicDegrees": {
+                  "item": {
+                    "kind": "number"
+                  },
+                  "kind": "array"
+                },
+                "clampToGround": {
+                  "kind": "boolean"
+                }
+              },
+              "kind": "object"
+            }
+          },
+          "kind": "object"
+        }
       }
     },
     {
       "description": "Simplified terrain mask pair structure using the documented Moon polar DEM configuration.",
       "id": "azimuth_elevation_mask_simple_explicit_polar_config",
       "return": {
-        "AzElMaskData": {
-          "even_length": true,
-          "item_type": "number",
-          "length": 722
-        },
         "IsSuccess": true,
         "Message": "Success",
-        "response_keys": [
-          "AzElMaskData",
-          "IsSuccess",
-          "Message",
-          "sitePosition"
-        ],
-        "sitePosition_keys": [
-          "CentralBody",
-          "HeightAboveGround",
-          "cartographicDegrees",
-          "clampToGround"
-        ]
+        "shape": {
+          "fields": {
+            "AzElMaskData": {
+              "item": {
+                "kind": "number"
+              },
+              "kind": "array",
+              "pair_size": 2
+            },
+            "IsSuccess": {
+              "kind": "boolean"
+            },
+            "Message": {
+              "kind": "string"
+            },
+            "sitePosition": {
+              "fields": {
+                "CentralBody": {
+                  "kind": "string"
+                },
+                "HeightAboveGround": {
+                  "kind": "number"
+                },
+                "cartographicDegrees": {
+                  "item": {
+                    "kind": "number"
+                  },
+                  "kind": "array"
+                },
+                "clampToGround": {
+                  "kind": "boolean"
+                }
+              },
+              "kind": "object"
+            }
+          },
+          "kind": "object"
+        }
       }
     }
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-08-09T04:46:33Z"
+    "refreshed_at": "2026-08-09T06:27:27Z"
   }
 }
