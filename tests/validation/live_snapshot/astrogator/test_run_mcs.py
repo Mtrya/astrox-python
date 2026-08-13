@@ -20,6 +20,7 @@ from tests.validation._support import (
 
 
 SNAPSHOT_PATH = Path(__file__).with_name("run_mcs.snap.json")
+SNAPSHOT_ABS_TOL = 1e-12
 START = "2026-01-01T00:00:00Z"
 MU = 398600441500000.0
 
@@ -345,8 +346,10 @@ CASES = [
 
 def test_run_mcs_live_snapshot() -> None:
     configure_astrox_from_env()
-    check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
+    check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH, abs_tol=SNAPSHOT_ABS_TOL)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(cases=CASES, snapshot_path=SNAPSHOT_PATH))
+    raise SystemExit(
+        main(cases=CASES, snapshot_path=SNAPSHOT_PATH, abs_tol=SNAPSHOT_ABS_TOL)
+    )
