@@ -5,6 +5,7 @@
 - [components](components/README.md)
 - [propagator](propagator/README.md)
 - [orbits](orbits/README.md)
+- [libration](libration/README.md)
 - [lighting](lighting/README.md)
 - [access](access/README.md)
 - [coverage](coverage/README.md)

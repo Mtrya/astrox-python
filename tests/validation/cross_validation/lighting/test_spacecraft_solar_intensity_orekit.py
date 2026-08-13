@@ -17,28 +17,23 @@
 from __future__ import annotations
 
 import math
-import os
-import shutil
 import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from urllib.request import urlopen
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from astrox import components, lighting
-from tests.validation._support import LiveConfigError, configure_astrox_from_env
+from tests.validation._support import (
+    LiveConfigError,
+    configure_astrox_from_env,
+    ensure_orekit_data,
+)
 
 
-OREKIT_DATA_URL = (
-    "https://gitlab.orekit.org/orekit/orekit-data/-/archive/main/orekit-data-main.zip"
-)
-OREKIT_DATA_PATH = Path(
-    os.environ.get("OREKIT_DATA_PATH", "/tmp/astrox-python-orekit-data.zip")
-)
 INTENSITY_ABS = 5.0e-6
 START = "2024-01-01T00:00:00.000Z"
 
@@ -155,20 +150,6 @@ PARTIAL_SHADOW_CASE = CzmlCase(
     ),
 )
 CASES = (GENERAL_SHADOW_CASE, PARTIAL_SHADOW_CASE)
-
-
-def ensure_orekit_data() -> Path:
-    if OREKIT_DATA_PATH.exists() and OREKIT_DATA_PATH.stat().st_size > 0:
-        return OREKIT_DATA_PATH
-
-    OREKIT_DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
-    temporary_path = OREKIT_DATA_PATH.with_suffix(OREKIT_DATA_PATH.suffix + ".tmp")
-    with urlopen(OREKIT_DATA_URL, timeout=60) as response, temporary_path.open(
-        "wb"
-    ) as output:
-        shutil.copyfileobj(response, output)
-    temporary_path.replace(OREKIT_DATA_PATH)
-    return OREKIT_DATA_PATH
 
 
 def czml_position(case: CzmlCase) -> components.CzmlPosition:

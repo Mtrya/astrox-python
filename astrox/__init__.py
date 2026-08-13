@@ -4,7 +4,7 @@ Functions are organized by domain modules and can use package-level
 configuration without requiring explicit client management:
 
     import astrox
-    from astrox import access, celestial, catalog, components, coverage, lighting, orbits, propagator, terrain
+    from astrox import access, celestial, catalog, components, coverage, libration, lighting, orbits, propagator, terrain
 
     astrox.configure(base_url="http://custom:8765", timeout=120)
     orbit = orbits.keplerian(...)
@@ -35,6 +35,7 @@ from astrox import (
     conjunction,
     components,
     coverage,
+    libration,
     lighting,
     orbits,
     propagator,
@@ -60,6 +61,7 @@ __all__ = [
     "conjunction",
     "coverage",
     "components",
+    "libration",
     "lighting",
     "orbits",
     "propagator",

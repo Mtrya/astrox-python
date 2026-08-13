@@ -1,0 +1,1218 @@
+{
+  "cases": [
+    {
+      "description": "Named five-point shape decoded from the Earth-Moon packed response.",
+      "id": "positions_earth_moon_named_points",
+      "return": {
+        "shape": {
+          "fields": {
+            "l1": {
+              "fields": {
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "l1_distance_to_secondary": {
+              "kind": "number"
+            },
+            "l2": {
+              "fields": {
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "l2_distance_to_secondary": {
+              "kind": "number"
+            },
+            "l3": {
+              "fields": {
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "l3_distance_to_primary": {
+              "kind": "number"
+            },
+            "l4": {
+              "fields": {
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "l5": {
+              "fields": {
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Named mass-ratio and dimensional scale fields for explicit Earth-Moon parameters.",
+      "id": "units_earth_moon_explicit_parameters",
+      "return": {
+        "shape": {
+          "fields": {
+            "length_unit_m": {
+              "kind": "number"
+            },
+            "mass_ratio": {
+              "kind": "number"
+            },
+            "primary_gravitational_parameter_m3_s2": {
+              "kind": "number"
+            },
+            "secondary_gravitational_parameter_m3_s2": {
+              "kind": "number"
+            },
+            "time_unit_s": {
+              "kind": "number"
+            },
+            "velocity_unit_m_s": {
+              "kind": "number"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Primary-centered forward trajectory using a fixed nondimensional output step.",
+      "id": "trajectory_primary_centered_forward_fixed_step",
+      "return": {
+        "is_barycentric": false,
+        "sample_count": 3,
+        "shape": {
+          "fields": {
+            "is_barycentric": {
+              "kind": "boolean"
+            },
+            "mass_ratio": {
+              "kind": "number"
+            },
+            "samples": {
+              "item": {
+                "fields": {
+                  "state": {
+                    "fields": {
+                      "vx": {
+                        "kind": "number"
+                      },
+                      "vy": {
+                        "kind": "number"
+                      },
+                      "vz": {
+                        "kind": "number"
+                      },
+                      "x": {
+                        "kind": "number"
+                      },
+                      "y": {
+                        "kind": "number"
+                      },
+                      "z": {
+                        "kind": "number"
+                      }
+                    },
+                    "kind": "object"
+                  },
+                  "time": {
+                    "kind": "number"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            }
+          },
+          "kind": "object"
+        },
+        "time_direction": "forward"
+      }
+    },
+    {
+      "description": "Barycentric forward trajectory using the independently shifted initial x coordinate.",
+      "id": "trajectory_barycentric_forward_fixed_step",
+      "return": {
+        "is_barycentric": true,
+        "sample_count": 3,
+        "shape": {
+          "fields": {
+            "is_barycentric": {
+              "kind": "boolean"
+            },
+            "mass_ratio": {
+              "kind": "number"
+            },
+            "samples": {
+              "item": {
+                "fields": {
+                  "state": {
+                    "fields": {
+                      "vx": {
+                        "kind": "number"
+                      },
+                      "vy": {
+                        "kind": "number"
+                      },
+                      "vz": {
+                        "kind": "number"
+                      },
+                      "x": {
+                        "kind": "number"
+                      },
+                      "y": {
+                        "kind": "number"
+                      },
+                      "z": {
+                        "kind": "number"
+                      }
+                    },
+                    "kind": "object"
+                  },
+                  "time": {
+                    "kind": "number"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            }
+          },
+          "kind": "object"
+        },
+        "time_direction": "forward"
+      }
+    },
+    {
+      "description": "Primary-centered reverse trajectory from the maintained forward endpoint.",
+      "id": "trajectory_primary_centered_reverse_fixed_step",
+      "return": {
+        "is_barycentric": false,
+        "sample_count": 3,
+        "shape": {
+          "fields": {
+            "is_barycentric": {
+              "kind": "boolean"
+            },
+            "mass_ratio": {
+              "kind": "number"
+            },
+            "samples": {
+              "item": {
+                "fields": {
+                  "state": {
+                    "fields": {
+                      "vx": {
+                        "kind": "number"
+                      },
+                      "vy": {
+                        "kind": "number"
+                      },
+                      "vz": {
+                        "kind": "number"
+                      },
+                      "x": {
+                        "kind": "number"
+                      },
+                      "y": {
+                        "kind": "number"
+                      },
+                      "z": {
+                        "kind": "number"
+                      }
+                    },
+                    "kind": "object"
+                  },
+                  "time": {
+                    "kind": "number"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            }
+          },
+          "kind": "object"
+        },
+        "time_direction": "reverse"
+      }
+    },
+    {
+      "description": "Primary-centered trajectory preserving the OutStep=0 adaptive-node branch.",
+      "id": "trajectory_primary_centered_adaptive_nodes",
+      "return": {
+        "is_barycentric": false,
+        "sample_count_is_positive": true,
+        "shape": {
+          "fields": {
+            "is_barycentric": {
+              "kind": "boolean"
+            },
+            "mass_ratio": {
+              "kind": "number"
+            },
+            "samples": {
+              "item": {
+                "fields": {
+                  "state": {
+                    "fields": {
+                      "vx": {
+                        "kind": "number"
+                      },
+                      "vy": {
+                        "kind": "number"
+                      },
+                      "vz": {
+                        "kind": "number"
+                      },
+                      "x": {
+                        "kind": "number"
+                      },
+                      "y": {
+                        "kind": "number"
+                      },
+                      "z": {
+                        "kind": "number"
+                      }
+                    },
+                    "kind": "object"
+                  },
+                  "time": {
+                    "kind": "number"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Northern Earth-Moon L1 Halo periodic-result shape.",
+      "id": "earth_moon_l1_halo_northern",
+      "return": {
+        "is_barycentric": false,
+        "sample_count_is_positive": true,
+        "shape": {
+          "fields": {
+            "corrected_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "initial_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "is_barycentric": {
+              "kind": "boolean"
+            },
+            "period": {
+              "kind": "number"
+            },
+            "samples": {
+              "item": {
+                "fields": {
+                  "state": {
+                    "fields": {
+                      "vx": {
+                        "kind": "number"
+                      },
+                      "vy": {
+                        "kind": "number"
+                      },
+                      "vz": {
+                        "kind": "number"
+                      },
+                      "x": {
+                        "kind": "number"
+                      },
+                      "y": {
+                        "kind": "number"
+                      },
+                      "z": {
+                        "kind": "number"
+                      }
+                    },
+                    "kind": "object"
+                  },
+                  "time": {
+                    "kind": "number"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Southern Earth-Moon L1 Halo periodic-result shape.",
+      "id": "earth_moon_l1_halo_southern",
+      "return": {
+        "is_barycentric": false,
+        "sample_count_is_positive": true,
+        "shape": {
+          "fields": {
+            "corrected_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "initial_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "is_barycentric": {
+              "kind": "boolean"
+            },
+            "period": {
+              "kind": "number"
+            },
+            "samples": {
+              "item": {
+                "fields": {
+                  "state": {
+                    "fields": {
+                      "vx": {
+                        "kind": "number"
+                      },
+                      "vy": {
+                        "kind": "number"
+                      },
+                      "vz": {
+                        "kind": "number"
+                      },
+                      "x": {
+                        "kind": "number"
+                      },
+                      "y": {
+                        "kind": "number"
+                      },
+                      "z": {
+                        "kind": "number"
+                      }
+                    },
+                    "kind": "object"
+                  },
+                  "time": {
+                    "kind": "number"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Northern Earth-Moon L2 Halo periodic-result shape.",
+      "id": "earth_moon_l2_halo_northern",
+      "return": {
+        "is_barycentric": false,
+        "sample_count_is_positive": true,
+        "shape": {
+          "fields": {
+            "corrected_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "initial_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "is_barycentric": {
+              "kind": "boolean"
+            },
+            "period": {
+              "kind": "number"
+            },
+            "samples": {
+              "item": {
+                "fields": {
+                  "state": {
+                    "fields": {
+                      "vx": {
+                        "kind": "number"
+                      },
+                      "vy": {
+                        "kind": "number"
+                      },
+                      "vz": {
+                        "kind": "number"
+                      },
+                      "x": {
+                        "kind": "number"
+                      },
+                      "y": {
+                        "kind": "number"
+                      },
+                      "z": {
+                        "kind": "number"
+                      }
+                    },
+                    "kind": "object"
+                  },
+                  "time": {
+                    "kind": "number"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Southern Earth-Moon L2 Halo periodic-result shape.",
+      "id": "earth_moon_l2_halo_southern",
+      "return": {
+        "is_barycentric": false,
+        "sample_count_is_positive": true,
+        "shape": {
+          "fields": {
+            "corrected_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "initial_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "is_barycentric": {
+              "kind": "boolean"
+            },
+            "period": {
+              "kind": "number"
+            },
+            "samples": {
+              "item": {
+                "fields": {
+                  "state": {
+                    "fields": {
+                      "vx": {
+                        "kind": "number"
+                      },
+                      "vy": {
+                        "kind": "number"
+                      },
+                      "vz": {
+                        "kind": "number"
+                      },
+                      "x": {
+                        "kind": "number"
+                      },
+                      "y": {
+                        "kind": "number"
+                      },
+                      "z": {
+                        "kind": "number"
+                      }
+                    },
+                    "kind": "object"
+                  },
+                  "time": {
+                    "kind": "number"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Planar Earth-Moon distant-retrograde periodic-result shape.",
+      "id": "earth_moon_dro_planar",
+      "return": {
+        "is_barycentric": false,
+        "sample_count_is_positive": true,
+        "shape": {
+          "fields": {
+            "corrected_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "initial_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "is_barycentric": {
+              "kind": "boolean"
+            },
+            "period": {
+              "kind": "number"
+            },
+            "samples": {
+              "item": {
+                "fields": {
+                  "state": {
+                    "fields": {
+                      "vx": {
+                        "kind": "number"
+                      },
+                      "vy": {
+                        "kind": "number"
+                      },
+                      "vz": {
+                        "kind": "number"
+                      },
+                      "x": {
+                        "kind": "number"
+                      },
+                      "y": {
+                        "kind": "number"
+                      },
+                      "z": {
+                        "kind": "number"
+                      }
+                    },
+                    "kind": "object"
+                  },
+                  "time": {
+                    "kind": "number"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Successful fixed-x correction of an L1 Halo seed in the primary-centered origin.",
+      "id": "fixed_x_l1_primary_centered",
+      "return": {
+        "is_barycentric": false,
+        "sample_count_is_positive": true,
+        "shape": {
+          "fields": {
+            "corrected_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "initial_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "is_barycentric": {
+              "kind": "boolean"
+            },
+            "period": {
+              "kind": "number"
+            },
+            "samples": {
+              "item": {
+                "fields": {
+                  "state": {
+                    "fields": {
+                      "vx": {
+                        "kind": "number"
+                      },
+                      "vy": {
+                        "kind": "number"
+                      },
+                      "vz": {
+                        "kind": "number"
+                      },
+                      "x": {
+                        "kind": "number"
+                      },
+                      "y": {
+                        "kind": "number"
+                      },
+                      "z": {
+                        "kind": "number"
+                      }
+                    },
+                    "kind": "object"
+                  },
+                  "time": {
+                    "kind": "number"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Successful fixed-x correction of the same L1 Halo seed in the barycentric origin.",
+      "id": "fixed_x_l1_barycentric",
+      "return": {
+        "is_barycentric": true,
+        "sample_count_is_positive": true,
+        "shape": {
+          "fields": {
+            "corrected_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "initial_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "is_barycentric": {
+              "kind": "boolean"
+            },
+            "period": {
+              "kind": "number"
+            },
+            "samples": {
+              "item": {
+                "fields": {
+                  "state": {
+                    "fields": {
+                      "vx": {
+                        "kind": "number"
+                      },
+                      "vy": {
+                        "kind": "number"
+                      },
+                      "vz": {
+                        "kind": "number"
+                      },
+                      "x": {
+                        "kind": "number"
+                      },
+                      "y": {
+                        "kind": "number"
+                      },
+                      "z": {
+                        "kind": "number"
+                      }
+                    },
+                    "kind": "object"
+                  },
+                  "time": {
+                    "kind": "number"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Successful fixed-x correction of an L2 Halo seed in the primary-centered origin.",
+      "id": "fixed_x_l2_primary_centered",
+      "return": {
+        "is_barycentric": false,
+        "sample_count_is_positive": true,
+        "shape": {
+          "fields": {
+            "corrected_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "initial_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "is_barycentric": {
+              "kind": "boolean"
+            },
+            "period": {
+              "kind": "number"
+            },
+            "samples": {
+              "item": {
+                "fields": {
+                  "state": {
+                    "fields": {
+                      "vx": {
+                        "kind": "number"
+                      },
+                      "vy": {
+                        "kind": "number"
+                      },
+                      "vz": {
+                        "kind": "number"
+                      },
+                      "x": {
+                        "kind": "number"
+                      },
+                      "y": {
+                        "kind": "number"
+                      },
+                      "z": {
+                        "kind": "number"
+                      }
+                    },
+                    "kind": "object"
+                  },
+                  "time": {
+                    "kind": "number"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    },
+    {
+      "description": "Successful fixed-x correction of a DRO seed in the primary-centered origin.",
+      "id": "fixed_x_dro_primary_centered",
+      "return": {
+        "is_barycentric": false,
+        "sample_count_is_positive": true,
+        "shape": {
+          "fields": {
+            "corrected_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "initial_state": {
+              "fields": {
+                "vx": {
+                  "kind": "number"
+                },
+                "vy": {
+                  "kind": "number"
+                },
+                "vz": {
+                  "kind": "number"
+                },
+                "x": {
+                  "kind": "number"
+                },
+                "y": {
+                  "kind": "number"
+                },
+                "z": {
+                  "kind": "number"
+                }
+              },
+              "kind": "object"
+            },
+            "is_barycentric": {
+              "kind": "boolean"
+            },
+            "period": {
+              "kind": "number"
+            },
+            "samples": {
+              "item": {
+                "fields": {
+                  "state": {
+                    "fields": {
+                      "vx": {
+                        "kind": "number"
+                      },
+                      "vy": {
+                        "kind": "number"
+                      },
+                      "vz": {
+                        "kind": "number"
+                      },
+                      "x": {
+                        "kind": "number"
+                      },
+                      "y": {
+                        "kind": "number"
+                      },
+                      "z": {
+                        "kind": "number"
+                      }
+                    },
+                    "kind": "object"
+                  },
+                  "time": {
+                    "kind": "number"
+                  }
+                },
+                "kind": "object"
+              },
+              "kind": "array"
+            }
+          },
+          "kind": "object"
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "astrox_base_url": "http://astrox.cn:8765",
+    "refreshed_at": "2026-08-13T17:45:56Z"
+  }
+}
