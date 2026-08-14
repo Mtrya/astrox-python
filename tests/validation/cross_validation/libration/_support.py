@@ -42,11 +42,12 @@ class EquilibriumSolution:
 
 @dataclass(frozen=True, kw_only=True)
 class PeriodicMetrics:
-    """Independent residuals for one ASTROX periodic orbit."""
+    """Cross-validation residuals for one ASTROX periodic orbit."""
 
     max_sample_residual: float
     closure_residual: float
     jacobi_drift: float
+    independent_jacobi_drift: float
     half_period_y_abs: float
     half_period_vx_abs: float
     half_period_vz_abs: float
@@ -331,6 +332,11 @@ def validate_periodic_orbit(
         independent_states[0],
     )
     drift = jacobi_drift(
+        states,
+        mass_ratio=mass_ratio,
+        is_barycentric=result.is_barycentric,
+    )
+    independent_drift = jacobi_drift(
         independent_states,
         mass_ratio=mass_ratio,
         is_barycentric=result.is_barycentric,
@@ -346,6 +352,7 @@ def validate_periodic_orbit(
         max_sample_residual=max_sample_residual,
         closure_residual=closure_residual,
         jacobi_drift=drift,
+        independent_jacobi_drift=independent_drift,
         half_period_y_abs=abs(float(half_state[1])),
         half_period_vx_abs=abs(float(half_state[3])),
         half_period_vz_abs=abs(float(half_state[5])),
@@ -357,7 +364,11 @@ def assert_periodic_metrics(metrics: PeriodicMetrics, *, case_id: str) -> None:
     bounds = {
         "sample residual": (metrics.max_sample_residual, PERIODIC_SAMPLE_ABS_TOL),
         "closure residual": (metrics.closure_residual, PERIODIC_CLOSURE_ABS_TOL),
-        "Jacobi drift": (metrics.jacobi_drift, JACOBI_DRIFT_ABS_TOL),
+        "ASTROX-sample Jacobi drift": (metrics.jacobi_drift, JACOBI_DRIFT_ABS_TOL),
+        "independent Jacobi drift": (
+            metrics.independent_jacobi_drift,
+            JACOBI_DRIFT_ABS_TOL,
+        ),
         "half-period y": (metrics.half_period_y_abs, SYMMETRY_ABS_TOL),
         "half-period vx": (metrics.half_period_vx_abs, SYMMETRY_ABS_TOL),
         "half-period vz": (metrics.half_period_vz_abs, SYMMETRY_ABS_TOL),

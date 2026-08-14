@@ -4,6 +4,9 @@
 # ///
 """演示平动点、无量纲轨迹、周期轨道族与固定 x 微分修正。"""
 
+import os
+
+import astrox
 from astrox import libration
 
 
@@ -12,6 +15,9 @@ EARTH_MOON_FAMILY_MASS_RATIO = 0.01215058560962404
 
 
 def main() -> None:
+    if base_url := os.environ.get("ASTROX_BASE_URL"):
+        astrox.configure(base_url=base_url)
+
     unit_system = libration.units()
     points = libration.positions(mass_ratio=unit_system.mass_ratio)
     print(f"单位系统质量比: {unit_system.mass_ratio:.15f}")

@@ -12,7 +12,7 @@ This page registers the live-contract and semantic evidence for `astrox.libratio
 | Earth-Moon DRO family | verified | Local propagation, closure, Jacobi drift, planarity, retrograde direction, and samples | e2m2e generation and two-dimensional correction |
 | Fixed-x correction | verified | Independently propagated L1, L2, and DRO corrections | e2m2e two-/three-dimensional correction and Orekit Halo seeds |
 
-The live snapshot at [`tests/validation/live_snapshot/libration/libration.snap.json`](../../tests/validation/live_snapshot/libration/libration.snap.json) maintains 15 cases across all seven routes, both Halo hemispheres, both trajectory origins, forward/reverse and adaptive/fixed sampling, and L1/L2/DRO fixed-x correction. These snapshots establish maintained response shape only; the semantic claims below come from cross-validation.
+The live snapshot at [`tests/validation/live_snapshot/libration/libration.snap.json`](../../tests/validation/live_snapshot/libration/libration.snap.json) maintains 15 cases across all seven routes, both Halo hemispheres, both trajectory origins, forward/reverse and adaptive/fixed sampling, and L1/L2/DRO fixed-x correction. It preserves normalized SDK return values, including array lengths and representative samples from long trajectories, so numerical and structural upstream drift remains visible. The independent semantic claims below still come from cross-validation rather than snapshot agreement.
 
 ## Equilibrium points and unit scales
 
@@ -39,7 +39,7 @@ The per-component state tolerance is `2e-10`; the observed maximum residual in t
 
 ## Periodic families
 
-[`test_periodic_families.py`](../../tests/validation/cross_validation/libration/test_periodic_families.py) exercises low, middle, and high members of L1 Halo, L2 Halo, and DRO families. Both northern and southern branches are covered for every Halo amplitude. Every returned sample is compared with independent propagation at the same nondimensional time; the full-period closure and XZ-plane half-period symmetry tolerances are `2e-8`, and the Jacobi-drift tolerance is `5e-10`.
+[`test_periodic_families.py`](../../tests/validation/cross_validation/libration/test_periodic_families.py) exercises low, middle, and high members of L1 Halo, L2 Halo, and DRO families. Both northern and southern branches are covered for every Halo amplitude. Every returned sample is compared with independent propagation at the same nondimensional time; the full-period closure and XZ-plane half-period symmetry tolerances are `2e-8`, and the Jacobi drift recomputed from ASTROX's returned samples is bounded by `5e-10`. The independent integrator's drift is measured separately at the same bound.
 
 The observed family conventions are:
 
@@ -51,13 +51,13 @@ The observed family conventions are:
 
 The rounded lower limits advertised in prose are not accepted literally by the current server. L2 rejects `0.026` and reports its first available value as `0.026000000000018453`; DRO rejects `0.078` and reports `0.0780437044745057`. The validator keeps both rejection branches explicit instead of rounding the bounds or weakening numerical tolerances.
 
-e2m2e L1/L2 Halo and DRO generation survive local closure, symmetry, and Jacobi checks at the same `2e-8`/`5e-10` bounds. Its DRO amplitude denotes the mean of minimum and maximum Moon distance, not ASTROX's x-axis amplitude, so the two amplitude parameters are not compared directly. Orekit's L1 Halo correction is accepted secondary evidence. Its maintained L2 result has approximately `3e-7` independent full-period closure and is therefore used only as a seed that ASTROX refines; it is not accepted as a periodic-orbit reference. Orekit's collinear-point calculation is likewise diagnostic because its normalized roots differ from the independently bracketed values by up to approximately `1.8e-7`.
+e2m2e L1/L2 Halo and DRO generation survive local closure, symmetry, and Jacobi checks at the same `2e-8`/`5e-10` bounds. Qualification also checks the requested L1/L2 family location, northern/southern sign and reflection, DRO planarity, and retrograde direction relative to the Moon. Its DRO amplitude denotes the mean of minimum and maximum Moon distance, not ASTROX's x-axis amplitude, so the two amplitude parameters are not compared directly. Orekit's L1 Halo correction is accepted secondary evidence. Its maintained L2 result has approximately `3e-7` independent full-period closure and is therefore used only as a seed that ASTROX refines; it is not accepted as a periodic-orbit reference. Orekit's collinear-point calculation is likewise diagnostic because its normalized roots differ from the independently bracketed values by up to approximately `1.8e-7`.
 
 ## Fixed-x differential correction
 
 [`test_fixed_x_correction.py`](../../tests/validation/cross_validation/libration/test_fixed_x_correction.py) covers exact and boundedly perturbed L1 Halo, L2 Halo, and DRO seeds, plus primary-centered and barycentric L1 inputs. It verifies that `initial_state` echoes the supplied seed, corrected x remains exactly fixed, the corrected state returns to the associated family member within `2e-8`, and independent full-period propagation meets closure, Jacobi, and symmetry tolerances.
 
-The live route interprets `period_guess` as a full-period guess. Supplying half the family period does not converge, despite the OpenAPI implementation description mentioning internal half-period correction. A coarse invalid perturbation is also retained as an explicit API-error case. The SDK does not reinterpret either response as success.
+The live route interprets `period_guess` as a full-period guess. Supplying half the family period does not converge, despite the OpenAPI implementation description mentioning internal half-period correction. A separate coarse seed with z increased and y velocity decreased by `0.05` is tested with the valid full-period guess and also remains an explicit API-error case. The SDK does not reinterpret either response as success.
 
 e2m2e's two-dimensional DRO and three-dimensional Halo fixed-x corrections converge unconditionally for the maintained cases and agree with the ASTROX family seeds within `2e-8`. Conversely, ASTROX accepts independently generated e2m2e L1, L2, and DRO seeds and preserves their corrected states and periods within that bound. e2m2e's `jacobi_error` summary is intentionally excluded because it measures maximum adjacent-sample change rather than total drift from the initial Jacobi constant; all invariant residuals used here are recomputed from states.
 

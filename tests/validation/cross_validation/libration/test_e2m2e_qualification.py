@@ -46,6 +46,7 @@ from tests.validation.cross_validation.libration._support import (  # noqa: E402
     SYMMETRY_ABS_TOL,
     CrossValidationError,
     crtbp_derivative,
+    equilibrium_solution,
     jacobi_drift,
     maximum_absolute_residual,
     propagate_local,
@@ -279,8 +280,55 @@ def generated_orbits() -> tuple[tuple[str, Orbit], ...]:
     )
 
 
+def assert_halo_family_and_branch(case_id: str, state: np.ndarray) -> None:
+    point, _, branch = case_id.split("_", maxsplit=2)
+    equilibria = equilibrium_solution(EARTH_MOON_MASS_RATIO)
+    secondary_x = 1.0 - EARTH_MOON_MASS_RATIO
+    if point == "l1":
+        family_matches = equilibria.points[0][0] < state[0] < secondary_x
+    elif point == "l2":
+        family_matches = state[0] > equilibria.points[1][0]
+    else:
+        raise CrossValidationError(f"unsupported e2m2e Halo case {case_id}")
+    if not family_matches:
+        raise CrossValidationError(
+            f"{case_id} initial x={state[0]:.12g} does not identify the requested family"
+        )
+
+    expected_z_sign = -1.0 if branch == "south" else 1.0
+    if expected_z_sign * float(state[2]) <= 0.0:
+        raise CrossValidationError(
+            f"{case_id} initial z={state[2]:.12g} has the wrong branch sign"
+        )
+    crossing_residual = max(abs(float(state[index])) for index in (1, 3, 5))
+    if crossing_residual > SYMMETRY_ABS_TOL:
+        raise CrossValidationError(
+            f"{case_id} initial XZ-plane crossing residual={crossing_residual:.12g}"
+        )
+
+
+def assert_halo_reflections(orbits: dict[str, Orbit]) -> None:
+    for point in ("l1", "l2"):
+        north = orbits[f"{point}_halo_north"]
+        south = orbits[f"{point}_halo_south"]
+        north_state = np.asarray(north.states[0], dtype=float)
+        expected_south = north_state.copy()
+        expected_south[[2, 5]] *= -1.0
+        reflection_residual = maximum_absolute_residual(
+            np.asarray(south.states[0], dtype=float),
+            expected_south,
+        )
+        period_residual = abs(float(south.period) - float(north.period))
+        if max(reflection_residual, period_residual) > PERIODIC_SAMPLE_ABS_TOL:
+            raise CrossValidationError(
+                f"{point} Halo north/south reflection={reflection_residual:.12g}, "
+                f"period={period_residual:.12g}"
+            )
+
+
 def test_e2m2e_halo_and_dro_generators_match_local_invariants() -> None:
-    for case_id, orbit in generated_orbits():
+    generated = generated_orbits()
+    for case_id, orbit in generated:
         if orbit.period is None:
             raise CrossValidationError(f"{case_id} did not return a period")
         state = np.asarray(orbit.states[0], dtype=float)
@@ -304,10 +352,25 @@ def test_e2m2e_halo_and_dro_generators_match_local_invariants() -> None:
                 raise CrossValidationError(
                     f"{case_id} amplitude={measured_amplitude:.12g} km"
                 )
+            planarity_residual = float(np.max(np.abs(states[:, (2, 5)])))
+            if planarity_residual > PERIODIC_SAMPLE_ABS_TOL:
+                raise CrossValidationError(
+                    f"{case_id} planarity residual={planarity_residual:.12g}"
+                )
+            relative_x = float(state[0] - moon[0])
+            relative_angular_momentum_z = relative_x * float(state[4])
+            if relative_angular_momentum_z >= 0.0:
+                raise CrossValidationError(
+                    f"{case_id} is not retrograde at the x-axis crossing: "
+                    f"relative_angular_momentum_z={relative_angular_momentum_z:.12g}"
+                )
+        else:
+            assert_halo_family_and_branch(case_id, state)
         print(
             f"E2M2E_FAMILY_CASE={case_id} closure={closure:.12g} "
             f"jacobi={drift:.12g} symmetry={symmetry:.12g}"
         )
+    assert_halo_reflections(dict(generated))
 
 
 def test_e2m2e_fixed_x_correction_matches_astrox_family_seeds() -> None:

@@ -6,7 +6,6 @@ from __future__ import annotations
 import math
 import sys
 from pathlib import Path
-from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
@@ -18,9 +17,7 @@ from tests.validation._support import (  # noqa: E402
     SnapshotError,
     check_snapshot,
     configure_astrox_from_env,
-    describe_json_shape,
     main as snapshot_main,
-    to_json_compatible,
 )
 
 
@@ -71,18 +68,14 @@ DRO_STATE = libration.crtbp_state(
 DRO_PERIOD = 3.004683468879153
 
 
-def _shape(value: Any, *, field: str) -> dict[str, Any]:
-    return describe_json_shape(to_json_compatible(value), field=field)
-
-
-def points_shape() -> dict[str, Any]:
+def points_value() -> libration.LibrationPoints:
     result = libration.positions(mass_ratio=EARTH_MOON_MASS_RATIO)
     if result.l4.y <= 0.0 or result.l5.y >= 0.0:
         raise SnapshotError("L4/L5 y signs do not match the maintained branch ordering")
-    return {"shape": _shape(result, field="libration points")}
+    return result
 
 
-def units_shape() -> dict[str, Any]:
+def units_value() -> libration.LibrationUnitSystem:
     result = libration.units(
         primary_gravitational_parameter_m3_s2=398600441800000.0,
         secondary_gravitational_parameter_m3_s2=4904869500000.0,
@@ -90,17 +83,17 @@ def units_shape() -> dict[str, Any]:
     )
     if min(result.length_unit_m, result.time_unit_s, result.velocity_unit_m_s) <= 0.0:
         raise SnapshotError("libration unit scales must be positive")
-    return {"shape": _shape(result, field="libration units")}
+    return result
 
 
-def trajectory_shape(
+def trajectory_value(
     *,
     initial_state: libration.CrtbpState,
     start_time: float,
     end_time: float,
     barycentric: bool,
     output_step: float,
-) -> dict[str, Any]:
+) -> libration.CrtbpTrajectory:
     result = libration.crtbp_trajectory(
         initial_state=initial_state,
         mass_ratio=EARTH_MOON_MASS_RATIO,
@@ -117,15 +110,10 @@ def trajectory_shape(
         raise SnapshotError("trajectory response did not begin at start_time")
     if not math.isclose(result.samples[-1].time, end_time, abs_tol=1.0e-14):
         raise SnapshotError("trajectory response did not end at end_time")
-    return {
-        "shape": _shape(result, field="CRTBP trajectory"),
-        "is_barycentric": result.is_barycentric,
-        "sample_count": len(result.samples),
-        "time_direction": "forward" if end_time > start_time else "reverse",
-    }
+    return result
 
 
-def adaptive_trajectory_shape() -> dict[str, Any]:
+def adaptive_trajectory_value() -> libration.CrtbpTrajectory:
     result = libration.crtbp_trajectory(
         initial_state=PRIMARY_STATE,
         mass_ratio=EARTH_MOON_MASS_RATIO,
@@ -136,14 +124,14 @@ def adaptive_trajectory_shape() -> dict[str, Any]:
     )
     if len(result.samples) < 2:
         raise SnapshotError("adaptive trajectory response must contain at least two samples")
-    return {
-        "shape": _shape(result, field="adaptive CRTBP trajectory"),
-        "is_barycentric": result.is_barycentric,
-        "sample_count_is_positive": bool(result.samples),
-    }
+    return result
 
 
-def periodic_shape(result: libration.PeriodicOrbit, *, expected_origin: bool) -> dict[str, Any]:
+def periodic_value(
+    result: libration.PeriodicOrbit,
+    *,
+    expected_origin: bool,
+) -> libration.PeriodicOrbit:
     if result.is_barycentric is not expected_origin:
         raise SnapshotError("periodic-orbit response did not echo the expected origin")
     if not result.samples:
@@ -152,40 +140,36 @@ def periodic_shape(result: libration.PeriodicOrbit, *, expected_origin: bool) ->
         raise SnapshotError("periodic-orbit samples must begin at zero")
     if not math.isclose(result.samples[-1].time, result.period, abs_tol=1.0e-12):
         raise SnapshotError("periodic-orbit samples must end at Period")
-    return {
-        "shape": _shape(result, field="periodic orbit"),
-        "is_barycentric": result.is_barycentric,
-        "sample_count_is_positive": bool(result.samples),
-    }
+    return result
 
 
-def l1_shape(*, southern: bool) -> dict[str, Any]:
-    return periodic_shape(
+def l1_value(*, southern: bool) -> libration.PeriodicOrbit:
+    return periodic_value(
         libration.earth_moon_l1_halo(z_amplitude=0.05, southern=southern),
         expected_origin=False,
     )
 
 
-def l2_shape(*, southern: bool) -> dict[str, Any]:
-    return periodic_shape(
+def l2_value(*, southern: bool) -> libration.PeriodicOrbit:
+    return periodic_value(
         libration.earth_moon_l2_halo(x_amplitude=0.10, southern=southern),
         expected_origin=False,
     )
 
 
-def dro_shape() -> dict[str, Any]:
-    return periodic_shape(
+def dro_value() -> libration.PeriodicOrbit:
+    return periodic_value(
         libration.earth_moon_dro(x_amplitude=0.1801),
         expected_origin=False,
     )
 
 
-def corrected_shape(
+def corrected_value(
     *,
     initial_state: libration.CrtbpState,
     period_guess: float,
     barycentric: bool,
-) -> dict[str, Any]:
+) -> libration.PeriodicOrbit:
     if barycentric:
         initial_state = libration.crtbp_state(
             x=initial_state.x - EARTH_MOON_MASS_RATIO,
@@ -195,7 +179,7 @@ def corrected_shape(
             vy=initial_state.vy,
             vz=initial_state.vz,
         )
-    return periodic_shape(
+    return periodic_value(
         libration.correct_periodic_orbit_fixed_x(
             initial_state=initial_state,
             period_guess=period_guess,
@@ -210,18 +194,18 @@ def corrected_shape(
 CASES = [
     LiveSnapshotCase(
         id="positions_earth_moon_named_points",
-        description="Named five-point shape decoded from the Earth-Moon packed response.",
-        run=points_shape,
+        description="Named five-point SDK value decoded from the Earth-Moon packed response.",
+        run=points_value,
     ),
     LiveSnapshotCase(
         id="units_earth_moon_explicit_parameters",
-        description="Named mass-ratio and dimensional scale fields for explicit Earth-Moon parameters.",
-        run=units_shape,
+        description="Named mass-ratio and dimensional scale values for explicit Earth-Moon parameters.",
+        run=units_value,
     ),
     LiveSnapshotCase(
         id="trajectory_primary_centered_forward_fixed_step",
         description="Primary-centered forward trajectory using a fixed nondimensional output step.",
-        run=lambda: trajectory_shape(
+        run=lambda: trajectory_value(
             initial_state=PRIMARY_STATE,
             start_time=0.0,
             end_time=0.2,
@@ -232,7 +216,7 @@ CASES = [
     LiveSnapshotCase(
         id="trajectory_barycentric_forward_fixed_step",
         description="Barycentric forward trajectory using the independently shifted initial x coordinate.",
-        run=lambda: trajectory_shape(
+        run=lambda: trajectory_value(
             initial_state=BARYCENTRIC_STATE,
             start_time=0.0,
             end_time=0.2,
@@ -243,7 +227,7 @@ CASES = [
     LiveSnapshotCase(
         id="trajectory_primary_centered_reverse_fixed_step",
         description="Primary-centered reverse trajectory from the maintained forward endpoint.",
-        run=lambda: trajectory_shape(
+        run=lambda: trajectory_value(
             initial_state=libration.crtbp_state(
                 x=1.1858521851789159,
                 y=-0.03411863250063764,
@@ -261,37 +245,37 @@ CASES = [
     LiveSnapshotCase(
         id="trajectory_primary_centered_adaptive_nodes",
         description="Primary-centered trajectory preserving the OutStep=0 adaptive-node branch.",
-        run=adaptive_trajectory_shape,
+        run=adaptive_trajectory_value,
     ),
     LiveSnapshotCase(
         id="earth_moon_l1_halo_northern",
-        description="Northern Earth-Moon L1 Halo periodic-result shape.",
-        run=lambda: l1_shape(southern=False),
+        description="Northern Earth-Moon L1 Halo periodic-orbit value.",
+        run=lambda: l1_value(southern=False),
     ),
     LiveSnapshotCase(
         id="earth_moon_l1_halo_southern",
-        description="Southern Earth-Moon L1 Halo periodic-result shape.",
-        run=lambda: l1_shape(southern=True),
+        description="Southern Earth-Moon L1 Halo periodic-orbit value.",
+        run=lambda: l1_value(southern=True),
     ),
     LiveSnapshotCase(
         id="earth_moon_l2_halo_northern",
-        description="Northern Earth-Moon L2 Halo periodic-result shape.",
-        run=lambda: l2_shape(southern=False),
+        description="Northern Earth-Moon L2 Halo periodic-orbit value.",
+        run=lambda: l2_value(southern=False),
     ),
     LiveSnapshotCase(
         id="earth_moon_l2_halo_southern",
-        description="Southern Earth-Moon L2 Halo periodic-result shape.",
-        run=lambda: l2_shape(southern=True),
+        description="Southern Earth-Moon L2 Halo periodic-orbit value.",
+        run=lambda: l2_value(southern=True),
     ),
     LiveSnapshotCase(
         id="earth_moon_dro_planar",
-        description="Planar Earth-Moon distant-retrograde periodic-result shape.",
-        run=dro_shape,
+        description="Planar Earth-Moon distant-retrograde periodic-orbit value.",
+        run=dro_value,
     ),
     LiveSnapshotCase(
         id="fixed_x_l1_primary_centered",
         description="Successful fixed-x correction of an L1 Halo seed in the primary-centered origin.",
-        run=lambda: corrected_shape(
+        run=lambda: corrected_value(
             initial_state=L1_STATE,
             period_guess=L1_PERIOD,
             barycentric=False,
@@ -300,7 +284,7 @@ CASES = [
     LiveSnapshotCase(
         id="fixed_x_l1_barycentric",
         description="Successful fixed-x correction of the same L1 Halo seed in the barycentric origin.",
-        run=lambda: corrected_shape(
+        run=lambda: corrected_value(
             initial_state=L1_STATE,
             period_guess=L1_PERIOD,
             barycentric=True,
@@ -309,7 +293,7 @@ CASES = [
     LiveSnapshotCase(
         id="fixed_x_l2_primary_centered",
         description="Successful fixed-x correction of an L2 Halo seed in the primary-centered origin.",
-        run=lambda: corrected_shape(
+        run=lambda: corrected_value(
             initial_state=L2_STATE,
             period_guess=L2_PERIOD,
             barycentric=False,
@@ -318,7 +302,7 @@ CASES = [
     LiveSnapshotCase(
         id="fixed_x_dro_primary_centered",
         description="Successful fixed-x correction of a DRO seed in the primary-centered origin.",
-        run=lambda: corrected_shape(
+        run=lambda: corrected_value(
             initial_state=DRO_STATE,
             period_guess=DRO_PERIOD,
             barycentric=False,

@@ -6,7 +6,7 @@
 #     - representative L1 Halo, L2 Halo, and planar DRO seeds: verified
 #     - exact and boundedly perturbed z/vy or vy/period seeds: verified
 #     - primary-centered inputs for all families and barycentric input for L1: verified
-#     - invalid half-period seed and a coarse perturbation: verified API-error behavior
+#     - invalid half-period guess and a 0.05 z/vy coarse perturbation: verified API-error behavior
 #   Fields:
 #     - InitialX0 echo, fixed corrected x, corrected state, Period, ListT, ListX, IsBarycentric: verified
 #   Parameters:
@@ -182,19 +182,23 @@ def test_fixed_x_nonconvergence_remains_visible(seed_kind: str) -> None:
         seed = libration.crtbp_state(
             x=state.x,
             y=state.y,
-            z=state.z + 5.0e-4,
+            z=state.z + 5.0e-2,
             vx=state.vx,
-            vy=state.vy - 5.0e-4,
+            vy=state.vy - 5.0e-2,
             vz=state.vz,
         )
-        period_guess = reference.period / 2.0
-    with pytest.raises(exceptions.AstroxAPIError, match="失败"):
+        period_guess = reference.period
+    with pytest.raises(exceptions.AstroxAPIError) as exc_info:
         libration.correct_periodic_orbit_fixed_x(
             initial_state=seed,
             period_guess=period_guess,
             mass_ratio=EARTH_MOON_MASS_RATIO,
             barycentric=False,
             output_step=0.05,
+        )
+    if exc_info.value.endpoint != "/libration/crtbp-period-orbit-fixed-x":
+        raise CrossValidationError(
+            f"{seed_kind} failed at unexpected endpoint {exc_info.value.endpoint!r}"
         )
 
 
