@@ -26,6 +26,7 @@ from tests.validation._support.gmat import (
     require_gmat_image,
     run_gmat_driver,
 )
+from tests.validation._support.orekit import ensure_orekit_data
 from tests.validation._support.skyfield import (
     DEFAULT_SKYFIELD_DATA_DIR,
     MMAP_LENGTH_ERROR,
@@ -51,6 +52,7 @@ __all__ = [
     "compare_values",
     "configure_astrox_from_env",
     "describe_json_shape",
+    "ensure_orekit_data",
     "is_external_validation_strict",
     "load_skyfield_ephemeris",
     "main",

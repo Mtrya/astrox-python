@@ -14,6 +14,7 @@ Per-domain validation evidence: what is verified, against what, with which toler
 - [Catalog](catalog.md)
 - [Celestial](celestial.md)
 - [Terrain](terrain.md)
+- [Libration](libration.md)
 
 Two evidence layers back these pages:
 
