@@ -5,13 +5,16 @@ This page solves one specific task: generate a periodic orbit from the Earth-Moo
 ## Complete example
 
 ```python
+import os
+
 import astrox
 from astrox import libration
 
 
 EARTH_MOON_MASS_RATIO = 0.01215058560962404
 
-astrox.configure(base_url="http://astrox.cn:8765")
+if base_url := os.environ.get("ASTROX_BASE_URL"):
+    astrox.configure(base_url=base_url)
 
 family_member = libration.earth_moon_l1_halo(
     z_amplitude=0.05,

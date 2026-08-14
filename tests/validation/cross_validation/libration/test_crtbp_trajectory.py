@@ -57,6 +57,7 @@ class TrajectoryCase:
     end_time: float
     barycentric: bool
     output_step: float
+    planar: bool = False
 
 
 PRIMARY_OUT_OF_PLANE = libration.crtbp_state(
@@ -138,6 +139,7 @@ CASES = (
         end_time=0.6,
         barycentric=True,
         output_step=0.05,
+        planar=True,
     ),
 )
 
@@ -176,7 +178,9 @@ def compare_case(case: TrajectoryCase) -> None:
         mass_ratio=case.mass_ratio,
         is_barycentric=case.barycentric,
     )
-    planar_residual = float(np.max(np.abs(states[:, (2, 5)]))) if case.id.startswith("synthetic_planar") else 0.0
+    planar_residual = (
+        float(np.max(np.abs(states[:, (2, 5)]))) if case.planar else 0.0
+    )
     print(
         f"CRTBP_TRAJECTORY_CASE={case.id} samples={len(times)} "
         f"max_state_residual={state_residual:.12g} jacobi_drift={drift:.12g}"

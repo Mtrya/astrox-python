@@ -35,7 +35,7 @@ The live `/libration/unit` defaults currently produce `mass_ratio = 0.0121556504
 
 The per-component state tolerance is `2e-10`; the observed maximum residual in the maintained matrix is below `6e-13`. Locally computed Jacobi drift is bounded by `5e-10`. The verified origin relation is `x_barycentric = x_primary_centered - mass_ratio`; the other five components are unchanged.
 
-[`test_e2m2e_qualification.py`](../../tests/validation/cross_validation/libration/test_e2m2e_qualification.py) independently qualifies e2m2e equations and propagation against the local model within `5e-12` and its state transition matrix against finite differences within `1e-8`. [`test_orekit_qualification.py`](../../tests/validation/cross_validation/libration/test_orekit_qualification.py) performs the corresponding Orekit force-model comparison within `2e-11` and STM comparison within `1e-8`.
+[`test_e2m2e_qualification.py`](../../tests/validation/cross_validation/libration/test_e2m2e_qualification.py) independently qualifies e2m2e equations and propagation against the local model within `5e-12` and its state transition matrix against finite differences within `1e-8`. [`test_orekit_qualification.py`](../../tests/validation/cross_validation/libration/test_orekit_qualification.py) performs the corresponding Orekit force-model comparison within `2e-11` and STM comparison within `1e-8`. Both STM paths also enforce `abs(det(STM) - 1) <= 1e-12`, which follows from the zero divergence of the first-order CRTBP flow.
 
 ## Periodic families
 

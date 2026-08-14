@@ -104,7 +104,8 @@ def test_family_samples_match_crtbp_trajectory_at_shared_times() -> None:
         )
         if max(max_residual, initial_residual) > TRAJECTORY_STATE_ABS_TOL:
             raise CrossValidationError(
-                f"{case.id} family/trajectory residual={max_residual:.12g}"
+                f"{case.id} family/trajectory residuals: "
+                f"state={max_residual:.12g}, initial={initial_residual:.12g}"
             )
 
 

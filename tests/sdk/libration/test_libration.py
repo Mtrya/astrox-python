@@ -140,6 +140,27 @@ def test_crtbp_state_is_frozen_and_lowers_exactly() -> None:
         state.x = 1.0
 
 
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+def test_libration_rejects_non_finite_request_numbers(value: float) -> None:
+    with pytest.raises(ValueError):
+        libration.crtbp_state(x=value, y=0, z=0, vx=0, vy=0, vz=0)
+
+    with pytest.raises(ValueError):
+        libration.positions(mass_ratio=value)
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+def test_response_parsers_reject_non_finite_numbers(
+    monkeypatch: pytest.MonkeyPatch,
+    value: float,
+) -> None:
+    response = {**UNITS_RESPONSE, "UnitT": value}
+    monkeypatch.setattr(libration.raw, "get", lambda endpoint, *, params: response)
+
+    with pytest.raises(ValueError):
+        libration.units()
+
+
 def test_positions_lowers_mass_ratio_and_names_packed_points(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from numbers import Real
@@ -31,7 +32,10 @@ __all__ = [
 def _number(value: Any, *, field: str) -> float:
     if isinstance(value, bool) or not isinstance(value, Real):
         raise TypeError(f"{field} must be a number")
-    return float(value)
+    result = float(value)
+    if not math.isfinite(result):
+        raise ValueError(f"{field} must be finite")
+    return result
 
 
 def _optional_number(value: float | None, *, parameter: str) -> float | None:

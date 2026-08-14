@@ -18,6 +18,7 @@
 #     - Orekit factory dimensional scales are ephemeris-derived and are not used as ASTROX unit evidence
 #   Tolerances:
 #     - 5e-13 equilibrium coordinates; 2e-11 propagation; 1e-8 STM finite differences
+#     - 1e-12 STM determinant
 #     - 2e-8 accepted periodic closure and ASTROX correction residual
 
 from __future__ import annotations
@@ -53,6 +54,7 @@ from tests.validation.cross_validation.libration._support import (  # noqa: E402
 
 OREKIT_PROPAGATION_ABS_TOL = 2.0e-11
 OREKIT_STM_FINITE_DIFFERENCE_ABS_TOL = 1.0e-8
+OREKIT_STM_DETERMINANT_ABS_TOL = 1.0e-12
 OREKIT_COLLINEAR_ROOT_RESIDUAL_MIN = 1.0e-8
 OREKIT_COLLINEAR_ROOT_RESIDUAL_MAX = 1.0e-6
 OREKIT_L2_SEED_CLOSURE_MIN = 1.0e-8
@@ -266,6 +268,10 @@ def test_orekit_crtbp_propagation_and_stm_match_local_equations() -> None:
         raise CrossValidationError(f"Orekit propagation residual={state_residual:.12g}")
     if stm_residual > OREKIT_STM_FINITE_DIFFERENCE_ABS_TOL:
         raise CrossValidationError(f"Orekit STM residual={stm_residual:.12g}")
+    if determinant_residual > OREKIT_STM_DETERMINANT_ABS_TOL:
+        raise CrossValidationError(
+            f"Orekit STM determinant residual={determinant_residual:.12g}"
+        )
 
 
 def test_orekit_halo_correction_is_independently_classified_and_refined_by_astrox() -> None:

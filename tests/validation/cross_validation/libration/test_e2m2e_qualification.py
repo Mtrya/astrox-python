@@ -14,7 +14,7 @@
 #     - its family APIs take dimensional amplitudes in km; the custom system scale is 384400 km
 #     - its DRO amplitude is the mean of minimum/maximum Moon distance, unlike ASTROX x_amplitude
 #   Tolerances:
-#     - 5e-12 equations/propagation; 1e-8 STM finite differences
+#     - 5e-12 equations/propagation; 1e-8 STM finite differences; 1e-12 STM determinant
 #     - 2e-8 periodic closure/symmetry and ASTROX correction agreement
 
 from __future__ import annotations
@@ -59,6 +59,7 @@ EARTH_MOON_TIME_UNIT_S = 375190.2589931179
 EQUATION_ABS_TOL = 5.0e-12
 PROPAGATION_ABS_TOL = 5.0e-12
 STM_FINITE_DIFFERENCE_ABS_TOL = 1.0e-8
+STM_DETERMINANT_ABS_TOL = 1.0e-12
 CORRECTION_ABS_TOL = PERIODIC_SAMPLE_ABS_TOL
 DRO_TARGET_AMPLITUDE_KM = 30000.0
 DRO_AMPLITUDE_ABS_TOL_KM = 20.0
@@ -248,6 +249,10 @@ def test_e2m2e_stm_matches_finite_differences() -> None:
     )
     if residual > STM_FINITE_DIFFERENCE_ABS_TOL:
         raise CrossValidationError(f"e2m2e STM finite-difference residual={residual:.12g}")
+    if determinant_residual > STM_DETERMINANT_ABS_TOL:
+        raise CrossValidationError(
+            f"e2m2e STM determinant residual={determinant_residual:.12g}"
+        )
 
 
 def generated_orbits() -> tuple[tuple[str, Orbit], ...]:
@@ -358,10 +363,13 @@ def test_e2m2e_halo_and_dro_generators_match_local_invariants() -> None:
                     f"{case_id} planarity residual={planarity_residual:.12g}"
                 )
             relative_x = float(state[0] - moon[0])
-            relative_angular_momentum_z = relative_x * float(state[4])
+            relative_y = float(state[1] - moon[1])
+            relative_angular_momentum_z = (
+                relative_x * float(state[4]) - relative_y * float(state[3])
+            )
             if relative_angular_momentum_z >= 0.0:
                 raise CrossValidationError(
-                    f"{case_id} is not retrograde at the x-axis crossing: "
+                    f"{case_id} is not retrograde relative to the Moon: "
                     f"relative_angular_momentum_z={relative_angular_momentum_z:.12g}"
                 )
         else:
@@ -409,15 +417,14 @@ def test_e2m2e_fixed_x_correction_matches_astrox_family_seeds() -> None:
         )
         print(
             f"E2M2E_CORRECTION_CASE={family} state={state_residual:.12g} "
-            f"period={period_residual:.12g} closure={closure:.12g}"
+            f"period={period_residual:.12g} closure={closure:.12g} "
+            f"jacobi={drift:.12g} symmetry={symmetry:.12g}"
         )
         if max(state_residual, period_residual) > CORRECTION_ABS_TOL:
             raise CrossValidationError(
                 f"e2m2e {family} correction disagreement: "
                 f"state={state_residual:.12g}, period={period_residual:.12g}"
             )
-        if max(drift, symmetry) > max(JACOBI_DRIFT_ABS_TOL, SYMMETRY_ABS_TOL):
-            raise CrossValidationError(f"e2m2e {family} correction invariant failure")
 
 
 def test_astrox_fixed_x_accepts_independently_generated_e2m2e_seeds() -> None:

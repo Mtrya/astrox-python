@@ -206,10 +206,7 @@ def main() -> int:
     try:
         test_fixed_x_correction_matches_independent_periodic_residuals()
         for seed_kind in ("half_period", "coarse_perturbation"):
-            try:
-                test_fixed_x_nonconvergence_remains_visible(seed_kind)
-            except exceptions.AstroxAPIError:
-                raise
+            test_fixed_x_nonconvergence_remains_visible(seed_kind)
     except Exception as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
