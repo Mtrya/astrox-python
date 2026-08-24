@@ -97,3 +97,18 @@ Run calibration diagnostics:
 ```bash
 ASTROX_BASE_URL=http://astrox.cn:8765 GMAT_VALIDATION_IMAGE=ghcr.io/<owner>/astrox-gmat-validation:gmat-r2026a ASTROX_EXTERNAL_VALIDATION=strict uv run python -m pytest tests/validation -m calibration --runxfail
 ```
+
+## Local Runtime
+
+A local ASTROX WebApi runtime, when available, is a triage and debugging convenience: it removes latency and load concerns from the shared live server, so broader exploratory probing is allowed against it (see `docs/test-principles.md`). All live validation scripts accept it through the same environment variable:
+
+```bash
+ASTROX_BASE_URL=http://127.0.0.1:8765 uv run python -m pytest tests/validation/cross_validation/propagator
+```
+
+Rules for local-runtime work:
+
+- Bind the local runtime to `127.0.0.1` only; do not expose it on the network.
+- The local runtime is not a source of truth. Its version may lag or differ from the live server; before a locally obtained result becomes a committed snapshot, test, or evidence claim, re-confirm it against the live server, and record the local runtime's version in investigation notes when it matters.
+- Never refresh a committed snapshot against the local runtime.
+- The local runtime distribution is private and ignored by git; do not commit it or reference its local path from committed files.

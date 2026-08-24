@@ -11,6 +11,9 @@ wheels/
 # Virtual environments
 .venv
 
+# Local-only server runtime for validation triage (never commit)
+.local-runtime/
+
 # Internal & intermediate docs
 *.md
 !README.md

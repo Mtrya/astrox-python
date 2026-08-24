@@ -68,6 +68,8 @@ Start with the most obvious external convention and expect it to fail. Deliberat
 
 The bounded investigation limit is three external adjustments plus two branch-variant probes per branch. If no explainable residual is found after that budget, mark the case `unresolved` and stop. Do not random-walk parameters.
 
+The budget applies to work against the shared live server. Exploratory probing beyond the budget—wider parameter sweeps, larger case batches, trial-and-error triage—is allowed only against a local ASTROX runtime (see `tests/validation/README.md`). When a local probe finds a candidate convention or mismatch, reduce it to a hypothesis-driven case within the budget and re-confirm it against the live server before it becomes a committed test, snapshot, or evidence claim.
+
 Tolerances are precision bounds for an explained comparison. They are set at the start based on the comparison's claimed precision. They are never widened to absorb an unexplained residual, a unit mistake, a frame confusion, or a branch misunderstanding.
 
 If the residual is stable and can be characterized as "ASTROX does X instead of Y," that is valid calibration. Document the observed ASTROX convention. Do not judge ASTROX against a textbook; the goal is to understand what ASTROX actually does.

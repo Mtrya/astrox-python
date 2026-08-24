@@ -71,7 +71,7 @@ Use invariants, analytic limits, plots, symmetry checks, conserved quantities, a
 
 Set tolerances from explained numerical precision, algorithmic differences, and observed residuals. Never loosen a tolerance merely to make a failing comparison pass. Investigate the residual and document the reason for any tolerance change.
 
-Large-scale fuzzing is prohibited. Use a small, hypothesis-driven case set that covers the important public functions and branches. Follow the bounded calibration rules in `docs/test-principles.md`; do not random-walk through payload variants.
+Large-scale fuzzing against the shared live server is prohibited. Broad exploratory probing is allowed only against a local ASTROX runtime (see `tests/validation/README.md`); findings from such exploration must be reduced to small, hypothesis-driven cases and re-confirmed against the live server before entering the committed suite. Committed tests use a small, hypothesis-driven case set that covers the important public functions and branches. Follow the bounded calibration rules in `docs/test-principles.md`; do not random-walk through payload variants in committed tests.
 
 Classify evidence honestly as verified, partial, unresolved, or unverifiable. Structural validity without understood semantics remains partial or unresolved. Keep uncertainty and failures visible rather than silently promoting them to supported behavior.
 
