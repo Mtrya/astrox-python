@@ -6,9 +6,10 @@
 
 1. **输入决定传播器**：
    - 有开普勒根数 → 用 `propagator.j2` 或 `propagator.two_body`。
+   - 有笛卡尔位置速度状态 → 用 `propagator.two_body_rv`（纯二体，返回扁平星历序列，不返回 `(period_s, position)`）。
    - 有两行根数（TLE） → 用 `propagator.sgp4`。
    - 有力模型配置 → 用 `propagator.hpop`。
-2. **读取采样**：所有单轨传播函数都返回 `(period_s, position)`，其中 `position.cartesian_velocity` 是 CZML 风格的扁平序列 `[t, x, y, z, vx, vy, vz, ...]`。
+2. **读取采样**：除 `two_body_rv` 外，所有单轨传播函数都返回 `(period_s, position)`，其中 `position.cartesian_velocity` 是 CZML 风格的扁平序列 `[t, x, y, z, vx, vy, vz, ...]`。
 
 ## 完整示例
 
@@ -139,6 +140,7 @@ HPOP 传播
 | --- | --- | --- |
 | 开普勒根数 | `propagator.j2` | 考虑 J2 摄动，适合大多数低轨任务。 |
 | 开普勒根数，纯二体 | `propagator.two_body` | 只考虑中心天体引力，计算最快。 |
+| 笛卡尔位置速度状态 | `propagator.two_body_rv` | 定步长数值二体积分，返回扁平星历序列 `[t, x, y, z, vx, vy, vz, ...]`。 |
 | 两行根数（TLE） | `propagator.sgp4` | 直接从 TLE 传播，无需手动构造根数。 |
 | 需要配置力模型 | `propagator.hpop` | 支持重力场、大气、太阳辐射压、第三方天体摄动等配置。 |
 

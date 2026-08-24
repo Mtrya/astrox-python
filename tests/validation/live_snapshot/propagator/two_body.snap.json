@@ -40,10 +40,41 @@
           "reference_frame": "INERTIAL"
         }
       ]
+    },
+    {
+      "description": "Flat [t, x, y, z, vx, vy, vz, ...] two-body RV ephemeris with server-owned defaults.",
+      "id": "rv_flat_ephemeris",
+      "return": {
+        "first": [
+          0,
+          6999999.999999998,
+          0,
+          0,
+          0,
+          7546.053290114565,
+          0,
+          300,
+          6637117.770538043,
+          2224560.114683618
+        ],
+        "last": [
+          -2398.0927370205623,
+          7154.863484193368,
+          0,
+          600,
+          5586094.942931313,
+          4218476.419691375,
+          0,
+          -4547.549691030551,
+          6021.852874946454,
+          0
+        ],
+        "length": 21
+      }
     }
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-06-03T17:33:10Z"
+    "refreshed_at": "2026-08-24T06:28:11Z"
   }
 }

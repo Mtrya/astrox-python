@@ -140,6 +140,17 @@ def lambert_delta_v_server_default_mu() -> tuple[
     )
 
 
+def lambert_delta_v_path_points() -> orbits.LambertResult:
+    return orbits.lambert_delta_v(
+        departure_state=cartesian_state(),
+        arrival_state=lambert_arrival_state(),
+        time_of_flight_s=817.4257,
+        gravitational_parameter_m3_s2=EARTH_MU,
+        get_path_points=True,
+        path_point_count=3,
+    )
+
+
 CASES = [
     LiveSnapshotCase(
         id="keplerian_to_cartesian",
@@ -175,6 +186,11 @@ CASES = [
         id="lambert_delta_v_server_default_mu",
         description="GEO-YM Lambert delta-v with server-owned platform gravitational parameter.",
         run=lambert_delta_v_server_default_mu,
+    ),
+    LiveSnapshotCase(
+        id="lambert_delta_v_path_points",
+        description="Single-revolution Lambert delta-v with the three-point transfer path sample output.",
+        run=lambert_delta_v_path_points,
     ),
 ]
 

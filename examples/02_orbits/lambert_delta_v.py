@@ -69,6 +69,20 @@ def main() -> None:
     print("GEO-YM Lambert 到达速度增量 (m/s):")
     print(f"  x={arrival_delta_v_m_s[0]:.6f}, y={arrival_delta_v_m_s[1]:.6f}, z={arrival_delta_v_m_s[2]:.6f}")
 
+    # get_path_points=True 时返回 LambertResult，额外携带转移轨道位置采样
+    lambert_result = orbits.lambert_delta_v(
+        departure_state=departure_state,
+        arrival_state=arrival_state,
+        time_of_flight_s=817.4257,
+        gravitational_parameter_m3_s2=EARTH_MU_M3_S2,
+        get_path_points=True,
+        path_point_count=5,
+    )
+
+    print(f"转移轨道位置采样: {len(lambert_result.positions) // 3} 个点")
+    first_point = lambert_result.positions[:3]
+    print(f"  起点: x={first_point[0]:.1f}, y={first_point[1]:.1f}, z={first_point[2]:.1f} m")
+
 
 if __name__ == "__main__":
     main()

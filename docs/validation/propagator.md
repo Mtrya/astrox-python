@@ -30,6 +30,32 @@ Live snapshot coverage: `propagator.two_body` has a sidecar snapshot at [`tests/
 Cross-validation script: [`tests/validation/cross_validation/propagator/test_two_body_brahe.py`](../../tests/validation/cross_validation/propagator/test_two_body_brahe.py).
 Live snapshot script: [`tests/validation/live_snapshot/propagator/test_two_body.py`](../../tests/validation/live_snapshot/propagator/test_two_body.py).
 
+## Two-body RV propagation
+
+Status of `propagator.two_body_rv`:
+
+- Cartesian-state input branch: `verified`.
+- Flat `[t, x, y, z, vx, vy, vz, ...]` output parsing: `verified` for the sample grid.
+- `time_of_flight_s` / `step_s` coverage: `partial` (one 600-second arc with 60-second steps).
+- `gravitational_parameter_m3_s2` coverage: `verified` for Brahe Earth GM.
+- `orbit` coverage: `partial` (LEO and inclined-LEO samples; zero-inclination states are excluded because the Brahe comparison route hits the RAAN singularity there).
+
+Comparison path: Brahe two-body ECI propagation (`bh.KeplerianPropagator.from_eci`) sampled at the same times. Samples are compared at 0 s, 60 s, ..., 600 s.
+
+Key constants and tolerances from [`tests/validation/cross_validation/propagator/test_two_body_rv_brahe.py`](../../tests/validation/cross_validation/propagator/test_two_body_rv_brahe.py):
+
+- `EARTH_MU = bh.GM_EARTH`.
+- Position tolerance: `POSITION_ABS_M = 1.0e-3`.
+- Velocity tolerance: `VELOCITY_ABS_M_S = 1.0e-5`.
+- Time tolerance: `TIME_ABS_S = 1.0e-9`.
+
+Known residuals and conventions: unlike the analytic element-based `two_body` route, `two_body_rv` is a fixed-step numerical integrator on the server side. Its residual against the Brahe Keplerian reference oscillates with orbital phase (peak about 4.2e-4 m and 5.4e-7 m/s per 10-minute arc) and is non-secular, so the tolerances are set from the observed residual envelope rather than from the analytic route's 1.0e-5 m / 1.0e-8 m/s. Longer arcs and larger steps are not calibrated.
+
+Live snapshot coverage: the `rv_flat_ephemeris` case in [`tests/validation/live_snapshot/propagator/two_body.snap.json`](../../tests/validation/live_snapshot/propagator/two_body.snap.json).
+
+Cross-validation script: [`tests/validation/cross_validation/propagator/test_two_body_rv_brahe.py`](../../tests/validation/cross_validation/propagator/test_two_body_rv_brahe.py).
+Live snapshot script: [`tests/validation/live_snapshot/propagator/test_two_body.py`](../../tests/validation/live_snapshot/propagator/test_two_body.py).
+
 ## J2 propagation
 
 Status of `propagator.j2`:

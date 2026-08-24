@@ -95,10 +95,37 @@
           145.7721915230352
         ]
       ]
+    },
+    {
+      "description": "Single-revolution Lambert delta-v with the three-point transfer path sample output.",
+      "id": "lambert_delta_v_path_points",
+      "return": {
+        "arrival_delta_v_m_s": [
+          -6981.067355350402,
+          3387.1183808111055,
+          -4924.757487049451
+        ],
+        "departure_delta_v_m_s": [
+          -8575.939825329679,
+          -1736.2629470740148,
+          -1983.8858905150032
+        ],
+        "positions": [
+          6114454.000000001,
+          2870352.000000002,
+          3308542,
+          658838.0672948235,
+          4355017.722592841,
+          2844325.511609798,
+          -4963330.500000005,
+          4154175.199999999,
+          1301602.9999999977
+        ]
+      }
     }
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-06-12T08:53:15Z"
+    "refreshed_at": "2026-08-24T06:28:11Z"
   }
 }

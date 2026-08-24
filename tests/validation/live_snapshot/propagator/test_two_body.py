@@ -45,12 +45,33 @@ def sso() -> tuple[float, propagator.PropagatorPosition]:
     )
 
 
+def rv() -> tuple[float, ...]:
+    state = orbits.cartesian_state(
+        x_m=7000000.0,
+        y_m=0.0,
+        z_m=0.0,
+        vx_m_s=0.0,
+        vy_m_s=7546.053290114564,
+        vz_m_s=0.0,
+    )
+    return propagator.two_body_rv(
+        state=state,
+        time_of_flight_s=600.0,
+        step_s=300.0,
+    )
+
+
 CASES = [
     LiveSnapshotCase(
         id="sso",
         description="Short two-body propagation from a low Earth orbit using explicit Earth constants.",
         run=sso,
-    )
+    ),
+    LiveSnapshotCase(
+        id="rv_flat_ephemeris",
+        description="Flat [t, x, y, z, vx, vy, vz, ...] two-body RV ephemeris with server-owned defaults.",
+        run=rv,
+    ),
 ]
 
 

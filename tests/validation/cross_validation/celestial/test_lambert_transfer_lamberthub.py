@@ -21,17 +21,29 @@ server's element convention is identified.
 #       Skyfield heliocentric Earth/Mars directions for ICRF; state-model
 #       precision and MeanEclpJ2000 semantics remain separate questions
 #     - DV1_Mag/DV2_Mag: verified as Euclidean norms of DeltaV1/DeltaV2
+#     - TimeOfFlightDays: verified as the exact day delta between ArrivalTime
+#       and DepartureTime
+#     - ArrivalLightAngle: verified as the angle in degrees between DeltaV2 and
+#       the RV2 position vector
 #     - DeltaV1/DeltaV2 physical body-velocity interpretation: unresolved
 #   Parameters:
 #     - departure and arrival sampling: verified for two departure dates and
 #       three arrival dates in the maintained ICRF case
 #     - MinTofDays: verified by exact timestamp-pair filtering on 2, 4, 12,
 #       and 14 day transfer durations
+#     - MaxTofDays: verified by exact timestamp-pair filtering against the
+#       maintained ICRF grid
+#     - MaxDepartureDV/MaxArrivalDV: verified as DV1_Mag/DV2_Mag upper-bound
+#       filters against the maintained ICRF grid; since 2026-08-20 the server
+#       defaults (10000 m/s departure, 10000 m/s arrival, 500 days TOF) filter
+#       the maintained grid to zero results, so the maintained fixtures pass
+#       explicit wide bounds
 #     - SunFrameName=ICRF: verified for the Lambert-state comparison and the
 #       independent axis-identification comparison
 #     - omitted MeanEclpJ2000 frame: unresolved against fixed obliquity rotations
 #     - explicit MPC elements: unresolved after independent element/time/frame
-#       convention probes
+#       convention probes, including the 2026-08-20 ReferenceFrame option,
+#       which does not change the route's arrival states
 #   Comparison:
 #     - External: lamberthub.izzo2015 with Sun mu, M=0, prograde=True
 #     - External frame anchor: Skyfield DE421 heliocentric Earth/Mars position
@@ -91,6 +103,19 @@ EXPECTED_ARRIVAL_TIMES = (
 FILTER_DEPARTURE_TIMES = ("2028-06-01T00:00:00Z", "2028-06-03T00:00:00Z")
 FILTER_ARRIVAL_TIMES = ("2028-06-05T00:00:00Z", "2028-06-15T00:00:00Z")
 
+# Since 2026-08-20 the server applies default MaxDepartureDV/MaxArrivalDV
+# (10000 m/s) and MaxTofDays (500) filters. The maintained grids exercise
+# transfers outside those defaults (the short-window fixture needs up to
+# about 2e6 m/s), so every maintained fixture opts out with explicit wide
+# bounds.
+WIDE_MAX_DELTA_V_M_S = 10000000
+WIDE_MAX_TOF_DAYS = 1000
+WIDE_FILTER_KWARGS: dict[str, Any] = {
+    "max_departure_delta_v_m_s": WIDE_MAX_DELTA_V_M_S,
+    "max_arrival_delta_v_m_s": WIDE_MAX_DELTA_V_M_S,
+    "max_time_of_flight_days": WIDE_MAX_TOF_DAYS,
+}
+
 EXPLICIT_ELEMENTS = celestial.mpc_orbital_elements(
     epoch_mjd_tdt=61000.0,
     periapsis_time_mjd_tdt=60900.0,
@@ -138,6 +163,8 @@ def _require_results(response: Any, *, expected_count: int) -> list[dict[str, An
             "DV2_Mag",
             "RV1",
             "RV2",
+            "TimeOfFlightDays",
+            "ArrivalLightAngle",
         ):
             if key not in result:
                 raise ResponseShapeError(f"TransferResults[{index}] missing {key}")
@@ -216,6 +243,7 @@ def _astrox_transfer_results(*, frame: str | None, explicit_elements: bool) -> l
         "min_time_of_flight_days": 10,
         "departure_step_days": 2.0,
         "arrival_step_days": 1.0,
+        **WIDE_FILTER_KWARGS,
     }
     if frame is not None:
         kwargs["sun_frame"] = frame
@@ -307,6 +335,7 @@ def _short_window_results(*, min_tof_days: int) -> Any:
         min_time_of_flight_days=min_tof_days,
         departure_step_days=2.0,
         arrival_step_days=10.0,
+        **WIDE_FILTER_KWARGS,
     )
 
 
@@ -349,6 +378,111 @@ def test_min_time_of_flight_filters_short_sampling_pairs() -> None:
     )
 
 
+def test_time_of_flight_days_matches_timestamp_delta() -> None:
+    configure_astrox_from_env()
+    results = _astrox_transfer_results(frame="ICRF", explicit_elements=False)
+    for index, result in enumerate(results):
+        expected_days = (
+            _time(result["ArrivalTime"]) - _time(result["DepartureTime"])
+        ).total_seconds() / 86400.0
+        actual_days = _require_number(
+            result["TimeOfFlightDays"],
+            field=f"TransferResults[{index}].TimeOfFlightDays",
+        )
+        if not math.isclose(actual_days, expected_days, rel_tol=0.0, abs_tol=1.0e-9):
+            raise CrossValidationError(
+                f"TransferResults[{index}].TimeOfFlightDays={actual_days:.12g} "
+                f"does not match the timestamp delta {expected_days:.12g} days"
+            )
+
+
+def test_arrival_light_angle_matches_delta_v_geometry() -> None:
+    configure_astrox_from_env()
+    results = _astrox_transfer_results(frame="ICRF", explicit_elements=False)
+    for index, result in enumerate(results):
+        delta_v2 = np.asarray(result["DeltaV2"], dtype=float)
+        arrival_position, _ = _state(result, "RV2")
+        cosine = float(
+            np.dot(delta_v2, arrival_position)
+            / (np.linalg.norm(delta_v2) * np.linalg.norm(arrival_position))
+        )
+        expected_deg = math.degrees(math.acos(np.clip(cosine, -1.0, 1.0)))
+        actual_deg = _require_number(
+            result["ArrivalLightAngle"],
+            field=f"TransferResults[{index}].ArrivalLightAngle",
+        )
+        if not math.isclose(actual_deg, expected_deg, rel_tol=0.0, abs_tol=1.0e-9):
+            raise CrossValidationError(
+                f"TransferResults[{index}].ArrivalLightAngle={actual_deg:.12g} "
+                f"does not match the DeltaV2/RV2 angle {expected_deg:.12g} deg"
+            )
+
+
+def test_max_filters_retain_expected_pairs() -> None:
+    configure_astrox_from_env()
+    unfiltered = _astrox_transfer_results(frame="ICRF", explicit_elements=False)
+
+    def _filtered(**overrides: Any) -> list[dict[str, Any]]:
+        kwargs: dict[str, Any] = {
+            "departure_body": "Earth",
+            "arrival_body": "Mars",
+            "departure_start": DEPARTURE_START,
+            "departure_stop": DEPARTURE_STOP,
+            "arrival_start": ARRIVAL_START,
+            "arrival_stop": ARRIVAL_STOP,
+            "sun_frame": "ICRF",
+            "min_time_of_flight_days": 10,
+            "departure_step_days": 2.0,
+            "arrival_step_days": 1.0,
+            **WIDE_FILTER_KWARGS,
+            **overrides,
+        }
+        results = celestial.lambert_transfer_window(**kwargs)["TransferResults"]
+        if not isinstance(results, list) or not results:
+            raise ResponseShapeError("filtered transfer response must be a non-empty list")
+        return results
+
+    def _expected_subset(**overrides: Any) -> list[tuple[datetime, datetime]]:
+        subset = []
+        for result in unfiltered:
+            if (
+                "max_departure_delta_v_m_s" in overrides
+                and result["DV1_Mag"] > overrides["max_departure_delta_v_m_s"]
+            ):
+                continue
+            if (
+                "max_arrival_delta_v_m_s" in overrides
+                and result["DV2_Mag"] > overrides["max_arrival_delta_v_m_s"]
+            ):
+                continue
+            if "max_time_of_flight_days" in overrides:
+                tof_days = (
+                    _time(result["ArrivalTime"]) - _time(result["DepartureTime"])
+                ).total_seconds() / 86400.0
+                if tof_days > overrides["max_time_of_flight_days"]:
+                    continue
+            subset.append((_time(result["DepartureTime"]), _time(result["ArrivalTime"])))
+        return sorted(subset)
+
+    for label, overrides in (
+        ("max_departure_delta_v_m_s", {"max_departure_delta_v_m_s": 15000}),
+        ("max_arrival_delta_v_m_s", {"max_arrival_delta_v_m_s": 5500}),
+        ("max_time_of_flight_days", {"max_time_of_flight_days": 304}),
+    ):
+        expected_pairs = _expected_subset(**overrides)
+        if len(expected_pairs) == len(unfiltered):
+            raise CrossValidationError(
+                f"{label} fixture no longer distinguishes: threshold retains every pair"
+            )
+        filtered = _filtered(**overrides)
+        if _timestamp_pairs(filtered) != expected_pairs:
+            raise CrossValidationError(
+                f"{label}={next(iter(overrides.values()))} did not retain exactly the "
+                "pairs whose maintained magnitudes satisfy the bound"
+            )
+        print(f"{label.upper()}_RETAINED_PAIRS={len(expected_pairs)}")
+
+
 def _obliquity_rotation(sign: float) -> np.ndarray:
     angle = math.radians(sign * MEAN_OBLIQUITY_DEG)
     return np.array(
@@ -382,6 +516,7 @@ def test_mean_ecliptic_frame_relation_remains_unresolved() -> None:
         "min_time_of_flight_days": 10,
         "departure_step_days": 1.0,
         "arrival_step_days": 1.0,
+        **WIDE_FILTER_KWARGS,
     }
     mean_ecliptic = _require_results(
         celestial.lambert_transfer_window(**common),
@@ -661,8 +796,10 @@ def _kepler_state_from_elements(
 @pytest.mark.xfail(
     reason=(
         "Explicit MPC elements remain unresolved after independent Kepler probes "
-        "for mean-anomaly and periapsis-time propagation; the server's exact "
-        "element frame and time convention is not identified."
+        "for mean-anomaly and periapsis-time propagation; the 2026-08-20 "
+        "ReferenceFrame option was probed and does not change the route's "
+        "arrival states, so the server's exact element frame and time "
+        "convention is still not identified."
     ),
     raises=CrossValidationError,
     strict=True,
@@ -699,11 +836,14 @@ def main() -> int:
         test_transfer_states_match_lamberthub_zero_revolution_prograde()
         test_transfer_delta_v_magnitudes_match_vector_norms()
         test_min_time_of_flight_filters_short_sampling_pairs()
+        test_time_of_flight_days_matches_timestamp_delta()
+        test_arrival_light_angle_matches_delta_v_geometry()
+        test_max_filters_retain_expected_pairs()
         test_icrf_axes_match_independent_skyfield_orientation()
     except Exception as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    print("CROSS_VALIDATION_CHECKED=4")
+    print("CROSS_VALIDATION_CHECKED=7")
     print("CROSS_VALIDATION_FAILED=0")
     return 0
 

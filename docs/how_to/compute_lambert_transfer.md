@@ -23,6 +23,9 @@ transfer = celestial.lambert_transfer_window(
     min_time_of_flight_days=10,
     departure_step_days=2.0,
     arrival_step_days=1.0,
+    # 该窗口出发双曲超速约 15 km/s，超出服务端 MaxDepartureDV 缺省值
+    # （10000 m/s），需要显式放宽上限才能保留结果
+    max_departure_delta_v_m_s=20000,
 )
 
 results = transfer["TransferResults"]
@@ -32,7 +35,8 @@ for result in results:
     print(
         f"出发 {result['DepartureTime']} → 到达 {result['ArrivalTime']}: "
         f"|DeltaV1|={result['DV1_Mag']:.1f} m/s, "
-        f"|DeltaV2|={result['DV2_Mag']:.1f} m/s"
+        f"|DeltaV2|={result['DV2_Mag']:.1f} m/s, "
+        f"TOF={result['TimeOfFlightDays']:.0f} d"
     )
 ```
 
@@ -47,14 +51,17 @@ python compute_lambert_transfer.py
 1. **选出发与到达天体**：`departure_body`/`arrival_body` 接受服务端支持的天体名称（如 `Earth`、`Mars`、`Ceres`）以及 MPC 编号或名称（如 `2015 XF261`）。小行星省略对应的 `*_elements` 参数时，服务端通过网络查询 MPC 根数。
 2. **定两个时间窗口**：`departure_start`/`departure_stop` 与 `arrival_start`/`arrival_stop` 各定义一个 UTC 时间窗口，SDK 分别组合为 `DepartureInterval`/`ArrivalInterval` 的 `"开始/结束"` 字符串。`departure_step_days` 与 `arrival_step_days`（单位 d）控制窗口内的采样步长，结果个数约等于两个窗口采样点数的乘积；示例中的 2 个出发日 × 3 个到达日产生 6 条结果。`min_time_of_flight_days`（单位 d，整数）过滤掉转移时间太短的组合，服务端缺省 10。
 3. **选输出参考系**：`sun_frame` 服务端缺省 `MeanEclpJ2000`；`ICRF` 分支的转移速度已与独立零圈顺行 Lambert 解一致，端点位置方向也已识别为 ICRF 轴方向，而 `MeanEclpJ2000` 与 ICRF 的精确关系尚未独立确认，需要参考系明确的数值时建议显式传 `sun_frame="ICRF"`。
+4. **按需调整过滤上限**：2026-08-20 起服务端按 `max_departure_delta_v_m_s`/`max_arrival_delta_v_m_s`（缺省各 10000 m/s，分别对应出发/到达双曲超速大小）与 `max_time_of_flight_days`（缺省 500 d）过滤算例，全部超界时返回空列表；扫描大 ΔV 或超长转移窗口时需显式放宽，示例中的 Earth→Mars 窗口就属于这种情况。
 
 ## 读懂结果
 
 每个结果对象包含：
 
 - `DepartureTime`/`ArrivalTime`：出发/到达时刻（UTC 字符串）。
-- `DeltaV1`/`DeltaV2`：出发/到达速度增量向量（m/s）；`DV1_Mag`/`DV2_Mag` 是它们的欧几里得范数（m/s）。`DeltaV` 相对端点天体速度的物理含义尚未独立确认，需要严格物理解释时请先核对。
+- `DeltaV1`/`DeltaV2`：出发/到达速度增量向量（出发/到达双曲超速矢量，m/s）；`DV1_Mag`/`DV2_Mag` 是它们的欧几里得范数（m/s）。`DeltaV` 相对端点天体速度的物理含义尚未独立确认，需要严格物理解释时请先核对。
 - `RV1`/`RV2`：出发/到达时的日心位置速度 `[x, y, z, vx, vy, vz]`（位置 m、速度 m/s）；ICRF 分支下转移速度与独立 Lambert 解一致，端点位置方向与 ICRF 轴方向一致。
+- `TimeOfFlightDays`：飞行时间（d），已验证为到达与出发时刻的精确天数差。
+- `ArrivalLightAngle`：到达时刻太阳光照角（deg），已验证为 `DeltaV2` 与 `RV2` 位置矢量的夹角。
 
 ## 小行星与显式 MPC 根数
 
@@ -84,7 +91,7 @@ transfer = celestial.lambert_transfer_window(
 )
 ```
 
-注意：显式 MPC 根数的独立开普勒递推尚未验证，元素系、参考系与时间约定未确认；这个分支可调用、响应结构已由 live 快照记录，但数值语义请自行核对。
+注意：显式 MPC 根数在转移路由中的独立开普勒递推尚未验证，元素系与时间约定未确认（`reference_frame` 选项不改变该路由的到达状态）；这个分支可调用、响应结构已由 live 快照记录，但数值语义请自行核对。`mpc_ephemeris` 的 `target_elements` 分支已验证（见天体手册）。
 
 ## 了解更多
 

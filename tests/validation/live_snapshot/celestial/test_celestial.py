@@ -147,6 +147,8 @@ def _transfer_result_shape(value: Any, *, field: str) -> dict[str, Any]:
         "DV2_Mag",
         "RV1",
         "RV2",
+        "TimeOfFlightDays",
+        "ArrivalLightAngle",
     )
     for key in required:
         if key not in value:
@@ -154,7 +156,7 @@ def _transfer_result_shape(value: Any, *, field: str) -> dict[str, Any]:
     for key in ("DepartureTime", "ArrivalTime"):
         if not isinstance(value[key], str):
             raise SnapshotError(f"{field}.{key} must be a string")
-    for key in ("DV1_Mag", "DV2_Mag"):
+    for key in ("DV1_Mag", "DV2_Mag", "TimeOfFlightDays", "ArrivalLightAngle"):
         if not isinstance(value[key], int | float) or isinstance(value[key], bool):
             raise SnapshotError(f"{field}.{key} must be numeric")
     for key, expected_length in (("DeltaV1", 3), ("DeltaV2", 3), ("RV1", 6), ("RV2", 6)):
@@ -190,6 +192,12 @@ def transfer_shape(*, frame: str | None, explicit_elements: bool) -> dict[str, A
         "arrival_stop": "2029-04-03T00:00:00Z",
         "departure_step_days": 2.0,
         "arrival_step_days": 1.0,
+        # Since 2026-08-20 the server defaults MaxDepartureDV/MaxArrivalDV to
+        # 10000 m/s and MaxTofDays to 500, which would filter this maintained
+        # grid to zero results; opt out with explicit wide bounds.
+        "max_departure_delta_v_m_s": 10000000,
+        "max_arrival_delta_v_m_s": 10000000,
+        "max_time_of_flight_days": 1000,
     }
     if frame is not None:
         kwargs["sun_frame"] = frame

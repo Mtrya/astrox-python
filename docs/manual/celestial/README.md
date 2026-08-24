@@ -113,19 +113,23 @@ celestial.mpc_ephemeris(
     observer_frame: str | None = None,
     start: str | None = None,
     stop: str | None = None,
+    target_elements: MpcOrbitalElements | None = None,
 ) -> dict[str, Any]
 ```
 
-按小行星名称或编号查询 MPC 小行星星历，返回原始 JSON 响应字典。
+按小行星名称或编号查询 MPC 小行星星历，返回原始 JSON 响应字典；提供 `target_elements` 时，服务端直接对给定 MPC 轨道根数积分，不再通过网络查询 MPC。
 
 | 参数 | wire 参数 | 说明 |
 | --- | --- | --- |
 | `target_name` | `TargetName` | 小行星名称或编号，如 `Ceres`、`99942` |
-| `observer_frame` | `ObserverFrame` | 日心坐标系，服务端可选 `FIXED`、`INERTIAL`、`MeanEclpJ2000`、`J2000`，缺省为 `MeanEclpJ2000` |
+| `observer_frame` | `ObserverFrame` | 日心坐标系，服务端可选 `FIXED`、`INERTIAL`、`J2000`、`ICRF`、`MeanEclpJ2000`、`EclpJ2000ICRF`，缺省为 `MeanEclpJ2000` |
 | `start` | `Start` | 开始时刻（UTC）；缺省为轨道历元时刻，不能早于轨道历元时刻（服务端规则） |
 | `stop` | `Stop` | 结束时刻（UTC）；缺省为 `Start` 起 1 年 |
+| `target_elements` | `TargetElements` | 显式 MPC 轨道根数（`mpc_orbital_elements` 构造）；省略时服务端通过网络查询 MPC |
 
-该路由从外部 MPC 数据源获取轨道根数（历元为 MJD TDT），由服务端以固定 1 天步长进行日心轨道递推，输出为日心系 CZML Position 结构。响应包含 `OrbitElements`（轨道根数，键为 `EpochMjdTdt`、`PeriTimeMjdTdt`、`Q`、`SemimajorAxis`、`Eccentricity`、`Inclination`、`Raan`、`ArgOfPeriapsis`、`MeanAnomaly`）与 `Position`（CZML 结构，同 `ephemeris`）。轨道根数的数值来自外部 MPC 数据，属于外部数据所有，可能随 MPC 数据更新而变化。省略 `start`/`stop` 时，服务端使用轨道历元默认窗口（`start` 为轨道历元时刻，`stop` 为其后 1 年）；显式固定窗口依赖查询时的轨道历元，外部 MPC 轨道历元更新后，先前固定的窗口可能早于新历元而被服务端拒绝，建议省略窗口参数或跟随当前历元选择。
+该路由从外部 MPC 数据源获取轨道根数（历元为 MJD TDT），由服务端以固定 3 天步长进行日心轨道递推，输出为日心系 CZML Position 结构。响应包含 `OrbitElements`（轨道根数，键为 `EpochMjdTdt`、`PeriTimeMjdTdt`、`Q`、`SemimajorAxis`、`Eccentricity`、`Inclination`、`Raan`、`ArgOfPeriapsis`、`MeanAnomaly`、`ReferenceFrame`）与 `Position`（CZML 结构，同 `ephemeris`）。轨道根数的数值来自外部 MPC 数据，属于外部数据所有，可能随 MPC 数据更新而变化。省略 `start`/`stop` 时，服务端使用轨道历元默认窗口（`start` 为轨道历元时刻，`stop` 为其后 1 年）；显式固定窗口依赖查询时的轨道历元，外部 MPC 轨道历元更新后，先前固定的窗口可能早于新历元而被服务端拒绝，建议省略窗口参数或跟随当前历元选择。
+
+已验证（端点间不变量）：把名称查询返回的 `OrbitElements` 以 `target_elements` 原样回传，得到的星历与名称查询结果完全一致；`reference_frame` 的 `EclpJ2000ICRF`（MPC 约定，服务端缺省）与 `MeanEclpJ2000`（JPL 约定）是可区分的两个分支。验证证据见 [celestial 验证页](../../validation/celestial.md)。
 
 ```python
 mpc = celestial.mpc_ephemeris(target_name="Ceres")
@@ -149,6 +153,7 @@ celestial.mpc_orbital_elements(
     raan_deg: float | None = None,
     argument_of_periapsis_deg: float | None = None,
     mean_anomaly_deg: float | None = None,
+    reference_frame: str | None = None,
 ) -> MpcOrbitalElements
 ```
 
@@ -165,6 +170,7 @@ celestial.mpc_orbital_elements(
 | `raan_deg` | `Raan` | deg |
 | `argument_of_periapsis_deg` | `ArgOfPeriapsis` | deg |
 | `mean_anomaly_deg` | `MeanAnomaly` | deg |
+| `reference_frame` | `ReferenceFrame` | 日心平黄道坐标系变体：`MeanEclpJ2000`（JPL）或 `EclpJ2000ICRF`（MPC，服务端缺省） |
 
 ```python
 from astrox import celestial
@@ -184,7 +190,7 @@ elements = celestial.mpc_orbital_elements(
 print(elements.to_wire())
 ```
 
-`to_wire()` 返回 ASTROX `MpcOrbElements` 请求片段，上面的示例输出 `{'EpochMjdTdt': 61000.0, 'PeriTimeMjdTdt': 60900.0, 'Q': 0.6740515, 'SemimajorAxis': 0.9898367, 'Eccentricity': 0.3190276, 'Inclination': 0.79379, 'Raan': 209.81829, 'ArgOfPeriapsis': 100.88187, 'MeanAnomaly': 120.0}`。传入 `lambert_transfer_window` 后，服务端直接使用这些根数进行日心轨道递推，不再通过网络查询 MPC。显式根数的独立开普勒递推尚未验证，其元素系、参考系与时间约定未确认，使用前请自行核对。
+`to_wire()` 返回 ASTROX `MpcOrbElements` 请求片段，上面的示例输出 `{'EpochMjdTdt': 61000.0, 'PeriTimeMjdTdt': 60900.0, 'Q': 0.6740515, 'SemimajorAxis': 0.9898367, 'Eccentricity': 0.3190276, 'Inclination': 0.79379, 'Raan': 209.81829, 'ArgOfPeriapsis': 100.88187, 'MeanAnomaly': 120.0}`。传入 `lambert_transfer_window` 后，服务端直接使用这些根数进行日心轨道递推，不再通过网络查询 MPC。显式根数在该路由中的独立开普勒递推尚未验证，其元素系与时间约定未确认（`reference_frame` 选项不改变该路由的到达状态）；`mpc_ephemeris` 的 `target_elements` 分支已验证（见上文），使用前请自行核对。
 
 ## Lambert 转移窗口
 
@@ -205,10 +211,13 @@ celestial.lambert_transfer_window(
     arrival_step_days: float | None = None,
     departure_elements: MpcOrbitalElements | None = None,
     arrival_elements: MpcOrbitalElements | None = None,
+    max_departure_delta_v_m_s: int | None = None,
+    max_arrival_delta_v_m_s: int | None = None,
+    max_time_of_flight_days: int | None = None,
 ) -> dict[str, Any]
 ```
 
-在出发时间窗口与到达时间窗口上采样，计算天体之间的 Lambert 转移，返回原始 JSON 响应字典。它不是单案例接口 `orbits.lambert_delta_v`：后者接收两个 `CartesianState` 与一个 `time_of_flight_s`，调用 `/orbit/lambert`，返回 `(DV1, DV2)` 两个三元组；本函数扫描整组出发/到达时间组合，返回 `TransferResults` 列表。
+在出发时间窗口与到达时间窗口上采样，计算天体之间的 Lambert 转移，返回原始 JSON 响应字典。它不是单案例接口 `orbits.lambert_delta_v`：后者接收两个 `CartesianState` 与一个 `time_of_flight_s`，调用 `/orbit/lambert`，默认返回 `(DV1, DV2)` 两个三元组；本函数扫描整组出发/到达时间组合，返回 `TransferResults` 列表。
 
 | 参数 | wire 参数 | 说明 |
 | --- | --- | --- |
@@ -224,6 +233,9 @@ celestial.lambert_transfer_window(
 | `arrival_step_days` | `ArrivalStepDay` | 到达时间采样步长，单位 d；服务端缺省 1 |
 | `departure_elements` | `DepartureElements` | 出发小行星的 MPC 轨道根数（`mpc_orbital_elements` 构造）；省略时服务端通过网络查询 MPC |
 | `arrival_elements` | `ArrivalElements` | 到达小行星的 MPC 轨道根数；省略时服务端通过网络查询 MPC |
+| `max_departure_delta_v_m_s` | `MaxDepartureDV` | 最大出发速度增量（出发双曲超速大小），单位 m/s，整数；服务端缺省 10000，超出的算例被过滤 |
+| `max_arrival_delta_v_m_s` | `MaxArrivalDV` | 最大到达速度增量（到达双曲超速大小），单位 m/s，整数；服务端缺省 10000，超出的算例被过滤 |
+| `max_time_of_flight_days` | `MaxTofDays` | 最大转移时间，单位 d，整数；服务端缺省 500，超出的算例被过滤 |
 
 `departure_body`、`arrival_body` 与四个时间字符串是本函数必填的请求字段；`DepartureInterval`/`ArrivalInterval` 是 `"开始/结束"` 形式的单字符串，例如 `"2028-06-01T00:00:00Z/2028-06-03T00:00:00Z"`。其它可选参数省略时不会被发往 ASTROX，由服务器保留默认值。
 
@@ -241,6 +253,9 @@ transfer = celestial.lambert_transfer_window(
     min_time_of_flight_days=10,
     departure_step_days=2.0,
     arrival_step_days=1.0,
+    # 该窗口出发双曲超速约 15 km/s，超出服务端 MaxDepartureDV 缺省值
+    # （10000 m/s），需要显式放宽上限才能保留结果
+    max_departure_delta_v_m_s=20000,
 )
 
 results = transfer["TransferResults"]
@@ -248,20 +263,23 @@ first = results[0]
 print(f"{len(results)} 个转移结果")
 print(
     f"首个: {first['DepartureTime']} → {first['ArrivalTime']}, "
-    f"|DeltaV1|={first['DV1_Mag']:.1f} m/s, |DeltaV2|={first['DV2_Mag']:.1f} m/s"
+    f"|DeltaV1|={first['DV1_Mag']:.1f} m/s, |DeltaV2|={first['DV2_Mag']:.1f} m/s, "
+    f"TOF={first['TimeOfFlightDays']:.0f} d"
 )
 ```
 
-响应包含 `TransferResults`（转移结果数组，每个元素对应一对被采样的出发/到达时刻；结果个数由两个时间窗口与采样步长共同决定）。每个结果的键为：
+响应包含 `TransferResults`（转移结果数组，每个元素对应一对被采样的出发/到达时刻；结果个数由两个时间窗口与采样步长共同决定，并受 `min_time_of_flight_days` 与 `max_departure_delta_v_m_s`/`max_arrival_delta_v_m_s`/`max_time_of_flight_days` 过滤上限影响，全部超界时结果为空）。每个结果的键为：
 
 | 键 | 类型 | 单位/说明 |
 | --- | --- | --- |
 | `DepartureTime` / `ArrivalTime` | string | 出发/到达时刻（UTC 字符串） |
-| `DeltaV1` / `DeltaV2` | number[3] | 出发/到达速度增量向量，m/s |
+| `DeltaV1` / `DeltaV2` | number[3] | 出发/到达速度增量向量（出发/到达双曲超速矢量），m/s |
 | `DV1_Mag` / `DV2_Mag` | number | 出发/到达速度增量大小，m/s；已验证为对应 `DeltaV` 向量的欧几里得范数 |
 | `RV1` / `RV2` | number[6] | 出发/到达时的位置速度（日心系）`[x, y, z, vx, vy, vz]`，位置 m、速度 m/s |
+| `TimeOfFlightDays` | number | 飞行时间，单位 d；已验证为 `ArrivalTime` 与 `DepartureTime` 的精确天数差 |
+| `ArrivalLightAngle` | number | 到达时刻太阳光照角，单位 deg；已验证为 `DeltaV2` 与 `RV2` 位置矢量的夹角 |
 
-已验证（独立交叉验证支持）：`sun_frame="ICRF"` 时，`RV1`/`RV2` 中的转移速度遵循零圈顺行 Lambert 关系，端点位置方向使用 ICRF 轴。未解决：`MeanEclpJ2000` 与 ICRF 之间的精确坐标关系、`DeltaV` 相对端点天体速度的物理含义、显式 MPC 根数的独立开普勒递推。这些分支目前只有请求构造与响应结构层面的证据，使用前请自行核对。
+已验证（独立交叉验证支持）：`sun_frame="ICRF"` 时，`RV1`/`RV2` 中的转移速度遵循零圈顺行 Lambert 关系，端点位置方向使用 ICRF 轴；`max_departure_delta_v_m_s`/`max_arrival_delta_v_m_s`/`max_time_of_flight_days` 分别按 `DV1_Mag`/`DV2_Mag`/飞行时间上限过滤采样网格。注意 2026-08-20 起服务端缺省值（出发/到达各 10000 m/s、500 d）会过滤掉超出缺省的算例，扫描大 ΔV 窗口时需显式放宽。未解决：`MeanEclpJ2000` 与 ICRF 之间的精确坐标关系、`DeltaV` 相对端点天体速度的物理含义、显式 MPC 根数的独立开普勒递推（`reference_frame` 选项不改变该路由的到达状态，元素约定仍未确认）。这些分支目前只有请求构造与响应结构层面的证据，使用前请自行核对。
 
 ## 约定说明
 

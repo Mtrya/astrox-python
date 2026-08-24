@@ -118,19 +118,21 @@ Coverage status from [`test_lambert_lamberthub.py`](../../tests/validation/cross
 | --- | --- |
 | `lambert_delta_v` (Cartesian endpoints) | verified |
 | `geo_ym_lambert_delta_v` (Keplerian platform/target) | verified with calibrated ASTROX target convention |
+| `lambert_delta_v` path points (`get_path_points=True`) | verified |
 
-Verified fields: both departure and arrival delta-v vectors.
+Verified fields: both departure and arrival delta-v vectors. For the path-points branch, the first and last samples reproduce the departure and arrival states, the sample count follows `path_point_count` (or the server default of 100), and intermediate samples match Brahe two-body propagation of the departure state plus the returned departure delta-v.
 
 Parameter coverage:
 
 - `time_of_flight_s` and `gravitational_parameter_m3_s2` are verified for `TIME_OF_FLIGHT_S = 3600.0` and `EARTH_MU = 398600441500000.0`.
+- `path_point_count` is verified for an explicit count of 5 and for the server default.
 - Platform/target orbits and Cartesian endpoint states are each partial (one representative GEO-like pair and one Cartesian transfer, respectively).
 
-Comparison path: `lamberthub` `izzo2015` zero-revolution prograde Lambert solver. Tolerances: `STRICT_RESIDUAL_M_S = 1.0e-3` for the verified comparison; `CONVENTION_DIAGNOSTIC_RESIDUAL_M_S = 1.0e-2` guards the GEO-YM target-timing convention.
+Comparison path: `lamberthub` `izzo2015` zero-revolution prograde Lambert solver; the path-points branch additionally uses Brahe two-body ECI propagation. Tolerances: `STRICT_RESIDUAL_M_S = 1.0e-3` for the verified comparison; `CONVENTION_DIAGNOSTIC_RESIDUAL_M_S = 1.0e-2` guards the GEO-YM target-timing convention; `ENDPOINT_ABS_M = 1.0e-3` and `PATH_POSITION_ABS_M = 1.0e-3` for the path-points checks in [`test_lambert_path_points.py`](../../tests/validation/cross_validation/orbits/test_lambert_path_points.py).
 
 Known convention for `geo_ym_lambert_delta_v`: ASTROX advances the target orbit's `true_anomaly_deg` linearly by `mean_motion * time_of_flight_s` before solving the Lambert transfer. This is different from propagating the target mean anomaly through Kepler's equation; the diagnostic threshold intentionally fails if the mean-anomaly path starts to match, so that a convention change is not silently absorbed.
 
-Live snapshot sidecar: `conversions.snap.json` covers `lambert_delta_v_cartesian`, `lambert_delta_v_with_platform_mu`, and `lambert_delta_v_server_default_mu`.
+Live snapshot sidecar: `conversions.snap.json` covers `lambert_delta_v_cartesian`, `lambert_delta_v_with_platform_mu`, `lambert_delta_v_server_default_mu`, and `lambert_delta_v_path_points`.
 
 ## OrbitSystem Frame Work
 

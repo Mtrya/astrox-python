@@ -6,9 +6,10 @@ This page solves a specific task: choose the right propagator from the orbit des
 
 1. **Input determines the propagator**:
    - You have Keplerian elements → use `propagator.j2` or `propagator.two_body`.
+   - You have a Cartesian position/velocity state → use `propagator.two_body_rv` (pure two-body; returns a flat ephemeris sequence, not `(period_s, position)`).
    - You have a two-line element set (TLE) → use `propagator.sgp4`.
    - You have a force model config → use `propagator.hpop`.
-2. **Reading the samples**: all single-orbit propagation functions return `(period_s, position)`, where `position.cartesian_velocity` is a CZML-style flat sequence `[t, x, y, z, vx, vy, vz, ...]`.
+2. **Reading the samples**: except for `two_body_rv`, all single-orbit propagation functions return `(period_s, position)`, where `position.cartesian_velocity` is a CZML-style flat sequence `[t, x, y, z, vx, vy, vz, ...]`.
 
 ## Complete example
 
@@ -139,6 +140,7 @@ Every 7 numbers in `cartesian_velocity` form one frame: time offset (seconds), p
 | --- | --- | --- |
 | Keplerian elements | `propagator.j2` | Includes J2 perturbation; suitable for most LEO missions. |
 | Keplerian elements, pure two-body | `propagator.two_body` | Only central-body gravity; fastest computation. |
+| Cartesian position/velocity state | `propagator.two_body_rv` | Fixed-step numerical two-body integration; returns a flat ephemeris sequence `[t, x, y, z, vx, vy, vz, ...]`. |
 | Two-line element set (TLE) | `propagator.sgp4` | Propagates directly from TLE; no need to build elements manually. |
 | Need to configure a force model | `propagator.hpop` | Supports gravity field, atmosphere, solar radiation pressure, third-body perturbations, and more. |
 

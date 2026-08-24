@@ -230,6 +230,94 @@ def test_lambert_delta_v_omits_mu_when_not_supplied(
     )
 
 
+def test_lambert_delta_v_path_points_return_lambert_result(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(
+        monkeypatch,
+        {
+            "IsSuccess": True,
+            "Message": "",
+            "DV1": [1.0, 2.0, 3.0],
+            "DV2": [-1.0, -2.0, -3.0],
+            "Positions": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+        },
+    )
+
+    result = orbits.lambert_delta_v(
+        departure_state=sample_cartesian_state(),
+        arrival_state=sample_cartesian_state(),
+        time_of_flight_s=817.4257,
+        get_path_points=True,
+        path_point_count=2,
+    )
+
+    assert calls[0]["endpoint"] == "/orbit/lambert"
+    assert_canonical_equal(
+        calls[0]["json"],
+        {
+            "RV1": REPRESENTATIVE_CARTESIAN_RESPONSE,
+            "RV2": REPRESENTATIVE_CARTESIAN_RESPONSE,
+            "TOF": [817.4257],
+            "GetPathPoints": True,
+            "NumberOfPathPoints": 2,
+        },
+    )
+    assert isinstance(result, orbits.LambertResult)
+    assert result.departure_delta_v_m_s == (1.0, 2.0, 3.0)
+    assert result.arrival_delta_v_m_s == (-1.0, -2.0, -3.0)
+    assert result.positions == (1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
+
+
+def test_lambert_delta_v_path_points_omit_sample_count_when_not_supplied(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(
+        monkeypatch,
+        {
+            "IsSuccess": True,
+            "Message": "",
+            "DV1": [1.0, 2.0, 3.0],
+            "DV2": [-1.0, -2.0, -3.0],
+            "Positions": [1.0, 2.0, 3.0],
+        },
+    )
+
+    orbits.lambert_delta_v(
+        departure_state=sample_cartesian_state(),
+        arrival_state=sample_cartesian_state(),
+        time_of_flight_s=817.4257,
+        get_path_points=True,
+    )
+
+    assert_canonical_equal(
+        calls[0]["json"],
+        {
+            "RV1": REPRESENTATIVE_CARTESIAN_RESPONSE,
+            "RV2": REPRESENTATIVE_CARTESIAN_RESPONSE,
+            "TOF": [817.4257],
+            "GetPathPoints": True,
+        },
+    )
+
+
+def test_lambert_delta_v_path_points_parser_fails_loudly_for_missing_positions(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    record_raw_post(
+        monkeypatch,
+        {"IsSuccess": True, "Message": "", "DV1": [1.0, 2.0, 3.0], "DV2": [4.0, 5.0, 6.0]},
+    )
+
+    with pytest.raises(KeyError):
+        orbits.lambert_delta_v(
+            departure_state=sample_cartesian_state(),
+            arrival_state=sample_cartesian_state(),
+            time_of_flight_s=817.4257,
+            get_path_points=True,
+        )
+
+
 @pytest.mark.parametrize(
     ("function_name", "kwargs"),
     [
@@ -403,7 +491,10 @@ def test_conversion_return_type_hints_are_curated_values() -> None:
         tuple[float, float, float],
         tuple[float, float, float],
     ]
-    assert get_type_hints(orbits.lambert_delta_v)["return"] == tuple[
-        tuple[float, float, float],
-        tuple[float, float, float],
-    ]
+    assert get_type_hints(orbits.lambert_delta_v)["return"] == (
+        tuple[
+            tuple[float, float, float],
+            tuple[float, float, float],
+        ]
+        | orbits.LambertResult
+    )

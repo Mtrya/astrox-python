@@ -113,19 +113,23 @@ celestial.mpc_ephemeris(
     observer_frame: str | None = None,
     start: str | None = None,
     stop: str | None = None,
+    target_elements: MpcOrbitalElements | None = None,
 ) -> dict[str, Any]
 ```
 
-Queries an MPC minor-planet ephemeris by asteroid name or number and returns a raw JSON response dictionary.
+Queries an MPC minor-planet ephemeris by asteroid name or number and returns a raw JSON response dictionary. When `target_elements` is provided, the server integrates the given MPC orbital elements directly instead of querying MPC over the network.
 
 | Parameter | Wire parameter | Description |
 | --- | --- | --- |
 | `target_name` | `TargetName` | Asteroid name or number, e.g. `Ceres`, `99942` |
-| `observer_frame` | `ObserverFrame` | Heliocentric frame, server options `FIXED`, `INERTIAL`, `MeanEclpJ2000`, `J2000`, default `MeanEclpJ2000` |
+| `observer_frame` | `ObserverFrame` | Heliocentric frame, server options `FIXED`, `INERTIAL`, `J2000`, `ICRF`, `MeanEclpJ2000`, `EclpJ2000ICRF`, default `MeanEclpJ2000` |
 | `start` | `Start` | Start time (UTC); defaults to the orbital epoch and cannot be earlier than the orbital epoch (server rule) |
 | `stop` | `Stop` | Stop time (UTC); defaults to 1 year after `Start` |
+| `target_elements` | `TargetElements` | Explicit MPC orbital elements (built with `mpc_orbital_elements`); when omitted, the server queries MPC over the network |
 
-This route fetches orbital elements from the external MPC data source (element epoch in MJD TDT), which the server propagates heliocentrically with a fixed 1-day step, and outputs a heliocentric CZML Position structure. The response contains `OrbitElements` (orbital elements with keys `EpochMjdTdt`, `PeriTimeMjdTdt`, `Q`, `SemimajorAxis`, `Eccentricity`, `Inclination`, `Raan`, `ArgOfPeriapsis`, `MeanAnomaly`) and `Position` (CZML structure, same as `ephemeris`). The orbital-element values come from external MPC data, are owned by that external data source, and may change with MPC updates. When `start`/`stop` are omitted, the server uses the orbital-epoch default window (`start` is the orbital epoch and `stop` is one year after it); an explicit fixed window depends on the orbital epoch at query time, and once the external MPC orbital epoch updates, a previously fixed window may fall before the new epoch and be rejected by the server, so prefer omitting the window parameters or following the current epoch.
+This route fetches orbital elements from the external MPC data source (element epoch in MJD TDT), which the server propagates heliocentrically with a fixed 3-day step, and outputs a heliocentric CZML Position structure. The response contains `OrbitElements` (orbital elements with keys `EpochMjdTdt`, `PeriTimeMjdTdt`, `Q`, `SemimajorAxis`, `Eccentricity`, `Inclination`, `Raan`, `ArgOfPeriapsis`, `MeanAnomaly`, `ReferenceFrame`) and `Position` (CZML structure, same as `ephemeris`). The orbital-element values come from external MPC data, are owned by that external data source, and may change with MPC updates. When `start`/`stop` are omitted, the server uses the orbital-epoch default window (`start` is the orbital epoch and `stop` is one year after it); an explicit fixed window depends on the orbital epoch at query time, and once the external MPC orbital epoch updates, a previously fixed window may fall before the new epoch and be rejected by the server, so prefer omitting the window parameters or following the current epoch.
+
+Verified (endpoint-internal invariant): passing the `OrbitElements` returned by a name query back as `target_elements` reproduces the name-query ephemeris exactly; the `reference_frame` values `EclpJ2000ICRF` (MPC convention, server default) and `MeanEclpJ2000` (JPL convention) are two distinguishable branches. See the [celestial validation page](../../../../validation/celestial.md) for the evidence.
 
 ```python
 mpc = celestial.mpc_ephemeris(target_name="Ceres")
@@ -149,6 +153,7 @@ celestial.mpc_orbital_elements(
     raan_deg: float | None = None,
     argument_of_periapsis_deg: float | None = None,
     mean_anomaly_deg: float | None = None,
+    reference_frame: str | None = None,
 ) -> MpcOrbitalElements
 ```
 
@@ -165,6 +170,7 @@ Builds a heliocentric MPC orbital-element fragment. When either the departure or
 | `raan_deg` | `Raan` | deg |
 | `argument_of_periapsis_deg` | `ArgOfPeriapsis` | deg |
 | `mean_anomaly_deg` | `MeanAnomaly` | deg |
+| `reference_frame` | `ReferenceFrame` | Heliocentric ecliptic frame variant: `MeanEclpJ2000` (JPL) or `EclpJ2000ICRF` (MPC, server default) |
 
 ```python
 from astrox import celestial
@@ -184,7 +190,7 @@ elements = celestial.mpc_orbital_elements(
 print(elements.to_wire())
 ```
 
-`to_wire()` returns the ASTROX `MpcOrbElements` request fragment; the example above prints `{'EpochMjdTdt': 61000.0, 'PeriTimeMjdTdt': 60900.0, 'Q': 0.6740515, 'SemimajorAxis': 0.9898367, 'Eccentricity': 0.3190276, 'Inclination': 0.79379, 'Raan': 209.81829, 'ArgOfPeriapsis': 100.88187, 'MeanAnomaly': 120.0}`. When passed to `lambert_transfer_window`, the server propagates heliocentrically directly with these elements and no longer queries MPC over the network. The independent Kepler propagation of explicit elements is unverified: the element system, reference frame, and time convention are not confirmed, so verify their meaning yourself before use.
+`to_wire()` returns the ASTROX `MpcOrbElements` request fragment; the example above prints `{'EpochMjdTdt': 61000.0, 'PeriTimeMjdTdt': 60900.0, 'Q': 0.6740515, 'SemimajorAxis': 0.9898367, 'Eccentricity': 0.3190276, 'Inclination': 0.79379, 'Raan': 209.81829, 'ArgOfPeriapsis': 100.88187, 'MeanAnomaly': 120.0}`. When passed to `lambert_transfer_window`, the server propagates heliocentrically directly with these elements and no longer queries MPC over the network. The independent Kepler propagation of explicit elements in that route is unverified: the element system and time convention are not confirmed (the `reference_frame` option does not change the arrival states of that route); the `target_elements` branch of `mpc_ephemeris` is verified (see above), so verify the meaning yourself before use.
 
 ## Lambert transfer windows
 
@@ -205,10 +211,13 @@ celestial.lambert_transfer_window(
     arrival_step_days: float | None = None,
     departure_elements: MpcOrbitalElements | None = None,
     arrival_elements: MpcOrbitalElements | None = None,
+    max_departure_delta_v_m_s: int | None = None,
+    max_arrival_delta_v_m_s: int | None = None,
+    max_time_of_flight_days: int | None = None,
 ) -> dict[str, Any]
 ```
 
-Samples over the departure time window and the arrival time window, computes Lambert transfers between bodies, and returns a raw JSON response dictionary. It is not the single-case `orbits.lambert_delta_v` interface: that function takes two `CartesianState` values and a `time_of_flight_s`, calls `/orbit/lambert`, and returns the two triples `(DV1, DV2)`; this function scans the whole grid of departure/arrival time pairs and returns a `TransferResults` list.
+Samples over the departure time window and the arrival time window, computes Lambert transfers between bodies, and returns a raw JSON response dictionary. It is not the single-case `orbits.lambert_delta_v` interface: that function takes two `CartesianState` values and a `time_of_flight_s`, calls `/orbit/lambert`, and by default returns the two triples `(DV1, DV2)`; this function scans the whole grid of departure/arrival time pairs and returns a `TransferResults` list.
 
 | Parameter | Wire parameter | Description |
 | --- | --- | --- |
@@ -224,6 +233,9 @@ Samples over the departure time window and the arrival time window, computes Lam
 | `arrival_step_days` | `ArrivalStepDay` | Arrival time sample step, in d; server default 1 |
 | `departure_elements` | `DepartureElements` | MPC orbital elements of the departure asteroid (built with `mpc_orbital_elements`); when omitted, the server queries MPC over the network |
 | `arrival_elements` | `ArrivalElements` | MPC orbital elements of the arrival asteroid; when omitted, the server queries MPC over the network |
+| `max_departure_delta_v_m_s` | `MaxDepartureDV` | Maximum departure velocity increment (departure hyperbolic excess speed magnitude), in m/s, integer; server default 10000, cases above it are filtered out |
+| `max_arrival_delta_v_m_s` | `MaxArrivalDV` | Maximum arrival velocity increment (arrival hyperbolic excess speed magnitude), in m/s, integer; server default 10000, cases above it are filtered out |
+| `max_time_of_flight_days` | `MaxTofDays` | Maximum transfer time, in d, integer; server default 500, cases above it are filtered out |
 
 `departure_body`, `arrival_body`, and the four time strings are the required request fields of this function; `DepartureInterval`/`ArrivalInterval` is a single `"start/stop"` string, e.g. `"2028-06-01T00:00:00Z/2028-06-03T00:00:00Z"`. Other optional parameters that are not supplied are not sent to ASTROX, and the server retains its default values.
 
@@ -241,6 +253,9 @@ transfer = celestial.lambert_transfer_window(
     min_time_of_flight_days=10,
     departure_step_days=2.0,
     arrival_step_days=1.0,
+    # this window's departure hyperbolic excess speed is about 15 km/s, above
+    # the server MaxDepartureDV default (10000 m/s); widen the bound explicitly
+    max_departure_delta_v_m_s=20000,
 )
 
 results = transfer["TransferResults"]
@@ -248,20 +263,23 @@ first = results[0]
 print(f"{len(results)} transfer results")
 print(
     f"First: {first['DepartureTime']} → {first['ArrivalTime']}, "
-    f"|DeltaV1|={first['DV1_Mag']:.1f} m/s, |DeltaV2|={first['DV2_Mag']:.1f} m/s"
+    f"|DeltaV1|={first['DV1_Mag']:.1f} m/s, |DeltaV2|={first['DV2_Mag']:.1f} m/s, "
+    f"TOF={first['TimeOfFlightDays']:.0f} d"
 )
 ```
 
-The response contains `TransferResults` (an array of transfer results; each element corresponds to one sampled departure/arrival time pair, and the number of results is determined jointly by the two time windows and the sample steps). Each result has the following keys:
+The response contains `TransferResults` (an array of transfer results; each element corresponds to one sampled departure/arrival time pair, and the number of results is determined jointly by the two time windows and the sample steps, and is also affected by `min_time_of_flight_days` and the `max_departure_delta_v_m_s`/`max_arrival_delta_v_m_s`/`max_time_of_flight_days` filter bounds — when every case is out of bounds the list is empty). Each result has the following keys:
 
 | Key | Type | Unit / description |
 | --- | --- | --- |
 | `DepartureTime` / `ArrivalTime` | string | Departure/arrival time (UTC string) |
-| `DeltaV1` / `DeltaV2` | number[3] | Departure/arrival velocity-increment vector, m/s |
+| `DeltaV1` / `DeltaV2` | number[3] | Departure/arrival velocity-increment vector (departure/arrival hyperbolic excess velocity vector), m/s |
 | `DV1_Mag` / `DV2_Mag` | number | Departure/arrival velocity-increment magnitude, m/s; verified to be the Euclidean norm of the corresponding `DeltaV` vector |
 | `RV1` / `RV2` | number[6] | Position and velocity at departure/arrival (heliocentric) `[x, y, z, vx, vy, vz]`, positions m, velocities m/s |
+| `TimeOfFlightDays` | number | Time of flight, in d; verified to be the exact day difference between `ArrivalTime` and `DepartureTime` |
+| `ArrivalLightAngle` | number | Sun lighting angle at arrival, in deg; verified to be the angle between `DeltaV2` and the `RV2` position vector |
 
-Verified (supported by independent cross-validation): with `sun_frame="ICRF"`, the transfer velocities in `RV1`/`RV2` follow the zero-revolution prograde Lambert relationship, and the endpoint position directions use the ICRF axes. Unresolved: the exact coordinate relationship between `MeanEclpJ2000` and ICRF, the physical meaning of `DeltaV` relative to the endpoint-body velocities, and independent Kepler propagation of explicit MPC elements. These branches currently have only request-construction and response-structure evidence, so verify their meaning yourself before use.
+Verified (supported by independent cross-validation): with `sun_frame="ICRF"`, the transfer velocities in `RV1`/`RV2` follow the zero-revolution prograde Lambert relationship, and the endpoint position directions use the ICRF axes; `max_departure_delta_v_m_s`/`max_arrival_delta_v_m_s`/`max_time_of_flight_days` filter the sampled grid by the `DV1_Mag`/`DV2_Mag`/time-of-flight upper bounds respectively. Note that since 2026-08-20 the server defaults (10000 m/s each for departure/arrival, 500 d) filter out cases beyond the defaults, so scans over large-ΔV windows need explicitly widened bounds. Unresolved: the exact coordinate relationship between `MeanEclpJ2000` and ICRF, the physical meaning of `DeltaV` relative to the endpoint-body velocities, and independent Kepler propagation of explicit MPC elements (the `reference_frame` option does not change the arrival states of that route; the element convention is still unconfirmed). These branches currently have only request-construction and response-structure evidence, so verify their meaning yourself before use.
 
 ## Convention notes
 
