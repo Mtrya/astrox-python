@@ -74,6 +74,9 @@ class MpcOrbitalElements:
     raan_deg: float | None = None
     argument_of_periapsis_deg: float | None = None
     mean_anomaly_deg: float | None = None
+    reference_frame: str | None = None
+    """Heliocentric mean-ecliptic variant: ``MeanEclpJ2000`` (JPL) or
+    ``EclpJ2000ICRF`` (MPC, server default)."""
 
     def __post_init__(self) -> None:
         for field_name in (
@@ -95,9 +98,14 @@ class MpcOrbitalElements:
                     parameter=field_name,
                 ),
             )
+        object.__setattr__(
+            self,
+            "reference_frame",
+            _optional_string(self.reference_frame, parameter="reference_frame"),
+        )
 
-    def to_wire(self) -> dict[str, float]:
-        payload: dict[str, float] = {}
+    def to_wire(self) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
         _include_if_supplied(payload, "EpochMjdTdt", self.epoch_mjd_tdt)
         _include_if_supplied(payload, "PeriTimeMjdTdt", self.periapsis_time_mjd_tdt)
         _include_if_supplied(payload, "Q", self.periapsis_distance_au)
@@ -111,6 +119,7 @@ class MpcOrbitalElements:
             self.argument_of_periapsis_deg,
         )
         _include_if_supplied(payload, "MeanAnomaly", self.mean_anomaly_deg)
+        _include_if_supplied(payload, "ReferenceFrame", self.reference_frame)
         return payload
 
 
@@ -125,6 +134,7 @@ def mpc_orbital_elements(
     raan_deg: float | None = None,
     argument_of_periapsis_deg: float | None = None,
     mean_anomaly_deg: float | None = None,
+    reference_frame: str | None = None,
 ) -> MpcOrbitalElements:
     """Build an MPC orbital-element fragment without adding physics policy."""
     return MpcOrbitalElements(
@@ -137,6 +147,7 @@ def mpc_orbital_elements(
         raan_deg=raan_deg,
         argument_of_periapsis_deg=argument_of_periapsis_deg,
         mean_anomaly_deg=mean_anomaly_deg,
+        reference_frame=reference_frame,
     )
 
 
@@ -153,7 +164,7 @@ def _elements_to_wire(
     value: MpcOrbitalElements | None,
     *,
     parameter: str,
-) -> dict[str, float] | None:
+) -> dict[str, Any] | None:
     if value is None:
         return None
     if not isinstance(value, MpcOrbitalElements):
@@ -175,6 +186,9 @@ def lambert_transfer_window(
     arrival_step_days: float | None = None,
     departure_elements: MpcOrbitalElements | None = None,
     arrival_elements: MpcOrbitalElements | None = None,
+    max_departure_delta_v_m_s: int | None = None,
+    max_arrival_delta_v_m_s: int | None = None,
+    max_time_of_flight_days: int | None = None,
 ) -> dict[str, Any]:
     """Return a Lambert transfer-window scan from ASTROX.
 
@@ -235,6 +249,30 @@ def lambert_transfer_window(
         payload,
         "ArrivalElements",
         _elements_to_wire(arrival_elements, parameter="arrival_elements"),
+    )
+    _include_if_supplied(
+        payload,
+        "MaxDepartureDV",
+        _optional_integer(
+            max_departure_delta_v_m_s,
+            parameter="max_departure_delta_v_m_s",
+        ),
+    )
+    _include_if_supplied(
+        payload,
+        "MaxArrivalDV",
+        _optional_integer(
+            max_arrival_delta_v_m_s,
+            parameter="max_arrival_delta_v_m_s",
+        ),
+    )
+    _include_if_supplied(
+        payload,
+        "MaxTofDays",
+        _optional_integer(
+            max_time_of_flight_days,
+            parameter="max_time_of_flight_days",
+        ),
     )
     return _without_status_fields(
         raw.post("/celestial/transfer", json=payload),
@@ -331,8 +369,14 @@ def mpc_ephemeris(
     observer_frame: str | None = None,
     start: str | None = None,
     stop: str | None = None,
+    target_elements: MpcOrbitalElements | None = None,
 ) -> dict[str, Any]:
-    """Return ASTROX minor-planet ephemeris output from its MPC-backed route."""
+    """Return ASTROX minor-planet ephemeris output from its MPC-backed route.
+
+    When ``target_elements`` is supplied, the server integrates those MPC
+    orbital elements directly instead of resolving ``target_name`` through the
+    MPC network query.
+    """
     payload: dict[str, Any] = {
         "TargetName": _string(target_name, parameter="target_name"),
     }
@@ -350,6 +394,11 @@ def mpc_ephemeris(
         payload,
         "Stop",
         _optional_string(stop, parameter="stop"),
+    )
+    _include_if_supplied(
+        payload,
+        "TargetElements",
+        _elements_to_wire(target_elements, parameter="target_elements"),
     )
     return _without_status_fields(
         raw.post("/celestial/mpc", json=payload),

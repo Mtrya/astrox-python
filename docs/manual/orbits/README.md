@@ -346,10 +346,12 @@ orbits.lambert_delta_v(
     arrival_state: CartesianState,
     time_of_flight_s: float,
     gravitational_parameter_m3_s2: float | None = None,
-) -> tuple[tuple[float, float, float], tuple[float, float, float]]
+    get_path_points: bool = False,
+    path_point_count: int | None = None,
+) -> tuple[tuple[float, float, float], tuple[float, float, float]] | LambertResult
 ```
 
-求解两个笛卡尔状态之间的单圈 Lambert 转移，返回 `(departure_delta_v_m_s, arrival_delta_v_m_s)`，每个速度增量均为 `(x, y, z)` 三元组，单位 m/s。
+求解两个笛卡尔状态之间的单圈 Lambert 转移。默认返回 `(departure_delta_v_m_s, arrival_delta_v_m_s)`，每个速度增量均为 `(x, y, z)` 三元组，单位 m/s。`get_path_points=True` 时返回 `orbits.LambertResult`，除速度增量外还携带 `positions` 转移轨道位置采样（扁平 `(x, y, z, ...)` 序列，单位 m，含首尾端点，点数为 `path_point_count`，服务端缺省 100）。
 
 | 参数 | 单位 | 说明 |
 | --- | --- | --- |
@@ -357,6 +359,8 @@ orbits.lambert_delta_v(
 | `arrival_state` | — | 到达时刻笛卡尔状态 |
 | `time_of_flight_s` | s | 转移飞行时间 |
 | `gravitational_parameter_m3_s2` | m³/s² | 引力参数 |
+| `get_path_points` | — | 是否输出转移轨道位置采样；仅单算例时有效 |
+| `path_point_count` | — | 位置采样点数（含首尾端点）；服务端缺省 100，仅在 `get_path_points=True` 时传递 |
 
 ```python
 departure_delta_v_m_s, arrival_delta_v_m_s = orbits.lambert_delta_v(
@@ -365,7 +369,19 @@ departure_delta_v_m_s, arrival_delta_v_m_s = orbits.lambert_delta_v(
     time_of_flight_s=817.4257,
     gravitational_parameter_m3_s2=398600441500000.0,
 )
+
+result = orbits.lambert_delta_v(
+    departure_state=departure_state,
+    arrival_state=arrival_state,
+    time_of_flight_s=817.4257,
+    gravitational_parameter_m3_s2=398600441500000.0,
+    get_path_points=True,
+    path_point_count=5,
+)
+print(result.positions)  # 5 个采样点的扁平 (x, y, z, ...) 序列
 ```
+
+位置采样已经过交叉验证：首末端点复现输入 `RV1`/`RV2` 的位置三元组，中间采样点落在以出发速度叠加返回速度增量后的二体转移轨道上（与 Brahe 独立递推一致）。验证证据见 [orbits 验证页](../../validation/orbits.md)。
 
 ### `orbits.geo_ym_lambert_delta_v`
 

@@ -27,7 +27,7 @@ orbit = orbits.keplerian(
 
 ## 返回值
 
-单个轨道传播函数返回 `(period_s, position)` 元组：
+除 `propagator.two_body_rv` 外，单个轨道传播函数返回 `(period_s, position)` 元组（`two_body_rv` 返回扁平星历序列，见下文小节）：
 
 - `period_s`：`float`，ASTROX 返回的轨道周期，单位秒。
 - `position`：`propagator.PropagatorPosition` 冻结数据类，字段如下：
@@ -125,6 +125,45 @@ period_s, position = propagator.two_body(
 ```
 
 完整可运行示例见 `examples/01_propagation/two_body_classical.py`。
+
+### `propagator.two_body_rv`
+
+```python
+propagator.two_body_rv(
+    *,
+    state: CartesianState,
+    time_of_flight_s: float,
+    gravitational_parameter_m3_s2: float | None = None,
+    step_s: float | None = None,
+) -> tuple[float, ...]
+```
+
+从初始位置速度用二体模型直接递推（`/Propagator/TwoBodyRV`，简化 RV 积分器），返回扁平星历序列 `[t, x, y, z, vx, vy, vz, ...]`：`t` 为相对初始时刻的秒数，位置单位 m、速度单位 m/s；序列包含起止采样点，中间样本按 `step_s` 间隔。
+
+| 参数 | wire 参数 | 单位 | 说明 |
+| --- | --- | --- | --- |
+| `state` | `RV0` | m, m/s | 初始笛卡尔状态（`orbits.cartesian_state` 构造） |
+| `time_of_flight_s` | `TimeOfFlight` | s | 飞行时间 |
+| `gravitational_parameter_m3_s2` | `Gm` | m³/s² | 中心天体引力常数；服务端缺省 3.986004415E14（地球） |
+| `step_s` | `Step` | s | 输出步长；服务端缺省 60 |
+
+该路由是定步长数值二体积分器，与 `propagator.two_body` 的解析开普勒路由不同：与 Brahe 独立二体递推的交叉验证显示，其残差随轨道相位振荡，约 10 分钟弧段内峰值约 4e-4 m、5.4e-7 m/s，且不随时间累积。验证证据见 [propagator 验证页](../../validation/propagator.md)。
+
+```python
+state = orbits.cartesian_state(
+    x_m=7000000.0, y_m=0.0, z_m=0.0,
+    vx_m_s=0.0, vy_m_s=7546.053290114564, vz_m_s=0.0,
+)
+
+positions = propagator.two_body_rv(
+    state=state,
+    time_of_flight_s=3600.0,
+    step_s=600.0,
+    gravitational_parameter_m3_s2=398600441500000.0,
+)
+```
+
+完整可运行示例见 `examples/01_propagation/two_body_rv.py`。
 
 ## 批量传播
 

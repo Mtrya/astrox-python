@@ -125,6 +125,7 @@ def test_public_modules_and_names_are_available() -> None:
     assert hasattr(propagator, "PropagatorPosition")
     assert hasattr(propagator, "j2")
     assert hasattr(propagator, "two_body")
+    assert hasattr(propagator, "two_body_rv")
     assert hasattr(propagator, "ballistic")
     assert hasattr(propagator, "ballistic_delta_v")
     assert hasattr(propagator, "ballistic_delta_v_min_ecc")

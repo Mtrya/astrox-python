@@ -113,6 +113,9 @@
                 "Raan": {
                   "kind": "number"
                 },
+                "ReferenceFrame": {
+                  "kind": "string"
+                },
                 "SemimajorAxis": {
                   "kind": "number"
                 }
@@ -163,6 +166,9 @@
             "TransferResults": {
               "item": {
                 "fields": {
+                  "ArrivalLightAngle": {
+                    "kind": "number"
+                  },
                   "ArrivalTime": {
                     "kind": "string"
                   },
@@ -202,6 +208,9 @@
                     },
                     "kind": "array",
                     "length": 6
+                  },
+                  "TimeOfFlightDays": {
+                    "kind": "number"
                   }
                 },
                 "kind": "object"
@@ -223,6 +232,9 @@
             "TransferResults": {
               "item": {
                 "fields": {
+                  "ArrivalLightAngle": {
+                    "kind": "number"
+                  },
                   "ArrivalTime": {
                     "kind": "string"
                   },
@@ -262,6 +274,9 @@
                     },
                     "kind": "array",
                     "length": 6
+                  },
+                  "TimeOfFlightDays": {
+                    "kind": "number"
                   }
                 },
                 "kind": "object"
@@ -277,6 +292,6 @@
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-08-09T10:08:21Z"
+    "refreshed_at": "2026-08-24T06:28:12Z"
   }
 }

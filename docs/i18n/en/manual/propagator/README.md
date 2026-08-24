@@ -27,7 +27,7 @@ For details on orbit constructors, see the [orbits manual](../orbits/README.md).
 
 ## Return Values
 
-Single-orbit propagation functions return a `(period_s, position)` tuple:
+Except for `propagator.two_body_rv`, single-orbit propagation functions return a `(period_s, position)` tuple (`two_body_rv` returns a flat ephemeris sequence; see its section below):
 
 - `period_s`: `float`, the orbital period returned by ASTROX, in seconds.
 - `position`: `propagator.PropagatorPosition` frozen dataclass with the following fields:
@@ -125,6 +125,45 @@ period_s, position = propagator.two_body(
 ```
 
 A complete runnable example is available at `examples/01_propagation/two_body_classical.py`.
+
+### `propagator.two_body_rv`
+
+```python
+propagator.two_body_rv(
+    *,
+    state: CartesianState,
+    time_of_flight_s: float,
+    gravitational_parameter_m3_s2: float | None = None,
+    step_s: float | None = None,
+) -> tuple[float, ...]
+```
+
+Propagates directly from an initial position/velocity state using the two-body model (`/Propagator/TwoBodyRV`, simplified RV integrator), returning a flat ephemeris sequence `[t, x, y, z, vx, vy, vz, ...]`: `t` is seconds relative to the initial epoch, positions are in m and velocities in m/s. The sequence includes the start and end samples, with intermediate samples spaced by `step_s`.
+
+| Parameter | Wire parameter | Unit | Description |
+| --- | --- | --- | --- |
+| `state` | `RV0` | m, m/s | Initial Cartesian state (built with `orbits.cartesian_state`) |
+| `time_of_flight_s` | `TimeOfFlight` | s | Time of flight |
+| `gravitational_parameter_m3_s2` | `Gm` | m³/s² | Central-body gravitational constant; server default 3.986004415E14 (Earth) |
+| `step_s` | `Step` | s | Output step; server default 60 |
+
+This route is a fixed-step numerical two-body integrator, unlike the analytic Kepler route of `propagator.two_body`: cross-validation against independent Brahe two-body propagation shows its residual oscillates with orbital phase, peaking at about 4e-4 m and 5.4e-7 m/s over a 10-minute arc, without secular growth. See the [propagator validation page](../../../../validation/propagator.md) for the evidence.
+
+```python
+state = orbits.cartesian_state(
+    x_m=7000000.0, y_m=0.0, z_m=0.0,
+    vx_m_s=0.0, vy_m_s=7546.053290114564, vz_m_s=0.0,
+)
+
+positions = propagator.two_body_rv(
+    state=state,
+    time_of_flight_s=3600.0,
+    step_s=600.0,
+    gravitational_parameter_m3_s2=398600441500000.0,
+)
+```
+
+A complete runnable example is available at `examples/01_propagation/two_body_rv.py`.
 
 ## Batch Propagation
 

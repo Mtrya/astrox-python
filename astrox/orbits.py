@@ -11,6 +11,7 @@ from astrox._http import raw
 __all__ = [
     "CartesianState",
     "KeplerianElements",
+    "LambertResult",
     "MeanKeplerianElements",
     "Tle",
     "cartesian_state",
@@ -517,14 +518,37 @@ def geo_ym_lambert_delta_v(
     )
 
 
+@dataclass(frozen=True, kw_only=True)
+class LambertResult:
+    """Single-case Lambert solution with the sampled transfer positions."""
+
+    departure_delta_v_m_s: tuple[float, float, float]
+    arrival_delta_v_m_s: tuple[float, float, float]
+    positions: tuple[float, ...]
+    """Flat ``(x, y, z, ...)`` transfer position sequence in meters.
+
+    The server samples ``path_point_count`` points including the departure and
+    arrival positions, so the sequence length is ``path_point_count * 3``.
+    """
+
+
 def lambert_delta_v(
     *,
     departure_state: CartesianState,
     arrival_state: CartesianState,
     time_of_flight_s: float,
     gravitational_parameter_m3_s2: float | None = None,
-) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
-    """Return single-revolution Lambert delta-v between two Cartesian states."""
+    get_path_points: bool = False,
+    path_point_count: int | None = None,
+) -> tuple[tuple[float, float, float], tuple[float, float, float]] | LambertResult:
+    """Return single-revolution Lambert delta-v between two Cartesian states.
+
+    By default returns ``(departure_delta_v_m_s, arrival_delta_v_m_s)``. When
+    ``get_path_points`` is true, the server also samples the transfer orbit and
+    the return is a :class:`LambertResult` carrying the delta-v pair plus the
+    flat position sequence; ``path_point_count`` sets the sample count
+    (server default 100, including both endpoints).
+    """
     if not isinstance(departure_state, CartesianState):
         raise TypeError("departure_state must be a CartesianState instance")
     if not isinstance(arrival_state, CartesianState):
@@ -536,12 +560,20 @@ def lambert_delta_v(
         "TOF": [time_of_flight_s],
     }
     _include_if_supplied(payload, "Gm", gravitational_parameter_m3_s2)
+    if get_path_points:
+        payload["GetPathPoints"] = True
+        _include_if_supplied(payload, "NumberOfPathPoints", path_point_count)
 
     result = raw.post("/orbit/lambert", json=payload)
-    return (
-        (result["DV1"][0], result["DV1"][1], result["DV1"][2]),
-        (result["DV2"][0], result["DV2"][1], result["DV2"][2]),
-    )
+    departure_delta_v = (result["DV1"][0], result["DV1"][1], result["DV1"][2])
+    arrival_delta_v = (result["DV2"][0], result["DV2"][1], result["DV2"][2])
+    if get_path_points:
+        return LambertResult(
+            departure_delta_v_m_s=departure_delta_v,
+            arrival_delta_v_m_s=arrival_delta_v,
+            positions=tuple(result["Positions"]),
+        )
+    return departure_delta_v, arrival_delta_v
 
 
 def convert_czml_position(

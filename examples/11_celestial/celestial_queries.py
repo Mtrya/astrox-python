@@ -48,13 +48,18 @@ def main() -> None:
         min_time_of_flight_days=10,
         departure_step_days=2.0,
         arrival_step_days=1.0,
+        # 2026-08-20 起服务端按 MaxDepartureDV/MaxArrivalDV（缺省各 10000 m/s）
+        # 与 MaxTofDays（缺省 500 d）过滤结果；该窗口的出发双曲超速约 15 km/s，
+        # 需要显式放宽上限才能得到结果。
+        max_departure_delta_v_m_s=20000,
     )
     results = transfer["TransferResults"]
     first = results[0]
     print(f"Lambert 窗口: {len(results)} 个转移结果")
     print(
         f"  首个: {first['DepartureTime']} → {first['ArrivalTime']}, "
-        f"|DeltaV1|={first['DV1_Mag']:.1f} m/s, |DeltaV2|={first['DV2_Mag']:.1f} m/s"
+        f"|DeltaV1|={first['DV1_Mag']:.1f} m/s, |DeltaV2|={first['DV2_Mag']:.1f} m/s, "
+        f"TOF={first['TimeOfFlightDays']:.0f} d"
     )
 
     elements = celestial.mpc_orbital_elements(
@@ -67,6 +72,7 @@ def main() -> None:
         raan_deg=209.81829,
         argument_of_periapsis_deg=100.88187,
         mean_anomaly_deg=120.0,
+        reference_frame="EclpJ2000ICRF",
     )
     print(f"MPC 根数片段: {elements.to_wire()}")
 

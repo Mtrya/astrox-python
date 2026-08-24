@@ -42,6 +42,7 @@ __all__ = [
     "sgp4",
     "simple_ascent",
     "two_body",
+    "two_body_rv",
 ]
 
 
@@ -670,6 +671,36 @@ def two_body(
 
     result = raw.post("/Propagator/TwoBody", json=payload)
     return _success_path(result)
+
+
+def two_body_rv(
+    *,
+    state: CartesianState,
+    time_of_flight_s: float,
+    gravitational_parameter_m3_s2: float | None = None,
+    step_s: float | None = None,
+) -> tuple[float, ...]:
+    """Propagate a Cartesian state with two-body dynamics and return the sampled ephemeris.
+
+    Returns the flat ``[t, x, y, z, vx, vy, vz, ...]`` sequence, where ``t`` is
+    seconds relative to the initial epoch, positions are in meters, and
+    velocities are in m/s. The sequence includes the start and stop samples;
+    intermediate samples follow ``step_s`` (server default 60 s).
+    """
+    if not isinstance(state, CartesianState):
+        raise TypeError("state must be a CartesianState instance")
+
+    payload: dict[str, Any] = {
+        "RV0": state.to_wire(),
+        "TimeOfFlight": time_of_flight_s,
+    }
+    if gravitational_parameter_m3_s2 is not None:
+        payload["Gm"] = gravitational_parameter_m3_s2
+    if step_s is not None:
+        payload["Step"] = step_s
+
+    result = raw.post("/Propagator/TwoBodyRV", json=payload)
+    return tuple(result["Positions"])
 
 
 def j2(

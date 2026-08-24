@@ -346,10 +346,12 @@ orbits.lambert_delta_v(
     arrival_state: CartesianState,
     time_of_flight_s: float,
     gravitational_parameter_m3_s2: float | None = None,
-) -> tuple[tuple[float, float, float], tuple[float, float, float]]
+    get_path_points: bool = False,
+    path_point_count: int | None = None,
+) -> tuple[tuple[float, float, float], tuple[float, float, float]] | LambertResult
 ```
 
-Solves a single-revolution Lambert transfer between two Cartesian states, returning `(departure_delta_v_m_s, arrival_delta_v_m_s)`. Each delta-v is an `(x, y, z)` tuple in m/s.
+Solves a single-revolution Lambert transfer between two Cartesian states. By default it returns `(departure_delta_v_m_s, arrival_delta_v_m_s)`; each delta-v is an `(x, y, z)` tuple in m/s. With `get_path_points=True` it returns `orbits.LambertResult`, which additionally carries `positions`: transfer-trajectory position samples as a flat `(x, y, z, ...)` sequence in m, including both endpoints, with `path_point_count` points (server default 100).
 
 | Parameter | Unit | Description |
 | --- | --- | --- |
@@ -357,6 +359,8 @@ Solves a single-revolution Lambert transfer between two Cartesian states, return
 | `arrival_state` | — | Cartesian state at arrival |
 | `time_of_flight_s` | s | Time of flight |
 | `gravitational_parameter_m3_s2` | m³/s² | Gravitational parameter |
+| `get_path_points` | — | Whether to return transfer-trajectory position samples; single-case requests only |
+| `path_point_count` | — | Number of position samples (including both endpoints); server default 100, only sent when `get_path_points=True` |
 
 ```python
 departure_delta_v_m_s, arrival_delta_v_m_s = orbits.lambert_delta_v(
@@ -365,7 +369,19 @@ departure_delta_v_m_s, arrival_delta_v_m_s = orbits.lambert_delta_v(
     time_of_flight_s=817.4257,
     gravitational_parameter_m3_s2=398600441500000.0,
 )
+
+result = orbits.lambert_delta_v(
+    departure_state=departure_state,
+    arrival_state=arrival_state,
+    time_of_flight_s=817.4257,
+    gravitational_parameter_m3_s2=398600441500000.0,
+    get_path_points=True,
+    path_point_count=5,
+)
+print(result.positions)  # flat (x, y, z, ...) sequence of 5 samples
 ```
+
+The position samples are cross-validated: the first and last samples reproduce the position triples of the input `RV1`/`RV2`, and intermediate samples lie on the two-body transfer trajectory started from the departure state plus the returned delta-v (consistent with independent Brahe propagation). See the [orbits validation page](../../../../validation/orbits.md) for the evidence.
 
 ### `orbits.geo_ym_lambert_delta_v`
 

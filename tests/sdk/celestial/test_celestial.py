@@ -314,6 +314,106 @@ def test_mpc_orbital_elements_omit_unsupplied_server_fields() -> None:
     )
 
 
+def test_mpc_orbital_elements_lower_reference_frame() -> None:
+    elements = celestial.mpc_orbital_elements(
+        epoch_mjd_tdt=61000.0,
+        semi_major_axis_au=0.9898367,
+        reference_frame="MeanEclpJ2000",
+    )
+
+    assert_canonical_equal(
+        elements.to_wire(),
+        {
+            "EpochMjdTdt": 61000.0,
+            "SemimajorAxis": 0.9898367,
+            "ReferenceFrame": "MeanEclpJ2000",
+        },
+    )
+
+
+def test_mpc_orbital_elements_reject_mistyped_reference_frame() -> None:
+    with pytest.raises(TypeError, match="reference_frame"):
+        celestial.mpc_orbital_elements(reference_frame=1)
+
+
+def test_mpc_ephemeris_lowers_target_elements(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(monkeypatch, RESPONSE)
+    elements = celestial.mpc_orbital_elements(
+        epoch_mjd_tdt=61000.0,
+        semi_major_axis_au=2.767,
+        eccentricity=0.0785,
+        inclination_deg=10.587,
+        raan_deg=80.254,
+        argument_of_periapsis_deg=73.743,
+        mean_anomaly_deg=187.58,
+        reference_frame="EclpJ2000ICRF",
+    )
+
+    celestial.mpc_ephemeris(
+        target_name="Ceres",
+        start=START,
+        stop=STOP,
+        target_elements=elements,
+    )
+
+    assert_canonical_equal(
+        calls[0],
+        {
+            "endpoint": "/celestial/mpc",
+            "json": {
+                "TargetName": "Ceres",
+                "Start": START,
+                "Stop": STOP,
+                "TargetElements": elements.to_wire(),
+            },
+        },
+    )
+
+
+def test_mpc_ephemeris_rejects_mistyped_target_elements() -> None:
+    with pytest.raises(TypeError, match="target_elements"):
+        celestial.mpc_ephemeris(target_name="Ceres", target_elements={})
+
+
+def test_lambert_transfer_window_lowers_delta_v_and_tof_filters(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(
+        monkeypatch,
+        {"IsSuccess": True, "Message": "Success", "TransferResults": []},
+    )
+
+    celestial.lambert_transfer_window(
+        departure_body="Earth",
+        arrival_body="Mars",
+        departure_start=START,
+        departure_stop=STOP,
+        arrival_start=START,
+        arrival_stop=STOP,
+        max_departure_delta_v_m_s=6000,
+        max_arrival_delta_v_m_s=4000,
+        max_time_of_flight_days=300,
+    )
+
+    assert_canonical_equal(
+        calls[0],
+        {
+            "endpoint": "/celestial/transfer",
+            "json": {
+                "DepartureCbName": "Earth",
+                "ArrivalCbName": "Mars",
+                "DepartureInterval": f"{START}/{STOP}",
+                "ArrivalInterval": f"{START}/{STOP}",
+                "MaxDepartureDV": 6000,
+                "MaxArrivalDV": 4000,
+                "MaxTofDays": 300,
+            },
+        },
+    )
+
+
 def test_lambert_transfer_window_lowers_complete_payload_and_strips_status(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -464,6 +564,30 @@ def test_lambert_transfer_window_propagates_api_errors_unchanged(
                 "min_time_of_flight_days": True,
             },
             "min_time_of_flight_days",
+        ),
+        (
+            {
+                "departure_body": "Earth",
+                "arrival_body": "Mars",
+                "departure_start": START,
+                "departure_stop": STOP,
+                "arrival_start": START,
+                "arrival_stop": STOP,
+                "max_departure_delta_v_m_s": True,
+            },
+            "max_departure_delta_v_m_s",
+        ),
+        (
+            {
+                "departure_body": "Earth",
+                "arrival_body": "Mars",
+                "departure_start": START,
+                "departure_stop": STOP,
+                "arrival_start": START,
+                "arrival_stop": STOP,
+                "max_time_of_flight_days": 300.5,
+            },
+            "max_time_of_flight_days",
         ),
     ],
 )
