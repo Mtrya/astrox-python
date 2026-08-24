@@ -1,6 +1,6 @@
 # Libration validation
 
-This page registers the live-contract and semantic evidence for `astrox.libration`. The primary comparison path is an independently written circular restricted three-body problem (CRTBP) model: bracketed equilibrium roots, closed-form unit scales, DOP853 integration, Jacobi conservation, symmetry-plane crossings, and full-period closure. Orekit 13.1 and e2m2e 5.6.8 provide separately qualified secondary comparisons; neither package is treated as an oracle. The exact e2m2e release is a development dependency because it is used only by maintained validation, not by the runtime SDK.
+This page registers the live-contract and semantic evidence for `astrox.libration`. The primary comparison path is an independently written circular restricted three-body problem (CRTBP) model: bracketed equilibrium roots, closed-form unit scales, DOP853 integration, Jacobi conservation, symmetry-plane crossings, and full-period closure. Orekit 13.1 and e2m2e 5.6.10 provide separately qualified secondary comparisons; neither package is treated as an oracle. The exact e2m2e release is a development dependency because it is used only by maintained validation, not by the runtime SDK.
 
 | Surface | Status | Primary evidence | Secondary evidence |
 | --- | --- | --- | --- |

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Qualify e2m2e 5.6.8 for narrow secondary CRTBP comparisons."""
+"""Qualify e2m2e 5.6.10 for narrow secondary CRTBP comparisons."""
 
 # Coverage:
 #   Accepted roles:
@@ -53,7 +53,7 @@ from tests.validation.cross_validation.libration._support import (  # noqa: E402
 )
 
 
-E2M2E_VERSION = "5.6.8"
+E2M2E_VERSION = "5.6.10"
 EARTH_MOON_LENGTH_KM = EARTH_MOON_MEAN_SEPARATION_M / 1000.0
 EARTH_MOON_TIME_UNIT_S = 375190.2589931179
 EQUATION_ABS_TOL = 5.0e-12
