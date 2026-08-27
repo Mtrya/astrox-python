@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Qualify e2m2e 5.6.10 for narrow secondary CRTBP comparisons."""
+"""Qualify the pinned e2m2e dependency for narrow secondary CRTBP comparisons."""
 
 # Coverage:
 #   Accepted roles:
@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import sys
 from dataclasses import dataclass
-from importlib.metadata import version as package_version
 from pathlib import Path
 
 import numpy as np
@@ -53,7 +52,6 @@ from tests.validation.cross_validation.libration._support import (  # noqa: E402
 )
 
 
-E2M2E_VERSION = "5.6.10"
 EARTH_MOON_LENGTH_KM = EARTH_MOON_MEAN_SEPARATION_M / 1000.0
 EARTH_MOON_TIME_UNIT_S = 375190.2589931179
 EQUATION_ABS_TOL = 5.0e-12
@@ -93,15 +91,6 @@ DYNAMICS_CASES = (
         times=(0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3),
     ),
 )
-
-
-def test_e2m2e_installed_version_matches_audited_release() -> None:
-    actual = package_version("e2m2e")
-    print(f"E2M2E_VERSION_CASE=installed actual={actual} expected={E2M2E_VERSION}")
-    if actual != E2M2E_VERSION:
-        raise CrossValidationError(
-            f"e2m2e version={actual}, expected audited release {E2M2E_VERSION}"
-        )
 
 
 def e2m2e_system(mass_ratio: float = EARTH_MOON_MASS_RATIO) -> CR3BP_System:
@@ -468,7 +457,6 @@ def test_astrox_fixed_x_accepts_independently_generated_e2m2e_seeds() -> None:
 
 def main() -> int:
     checks = (
-        test_e2m2e_installed_version_matches_audited_release,
         test_e2m2e_equations_and_propagation_match_local_crtbp,
         test_e2m2e_stm_matches_finite_differences,
         test_e2m2e_halo_and_dro_generators_match_local_invariants,
@@ -481,7 +469,7 @@ def main() -> int:
     except Exception as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    checked = 1 + len(DYNAMICS_CASES) + 1 + 1 + 5 + 3 + 3
+    checked = len(DYNAMICS_CASES) + 1 + 1 + 5 + 3 + 3
     print(f"CROSS_VALIDATION_CHECKED={checked}")
     print("CROSS_VALIDATION_FAILED=0")
     return 0

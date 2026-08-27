@@ -158,8 +158,8 @@
       }
     },
     {
-      "description": "Transfer-window result grid and six-state vector layout for a maintained Earth-to-Mars case.",
-      "id": "lambert_transfer_earth_mars_mean_ecliptic",
+      "description": "Transfer-window result grid and six-state vector layout for the server-default EclpJ2000ICRF Earth-to-Mars case.",
+      "id": "lambert_transfer_earth_mars_default_eclp_j2000_icrf",
       "return": {
         "shape": {
           "fields": {

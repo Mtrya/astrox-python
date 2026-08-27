@@ -32,7 +32,7 @@ Computes an ephemeris for a target body over a time window and returns a raw JSO
 | `start` | `Start` | Analysis start time (UTC, `yyyy-MM-ddTHH:mm:ssZ`). Optional; the server default is January 1 of the current year |
 | `stop` | `Stop` | Analysis stop time (UTC). Optional; the server default is December 31 of the current year |
 | `observer_name` | `ObserverName` | Observer name, e.g. `Earth`; the server default is `Sun` |
-| `observer_frame` | `ObserverFrame` | Observer frame, server options `FIXED`, `INERTIAL`, `MeanEclpJ2000`, `J2000`, default `MeanEclpJ2000` |
+| `observer_frame` | `ObserverFrame` | Observer frame; the server currently accepts `FIXED`, `INERTIAL`, `MeanEclpJ2000`, `EclpJ2000ICRF`, `J2000`, and `ICRF`; default `MeanEclpJ2000` |
 | `step_s` | `Step` | Sample step, in s, server default 86400 s |
 
 `target_name` is the only required request field of this function; `start` and `stop` are optional — when omitted they are not sent to ASTROX and the server selects January 1 to December 31 of the current year as the window. Other optional fields that are not supplied are likewise not sent to ASTROX, and the server retains its default values.
@@ -43,7 +43,7 @@ from astrox import celestial
 start = "2026-01-01T00:00:00.000Z"
 stop = "2026-01-02T00:00:00.000Z"
 
-for frame in ("J2000", "MeanEclpJ2000"):
+for frame in ("J2000", "MeanEclpJ2000", "EclpJ2000ICRF"):
     ephemeris = celestial.ephemeris(
         target_name="Moon",
         start=start,
@@ -81,11 +81,11 @@ Computes the rotation from the coordinate axes of the source central body to tho
 | `from_central_body` | `FromCbName` | Source central body name, e.g. `Earth` |
 | `to_central_body` | `ToCbName` | Target central body name, e.g. `Moon` |
 | `epoch` | `Epoch` | Epoch time (UTC) |
-| `from_frame` | `FromCbFrame` | Source frame, server options `FIXED`, `INERTIAL`, `J2000`, `ICRF`, `MeanEclpJ2000`, default `INERTIAL` |
+| `from_frame` | `FromCbFrame` | Source frame, server options `FIXED`, `INERTIAL`, `J2000`, `ICRF`, `MeanEclpJ2000`, `EclpJ2000ICRF`, default `INERTIAL` |
 | `to_frame` | `ToCbFrame` | Target frame, same options, default `FIXED` |
 | `order` | `Order` | Rotation motion order: `0` returns the quaternion only, `1` returns the quaternion and angular velocity; passed through as an integer |
 
-`order` is preserved as an integer and lowered to the server as-is; the SDK does not rewrite the branch. The `Rotation` field of the response is a numeric array: with `order=0` it has length 4 (quaternion `[qx, qy, qz, qw]`), and with `order=1` it has length 7 (quaternion plus angular-velocity components, unit rad/s per the server documentation). Verified numeric semantics include: for the same central body on both sides with `INERTIAL` frames on both sides, the server returns the identity quaternion with zero angular velocity at `order=1`; the Earth `INERTIAL`→`FIXED` quaternion and angular velocity; and the Earth→Moon `INERTIAL`→`FIXED` angular velocity at `order=1`. The Earth→Moon `INERTIAL`→`FIXED` quaternion is unresolved, and other combinations are unverified, so verify their meaning yourself before use.
+`order` is preserved as an integer and lowered to the server as-is; the SDK does not rewrite the branch. The `Rotation` field of the response is a numeric array: with `order=0` it has length 4 (quaternion `[qx, qy, qz, qw]`), and with `order=1` it has length 7 (quaternion plus angular-velocity components, unit rad/s per the server documentation). Verified numeric semantics include: for the same central body on both sides with `INERTIAL` frames on both sides, the server returns the identity quaternion with zero angular velocity at `order=1`; Earth→Earth `EclpJ2000ICRF`→`ICRF` follows the fixed J2000 mean-obliquity rotation with zero angular velocity at the two maintained epochs and `order=0/1`; the Earth `INERTIAL`→`FIXED` quaternion and angular velocity; and the Earth→Moon `INERTIAL`→`FIXED` angular velocity at `order=1`. The Earth→Moon `INERTIAL`→`FIXED` quaternion is unresolved, and other combinations are unverified, so verify their meaning yourself before use.
 
 ```python
 rotation = celestial.cb_axes_rotation(
@@ -113,6 +113,7 @@ celestial.mpc_ephemeris(
     observer_frame: str | None = None,
     start: str | None = None,
     stop: str | None = None,
+    step_s: float | None = None,
     target_elements: MpcOrbitalElements | None = None,
 ) -> dict[str, Any]
 ```
@@ -125,14 +126,15 @@ Queries an MPC minor-planet ephemeris by asteroid name or number and returns a r
 | `observer_frame` | `ObserverFrame` | Heliocentric frame, server options `FIXED`, `INERTIAL`, `J2000`, `ICRF`, `MeanEclpJ2000`, `EclpJ2000ICRF`, default `MeanEclpJ2000` |
 | `start` | `Start` | Start time (UTC); defaults to the orbital epoch and cannot be earlier than the orbital epoch (server rule) |
 | `stop` | `Stop` | Stop time (UTC); defaults to 1 year after `Start` |
+| `step_s` | `Step` | Output sample step, in s, server default 86400 s; pass `0` to output at the internal integration steps |
 | `target_elements` | `TargetElements` | Explicit MPC orbital elements (built with `mpc_orbital_elements`); when omitted, the server queries MPC over the network |
 
-This route fetches orbital elements from the external MPC data source (element epoch in MJD TDT), which the server propagates heliocentrically with a fixed 3-day step, and outputs a heliocentric CZML Position structure. The response contains `OrbitElements` (orbital elements with keys `EpochMjdTdt`, `PeriTimeMjdTdt`, `Q`, `SemimajorAxis`, `Eccentricity`, `Inclination`, `Raan`, `ArgOfPeriapsis`, `MeanAnomaly`, `ReferenceFrame`) and `Position` (CZML structure, same as `ephemeris`). The orbital-element values come from external MPC data, are owned by that external data source, and may change with MPC updates. When `start`/`stop` are omitted, the server uses the orbital-epoch default window (`start` is the orbital epoch and `stop` is one year after it); an explicit fixed window depends on the orbital epoch at query time, and once the external MPC orbital epoch updates, a previously fixed window may fall before the new epoch and be rejected by the server, so prefer omitting the window parameters or following the current epoch.
+This route fetches orbital elements from the external MPC data source (element epoch in MJD TDT). The server contract declares adaptive heliocentric integration followed by Hermite interpolation onto the fixed output grid selected by `step_s`; `step_s=0` requests output at the server-declared internal integration steps. The response is a heliocentric CZML Position structure containing `OrbitElements` (orbital elements with keys `EpochMjdTdt`, `PeriTimeMjdTdt`, `Q`, `SemimajorAxis`, `Eccentricity`, `Inclination`, `Raan`, `ArgOfPeriapsis`, `MeanAnomaly`, `ReferenceFrame`) and `Position` (CZML structure, same as `ephemeris`). The orbital-element values come from external MPC data, are owned by that external data source, and may change with MPC updates. When `start`/`stop` are omitted, the server uses the orbital-epoch default window (`start` is the orbital epoch and `stop` is one year after it); an explicit fixed window depends on the orbital epoch at query time, and once the external MPC orbital epoch updates, a previously fixed window may fall before the new epoch and be rejected by the server, so prefer omitting the window parameters or following the current epoch.
 
-Verified (endpoint-internal invariant): passing the `OrbitElements` returned by a name query back as `target_elements` reproduces the name-query ephemeris exactly; the `reference_frame` values `EclpJ2000ICRF` (MPC convention, server default) and `MeanEclpJ2000` (JPL convention) are two distinguishable branches. See the [celestial validation page](../../../../validation/celestial.md) for the evidence.
+Verified (within-route invariants): passing the `OrbitElements` returned by a name query back as `target_elements` reproduces the name-query ephemeris exactly; omitting `step_s` exactly matches explicit `86400`, `172800` produces an exact subset of the daily grid, and `0` returns the same endpoints on a nonuniform internal integration grid; the `reference_frame` values `EclpJ2000ICRF` (MPC convention, server default) and `MeanEclpJ2000` (JPL convention) are two distinguishable branches. This evidence verifies request branches and output-sampling semantics, not absolute orbit accuracy. See the [celestial validation page](../../../../validation/celestial.md) for details.
 
 ```python
-mpc = celestial.mpc_ephemeris(target_name="Ceres")
+mpc = celestial.mpc_ephemeris(target_name="Ceres", step_s=172800.0)
 
 print(f"Ceres MPC ephemeris: {len(mpc['Position']['cartesianVelocity']) // 7} state samples")
 ```
@@ -227,7 +229,7 @@ Samples over the departure time window and the arrival time window, computes Lam
 | `departure_stop` | `DepartureInterval` | Departure time window end (UTC) |
 | `arrival_start` | `ArrivalInterval` | Arrival time window start (UTC); combined with `arrival_stop` into `"start/stop"` |
 | `arrival_stop` | `ArrivalInterval` | Arrival time window end (UTC) |
-| `sun_frame` | `SunFrameName` | Heliocentric frame, server options `MeanEclpJ2000`, `ICRF`, default `MeanEclpJ2000` |
+| `sun_frame` | `SunFrameName` | Heliocentric output frame; the server currently accepts `MeanEclpJ2000`, `EclpJ2000ICRF`, and `ICRF`; default `EclpJ2000ICRF` |
 | `min_time_of_flight_days` | `MinTofDays` | Minimum transfer time, in d, integer; server default 10 |
 | `departure_step_days` | `DepartureStepDay` | Departure time sample step, in d; server default 1 |
 | `arrival_step_days` | `ArrivalStepDay` | Arrival time sample step, in d; server default 1 |
@@ -279,7 +281,7 @@ The response contains `TransferResults` (an array of transfer results; each elem
 | `TimeOfFlightDays` | number | Time of flight, in d; verified to be the exact day difference between `ArrivalTime` and `DepartureTime` |
 | `ArrivalLightAngle` | number | Sun lighting angle at arrival, in deg; verified to be the angle between `DeltaV2` and the `RV2` position vector |
 
-Verified (supported by independent cross-validation): with `sun_frame="ICRF"`, the transfer velocities in `RV1`/`RV2` follow the zero-revolution prograde Lambert relationship, and the endpoint position directions use the ICRF axes; `max_departure_delta_v_m_s`/`max_arrival_delta_v_m_s`/`max_time_of_flight_days` filter the sampled grid by the `DV1_Mag`/`DV2_Mag`/time-of-flight upper bounds respectively. Note that since 2026-08-20 the server defaults (10000 m/s each for departure/arrival, 500 d) filter out cases beyond the defaults, so scans over large-ΔV windows need explicitly widened bounds. Unresolved: the exact coordinate relationship between `MeanEclpJ2000` and ICRF, the physical meaning of `DeltaV` relative to the endpoint-body velocities, and independent Kepler propagation of explicit MPC elements (the `reference_frame` option does not change the arrival states of that route; the element convention is still unconfirmed). These branches currently have only request-construction and response-structure evidence, so verify their meaning yourself before use.
+Verified (supported by independent cross-validation): omitting `sun_frame` produces exactly the same `TransferResults` as explicit `EclpJ2000ICRF`; `EclpJ2000ICRF` output is the `ICRF` output rotated by the fixed 23.43929111111111° J2000 mean obliquity; with `sun_frame="ICRF"`, the transfer velocities in `RV1`/`RV2` follow the zero-revolution prograde Lambert relationship, and the endpoint position directions use the ICRF axes; `max_departure_delta_v_m_s`/`max_arrival_delta_v_m_s`/`max_time_of_flight_days` filter the sampled grid by the `DV1_Mag`/`DV2_Mag`/time-of-flight upper bounds respectively. Note that since 2026-08-20 the server defaults (10000 m/s each for departure/arrival, 500 d) filter out cases beyond the defaults, so scans over large-ΔV windows need explicitly widened bounds. Unresolved: the exact coordinate relationship between explicit `MeanEclpJ2000` and ICRF, the physical meaning of `DeltaV` relative to the endpoint-body velocities, and independent Kepler propagation of explicit MPC elements (the `reference_frame` option does not change the arrival states of that route; the element convention is still unconfirmed). The numeric semantics of those branches remain unverified, so check them before use.
 
 ## Convention notes
 
@@ -287,6 +289,7 @@ Verified (supported by independent cross-validation): with `sun_frame="ICRF"`, t
 - Each `cartesianVelocity` sample is `[Time, X, Y, Z, dX, dY, dZ]`, with `Time` in seconds from the reference epoch, positions in m, and velocities in m/s.
 - `cb_axes_rotation` passes the integer `order` through as-is; the `Rotation` length corresponds to `order` (`0` → 4, `1` → 7).
 - `mpc_ephemeris` relies on the server's orbital-epoch default window when `start`/`stop` are omitted; an explicit fixed window may expire when the external MPC orbital epoch updates.
+- `mpc_ephemeris` `step_s` controls the output sampling grid; when omitted the server default is 86400 s, while `0` outputs at the internal integration steps.
 - The returns of all four functions on this page have the transport-level `IsSuccess` and `Message` removed, and the remaining server fields are preserved; errors are still raised by the HTTP layer (see error handling).
 - `lambert_transfer_window` combines `departure_start`/`departure_stop` and `arrival_start`/`arrival_stop` into the `"start/stop"` strings of `DepartureInterval`/`ArrivalInterval` respectively.
 - `mpc_orbital_elements` only performs the type checks required for lowering and does not perform physical-validity validation; fields that are not supplied do not appear in the `to_wire()` fragment.

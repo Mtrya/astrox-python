@@ -189,6 +189,7 @@ def test_mpc_ephemeris_lowers_optional_arguments(
         observer_frame="topocentric",
         start=START,
         stop=STOP,
+        step_s=3600.0,
     )
 
     assert_canonical_equal(
@@ -200,7 +201,24 @@ def test_mpc_ephemeris_lowers_optional_arguments(
                 "ObserverFrame": "topocentric",
                 "Start": START,
                 "Stop": STOP,
+                "Step": 3600.0,
             },
+        },
+    )
+
+
+def test_mpc_ephemeris_preserves_zero_step(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = record_raw_post(monkeypatch, RESPONSE)
+
+    celestial.mpc_ephemeris(target_name="Ceres", step_s=0)
+
+    assert_canonical_equal(
+        calls[0],
+        {
+            "endpoint": "/celestial/mpc",
+            "json": {"TargetName": "Ceres", "Step": 0.0},
         },
     )
 
@@ -215,6 +233,7 @@ def test_mpc_ephemeris_omits_none_optional_arguments(
         observer_frame=None,
         start=START,
         stop=None,
+        step_s=None,
     )
 
     assert_canonical_equal(
@@ -242,6 +261,7 @@ def test_mpc_ephemeris_omits_none_optional_arguments(
             "order",
         ),
         (celestial.mpc_ephemeris, {"target_name": 1}, "target_name"),
+        (celestial.mpc_ephemeris, {"target_name": "Ceres", "step_s": True}, "step_s"),
     ],
 )
 def test_celestial_rejects_mistyped_arguments(
