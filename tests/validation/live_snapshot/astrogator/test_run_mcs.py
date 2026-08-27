@@ -20,7 +20,10 @@ from tests.validation._support import (
 
 
 SNAPSHOT_PATH = Path(__file__).with_name("run_mcs.snap.json")
-SNAPSHOT_ABS_TOL = 1e-12
+# GitHub-hosted and local live checks have differed by about 3.4e-9 degrees
+# for the same geocentric longitude. Keep the snapshot strict while allowing
+# this few-nanodegree backend variation across runners.
+SNAPSHOT_ABS_TOL = 1e-8
 START = "2026-01-01T00:00:00Z"
 MU = 398600441500000.0
 
