@@ -259,8 +259,8 @@ CASES = [
         run=mpc_shape,
     ),
     LiveSnapshotCase(
-        id="lambert_transfer_earth_mars_mean_ecliptic",
-        description="Transfer-window result grid and six-state vector layout for a maintained Earth-to-Mars case.",
+        id="lambert_transfer_earth_mars_default_eclp_j2000_icrf",
+        description="Transfer-window result grid and six-state vector layout for the server-default EclpJ2000ICRF Earth-to-Mars case.",
         run=lambda: transfer_shape(frame=None, explicit_elements=False),
     ),
     LiveSnapshotCase(

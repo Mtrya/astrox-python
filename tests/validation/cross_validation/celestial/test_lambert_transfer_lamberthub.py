@@ -11,7 +11,11 @@ server's element convention is identified.
 #   Branches:
 #     - Earth -> Mars, ICRF, zero-revolution prograde transfer states: verified
 #       for the maintained six-result sampling grid
-#     - Earth -> Mars, server-owned MeanEclpJ2000 output frame: unresolved
+#     - Earth -> Mars, omitted frame: verified as exactly equivalent to explicit
+#       EclpJ2000ICRF on the maintained grid
+#     - Earth -> Mars, EclpJ2000ICRF: verified as the standard J2000
+#       mean-obliquity rotation of the independently anchored ICRF branch
+#     - Earth -> Mars, explicit MeanEclpJ2000 output frame: unresolved
 #     - Earth -> 2015 XF261 with explicit MPC elements: unresolved; the
 #       independent Kepler derivation does not yet identify the server's exact
 #       element/frame/time convention
@@ -40,7 +44,8 @@ server's element convention is identified.
 #       explicit wide bounds
 #     - SunFrameName=ICRF: verified for the Lambert-state comparison and the
 #       independent axis-identification comparison
-#     - omitted MeanEclpJ2000 frame: unresolved against fixed obliquity rotations
+#     - omitted/explicit EclpJ2000ICRF: verified by TransferResults equality
+#     - explicit MeanEclpJ2000: unresolved against fixed obliquity rotations
 #     - explicit MPC elements: unresolved after independent element/time/frame
 #       convention probes, including the 2026-08-20 ReferenceFrame option,
 #       which does not change the route's arrival states
@@ -50,8 +55,9 @@ server's element convention is identified.
 #       directions at the returned UTC epochs
 #     - Local: standard elliptic Kepler propagation for the supplied MPC values
 #     - Tolerances: solver precision bounds, a 0.01-degree axis-identification
-#       bound, and a 1-degree wrong-frame separation; none is a fitted envelope
-#       for unexplained model differences
+#       bound, a 1-degree wrong-frame separation, and direct ecliptic-frame
+#       relation bounds of 1e-3 m and 1e-9 m/s; none is a fitted envelope for
+#       unexplained model differences
 
 from __future__ import annotations
 
@@ -80,12 +86,14 @@ from tests.validation._support import (  # noqa: E402
 
 SUN_MU_M3_S2 = 1.3271244004193938e20
 AU_M = 149597870700.0
-MEAN_OBLIQUITY_DEG = 23.439291111
+MEAN_OBLIQUITY_DEG = 23.43929111111111
 SOLVER_ABS_TOL_M_S = 1.0e-6
 NORM_REL_TOL = 1.0e-12
 NORM_ABS_TOL_M_S = 1.0e-9
-FRAME_POSITION_DIAGNOSTIC_TOL_M = 1.0
-FRAME_VELOCITY_DIAGNOSTIC_TOL_M_S = 1.0e-6
+ECLIPTIC_RELATION_POSITION_ABS_TOL_M = 1.0e-3
+ECLIPTIC_RELATION_VELOCITY_ABS_TOL_M_S = 1.0e-9
+MEAN_FRAME_POSITION_DIAGNOSTIC_TOL_M = 1.0
+MEAN_FRAME_VELOCITY_DIAGNOSTIC_TOL_M_S = 1.0e-6
 ELEMENT_POSITION_DIAGNOSTIC_TOL_M = 1.0
 ICRF_AXIS_IDENTIFICATION_MAX_ANGLE_DEG = 0.01
 WRONG_FRAME_MIN_SEPARATION_DEG = 1.0
@@ -494,6 +502,101 @@ def _obliquity_rotation(sign: float) -> np.ndarray:
     )
 
 
+def test_server_default_matches_eclp_j2000_icrf() -> None:
+    configure_astrox_from_env()
+    omitted = _astrox_transfer_results(frame=None, explicit_elements=False)
+    ecliptic = _astrox_transfer_results(
+        frame="EclpJ2000ICRF",
+        explicit_elements=False,
+    )
+    mean_ecliptic = _astrox_transfer_results(
+        frame="MeanEclpJ2000",
+        explicit_elements=False,
+    )
+    if omitted != ecliptic:
+        raise CrossValidationError(
+            "omitted SunFrameName no longer reproduces explicit EclpJ2000ICRF output"
+        )
+    separation = max(
+        float(
+            np.max(
+                np.abs(
+                    np.asarray(ecliptic_result[state_key], dtype=float)
+                    - np.asarray(mean_result[state_key], dtype=float)
+                )
+            )
+        )
+        for ecliptic_result, mean_result in zip(
+            ecliptic,
+            mean_ecliptic,
+            strict=True,
+        )
+        for state_key in ("RV1", "RV2")
+    )
+    print(f"LAMBERT_DEFAULT_ECLIPTIC_SEPARATION_M={separation:.12g}")
+    if separation <= ECLIPTIC_RELATION_POSITION_ABS_TOL_M:
+        raise CrossValidationError(
+            "the default EclpJ2000ICRF output is not distinguishable from explicit MeanEclpJ2000"
+        )
+
+
+def test_eclp_j2000_icrf_matches_icrf_obliquity_rotation() -> None:
+    configure_astrox_from_env()
+    icrf = _astrox_transfer_results(frame="ICRF", explicit_elements=False)
+    ecliptic = _astrox_transfer_results(
+        frame="EclpJ2000ICRF",
+        explicit_elements=False,
+    )
+    rotation = _obliquity_rotation(-1.0)
+    position_residuals: list[float] = []
+    velocity_residuals: list[float] = []
+    for icrf_result, ecliptic_result in zip(icrf, ecliptic, strict=True):
+        if (
+            icrf_result["DepartureTime"] != ecliptic_result["DepartureTime"]
+            or icrf_result["ArrivalTime"] != ecliptic_result["ArrivalTime"]
+        ):
+            raise CrossValidationError(
+                "ICRF and EclpJ2000ICRF transfer results use different timestamp pairs"
+            )
+        for state_key in ("RV1", "RV2"):
+            icrf_position, icrf_velocity = _state(icrf_result, state_key)
+            ecliptic_position, ecliptic_velocity = _state(ecliptic_result, state_key)
+            position_residuals.append(
+                float(np.max(np.abs(ecliptic_position - rotation @ icrf_position)))
+            )
+            velocity_residuals.append(
+                float(np.max(np.abs(ecliptic_velocity - rotation @ icrf_velocity)))
+            )
+        for delta_v_key in ("DeltaV1", "DeltaV2"):
+            velocity_residuals.append(
+                float(
+                    np.max(
+                        np.abs(
+                            np.asarray(ecliptic_result[delta_v_key], dtype=float)
+                            - rotation @ np.asarray(icrf_result[delta_v_key], dtype=float)
+                        )
+                    )
+                )
+            )
+    max_position_residual_m = max(position_residuals)
+    max_velocity_residual_m_s = max(velocity_residuals)
+    print(
+        "LAMBERT_ECLIPTIC_RELATION="
+        f"position={max_position_residual_m:.12g} m "
+        f"velocity={max_velocity_residual_m_s:.12g} m/s"
+    )
+    if (
+        max_position_residual_m > ECLIPTIC_RELATION_POSITION_ABS_TOL_M
+        or max_velocity_residual_m_s > ECLIPTIC_RELATION_VELOCITY_ABS_TOL_M_S
+    ):
+        raise CrossValidationError(
+            "EclpJ2000ICRF transfer vectors no longer match the analytic ICRF "
+            "mean-obliquity rotation: "
+            f"position={max_position_residual_m:.12g} m, "
+            f"velocity={max_velocity_residual_m_s:.12g} m/s"
+        )
+
+
 @pytest.mark.calibration
 @pytest.mark.xfail(
     reason=(
@@ -519,7 +622,10 @@ def test_mean_ecliptic_frame_relation_remains_unresolved() -> None:
         **WIDE_FILTER_KWARGS,
     }
     mean_ecliptic = _require_results(
-        celestial.lambert_transfer_window(**common),
+        celestial.lambert_transfer_window(
+            **common,
+            sun_frame="MeanEclpJ2000",
+        ),
         expected_count=1,
     )[0]
     icrf = _require_results(
@@ -565,8 +671,8 @@ def test_mean_ecliptic_frame_relation_remains_unresolved() -> None:
         f"position={best_position:.12g} m velocity={best_velocity:.12g} m/s"
     )
     if (
-        best_position > FRAME_POSITION_DIAGNOSTIC_TOL_M
-        or best_velocity > FRAME_VELOCITY_DIAGNOSTIC_TOL_M_S
+        best_position > MEAN_FRAME_POSITION_DIAGNOSTIC_TOL_M
+        or best_velocity > MEAN_FRAME_VELOCITY_DIAGNOSTIC_TOL_M_S
     ):
         raise CrossValidationError(
             "fixed mean-obliquity rotations do not explain MeanEclpJ2000 versus "
@@ -840,10 +946,12 @@ def main() -> int:
         test_arrival_light_angle_matches_delta_v_geometry()
         test_max_filters_retain_expected_pairs()
         test_icrf_axes_match_independent_skyfield_orientation()
+        test_server_default_matches_eclp_j2000_icrf()
+        test_eclp_j2000_icrf_matches_icrf_obliquity_rotation()
     except Exception as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    print("CROSS_VALIDATION_CHECKED=7")
+    print("CROSS_VALIDATION_CHECKED=9")
     print("CROSS_VALIDATION_FAILED=0")
     return 0
 

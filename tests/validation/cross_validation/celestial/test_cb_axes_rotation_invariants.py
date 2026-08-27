@@ -7,6 +7,8 @@
 #       Earth and Moon at two explicit epochs
 #     - Earth INERTIAL -> FIXED order 0/1: verified against an independent ERFA
 #       Earth-orientation construction at two epochs
+#     - Earth same-body EclpJ2000ICRF -> ICRF order 0/1: verified against the
+#       analytic J2000 mean-obliquity rotation at two epochs
 #     - Earth -> Moon INERTIAL -> FIXED order 1 angular velocity: verified against
 #       an independent SPICE Moon orientation derivative at two epochs
 #     - Earth -> Moon INERTIAL -> FIXED quaternion: unresolved; the SPICE DE440
@@ -18,6 +20,7 @@
 #     - Earth quaternion and angular velocity: verified against ERFA
 #     - Moon order-1 angular velocity: verified against SPICE
 #     - Moon fixed quaternion: unresolved after an independent model comparison
+#     - EclpJ2000ICRF quaternion and zero angular velocity: verified analytically
 #   Parameters:
 #     - central-body/frame combinations above
 #     - order 0 and 1 where the branch exposes both
@@ -29,6 +32,7 @@
 #     - Moon oracle: SPICE J2000 -> IAU_MOON transform and xf2rav angular velocity
 #       from the maintained public PCK/DE440 data; the quaternion residual is kept
 #       unresolved instead of absorbed by a loose tolerance
+#     - Ecliptic oracle: fixed rotation by the standard J2000 mean obliquity
 #     - Tolerances: matrix 1e-8, angular velocity 1e-10 rad/s, identity 1e-12;
 #       these are precision bounds for independent comparisons, not model-fit
 #       envelopes
@@ -63,6 +67,7 @@ ABS_TOL = 1.0e-12
 MATRIX_ABS_TOL = 1.0e-8
 ANGULAR_VELOCITY_ABS_TOL = 1.0e-10
 QUATERNION_RESOLUTION_DEG = 1.0e-6
+J2000_MEAN_OBLIQUITY_DEG = 23.43929111111111
 
 
 class CrossValidationError(Exception):
@@ -166,7 +171,7 @@ def _assert_rotation_matrix_matches(
     expected_matrix: np.ndarray,
     *,
     label: str,
-) -> None:
+) -> float:
     actual_matrix = Rotation.from_quat(actual_rotation[:4]).as_matrix()
     error = float(np.max(np.abs(actual_matrix - expected_matrix)))
     if error > MATRIX_ABS_TOL:
@@ -174,6 +179,7 @@ def _assert_rotation_matrix_matches(
             f"{label} rotation matrix residual={error:.12g}, "
             f"exceeds {MATRIX_ABS_TOL:g}"
         )
+    return error
 
 
 def test_same_body_inertial_rotations_are_identity() -> None:
@@ -217,6 +223,51 @@ def test_earth_inertial_to_fixed_matches_erfa() -> None:
                     f"Earth/{epoch}/order=1 angular velocity residual="
                     f"{np.max(np.abs(actual[4:] - expected_angular_velocity)):.12g}"
                 )
+
+
+def _icrf_to_eclp_j2000_matrix() -> np.ndarray:
+    obliquity = math.radians(J2000_MEAN_OBLIQUITY_DEG)
+    return np.array(
+        [
+            [1.0, 0.0, 0.0],
+            [0.0, math.cos(obliquity), math.sin(obliquity)],
+            [0.0, -math.sin(obliquity), math.cos(obliquity)],
+        ]
+    )
+
+
+def test_eclp_j2000_icrf_rotation_matches_mean_obliquity() -> None:
+    configure_astrox_from_env()
+    expected_matrix = _icrf_to_eclp_j2000_matrix()
+    residuals: list[float] = []
+    for epoch in EPOCHS:
+        for order in (0, 1):
+            actual = rotation_response(
+                from_central_body="Earth",
+                to_central_body="Earth",
+                epoch=epoch,
+                from_frame="EclpJ2000ICRF",
+                to_frame="ICRF",
+                order=order,
+            )
+            residuals.append(
+                _assert_rotation_matrix_matches(
+                    actual,
+                    expected_matrix,
+                    label=f"Earth/EclpJ2000ICRF->ICRF/{epoch}/order={order}",
+                )
+            )
+            if order == 1 and not np.allclose(
+                actual[4:],
+                0.0,
+                atol=ABS_TOL,
+                rtol=0.0,
+            ):
+                raise CrossValidationError(
+                    "fixed EclpJ2000ICRF/ICRF relation returned nonzero angular "
+                    f"velocity at {epoch}: {actual[4:].tolist()}"
+                )
+    print(f"ECLIPTIC_ROTATION_MAX_MATRIX_RESIDUAL={max(residuals):.12g}")
 
 
 def _moon_inertial_to_fixed_matrix(time: Time) -> np.ndarray:
@@ -299,11 +350,12 @@ def main() -> int:
     try:
         test_same_body_inertial_rotations_are_identity()
         test_earth_inertial_to_fixed_matches_erfa()
+        test_eclp_j2000_icrf_rotation_matches_mean_obliquity()
         test_earth_moon_inertial_to_fixed_angular_velocity_matches_spice()
     except Exception as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    print("CROSS_VALIDATION_CHECKED=14")
+    print("CROSS_VALIDATION_CHECKED=18")
     print("CROSS_VALIDATION_FAILED=0")
     return 0
 

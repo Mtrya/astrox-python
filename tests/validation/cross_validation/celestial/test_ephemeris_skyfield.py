@@ -6,6 +6,8 @@
 #     - celestial.ephemeris for Moon and Mars in J2000 and MeanEclpJ2000:
 #       partial; response frame, epoch, units, and sample layout are verified,
 #       while the numeric state comparison remains unresolved
+#     - celestial.ephemeris EclpJ2000ICRF: verified as the standard J2000
+#       mean-obliquity rotation of the live ICRF branch for Moon and Mars
 #   Fields:
 #     - Position.CentralBody, referenceFrame, epoch, and cartesianVelocity sample
 #       layout: verified for the maintained cases
@@ -14,7 +16,7 @@
 #   Parameters:
 #     - target_name: Moon and Mars
 #     - observer_name: Earth
-#     - observer_frame: J2000 and MeanEclpJ2000
+#     - observer_frame: J2000, MeanEclpJ2000, ICRF, and EclpJ2000ICRF
 #     - explicit Start/Stop window and 43200-second sample step
 #   Comparison:
 #     - External: Skyfield 1.54 geometric target-minus-Earth states from DE421 and
@@ -22,8 +24,8 @@
 #       mean-obliquity rotation of the same geometric state
 #     - Units: ASTROX cartesianVelocity positions are m and velocities are m/s;
 #       Skyfield values are converted to km and km/s before comparison
-#     - Tolerances: none; unresolved numeric comparisons remain strict calibration
-#       xfails rather than passing with an unexplained residual envelope
+#     - Tolerances: direct ICRF-to-EclpJ2000ICRF relation 1e-3 m and 1e-10 m/s;
+#       unresolved external-kernel comparisons remain strict calibration xfails
 #
 # Calibration notes:
 #   - The comparison intentionally does not use Skyfield observe(), which applies
@@ -67,7 +69,10 @@ STOP = "2026-01-02T00:00:00.000Z"
 SAMPLE_STEP_S = 43200.0
 SAMPLE_OFFSETS_S = (0.0, 43200.0, 86400.0)
 FRAMES = ("J2000", "MeanEclpJ2000")
-J2000_MEAN_OBLIQUITY_DEG = 23.439291111
+SHAPE_FRAMES = (*FRAMES, "EclpJ2000ICRF")
+J2000_MEAN_OBLIQUITY_DEG = 23.43929111111111
+ECLIPTIC_RELATION_POSITION_ABS_M = 1.0e-3
+ECLIPTIC_RELATION_VELOCITY_ABS_M_S = 1.0e-10
 
 
 class CrossValidationError(Exception):
@@ -243,8 +248,55 @@ def compare_case(*, target_name: str, frame: str, ephemeris: Any) -> None:
 def test_ephemeris_response_shapes() -> None:
     configure_astrox_from_env()
     for target_name in ("Moon", "Mars"):
-        for frame in FRAMES:
+        for frame in SHAPE_FRAMES:
             _ephemeris_response(target_name=target_name, frame=frame)
+
+
+def test_eclp_j2000_icrf_matches_icrf_obliquity_rotation() -> None:
+    configure_astrox_from_env()
+    rotation = frame_rotation("MeanEclpJ2000")
+    for target_name in ("Moon", "Mars"):
+        icrf = samples_from_response(
+            _ephemeris_response(target_name=target_name, frame="ICRF"),
+            frame="ICRF",
+        )
+        ecliptic = samples_from_response(
+            _ephemeris_response(target_name=target_name, frame="EclpJ2000ICRF"),
+            frame="EclpJ2000ICRF",
+        )
+        position_residuals: list[float] = []
+        velocity_residuals: list[float] = []
+        for icrf_sample, ecliptic_sample in zip(icrf, ecliptic, strict=True):
+            icrf_offset_s, icrf_position_m, icrf_velocity_m_s = icrf_sample
+            ecliptic_offset_s, ecliptic_position_m, ecliptic_velocity_m_s = ecliptic_sample
+            if icrf_offset_s != ecliptic_offset_s:
+                raise CrossValidationError(
+                    f"{target_name} ICRF/EclpJ2000ICRF sample offsets differ: "
+                    f"{icrf_offset_s:g} versus {ecliptic_offset_s:g}"
+                )
+            position_residuals.append(
+                float(np.max(np.abs(ecliptic_position_m - rotation @ icrf_position_m)))
+            )
+            velocity_residuals.append(
+                float(np.max(np.abs(ecliptic_velocity_m_s - rotation @ icrf_velocity_m_s)))
+            )
+        max_position_residual_m = max(position_residuals)
+        max_velocity_residual_m_s = max(velocity_residuals)
+        print(
+            f"EPHEMERIS_ECLIPTIC_CASE={target_name} "
+            f"max_position_residual_m={max_position_residual_m:.12g} "
+            f"max_velocity_residual_m_s={max_velocity_residual_m_s:.12g}"
+        )
+        if (
+            max_position_residual_m > ECLIPTIC_RELATION_POSITION_ABS_M
+            or max_velocity_residual_m_s > ECLIPTIC_RELATION_VELOCITY_ABS_M_S
+        ):
+            raise CrossValidationError(
+                f"{target_name} EclpJ2000ICRF no longer matches the analytic "
+                "ICRF mean-obliquity rotation: "
+                f"position={max_position_residual_m:.12g} m, "
+                f"velocity={max_velocity_residual_m_s:.12g} m/s"
+            )
 
 
 @pytest.mark.calibration
@@ -268,7 +320,8 @@ def test_ephemeris_matches_skyfield_geometric_states() -> None:
 
 def main() -> int:
     try:
-        test_ephemeris_matches_skyfield_geometric_states()
+        test_ephemeris_response_shapes()
+        test_eclp_j2000_icrf_matches_icrf_obliquity_rotation()
     except Exception as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1

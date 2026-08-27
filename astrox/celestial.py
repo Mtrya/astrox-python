@@ -369,13 +369,15 @@ def mpc_ephemeris(
     observer_frame: str | None = None,
     start: str | None = None,
     stop: str | None = None,
+    step_s: float | None = None,
     target_elements: MpcOrbitalElements | None = None,
 ) -> dict[str, Any]:
     """Return ASTROX minor-planet ephemeris output from its MPC-backed route.
 
     When ``target_elements`` is supplied, the server integrates those MPC
     orbital elements directly instead of resolving ``target_name`` through the
-    MPC network query.
+    MPC network query. ``step_s`` controls the output sampling cadence; zero
+    requests the server's internal integration grid.
     """
     payload: dict[str, Any] = {
         "TargetName": _string(target_name, parameter="target_name"),
@@ -394,6 +396,11 @@ def mpc_ephemeris(
         payload,
         "Stop",
         _optional_string(stop, parameter="stop"),
+    )
+    _include_if_supplied(
+        payload,
+        "Step",
+        _optional_number(step_s, parameter="step_s"),
     )
     _include_if_supplied(
         payload,

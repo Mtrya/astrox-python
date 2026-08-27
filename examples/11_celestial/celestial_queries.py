@@ -12,7 +12,7 @@ STOP = "2026-01-02T00:00:00.000Z"
 
 
 def main() -> None:
-    for frame in ("J2000", "MeanEclpJ2000"):
+    for frame in ("J2000", "MeanEclpJ2000", "EclpJ2000ICRF"):
         ephemeris = celestial.ephemeris(
             target_name="Moon",
             start=START,
@@ -34,7 +34,7 @@ def main() -> None:
     )
     print(f"Earth→Moon 旋转: {len(rotation['Rotation'])} 个数值")
 
-    mpc = celestial.mpc_ephemeris(target_name="Ceres")
+    mpc = celestial.mpc_ephemeris(target_name="Ceres", step_s=172800.0)
     print(f"Ceres MPC 星历: {len(mpc['Position']['cartesianVelocity']) // 7} 个状态样本")
 
     transfer = celestial.lambert_transfer_window(

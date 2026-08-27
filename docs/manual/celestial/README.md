@@ -32,7 +32,7 @@ celestial.ephemeris(
 | `start` | `Start` | 分析开始时刻（UTC，`yyyy-MM-ddTHH:mm:ssZ`）。可选；服务端缺省为当年 1 月 1 日 |
 | `stop` | `Stop` | 分析结束时刻（UTC）。可选；服务端缺省为当年 12 月 31 日 |
 | `observer_name` | `ObserverName` | 观测者名称，如 `Earth`；服务端缺省为 `Sun` |
-| `observer_frame` | `ObserverFrame` | 观测者坐标系，服务端可选 `FIXED`、`INERTIAL`、`MeanEclpJ2000`、`J2000`，缺省为 `MeanEclpJ2000` |
+| `observer_frame` | `ObserverFrame` | 观测者坐标系，服务端当前接受 `FIXED`、`INERTIAL`、`MeanEclpJ2000`、`EclpJ2000ICRF`、`J2000`、`ICRF`，缺省为 `MeanEclpJ2000` |
 | `step_s` | `Step` | 采样步长，单位 s，服务端缺省 86400 s |
 
 `target_name` 是本函数唯一必填的请求字段；`start` 与 `stop` 可选，省略时不会被发往 ASTROX，由服务端选择当年 1 月 1 日至 12 月 31 日作为窗口，其它未提供的可选字段同样不会被发往 ASTROX，由服务器保留默认值。
@@ -43,7 +43,7 @@ from astrox import celestial
 start = "2026-01-01T00:00:00.000Z"
 stop = "2026-01-02T00:00:00.000Z"
 
-for frame in ("J2000", "MeanEclpJ2000"):
+for frame in ("J2000", "MeanEclpJ2000", "EclpJ2000ICRF"):
     ephemeris = celestial.ephemeris(
         target_name="Moon",
         start=start,
@@ -81,11 +81,11 @@ celestial.cb_axes_rotation(
 | `from_central_body` | `FromCbName` | 起始中心天体名称，如 `Earth` |
 | `to_central_body` | `ToCbName` | 目标中心天体名称，如 `Moon` |
 | `epoch` | `Epoch` | 历元时刻（UTC） |
-| `from_frame` | `FromCbFrame` | 起始坐标系，服务端可选 `FIXED`、`INERTIAL`、`J2000`、`ICRF`、`MeanEclpJ2000`，缺省为 `INERTIAL` |
+| `from_frame` | `FromCbFrame` | 起始坐标系，服务端可选 `FIXED`、`INERTIAL`、`J2000`、`ICRF`、`MeanEclpJ2000`、`EclpJ2000ICRF`，缺省为 `INERTIAL` |
 | `to_frame` | `ToCbFrame` | 目标坐标系，选项同上，缺省为 `FIXED` |
 | `order` | `Order` | 旋转运动阶数：`0` 仅返回四元数，`1` 返回四元数及角速度；整数原样传递 |
 
-`order` 保留为整数并原样 lower 到服务端，SDK 不做分支改写。响应中的 `Rotation` 是数值数组：`order=0` 时长度为 4（四元数 `[qx, qy, qz, qw]`），`order=1` 时长度为 7（四元数加角速度分量，服务端文档标注角速度单位为 rad/s）。已验证的数值语义包括：同一中心天体、两侧均为 `INERTIAL` 时，服务端返回单位四元数且 `order=1` 时角速度为 0；`Earth` 的 `INERTIAL`→`FIXED` 四元数与角速度；`Earth`→`Moon` 的 `INERTIAL`→`FIXED` 在 `order=1` 时的角速度。`Earth`→`Moon` 的 `INERTIAL`→`FIXED` 四元数尚未确认，其它组合未验证，使用前请自行核对。
+`order` 保留为整数并原样 lower 到服务端，SDK 不做分支改写。响应中的 `Rotation` 是数值数组：`order=0` 时长度为 4（四元数 `[qx, qy, qz, qw]`），`order=1` 时长度为 7（四元数加角速度分量，服务端文档标注角速度单位为 rad/s）。已验证的数值语义包括：同一中心天体、两侧均为 `INERTIAL` 时，服务端返回单位四元数且 `order=1` 时角速度为 0；`Earth`→`Earth` 的 `EclpJ2000ICRF`→`ICRF` 在两个已维护历元、`order=0/1` 下符合固定 J2000 平黄赤交角旋转且角速度为 0；`Earth` 的 `INERTIAL`→`FIXED` 四元数与角速度；`Earth`→`Moon` 的 `INERTIAL`→`FIXED` 在 `order=1` 时的角速度。`Earth`→`Moon` 的 `INERTIAL`→`FIXED` 四元数尚未确认，其它组合未验证，使用前请自行核对。
 
 ```python
 rotation = celestial.cb_axes_rotation(
@@ -113,6 +113,7 @@ celestial.mpc_ephemeris(
     observer_frame: str | None = None,
     start: str | None = None,
     stop: str | None = None,
+    step_s: float | None = None,
     target_elements: MpcOrbitalElements | None = None,
 ) -> dict[str, Any]
 ```
@@ -125,14 +126,15 @@ celestial.mpc_ephemeris(
 | `observer_frame` | `ObserverFrame` | 日心坐标系，服务端可选 `FIXED`、`INERTIAL`、`J2000`、`ICRF`、`MeanEclpJ2000`、`EclpJ2000ICRF`，缺省为 `MeanEclpJ2000` |
 | `start` | `Start` | 开始时刻（UTC）；缺省为轨道历元时刻，不能早于轨道历元时刻（服务端规则） |
 | `stop` | `Stop` | 结束时刻（UTC）；缺省为 `Start` 起 1 年 |
+| `step_s` | `Step` | 输出采样步长，单位 s，服务端缺省 86400 s；传入 `0` 时按内部积分步长输出 |
 | `target_elements` | `TargetElements` | 显式 MPC 轨道根数（`mpc_orbital_elements` 构造）；省略时服务端通过网络查询 MPC |
 
-该路由从外部 MPC 数据源获取轨道根数（历元为 MJD TDT），由服务端以固定 3 天步长进行日心轨道递推，输出为日心系 CZML Position 结构。响应包含 `OrbitElements`（轨道根数，键为 `EpochMjdTdt`、`PeriTimeMjdTdt`、`Q`、`SemimajorAxis`、`Eccentricity`、`Inclination`、`Raan`、`ArgOfPeriapsis`、`MeanAnomaly`、`ReferenceFrame`）与 `Position`（CZML 结构，同 `ephemeris`）。轨道根数的数值来自外部 MPC 数据，属于外部数据所有，可能随 MPC 数据更新而变化。省略 `start`/`stop` 时，服务端使用轨道历元默认窗口（`start` 为轨道历元时刻，`stop` 为其后 1 年）；显式固定窗口依赖查询时的轨道历元，外部 MPC 轨道历元更新后，先前固定的窗口可能早于新历元而被服务端拒绝，建议省略窗口参数或跟随当前历元选择。
+该路由从外部 MPC 数据源获取轨道根数（历元为 MJD TDT）。服务端契约声明其使用自适应日心积分器递推，再通过 Hermite 插值重采样到 `step_s` 指定的固定输出网格；`step_s=0` 表示请求按服务端声明的内部积分步长输出。响应为日心系 CZML Position 结构，包含 `OrbitElements`（轨道根数，键为 `EpochMjdTdt`、`PeriTimeMjdTdt`、`Q`、`SemimajorAxis`、`Eccentricity`、`Inclination`、`Raan`、`ArgOfPeriapsis`、`MeanAnomaly`、`ReferenceFrame`）与 `Position`（CZML 结构，同 `ephemeris`）。轨道根数的数值来自外部 MPC 数据，属于外部数据所有，可能随 MPC 数据更新而变化。省略 `start`/`stop` 时，服务端使用轨道历元默认窗口（`start` 为轨道历元时刻，`stop` 为其后 1 年）；显式固定窗口依赖查询时的轨道历元，外部 MPC 轨道历元更新后，先前固定的窗口可能早于新历元而被服务端拒绝，建议省略窗口参数或跟随当前历元选择。
 
-已验证（端点间不变量）：把名称查询返回的 `OrbitElements` 以 `target_elements` 原样回传，得到的星历与名称查询结果完全一致；`reference_frame` 的 `EclpJ2000ICRF`（MPC 约定，服务端缺省）与 `MeanEclpJ2000`（JPL 约定）是可区分的两个分支。验证证据见 [celestial 验证页](../../validation/celestial.md)。
+已验证（路由内不变量）：把名称查询返回的 `OrbitElements` 以 `target_elements` 原样回传，得到的星历与名称查询结果完全一致；省略 `step_s` 与显式传入 `86400` 结果完全一致，`172800` 输出是日采样网格的精确子集，`0` 返回端点一致但中间时间不等距的内部积分网格；`reference_frame` 的 `EclpJ2000ICRF`（MPC 约定，服务端缺省）与 `MeanEclpJ2000`（JPL 约定）是可区分的两个分支。这些证据验证请求分支与输出采样语义，不验证绝对轨道精度；详见 [celestial 验证页](../../validation/celestial.md)。
 
 ```python
-mpc = celestial.mpc_ephemeris(target_name="Ceres")
+mpc = celestial.mpc_ephemeris(target_name="Ceres", step_s=172800.0)
 
 print(f"Ceres MPC 星历: {len(mpc['Position']['cartesianVelocity']) // 7} 个状态样本")
 ```
@@ -227,7 +229,7 @@ celestial.lambert_transfer_window(
 | `departure_stop` | `DepartureInterval` | 出发时间窗口终点（UTC） |
 | `arrival_start` | `ArrivalInterval` | 到达时间窗口起点（UTC），与 `arrival_stop` 一起 lower 为 `"start/stop"` |
 | `arrival_stop` | `ArrivalInterval` | 到达时间窗口终点（UTC） |
-| `sun_frame` | `SunFrameName` | 日心参考系，服务端可选 `MeanEclpJ2000`、`ICRF`，缺省为 `MeanEclpJ2000` |
+| `sun_frame` | `SunFrameName` | 日心输出参考系，服务端当前接受 `MeanEclpJ2000`、`EclpJ2000ICRF`、`ICRF`，缺省为 `EclpJ2000ICRF` |
 | `min_time_of_flight_days` | `MinTofDays` | 最小转移时间，单位 d，整数；服务端缺省 10 |
 | `departure_step_days` | `DepartureStepDay` | 出发时间采样步长，单位 d；服务端缺省 1 |
 | `arrival_step_days` | `ArrivalStepDay` | 到达时间采样步长，单位 d；服务端缺省 1 |
@@ -279,7 +281,7 @@ print(
 | `TimeOfFlightDays` | number | 飞行时间，单位 d；已验证为 `ArrivalTime` 与 `DepartureTime` 的精确天数差 |
 | `ArrivalLightAngle` | number | 到达时刻太阳光照角，单位 deg；已验证为 `DeltaV2` 与 `RV2` 位置矢量的夹角 |
 
-已验证（独立交叉验证支持）：`sun_frame="ICRF"` 时，`RV1`/`RV2` 中的转移速度遵循零圈顺行 Lambert 关系，端点位置方向使用 ICRF 轴；`max_departure_delta_v_m_s`/`max_arrival_delta_v_m_s`/`max_time_of_flight_days` 分别按 `DV1_Mag`/`DV2_Mag`/飞行时间上限过滤采样网格。注意 2026-08-20 起服务端缺省值（出发/到达各 10000 m/s、500 d）会过滤掉超出缺省的算例，扫描大 ΔV 窗口时需显式放宽。未解决：`MeanEclpJ2000` 与 ICRF 之间的精确坐标关系、`DeltaV` 相对端点天体速度的物理含义、显式 MPC 根数的独立开普勒递推（`reference_frame` 选项不改变该路由的到达状态，元素约定仍未确认）。这些分支目前只有请求构造与响应结构层面的证据，使用前请自行核对。
+已验证（独立交叉验证支持）：省略 `sun_frame` 与显式传入 `EclpJ2000ICRF` 的 `TransferResults` 完全一致；`EclpJ2000ICRF` 输出是 `ICRF` 输出按 23.43929111111111° J2000 平黄赤交角进行的固定旋转；`sun_frame="ICRF"` 时，`RV1`/`RV2` 中的转移速度遵循零圈顺行 Lambert 关系，端点位置方向使用 ICRF 轴；`max_departure_delta_v_m_s`/`max_arrival_delta_v_m_s`/`max_time_of_flight_days` 分别按 `DV1_Mag`/`DV2_Mag`/飞行时间上限过滤采样网格。注意 2026-08-20 起服务端缺省值（出发/到达各 10000 m/s、500 d）会过滤掉超出缺省的算例，扫描大 ΔV 窗口时需显式放宽。未解决：显式 `MeanEclpJ2000` 与 ICRF 之间的精确坐标关系、`DeltaV` 相对端点天体速度的物理含义、显式 MPC 根数的独立开普勒递推（`reference_frame` 选项不改变该路由的到达状态，元素约定仍未确认）。这些分支的数值语义尚未验证，使用前请自行核对。
 
 ## 约定说明
 
@@ -287,6 +289,7 @@ print(
 - `cartesianVelocity` 每个样本为 `[Time, X, Y, Z, dX, dY, dZ]`，`Time` 为相对历元的秒数，位置 m、速度 m/s。
 - `cb_axes_rotation` 的 `order` 是整数，SDK 原样传递；`Rotation` 长度与 `order` 对应（`0` → 4，`1` → 7）。
 - `mpc_ephemeris` 省略 `start`/`stop` 时由服务端使用轨道历元默认窗口；显式固定窗口可能因外部 MPC 轨道历元更新而过期。
+- `mpc_ephemeris` 的 `step_s` 控制输出采样网格；省略时服务端缺省为 86400 s，传入 `0` 时按内部积分步长输出。
 - 本页四个函数的返回都移除了传输层 `IsSuccess` 与 `Message`，保留其余服务器字段；错误仍由 HTTP 层抛出（见错误处理）。
 - `lambert_transfer_window` 的 `departure_start`/`departure_stop` 与 `arrival_start`/`arrival_stop` 分别组合为 `DepartureInterval`/`ArrivalInterval` 的 `"start/stop"` 字符串。
 - `mpc_orbital_elements` 只做 lowering 所需的类型检查，不做物理有效性校验；未提供的字段不出现在 `to_wire()` 片段中。
