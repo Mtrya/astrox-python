@@ -48,9 +48,9 @@ python compute_lambert_transfer.py
 
 ## 需要做的几个决定
 
-1. **选出发与到达天体**：`departure_body`/`arrival_body` 接受服务端支持的天体名称（如 `Earth`、`Mars`、`Ceres`）以及 MPC 编号或名称（如 `2015 XF261`）。小行星省略对应的 `*_elements` 参数时，服务端通过网络查询 MPC 根数。
+1. **选出发与到达天体**：`departure_body`/`arrival_body` 接受服务端支持的天体名称（如 `Earth`、`Mars`、`Ceres`）以及 MPC 编号或名称（如 `2015 XF261`）。近地小行星省略对应的 `*_elements` 参数时，服务端从每日更新的本地 NEA 目录读取根数；其他小行星需显式提供根数。
 2. **定两个时间窗口**：`departure_start`/`departure_stop` 与 `arrival_start`/`arrival_stop` 各定义一个 UTC 时间窗口，SDK 分别组合为 `DepartureInterval`/`ArrivalInterval` 的 `"开始/结束"` 字符串。`departure_step_days` 与 `arrival_step_days`（单位 d）控制窗口内的采样步长，结果个数约等于两个窗口采样点数的乘积；示例中的 2 个出发日 × 3 个到达日产生 6 条结果。`min_time_of_flight_days`（单位 d，整数）过滤掉转移时间太短的组合，服务端缺省 10。
-3. **选输出参考系**：`sun_frame` 服务端缺省 `MeanEclpJ2000`；`ICRF` 分支的转移速度已与独立零圈顺行 Lambert 解一致，端点位置方向也已识别为 ICRF 轴方向，而 `MeanEclpJ2000` 与 ICRF 的精确关系尚未独立确认，需要参考系明确的数值时建议显式传 `sun_frame="ICRF"`。
+3. **选输出参考系**：`sun_frame` 服务端缺省 `EclpJ2000ICRF`；`ICRF` 分支的转移速度已与独立零圈顺行 Lambert 解一致，端点位置方向也已识别为 ICRF 轴方向，而 `MeanEclpJ2000` 与 ICRF 的精确关系尚未独立确认，需要参考系明确的数值时建议显式传 `sun_frame="ICRF"`。
 4. **按需调整过滤上限**：2026-08-20 起服务端按 `max_departure_delta_v_m_s`/`max_arrival_delta_v_m_s`（缺省各 10000 m/s，分别对应出发/到达双曲超速大小）与 `max_time_of_flight_days`（缺省 500 d）过滤算例，全部超界时返回空列表；扫描大 ΔV 或超长转移窗口时需显式放宽，示例中的 Earth→Mars 窗口就属于这种情况。
 
 ## 读懂结果
@@ -65,7 +65,7 @@ python compute_lambert_transfer.py
 
 ## 小行星与显式 MPC 根数
 
-要跳过服务端的 MPC 网络查询，可以显式传入轨道根数：
+要跳过服务端的本地 NEA 目录查询，或使用非 NEA 小行星，可以显式传入轨道根数：
 
 ```python
 elements = celestial.mpc_orbital_elements(

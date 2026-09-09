@@ -75,8 +75,8 @@ class MpcOrbitalElements:
     argument_of_periapsis_deg: float | None = None
     mean_anomaly_deg: float | None = None
     reference_frame: str | None = None
-    """Heliocentric mean-ecliptic variant: ``MeanEclpJ2000`` (JPL) or
-    ``EclpJ2000ICRF`` (MPC, server default)."""
+    """Heliocentric mean-ecliptic variant: ``MeanEclpJ2000`` (server default)
+    or ``EclpJ2000ICRF``."""
 
     def __post_init__(self) -> None:
         for field_name in (
@@ -372,11 +372,11 @@ def mpc_ephemeris(
     step_s: float | None = None,
     target_elements: MpcOrbitalElements | None = None,
 ) -> dict[str, Any]:
-    """Return ASTROX minor-planet ephemeris output from its MPC-backed route.
+    """Return ASTROX minor-planet ephemeris output from its MPC data route.
 
     When ``target_elements`` is supplied, the server integrates those MPC
-    orbital elements directly instead of resolving ``target_name`` through the
-    MPC network query. ``step_s`` controls the output sampling cadence; zero
+    orbital elements directly instead of resolving ``target_name`` through its
+    local NEA catalog. ``step_s`` controls the output sampling cadence; zero
     requests the server's internal integration grid.
     """
     payload: dict[str, Any] = {

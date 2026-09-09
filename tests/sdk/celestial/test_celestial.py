@@ -166,16 +166,16 @@ def test_cb_axes_rotation_omits_optional_server_defaults(
     )
 
 
-def test_mpc_ephemeris_preserves_external_route_defaults(
+def test_mpc_ephemeris_preserves_server_owned_route_defaults(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls = record_raw_post(monkeypatch, RESPONSE)
 
-    celestial.mpc_ephemeris(target_name="Ceres")
+    celestial.mpc_ephemeris(target_name="Apophis")
 
     assert_canonical_equal(
         calls[0],
-        {"endpoint": "/celestial/mpc", "json": {"TargetName": "Ceres"}},
+        {"endpoint": "/celestial/mpc", "json": {"TargetName": "Apophis"}},
     )
 
 
@@ -185,7 +185,7 @@ def test_mpc_ephemeris_lowers_optional_arguments(
     calls = record_raw_post(monkeypatch, RESPONSE)
 
     celestial.mpc_ephemeris(
-        target_name="Ceres",
+        target_name="Apophis",
         observer_frame="topocentric",
         start=START,
         stop=STOP,
@@ -197,7 +197,7 @@ def test_mpc_ephemeris_lowers_optional_arguments(
         {
             "endpoint": "/celestial/mpc",
             "json": {
-                "TargetName": "Ceres",
+                "TargetName": "Apophis",
                 "ObserverFrame": "topocentric",
                 "Start": START,
                 "Stop": STOP,
@@ -212,13 +212,13 @@ def test_mpc_ephemeris_preserves_zero_step(
 ) -> None:
     calls = record_raw_post(monkeypatch, RESPONSE)
 
-    celestial.mpc_ephemeris(target_name="Ceres", step_s=0)
+    celestial.mpc_ephemeris(target_name="Apophis", step_s=0)
 
     assert_canonical_equal(
         calls[0],
         {
             "endpoint": "/celestial/mpc",
-            "json": {"TargetName": "Ceres", "Step": 0.0},
+            "json": {"TargetName": "Apophis", "Step": 0.0},
         },
     )
 
@@ -229,7 +229,7 @@ def test_mpc_ephemeris_omits_none_optional_arguments(
     calls = record_raw_post(monkeypatch, RESPONSE)
 
     celestial.mpc_ephemeris(
-        target_name="Ceres",
+        target_name="Apophis",
         observer_frame=None,
         start=START,
         stop=None,
@@ -240,7 +240,7 @@ def test_mpc_ephemeris_omits_none_optional_arguments(
         calls[0],
         {
             "endpoint": "/celestial/mpc",
-            "json": {"TargetName": "Ceres", "Start": START},
+            "json": {"TargetName": "Apophis", "Start": START},
         },
     )
 
@@ -261,7 +261,7 @@ def test_mpc_ephemeris_omits_none_optional_arguments(
             "order",
         ),
         (celestial.mpc_ephemeris, {"target_name": 1}, "target_name"),
-        (celestial.mpc_ephemeris, {"target_name": "Ceres", "step_s": True}, "step_s"),
+        (celestial.mpc_ephemeris, {"target_name": "Apophis", "step_s": True}, "step_s"),
     ],
 )
 def test_celestial_rejects_mistyped_arguments(
@@ -372,7 +372,7 @@ def test_mpc_ephemeris_lowers_target_elements(
     )
 
     celestial.mpc_ephemeris(
-        target_name="Ceres",
+        target_name="Apophis",
         start=START,
         stop=STOP,
         target_elements=elements,
@@ -383,7 +383,7 @@ def test_mpc_ephemeris_lowers_target_elements(
         {
             "endpoint": "/celestial/mpc",
             "json": {
-                "TargetName": "Ceres",
+                "TargetName": "Apophis",
                 "Start": START,
                 "Stop": STOP,
                 "TargetElements": elements.to_wire(),
@@ -394,7 +394,7 @@ def test_mpc_ephemeris_lowers_target_elements(
 
 def test_mpc_ephemeris_rejects_mistyped_target_elements() -> None:
     with pytest.raises(TypeError, match="target_elements"):
-        celestial.mpc_ephemeris(target_name="Ceres", target_elements={})
+        celestial.mpc_ephemeris(target_name="Apophis", target_elements={})
 
 
 def test_lambert_transfer_window_lowers_delta_v_and_tof_filters(

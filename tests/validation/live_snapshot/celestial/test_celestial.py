@@ -117,7 +117,7 @@ def rotation_shape(order: int) -> dict[str, Any]:
 
 def mpc_shape() -> dict[str, Any]:
     response = _require_response(
-        celestial.mpc_ephemeris(target_name="Ceres"),
+        celestial.mpc_ephemeris(target_name="Apophis"),
         field="MPC",
         keys=("OrbitElements", "Position"),
     )
@@ -254,8 +254,8 @@ CASES = [
         run=lambda: rotation_shape(1),
     ),
     LiveSnapshotCase(
-        id="mpc_ceres_server_default_window",
-        description="Nested MPC response shape using the server-owned orbital-epoch default window; external numeric values are not frozen.",
+        id="mpc_apophis_server_default_window",
+        description="Nested NEA/MPC response shape using the server-owned orbital-epoch default window; catalog numeric values are not frozen.",
         run=mpc_shape,
     ),
     LiveSnapshotCase(

@@ -118,25 +118,25 @@ celestial.mpc_ephemeris(
 ) -> dict[str, Any]
 ```
 
-按小行星名称或编号查询 MPC 小行星星历，返回原始 JSON 响应字典；提供 `target_elements` 时，服务端直接对给定 MPC 轨道根数积分，不再通过网络查询 MPC。
+按近地小行星（NEA）名称或编号查询 MPC 小行星星历，返回原始 JSON 响应字典。名称查询由服务端每日更新的本地 NEA 目录解析；提供 `target_elements` 时，服务端直接对给定 MPC 轨道根数积分，不再查询该目录，非 NEA 小行星也必须使用这一方式。
 
 | 参数 | wire 参数 | 说明 |
 | --- | --- | --- |
-| `target_name` | `TargetName` | 小行星名称或编号，如 `Ceres`、`99942` |
+| `target_name` | `TargetName` | 近地小行星名称或编号，如 `Apophis`、`99942`；非 NEA 小行星需同时提供 `target_elements` |
 | `observer_frame` | `ObserverFrame` | 日心坐标系，服务端可选 `FIXED`、`INERTIAL`、`J2000`、`ICRF`、`MeanEclpJ2000`、`EclpJ2000ICRF`，缺省为 `MeanEclpJ2000` |
 | `start` | `Start` | 开始时刻（UTC）；缺省为轨道历元时刻，不能早于轨道历元时刻（服务端规则） |
 | `stop` | `Stop` | 结束时刻（UTC）；缺省为 `Start` 起 1 年 |
 | `step_s` | `Step` | 输出采样步长，单位 s，服务端缺省 86400 s；传入 `0` 时按内部积分步长输出 |
-| `target_elements` | `TargetElements` | 显式 MPC 轨道根数（`mpc_orbital_elements` 构造）；省略时服务端通过网络查询 MPC |
+| `target_elements` | `TargetElements` | 显式 MPC 轨道根数（`mpc_orbital_elements` 构造）；省略时服务端从本地 NEA 目录解析 `target_name` |
 
-该路由从外部 MPC 数据源获取轨道根数（历元为 MJD TDT）。服务端契约声明其使用自适应日心积分器递推，再通过 Hermite 插值重采样到 `step_s` 指定的固定输出网格；`step_s=0` 表示请求按服务端声明的内部积分步长输出。响应为日心系 CZML Position 结构，包含 `OrbitElements`（轨道根数，键为 `EpochMjdTdt`、`PeriTimeMjdTdt`、`Q`、`SemimajorAxis`、`Eccentricity`、`Inclination`、`Raan`、`ArgOfPeriapsis`、`MeanAnomaly`、`ReferenceFrame`）与 `Position`（CZML 结构，同 `ephemeris`）。轨道根数的数值来自外部 MPC 数据，属于外部数据所有，可能随 MPC 数据更新而变化。省略 `start`/`stop` 时，服务端使用轨道历元默认窗口（`start` 为轨道历元时刻，`stop` 为其后 1 年）；显式固定窗口依赖查询时的轨道历元，外部 MPC 轨道历元更新后，先前固定的窗口可能早于新历元而被服务端拒绝，建议省略窗口参数或跟随当前历元选择。
+该路由从服务端本地 NEA 目录读取轨道根数（历元为 MJD TDT），目录每日更新。服务端契约声明其使用自适应日心积分器递推，再通过 Hermite 插值重采样到 `step_s` 指定的固定输出网格；`step_s=0` 表示请求按服务端声明的内部积分步长输出。响应为日心系 CZML Position 结构，包含 `OrbitElements`（轨道根数，键为 `EpochMjdTdt`、`PeriTimeMjdTdt`、`Q`、`SemimajorAxis`、`Eccentricity`、`Inclination`、`Raan`、`ArgOfPeriapsis`、`MeanAnomaly`、`ReferenceFrame`）与 `Position`（CZML 结构，同 `ephemeris`）。目录中的轨道根数可能随每日数据刷新而变化。省略 `start`/`stop` 时，服务端使用轨道历元默认窗口（`start` 为轨道历元时刻，`stop` 为其后 1 年）；显式固定窗口依赖查询时的轨道历元，目录更新后，先前固定的窗口可能早于新历元而被服务端拒绝，建议省略窗口参数或跟随当前历元选择。
 
-已验证（路由内不变量）：把名称查询返回的 `OrbitElements` 以 `target_elements` 原样回传，得到的星历与名称查询结果完全一致；省略 `step_s` 与显式传入 `86400` 结果完全一致，`172800` 输出是日采样网格的精确子集，`0` 返回端点一致但中间时间不等距的内部积分网格；`reference_frame` 的 `EclpJ2000ICRF`（MPC 约定，服务端缺省）与 `MeanEclpJ2000`（JPL 约定）是可区分的两个分支。这些证据验证请求分支与输出采样语义，不验证绝对轨道精度；详见 [celestial 验证页](../../validation/celestial.md)。
+已验证（路由内不变量）：把名称查询返回的 `OrbitElements` 以 `target_elements` 原样回传，得到的星历与名称查询结果完全一致；省略 `step_s` 与显式传入 `86400` 结果完全一致，`172800` 输出是日采样网格的精确子集，`0` 返回端点一致但中间时间不等距的内部积分网格；`reference_frame` 的 `MeanEclpJ2000`（本地 NEA 目录与省略值时的服务端缺省）与 `EclpJ2000ICRF` 是可区分的两个分支。这些证据验证请求分支与输出采样语义，不验证绝对轨道精度；详见 [celestial 验证页](../../validation/celestial.md)。
 
 ```python
-mpc = celestial.mpc_ephemeris(target_name="Ceres", step_s=172800.0)
+mpc = celestial.mpc_ephemeris(target_name="Apophis", step_s=172800.0)
 
-print(f"Ceres MPC 星历: {len(mpc['Position']['cartesianVelocity']) // 7} 个状态样本")
+print(f"Apophis MPC 星历: {len(mpc['Position']['cartesianVelocity']) // 7} 个状态样本")
 ```
 
 ## 小行星 MPC 轨道根数
@@ -172,7 +172,7 @@ celestial.mpc_orbital_elements(
 | `raan_deg` | `Raan` | deg |
 | `argument_of_periapsis_deg` | `ArgOfPeriapsis` | deg |
 | `mean_anomaly_deg` | `MeanAnomaly` | deg |
-| `reference_frame` | `ReferenceFrame` | 日心平黄道坐标系变体：`MeanEclpJ2000`（JPL）或 `EclpJ2000ICRF`（MPC，服务端缺省） |
+| `reference_frame` | `ReferenceFrame` | 日心平黄道坐标系变体：`MeanEclpJ2000`（服务端缺省）或 `EclpJ2000ICRF` |
 
 ```python
 from astrox import celestial
@@ -192,7 +192,7 @@ elements = celestial.mpc_orbital_elements(
 print(elements.to_wire())
 ```
 
-`to_wire()` 返回 ASTROX `MpcOrbElements` 请求片段，上面的示例输出 `{'EpochMjdTdt': 61000.0, 'PeriTimeMjdTdt': 60900.0, 'Q': 0.6740515, 'SemimajorAxis': 0.9898367, 'Eccentricity': 0.3190276, 'Inclination': 0.79379, 'Raan': 209.81829, 'ArgOfPeriapsis': 100.88187, 'MeanAnomaly': 120.0}`。传入 `lambert_transfer_window` 后，服务端直接使用这些根数进行日心轨道递推，不再通过网络查询 MPC。显式根数在该路由中的独立开普勒递推尚未验证，其元素系与时间约定未确认（`reference_frame` 选项不改变该路由的到达状态）；`mpc_ephemeris` 的 `target_elements` 分支已验证（见上文），使用前请自行核对。
+`to_wire()` 返回 ASTROX `MpcOrbElements` 请求片段，上面的示例输出 `{'EpochMjdTdt': 61000.0, 'PeriTimeMjdTdt': 60900.0, 'Q': 0.6740515, 'SemimajorAxis': 0.9898367, 'Eccentricity': 0.3190276, 'Inclination': 0.79379, 'Raan': 209.81829, 'ArgOfPeriapsis': 100.88187, 'MeanAnomaly': 120.0}`。传入 `lambert_transfer_window` 后，服务端直接使用这些根数进行日心轨道递推，不再查询本地 NEA 目录。显式根数在该路由中的独立开普勒递推尚未验证，其元素系与时间约定未确认（`reference_frame` 选项不改变该路由的到达状态）；`mpc_ephemeris` 的 `target_elements` 分支已验证（见上文），使用前请自行核对。
 
 ## Lambert 转移窗口
 
@@ -233,8 +233,8 @@ celestial.lambert_transfer_window(
 | `min_time_of_flight_days` | `MinTofDays` | 最小转移时间，单位 d，整数；服务端缺省 10 |
 | `departure_step_days` | `DepartureStepDay` | 出发时间采样步长，单位 d；服务端缺省 1 |
 | `arrival_step_days` | `ArrivalStepDay` | 到达时间采样步长，单位 d；服务端缺省 1 |
-| `departure_elements` | `DepartureElements` | 出发小行星的 MPC 轨道根数（`mpc_orbital_elements` 构造）；省略时服务端通过网络查询 MPC |
-| `arrival_elements` | `ArrivalElements` | 到达小行星的 MPC 轨道根数；省略时服务端通过网络查询 MPC |
+| `departure_elements` | `DepartureElements` | 出发小行星的 MPC 轨道根数（`mpc_orbital_elements` 构造）；近地小行星省略时服务端查询本地 NEA 目录，其他小行星需显式提供 |
+| `arrival_elements` | `ArrivalElements` | 到达小行星的 MPC 轨道根数；近地小行星省略时服务端查询本地 NEA 目录，其他小行星需显式提供 |
 | `max_departure_delta_v_m_s` | `MaxDepartureDV` | 最大出发速度增量（出发双曲超速大小），单位 m/s，整数；服务端缺省 10000，超出的算例被过滤 |
 | `max_arrival_delta_v_m_s` | `MaxArrivalDV` | 最大到达速度增量（到达双曲超速大小），单位 m/s，整数；服务端缺省 10000，超出的算例被过滤 |
 | `max_time_of_flight_days` | `MaxTofDays` | 最大转移时间，单位 d，整数；服务端缺省 500，超出的算例被过滤 |
@@ -288,7 +288,7 @@ print(
 - `ephemeris` 的 `start` 与 `stop` 可选；省略时不会被发往 ASTROX，由服务端选择当年 1 月 1 日至 12 月 31 日作为窗口。
 - `cartesianVelocity` 每个样本为 `[Time, X, Y, Z, dX, dY, dZ]`，`Time` 为相对历元的秒数，位置 m、速度 m/s。
 - `cb_axes_rotation` 的 `order` 是整数，SDK 原样传递；`Rotation` 长度与 `order` 对应（`0` → 4，`1` → 7）。
-- `mpc_ephemeris` 省略 `start`/`stop` 时由服务端使用轨道历元默认窗口；显式固定窗口可能因外部 MPC 轨道历元更新而过期。
+- `mpc_ephemeris` 省略 `start`/`stop` 时由服务端使用轨道历元默认窗口；显式固定窗口可能因本地 NEA 目录中的轨道历元更新而过期。
 - `mpc_ephemeris` 的 `step_s` 控制输出采样网格；省略时服务端缺省为 86400 s，传入 `0` 时按内部积分步长输出。
 - 本页四个函数的返回都移除了传输层 `IsSuccess` 与 `Message`，保留其余服务器字段；错误仍由 HTTP 层抛出（见错误处理）。
 - `lambert_transfer_window` 的 `departure_start`/`departure_stop` 与 `arrival_start`/`arrival_stop` 分别组合为 `DepartureInterval`/`ArrivalInterval` 的 `"start/stop"` 字符串。

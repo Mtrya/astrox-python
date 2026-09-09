@@ -118,25 +118,25 @@ celestial.mpc_ephemeris(
 ) -> dict[str, Any]
 ```
 
-Queries an MPC minor-planet ephemeris by asteroid name or number and returns a raw JSON response dictionary. When `target_elements` is provided, the server integrates the given MPC orbital elements directly instead of querying MPC over the network.
+Queries an MPC ephemeris by near-Earth asteroid (NEA) name or number and returns a raw JSON response dictionary. Name lookup uses the server's daily-refreshed local NEA catalog. When `target_elements` is provided, the server integrates the given MPC orbital elements directly without consulting that catalog; non-NEA asteroids must use this path.
 
 | Parameter | Wire parameter | Description |
 | --- | --- | --- |
-| `target_name` | `TargetName` | Asteroid name or number, e.g. `Ceres`, `99942` |
+| `target_name` | `TargetName` | Near-Earth asteroid name or number, e.g. `Apophis`, `99942`; non-NEAs also require `target_elements` |
 | `observer_frame` | `ObserverFrame` | Heliocentric frame, server options `FIXED`, `INERTIAL`, `J2000`, `ICRF`, `MeanEclpJ2000`, `EclpJ2000ICRF`, default `MeanEclpJ2000` |
 | `start` | `Start` | Start time (UTC); defaults to the orbital epoch and cannot be earlier than the orbital epoch (server rule) |
 | `stop` | `Stop` | Stop time (UTC); defaults to 1 year after `Start` |
 | `step_s` | `Step` | Output sample step, in s, server default 86400 s; pass `0` to output at the internal integration steps |
-| `target_elements` | `TargetElements` | Explicit MPC orbital elements (built with `mpc_orbital_elements`); when omitted, the server queries MPC over the network |
+| `target_elements` | `TargetElements` | Explicit MPC orbital elements (built with `mpc_orbital_elements`); when omitted, the server resolves `target_name` from its local NEA catalog |
 
-This route fetches orbital elements from the external MPC data source (element epoch in MJD TDT). The server contract declares adaptive heliocentric integration followed by Hermite interpolation onto the fixed output grid selected by `step_s`; `step_s=0` requests output at the server-declared internal integration steps. The response is a heliocentric CZML Position structure containing `OrbitElements` (orbital elements with keys `EpochMjdTdt`, `PeriTimeMjdTdt`, `Q`, `SemimajorAxis`, `Eccentricity`, `Inclination`, `Raan`, `ArgOfPeriapsis`, `MeanAnomaly`, `ReferenceFrame`) and `Position` (CZML structure, same as `ephemeris`). The orbital-element values come from external MPC data, are owned by that external data source, and may change with MPC updates. When `start`/`stop` are omitted, the server uses the orbital-epoch default window (`start` is the orbital epoch and `stop` is one year after it); an explicit fixed window depends on the orbital epoch at query time, and once the external MPC orbital epoch updates, a previously fixed window may fall before the new epoch and be rejected by the server, so prefer omitting the window parameters or following the current epoch.
+This route reads orbital elements from the server's local NEA catalog (element epoch in MJD TDT), which is refreshed daily. The server contract declares adaptive heliocentric integration followed by Hermite interpolation onto the fixed output grid selected by `step_s`; `step_s=0` requests output at the server-declared internal integration steps. The response is a heliocentric CZML Position structure containing `OrbitElements` (orbital elements with keys `EpochMjdTdt`, `PeriTimeMjdTdt`, `Q`, `SemimajorAxis`, `Eccentricity`, `Inclination`, `Raan`, `ArgOfPeriapsis`, `MeanAnomaly`, `ReferenceFrame`) and `Position` (CZML structure, same as `ephemeris`). The catalog's orbital-element values may change with each daily refresh. When `start`/`stop` are omitted, the server uses the orbital-epoch default window (`start` is the orbital epoch and `stop` is one year after it); an explicit fixed window depends on the orbital epoch at query time, and once the catalog epoch updates, a previously fixed window may fall before the new epoch and be rejected by the server, so prefer omitting the window parameters or following the current epoch.
 
-Verified (within-route invariants): passing the `OrbitElements` returned by a name query back as `target_elements` reproduces the name-query ephemeris exactly; omitting `step_s` exactly matches explicit `86400`, `172800` produces an exact subset of the daily grid, and `0` returns the same endpoints on a nonuniform internal integration grid; the `reference_frame` values `EclpJ2000ICRF` (MPC convention, server default) and `MeanEclpJ2000` (JPL convention) are two distinguishable branches. This evidence verifies request branches and output-sampling semantics, not absolute orbit accuracy. See the [celestial validation page](../../../../validation/celestial.md) for details.
+Verified (within-route invariants): passing the `OrbitElements` returned by a name query back as `target_elements` reproduces the name-query ephemeris exactly; omitting `step_s` exactly matches explicit `86400`, `172800` produces an exact subset of the daily grid, and `0` returns the same endpoints on a nonuniform internal integration grid; the `reference_frame` values `MeanEclpJ2000` (the server default for local-catalog and omitted values) and `EclpJ2000ICRF` are two distinguishable branches. This evidence verifies request branches and output-sampling semantics, not absolute orbit accuracy. See the [celestial validation page](../../../../validation/celestial.md) for details.
 
 ```python
-mpc = celestial.mpc_ephemeris(target_name="Ceres", step_s=172800.0)
+mpc = celestial.mpc_ephemeris(target_name="Apophis", step_s=172800.0)
 
-print(f"Ceres MPC ephemeris: {len(mpc['Position']['cartesianVelocity']) // 7} state samples")
+print(f"Apophis MPC ephemeris: {len(mpc['Position']['cartesianVelocity']) // 7} state samples")
 ```
 
 ## Minor-planet MPC orbital elements
@@ -172,7 +172,7 @@ Builds a heliocentric MPC orbital-element fragment. When either the departure or
 | `raan_deg` | `Raan` | deg |
 | `argument_of_periapsis_deg` | `ArgOfPeriapsis` | deg |
 | `mean_anomaly_deg` | `MeanAnomaly` | deg |
-| `reference_frame` | `ReferenceFrame` | Heliocentric ecliptic frame variant: `MeanEclpJ2000` (JPL) or `EclpJ2000ICRF` (MPC, server default) |
+| `reference_frame` | `ReferenceFrame` | Heliocentric ecliptic frame variant: `MeanEclpJ2000` (server default) or `EclpJ2000ICRF` |
 
 ```python
 from astrox import celestial
@@ -192,7 +192,7 @@ elements = celestial.mpc_orbital_elements(
 print(elements.to_wire())
 ```
 
-`to_wire()` returns the ASTROX `MpcOrbElements` request fragment; the example above prints `{'EpochMjdTdt': 61000.0, 'PeriTimeMjdTdt': 60900.0, 'Q': 0.6740515, 'SemimajorAxis': 0.9898367, 'Eccentricity': 0.3190276, 'Inclination': 0.79379, 'Raan': 209.81829, 'ArgOfPeriapsis': 100.88187, 'MeanAnomaly': 120.0}`. When passed to `lambert_transfer_window`, the server propagates heliocentrically directly with these elements and no longer queries MPC over the network. The independent Kepler propagation of explicit elements in that route is unverified: the element system and time convention are not confirmed (the `reference_frame` option does not change the arrival states of that route); the `target_elements` branch of `mpc_ephemeris` is verified (see above), so verify the meaning yourself before use.
+`to_wire()` returns the ASTROX `MpcOrbElements` request fragment; the example above prints `{'EpochMjdTdt': 61000.0, 'PeriTimeMjdTdt': 60900.0, 'Q': 0.6740515, 'SemimajorAxis': 0.9898367, 'Eccentricity': 0.3190276, 'Inclination': 0.79379, 'Raan': 209.81829, 'ArgOfPeriapsis': 100.88187, 'MeanAnomaly': 120.0}`. When passed to `lambert_transfer_window`, the server propagates heliocentrically directly with these elements and no longer consults the local NEA catalog. The independent Kepler propagation of explicit elements in that route is unverified: the element system and time convention are not confirmed (the `reference_frame` option does not change the arrival states of that route); the `target_elements` branch of `mpc_ephemeris` is verified (see above), so verify the meaning yourself before use.
 
 ## Lambert transfer windows
 
@@ -233,8 +233,8 @@ Samples over the departure time window and the arrival time window, computes Lam
 | `min_time_of_flight_days` | `MinTofDays` | Minimum transfer time, in d, integer; server default 10 |
 | `departure_step_days` | `DepartureStepDay` | Departure time sample step, in d; server default 1 |
 | `arrival_step_days` | `ArrivalStepDay` | Arrival time sample step, in d; server default 1 |
-| `departure_elements` | `DepartureElements` | MPC orbital elements of the departure asteroid (built with `mpc_orbital_elements`); when omitted, the server queries MPC over the network |
-| `arrival_elements` | `ArrivalElements` | MPC orbital elements of the arrival asteroid; when omitted, the server queries MPC over the network |
+| `departure_elements` | `DepartureElements` | MPC orbital elements of the departure asteroid (built with `mpc_orbital_elements`); when omitted for a near-Earth asteroid, the server queries its local NEA catalog, while other asteroids require explicit elements |
+| `arrival_elements` | `ArrivalElements` | MPC orbital elements of the arrival asteroid; when omitted for a near-Earth asteroid, the server queries its local NEA catalog, while other asteroids require explicit elements |
 | `max_departure_delta_v_m_s` | `MaxDepartureDV` | Maximum departure velocity increment (departure hyperbolic excess speed magnitude), in m/s, integer; server default 10000, cases above it are filtered out |
 | `max_arrival_delta_v_m_s` | `MaxArrivalDV` | Maximum arrival velocity increment (arrival hyperbolic excess speed magnitude), in m/s, integer; server default 10000, cases above it are filtered out |
 | `max_time_of_flight_days` | `MaxTofDays` | Maximum transfer time, in d, integer; server default 500, cases above it are filtered out |
@@ -288,7 +288,7 @@ Verified (supported by independent cross-validation): omitting `sun_frame` produ
 - `ephemeris` `start` and `stop` are optional; when omitted they are not sent to ASTROX and the server selects January 1 to December 31 of the current year as the window.
 - Each `cartesianVelocity` sample is `[Time, X, Y, Z, dX, dY, dZ]`, with `Time` in seconds from the reference epoch, positions in m, and velocities in m/s.
 - `cb_axes_rotation` passes the integer `order` through as-is; the `Rotation` length corresponds to `order` (`0` → 4, `1` → 7).
-- `mpc_ephemeris` relies on the server's orbital-epoch default window when `start`/`stop` are omitted; an explicit fixed window may expire when the external MPC orbital epoch updates.
+- `mpc_ephemeris` relies on the server's orbital-epoch default window when `start`/`stop` are omitted; an explicit fixed window may expire when the orbital epoch in the local NEA catalog updates.
 - `mpc_ephemeris` `step_s` controls the output sampling grid; when omitted the server default is 86400 s, while `0` outputs at the internal integration steps.
 - The returns of all four functions on this page have the transport-level `IsSuccess` and `Message` removed, and the remaining server fields are preserved; errors are still raised by the HTTP layer (see error handling).
 - `lambert_transfer_window` combines `departure_start`/`departure_stop` and `arrival_start`/`arrival_stop` into the `"start/stop"` strings of `DepartureInterval`/`ArrivalInterval` respectively.
