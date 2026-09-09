@@ -362,6 +362,8 @@ count_now = coverage.number_of_assets.by_grid_point_at_time(
 
 Response time returns statistics on uncovered gap durations for each grid point. `compute_type` supports `"Maximum"` and `"Minimum"`.
 
+The dynamic `by_grid_point_at_time` route returns `FOM_Value: null` when a point is currently uncovered and has no later access inside the analysis window. `Minimum`, `Maximum`, and `Average` from `grid_stats_over_time` can also be `null`, so callers should handle `None` when reading these fields.
+
 ```python
 response = coverage.response_time.grid_stats(
     start="2024-01-01T00:00:00.000Z",

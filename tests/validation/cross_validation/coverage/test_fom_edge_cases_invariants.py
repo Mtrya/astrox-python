@@ -5,11 +5,11 @@
 #   Branches:
 #     - no-coverage grid with one SGP4 asset: verified for all static FOM routes and supported at-time/over-time routes; ComputeCoverage worker-error behavior is recorded separately
 #     - continuous-coverage grid/window with one SGP4 asset: verified for all static, at-time, and over-time FOM routes, including response-time dynamic routes
-#     - ResponseTime ValueByGridPointAtTime/GridStatsOverTime: partial; verified to succeed for continuous coverage; current no-coverage HTTP 500 behavior is guarded in live snapshots
+#     - ResponseTime ValueByGridPointAtTime/GridStatsOverTime: verified to return null values for never-covered points and to succeed for continuous coverage
 #   Fields:
 #     - Datas[].Latitude/Longitude/Altitude: verified against GetGridPoints for no-coverage and continuous-coverage cases
-#     - Datas[].FOM_Value: verified against all-zero/all-window/all-covered local derivations where ComputeCoverage has worker-error edge behavior
-#     - Minimum/Maximum/Average: verified as arithmetic statistics over point values for no-coverage and continuous-coverage cases
+#     - Datas[].FOM_Value: verified against all-zero/all-window/all-covered/null local derivations where ComputeCoverage has worker-error edge behavior
+#     - Minimum/Maximum/Average: verified as arithmetic statistics over point values for static no-coverage and continuous-coverage cases; dynamic never-covered rows are verified as all-null
 #     - GridStatsOverTime.Datas[].EpochSeconds: verified to include Start, interior Step samples, and Stop
 #   Parameters:
 #     - time: verified for supported at-time routes in never-covered and always-covered cases
@@ -21,7 +21,7 @@
 #     - Tolerances: VALUE_ABS=1e-6 for endpoint-to-endpoint floating values; POSITION_ABS_DEG=1e-10 for grid coordinate echoes
 #   Findings:
 #     - ComputeCoverage currently returns a worker "Index was out of range" error for all-zero and all-covered edge cases, but most FOM routes return meaningful edge-case values.
-#     - No-coverage FOM routes return 0 for SimpleCoverage, CoverageTime, and NumberOfAssets; full-window duration for ResponseTime and RevisitTime; response-time dynamic HTTP 500 cases are drift-guarded in live snapshots.
+#     - No-coverage FOM routes return 0 for SimpleCoverage, CoverageTime, and NumberOfAssets; static ResponseTime and RevisitTime return full-window duration; dynamic ResponseTime returns null.
 #     - Continuous-coverage FOM routes return 1 for SimpleCoverage and NumberOfAssets, full-window duration for CoverageTime, and 0 for ResponseTime and RevisitTime; response-time dynamic routes succeed in this regime.
 
 from __future__ import annotations
@@ -89,6 +89,22 @@ def test_no_coverage_fom_routes_match_edge_case_conventions() -> None:
         report = func(start=START, stop=STOP, grid=grid, assets=assets, minimum_assets=1, step_s=60.0, **extra)
         assert_fom_values(label, report["Datas"], points, expected)
 
+    response_at_time = coverage.response_time.by_grid_point_at_time(
+        time="2024-01-01T00:10:00.000Z",
+        start=START,
+        stop=STOP,
+        grid=grid,
+        assets=assets,
+        minimum_assets=1,
+        step_s=60.0,
+    )
+    assert_fom_values(
+        "response_at_time",
+        response_at_time["Datas"],
+        points,
+        [None for _ in points],
+    )
+
     stat_cases = [
         ("simple_grid_stats", coverage.simple_coverage.grid_stats, {}, zeros),
         ("coverage_time_grid_stats", coverage.coverage_time.grid_stats, {"compute_type": "TotalTimeAbove"}, zeros),
@@ -111,6 +127,22 @@ def test_no_coverage_fom_routes_match_edge_case_conventions() -> None:
         assert_epoch_series(label, report["Datas"], expected_offsets)
         for row in report["Datas"]:
             assert_stats(f"{label}@{row['EpochSeconds']}", row, expected)
+
+    response_over_time = coverage.response_time.grid_stats_over_time(
+        start=START,
+        stop=STOP,
+        grid=grid,
+        assets=assets,
+        minimum_assets=1,
+        step_s=700.0,
+    )
+    assert_epoch_series("response_over_time", response_over_time["Datas"], expected_offsets)
+    for row in response_over_time["Datas"]:
+        for field in ("Minimum", "Maximum", "Average"):
+            if row[field] is not None:
+                raise CrossValidationError(
+                    f"response_over_time@{row['EpochSeconds']}.{field}: expected None, got {row[field]}"
+                )
 
 
 def test_continuous_coverage_fom_routes_match_edge_case_conventions() -> None:

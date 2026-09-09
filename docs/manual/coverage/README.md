@@ -362,6 +362,8 @@ count_now = coverage.number_of_assets.by_grid_point_at_time(
 
 响应时间返回每个网格点未被覆盖的间隙时长统计。`compute_type` 支持 `"Maximum"` 和 `"Minimum"`。
 
+指定时刻接口 `by_grid_point_at_time` 在网格点当前未覆盖且分析窗口内没有后续覆盖时返回 `FOM_Value: null`；`grid_stats_over_time` 的 `Minimum`、`Maximum`、`Average` 也可能为 `null`，读取这些字段时应处理 `None`。
+
 ```python
 response = coverage.response_time.grid_stats(
     start="2024-01-01T00:00:00.000Z",

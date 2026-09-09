@@ -1656,36 +1656,129 @@
       }
     },
     {
-      "description": "Drift guard: FOM response-time at-time currently returns ASTROX HTTP 500 when the representative intermittent case includes a grid point with no later access inside the analysis window.",
+      "description": "FOM response-time at-time for an intermittent case, including null where a grid point has no later access inside the window.",
       "id": "fom_response_time_by_grid_point_at_time",
       "return": {
-        "endpoint": "/Coverage/FOM/ValueByGridPointAtTime/ResponseTime",
-        "error": "AstroxHTTPError",
-        "expected_current_behavior": "response_time_at_time_no_next_access_http_500",
-        "message": "Internal Server Error",
-        "status_code": 500
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": null,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": null,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": 0,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
       }
     },
     {
-      "description": "Drift guard: FOM response-time at-time currently returns ASTROX HTTP 500 late in the representative window, when all points are uncovered and have no later access. If ASTROX returns a value or a clearer validation error, this snapshot must fail so we can recalibrate the SDK docs and cross-validation.",
-      "id": "fom_response_time_by_grid_point_at_time_all_no_next_access_http_500",
+      "description": "FOM response-time at-time late in an intermittent window, where all points have no later access and return null.",
+      "id": "fom_response_time_by_grid_point_at_time_all_no_next_access",
       "return": {
-        "endpoint": "/Coverage/FOM/ValueByGridPointAtTime/ResponseTime",
-        "error": "AstroxHTTPError",
-        "expected_current_behavior": "response_time_at_time_all_no_next_access_http_500",
-        "message": "Internal Server Error",
-        "status_code": 500
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": null,
+            "Latitude": 21.25,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": null,
+            "Latitude": 21.25,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": null,
+            "Latitude": 21.25,
+            "Longitude": -111.66666666666663
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": null,
+            "Latitude": 23.75,
+            "Longitude": -118.33333333333327
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": null,
+            "Latitude": 23.75,
+            "Longitude": -114.99999999999997
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": null,
+            "Latitude": 23.75,
+            "Longitude": -111.66666666666663
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
       }
     },
     {
-      "description": "Drift guard: FOM response-time at-time currently returns ASTROX HTTP 500 for a never-covered grid. A future success or clearer server validation error should force this snapshot to change.",
-      "id": "fom_response_time_by_grid_point_at_time_no_coverage_http_500",
+      "description": "FOM response-time at-time for a never-covered grid, where every point returns null because no later access exists.",
+      "id": "fom_response_time_by_grid_point_at_time_no_coverage",
       "return": {
-        "endpoint": "/Coverage/FOM/ValueByGridPointAtTime/ResponseTime",
-        "error": "AstroxHTTPError",
-        "expected_current_behavior": "response_time_at_time_no_coverage_http_500",
-        "message": "Internal Server Error",
-        "status_code": 500
+        "Datas": [
+          {
+            "Altitude": 0,
+            "FOM_Value": null,
+            "Latitude": 81.25,
+            "Longitude": 2.5000000000000044
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": null,
+            "Latitude": 81.25,
+            "Longitude": 7.500000000000001
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": null,
+            "Latitude": 83.75,
+            "Longitude": 2.5000000000000044
+          },
+          {
+            "Altitude": 0,
+            "FOM_Value": null,
+            "Latitude": 83.75,
+            "Longitude": 7.500000000000001
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
       }
     },
     {
@@ -1700,25 +1793,190 @@
       }
     },
     {
-      "description": "Drift guard: FOM response-time over-time currently returns ASTROX HTTP 500 for the representative intermittent case because the sample series reaches a no-next-access condition.",
+      "description": "FOM response-time statistics over an intermittent window, including nullable statistics after the final access.",
       "id": "fom_response_time_grid_stats_over_time",
       "return": {
-        "endpoint": "/Coverage/FOM/GridStatsOverTime/ResponseTime",
-        "error": "AstroxHTTPError",
-        "expected_current_behavior": "response_time_over_time_no_next_access_http_500",
-        "message": "Internal Server Error",
-        "status_code": 500
+        "Datas": [
+          {
+            "Average": 51.76796095164294,
+            "EpochSeconds": 0,
+            "Maximum": 82.6661763562006,
+            "Minimum": 19.152827789788716
+          },
+          {
+            "Average": 0,
+            "EpochSeconds": 300,
+            "Maximum": 0,
+            "Minimum": 0
+          },
+          {
+            "Average": null,
+            "EpochSeconds": 600,
+            "Maximum": null,
+            "Minimum": 0
+          },
+          {
+            "Average": null,
+            "EpochSeconds": 900,
+            "Maximum": null,
+            "Minimum": null
+          },
+          {
+            "Average": null,
+            "EpochSeconds": 1200,
+            "Maximum": null,
+            "Minimum": null
+          },
+          {
+            "Average": null,
+            "EpochSeconds": 1500,
+            "Maximum": null,
+            "Minimum": null
+          },
+          {
+            "Average": null,
+            "EpochSeconds": 1800,
+            "Maximum": null,
+            "Minimum": null
+          }
+        ],
+        "IsSuccess": true,
+        "Message": "Success"
       }
     },
     {
-      "description": "Drift guard: FOM response-time over-time currently returns ASTROX HTTP 500 for a never-covered grid. If the server starts returning full-window durations, empty data, or a clearer validation error, this snapshot should fail and be recalibrated.",
-      "id": "fom_response_time_grid_stats_over_time_no_coverage_http_500",
+      "description": "FOM response-time statistics over time for a never-covered grid, where every statistic is null at every sample.",
+      "id": "fom_response_time_grid_stats_over_time_no_coverage",
       "return": {
-        "endpoint": "/Coverage/FOM/GridStatsOverTime/ResponseTime",
-        "error": "AstroxHTTPError",
-        "expected_current_behavior": "response_time_over_time_no_coverage_http_500",
-        "message": "Internal Server Error",
-        "status_code": 500
+        "Datas": {
+          "first": [
+            {
+              "Average": null,
+              "EpochSeconds": 0,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 60,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 120,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 180,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 240,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 300,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 360,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 420,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 480,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 540,
+              "Maximum": null,
+              "Minimum": null
+            }
+          ],
+          "last": [
+            {
+              "Average": null,
+              "EpochSeconds": 1260,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 1320,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 1380,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 1440,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 1500,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 1560,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 1620,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 1680,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 1740,
+              "Maximum": null,
+              "Minimum": null
+            },
+            {
+              "Average": null,
+              "EpochSeconds": 1800,
+              "Maximum": null,
+              "Minimum": null
+            }
+          ],
+          "length": 31
+        },
+        "IsSuccess": true,
+        "Message": "Success"
       }
     },
     {
@@ -1879,6 +2137,6 @@
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-06-17T06:58:13Z"
+    "refreshed_at": "2026-09-09T07:21:42Z"
   }
 }

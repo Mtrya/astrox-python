@@ -177,7 +177,7 @@ def assert_fom_values(
     label: str,
     actual_rows: list[dict[str, Any]],
     points: list[dict[str, Any]],
-    expected_values: list[float],
+    expected_values: list[float | None],
 ) -> None:
     if len(actual_rows) != len(expected_values):
         raise CrossValidationError(f"{label}: expected {len(expected_values)} rows, got {len(actual_rows)}")
@@ -186,7 +186,13 @@ def assert_fom_values(
         assert_close(f"{label}[{index}].Latitude", math.degrees(latitude_rad), actual["Latitude"], POSITION_ABS_DEG)
         assert_close(f"{label}[{index}].Longitude", math.degrees(longitude_rad), actual["Longitude"], POSITION_ABS_DEG)
         assert_close(f"{label}[{index}].Altitude", 0.0, actual["Altitude"], VALUE_ABS)
-        assert_close(f"{label}[{index}].FOM_Value", expected_value, actual["FOM_Value"], VALUE_ABS)
+        if expected_value is None:
+            if actual["FOM_Value"] is not None:
+                raise CrossValidationError(
+                    f"{label}[{index}].FOM_Value: expected None, got {actual['FOM_Value']}"
+                )
+        else:
+            assert_close(f"{label}[{index}].FOM_Value", expected_value, actual["FOM_Value"], VALUE_ABS)
 
 
 def assert_stats(label: str, actual: dict[str, Any], values: list[float]) -> None:

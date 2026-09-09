@@ -168,8 +168,8 @@ FOM cross-validation is organized across [`test_fom_interval_invariants.py`](../
 | `ValueByGridPointAtTime` before first access | verified as remaining duration until next positive-asset interval |
 | `ValueByGridPointAtTime` during access | verified as `0` |
 | `ValueByGridPointAtTime` mixed covered/not-yet-covered | verified pointwise against remaining time to next access |
-| `ValueByGridPointAtTime` after final access | unresolved; live ASTROX HTTP 500 is guarded in live snapshots |
-| `GridStatsOverTime` for intermittent coverage | unresolved; live ASTROX HTTP 500 is guarded in live snapshots |
+| `ValueByGridPointAtTime` after final access | verified as `null` when no later access exists inside the analysis window |
+| `GridStatsOverTime` for intermittent coverage | partial; returns nullable statistics instead of an HTTP error, while exact mixed-null aggregation remains unresolved |
 | `ValueByGridPointAtTime` outside analysis window | verified to reject with an API error, not a silent clamp |
 
 ### Revisit Time
@@ -190,12 +190,13 @@ Known findings:
 - FOM grid statistics use simple arithmetic statistics over point values, not coverage grid weights. This is verified on a representative `LatLonBounds` grid where arithmetic and weighted averages differ.
 - At-time FOM routes use ASTROX's internal transition precision, not the rounded millisecond strings returned in `ComputeCoverage` intervals. A rounded access-start timestamp can still evaluate as uncovered when the precise transition occurs a fraction of a millisecond later.
 - `ResponseTime` differs from `RevisitTime`: when uncovered before a later access, `ResponseTime` returns remaining time until the next access, while `RevisitTime` returns the whole containing gap duration.
+- Dynamic `ResponseTime` returns `null` for an uncovered point when no later access exists inside the analysis window. A never-covered grid therefore returns null per-point values and all-null over-time statistics.
 - For no-coverage cases, `ComputeCoverage` itself currently returns a worker "Index was out of range" error, but most FOM static, at-time, and over-time routes return meaningful edge-case values: `0` for `SimpleCoverage`, `CoverageTime`, and `NumberOfAssets`; full-window duration for `ResponseTime` and `RevisitTime`.
 - For continuous-coverage cases, `ComputeCoverage` also returns a worker error in the covered fixture, but the FOM routes return `1` for `SimpleCoverage` and `NumberOfAssets`, full-window duration for `CoverageTime`, and `0` for `ResponseTime` and `RevisitTime`.
 - Unsupported `ComputeType` strings are rejected by ASTROX for routes that expose `ComputeType`; they are not ignored, defaulted, or silently remapped.
 - `AzElMask` is rejected consistently across representative FOM routes and `ComputeCoverage` in the coverage grid-point role.
 
-Live snapshot sidecar: `coverage.snap.json` covers all public FOM routes, including drift guards for the `ResponseTime` dynamic HTTP 500 cases.
+Live snapshot sidecar: `coverage.snap.json` covers all public FOM routes, including nullable dynamic `ResponseTime` results.
 
 ## Live Snapshot Coverage
 
@@ -206,7 +207,7 @@ The live snapshot layer proves maintained response shape, not semantic correctne
 - Coverage compute with elevation and range grid-point constraints.
 - `percent_coverage` and `coverage_by_asset` reports for one SGP4 asset.
 - All 18 public FOM functions: `simple_coverage`, `coverage_time`, `number_of_assets`, `response_time`, and `revisit_time` across `by_grid_point`, `by_grid_point_at_time`, `grid_stats`, and `grid_stats_over_time` where exposed.
-- Drift guards for `response_time.by_grid_point_at_time` and `response_time.grid_stats_over_time` HTTP 500 behavior in intermittent and no-coverage cases.
+- Nullable `response_time.by_grid_point_at_time` and `response_time.grid_stats_over_time` results in intermittent and no-coverage cases.
 - Drift guard for site-entity coverage assets currently returning a worker error.
 
 The snapshot tolerance is `COVERAGE_SNAPSHOT_ABS_TOL = 2.0e-3`; cross-validation owns semantic precision.
