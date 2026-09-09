@@ -3,14 +3,14 @@
 
 The ``TargetElements`` branch of ``/celestial/mpc`` lets callers integrate
 supplied MPC orbital elements directly instead of resolving the target name
-through the MPC network query. The primary anchor is endpoint-to-endpoint:
+through the server's local NEA catalog. The primary anchor is endpoint-to-endpoint:
 the elements parsed from a name-based lookup must reproduce the name-based
 ephemeris exactly when fed back through ``target_elements``. The
-``reference_frame`` branch is pinned by a distinguishing case: the same
-elements labelled ``MeanEclpJ2000`` (JPL) versus ``EclpJ2000ICRF`` (MPC) must
-produce measurably different ephemerides. The output-cadence branch is pinned
-by endpoint-to-endpoint grid invariants for the server default, explicit fixed
-steps, and ``step_s=0`` internal-step output.
+``reference_frame`` branch is pinned by a distinguishing case: the same elements
+labelled ``MeanEclpJ2000`` versus ``EclpJ2000ICRF`` must produce measurably
+different ephemerides. The output-cadence branch is pinned by endpoint-to-endpoint
+grid invariants for the server default, explicit fixed steps, and ``step_s=0``
+internal-step output.
 """
 
 # Coverage:
@@ -18,13 +18,14 @@ steps, and ``step_s=0`` internal-step output.
 #     - mpc_ephemeris target_elements explicit-element integration: verified
 #     - MpcOrbitalElements.reference_frame EclpJ2000ICRF/MeanEclpJ2000: verified
 #       as a distinguishing frame pair
+#     - MpcOrbitalElements.reference_frame omitted: verified as MeanEclpJ2000
 #     - mpc_ephemeris step_s omitted/86400/172800/0: verified for output-grid
-#       selection and endpoint consistency on the maintained Ceres window
+#       selection and endpoint consistency on the maintained Apophis window
 #   Fields:
 #     - Position.cartesianVelocity samples: verified by exact endpoint-to-endpoint
 #       reproduction of the name-based ephemeris
 #   Parameters:
-#     - target_elements: verified for the Ceres elements returned by the server
+#     - target_elements: verified for the Apophis elements returned by the server
 #     - step_s: verified for omission, 86400 s, 172800 s, and 0
 #   Comparison:
 #     - Endpoint invariant: name-based MPC ephemeris versus explicit-elements
@@ -39,6 +40,7 @@ steps, and ``step_s=0`` internal-step output.
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 import sys
 from pathlib import Path
@@ -58,8 +60,9 @@ OUTPUT_GRID_ABS_TOL = 1.0e-6
 DEFAULT_OUTPUT_STEP_S = 86400.0
 COARSE_OUTPUT_STEP_S = 172800.0
 CADENCE_WINDOW_DAYS = 6
-# The JPL/MPC mean-ecliptic variants differ by the frame bias between the two
-# ecliptic definitions; the observed Ceres separation is tens of kilometres.
+DEFAULT_REFERENCE_FRAME = "MeanEclpJ2000"
+# The server exposes two distinguishable mean-ecliptic frame labels; the
+# observed Apophis separation is large enough to protect the branch wiring.
 FRAME_SEPARATION_MIN_M = 1000.0
 
 
@@ -132,9 +135,9 @@ def compare_explicit_elements_roundtrip(
     start: str,
     stop: str,
 ) -> None:
-    name_based = celestial.mpc_ephemeris(target_name="Ceres", start=start, stop=stop)
+    name_based = celestial.mpc_ephemeris(target_name="Apophis", start=start, stop=stop)
     explicit = celestial.mpc_ephemeris(
-        target_name="Ceres",
+        target_name="Apophis",
         start=start,
         stop=stop,
         target_elements=elements,
@@ -148,32 +151,66 @@ def compare_explicit_elements_roundtrip(
         )
 
 
+def check_default_reference_frame(
+    *,
+    elements: celestial.MpcOrbitalElements,
+    start: str,
+    stop: str,
+) -> None:
+    if elements.reference_frame != DEFAULT_REFERENCE_FRAME:
+        raise CrossValidationError(
+            "name-based MPC lookup returned an unexpected reference frame: "
+            f"{elements.reference_frame!r}, expected {DEFAULT_REFERENCE_FRAME!r}"
+        )
+    omitted_frame_elements = replace(elements, reference_frame=None)
+    if "ReferenceFrame" in omitted_frame_elements.to_wire():
+        raise CrossValidationError("omitted reference_frame was emitted in TargetElements")
+    explicit = celestial.mpc_ephemeris(
+        target_name="Apophis",
+        start=start,
+        stop=stop,
+        target_elements=omitted_frame_elements,
+    )
+    explicit_frame = _elements_from_response(explicit).reference_frame
+    print(f"MPC_DEFAULT_REFERENCE_FRAME={explicit_frame}")
+    if explicit_frame != DEFAULT_REFERENCE_FRAME:
+        raise CrossValidationError(
+            "omitted TargetElements.ReferenceFrame resolved unexpectedly: "
+            f"{explicit_frame!r}, expected {DEFAULT_REFERENCE_FRAME!r}"
+        )
+
+
 def compare_reference_frame_separation(
     *,
     elements_payload: object,
     start: str,
     stop: str,
 ) -> None:
-    icrf = _elements_from_response(elements_payload, reference_frame="EclpJ2000ICRF")
-    jpl = _elements_from_response(elements_payload, reference_frame="MeanEclpJ2000")
-    icrf_samples = _samples(
+    ecliptic_icrf = _elements_from_response(elements_payload, reference_frame="EclpJ2000ICRF")
+    mean_ecliptic = _elements_from_response(elements_payload, reference_frame="MeanEclpJ2000")
+    ecliptic_icrf_samples = _samples(
         celestial.mpc_ephemeris(
-            target_name="Ceres",
+            target_name="Apophis",
             start=start,
             stop=stop,
-            target_elements=icrf,
+            target_elements=ecliptic_icrf,
         )
     )
-    jpl_samples = _samples(
+    mean_ecliptic_samples = _samples(
         celestial.mpc_ephemeris(
-            target_name="Ceres",
+            target_name="Apophis",
             start=start,
             stop=stop,
-            target_elements=jpl,
+            target_elements=mean_ecliptic,
         )
     )
     separation_m = float(
-        np.max(np.abs(icrf_samples[:, 1:4] - jpl_samples[:, 1:4]))
+        np.max(
+            np.abs(
+                ecliptic_icrf_samples[:, 1:4]
+                - mean_ecliptic_samples[:, 1:4]
+            )
+        )
     )
     print(f"MPC_REFERENCE_FRAME_SEPARATION_M={separation_m:.12g}")
     if separation_m < FRAME_SEPARATION_MIN_M:
@@ -191,7 +228,7 @@ def compare_output_cadence(
     stop: str,
 ) -> None:
     common = {
-        "target_name": "Ceres",
+        "target_name": "Apophis",
         "start": start,
         "stop": stop,
         "target_elements": elements,
@@ -279,10 +316,11 @@ def compare_output_cadence(
 
 def test_mpc_explicit_elements_roundtrip_and_frame_branch() -> None:
     configure_astrox_from_env()
-    elements_payload = celestial.mpc_ephemeris(target_name="Ceres")
+    elements_payload = celestial.mpc_ephemeris(target_name="Apophis")
     elements = _elements_from_response(elements_payload)
     start, stop = _validation_window(elements_payload)
     print(f"MPC_VALIDATION_WINDOW={start}/{stop}")
+    check_default_reference_frame(elements=elements, start=start, stop=stop)
     compare_explicit_elements_roundtrip(elements=elements, start=start, stop=stop)
     compare_reference_frame_separation(
         elements_payload=elements_payload,
@@ -298,7 +336,7 @@ def main() -> int:
     except (CrossValidationError, LiveConfigError, ResponseShapeError) as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    print("CROSS_VALIDATION_CHECKED=5")
+    print("CROSS_VALIDATION_CHECKED=6")
     print("CROSS_VALIDATION_FAILED=0")
     return 0
 

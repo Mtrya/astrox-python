@@ -82,8 +82,8 @@
       }
     },
     {
-      "description": "Nested MPC response shape using the server-owned orbital-epoch default window; external numeric values are not frozen.",
-      "id": "mpc_ceres_server_default_window",
+      "description": "Nested NEA/MPC response shape using the server-owned orbital-epoch default window; catalog numeric values are not frozen.",
+      "id": "mpc_apophis_server_default_window",
       "return": {
         "shape": {
           "fields": {

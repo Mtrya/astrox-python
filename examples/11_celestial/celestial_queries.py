@@ -34,8 +34,8 @@ def main() -> None:
     )
     print(f"Earth→Moon 旋转: {len(rotation['Rotation'])} 个数值")
 
-    mpc = celestial.mpc_ephemeris(target_name="Ceres", step_s=172800.0)
-    print(f"Ceres MPC 星历: {len(mpc['Position']['cartesianVelocity']) // 7} 个状态样本")
+    mpc = celestial.mpc_ephemeris(target_name="Apophis", step_s=172800.0)
+    print(f"Apophis MPC 星历: {len(mpc['Position']['cartesianVelocity']) // 7} 个状态样本")
 
     transfer = celestial.lambert_transfer_window(
         departure_body="Earth",

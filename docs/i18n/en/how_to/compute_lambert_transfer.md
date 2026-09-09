@@ -49,9 +49,9 @@ python compute_lambert_transfer.py
 
 ## Decisions to make
 
-1. **Choose the departure and arrival bodies**: `departure_body`/`arrival_body` accept server-supported body names (e.g. `Earth`, `Mars`, `Ceres`) and MPC numbers or names (e.g. `2015 XF261`). When the matching `*_elements` argument is omitted for an asteroid, the server queries the MPC elements over the network.
+1. **Choose the departure and arrival bodies**: `departure_body`/`arrival_body` accept server-supported body names (e.g. `Earth`, `Mars`, `Ceres`) and MPC numbers or names (e.g. `2015 XF261`). When the matching `*_elements` argument is omitted for a near-Earth asteroid, the server reads the elements from its daily-refreshed local NEA catalog; other asteroids require explicit elements.
 2. **Set the two time windows**: `departure_start`/`departure_stop` and `arrival_start`/`arrival_stop` each define a UTC time window, which the SDK combines into the `"start/stop"` string of `DepartureInterval`/`ArrivalInterval` respectively. `departure_step_days` and `arrival_step_days` (unit d) control the sample step within each window; the number of results is roughly the product of the two windows' sample counts — the 2 departure days × 3 arrival days in the example produce 6 results. `min_time_of_flight_days` (unit d, integer) filters out combinations whose transfer time is too short; the server default is 10.
-3. **Choose the output reference frame**: the server default for `sun_frame` is `MeanEclpJ2000`; the transfer velocities of the `ICRF` branch agree with an independent zero-revolution prograde Lambert solution, and the endpoint position directions have also been identified as ICRF axes, while the exact relationship between `MeanEclpJ2000` and ICRF is not yet independently confirmed, so pass `sun_frame="ICRF"` explicitly when you need numbers with an identified frame.
+3. **Choose the output reference frame**: the server default for `sun_frame` is `EclpJ2000ICRF`; the transfer velocities of the `ICRF` branch agree with an independent zero-revolution prograde Lambert solution, and the endpoint position directions have also been identified as ICRF axes, while the exact relationship between `MeanEclpJ2000` and ICRF is not yet independently confirmed, so pass `sun_frame="ICRF"` explicitly when you need numbers with an identified frame.
 4. **Adjust the filter bounds as needed**: since 2026-08-20 the server filters cases by `max_departure_delta_v_m_s`/`max_arrival_delta_v_m_s` (defaults 10000 m/s each, the departure/arrival hyperbolic excess speed magnitudes) and `max_time_of_flight_days` (default 500 d), returning an empty list when everything is out of bounds; widen the bounds explicitly when scanning large-ΔV or very long transfer windows — the Earth→Mars window in the example is such a case.
 
 ## Reading the results
@@ -66,7 +66,7 @@ Each result object contains:
 
 ## Asteroids and explicit MPC elements
 
-To skip the server's MPC network query, you can pass orbital elements explicitly:
+To bypass the server's local NEA catalog lookup, or to use a non-NEA asteroid, pass orbital elements explicitly:
 
 ```python
 elements = celestial.mpc_orbital_elements(
