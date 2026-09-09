@@ -78,7 +78,7 @@ Run the live lighting cross-validation tests:
 ASTROX_BASE_URL=http://astrox.cn:8765 uv run python -m pytest tests/validation/cross_validation/lighting
 ```
 
-Orekit-backed lighting validation uses `orekit-jpype[jdk4py]` to compare ASTROX spacecraft solar intensity against Orekit's conical Earth-shadow lighting ratio, including a partial-shadow sample. The test loads Orekit data from `OREKIT_DATA_PATH`, defaulting to `/tmp/astrox-python-orekit-data.zip`, and downloads that zip if it is not present.
+Orekit-backed validation uses `orekit-jpype[jdk4py]` for independent lighting and libration comparisons. The test loads a commit-pinned Orekit data archive from `OREKIT_DATA_PATH`, defaulting to `$XDG_CACHE_HOME/astrox-python/orekit-data-<revision>.zip` (or `~/.cache` when `XDG_CACHE_HOME` is unset), and downloads it when the cached content is missing or invalid. Because GitLab-generated archive container bytes may change without a repository change, validation pins a canonical SHA-256 over the archive's member paths and uncompressed contents rather than the ZIP file bytes.
 
 GMAT-backed validation runs through a prepared Docker image. Scheduled SDK health pulls `ghcr.io/<owner>/astrox-gmat-validation:gmat-r2026a`, self-checks it, and sets `ASTROX_EXTERNAL_VALIDATION=strict` before running validation.
 
