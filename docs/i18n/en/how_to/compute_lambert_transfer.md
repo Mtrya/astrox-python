@@ -63,6 +63,7 @@ Each result object contains:
 - `RV1`/`RV2`: heliocentric position and velocity at departure/arrival `[x, y, z, vx, vy, vz]` (positions m, velocities m/s); under the ICRF branch the transfer velocities agree with the independent Lambert solution, and the endpoint position directions match the ICRF axes.
 - `TimeOfFlightDays`: time of flight (d), verified to be the exact day difference between the arrival and departure times.
 - `ArrivalLightAngle`: Sun lighting angle at arrival (deg), verified to be the angle between `DeltaV2` and the `RV2` position vector.
+- `MinRangeAu`/`MaxRangeAu`: minimum/maximum distance from the Sun along the departure-to-arrival transfer arc (AU, including endpoints).
 
 ## Asteroids and explicit MPC elements
 

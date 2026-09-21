@@ -195,6 +195,12 @@
                   "DepartureTime": {
                     "kind": "string"
                   },
+                  "MaxRangeAu": {
+                    "kind": "number"
+                  },
+                  "MinRangeAu": {
+                    "kind": "number"
+                  },
                   "RV1": {
                     "item": {
                       "kind": "number"
@@ -220,7 +226,33 @@
             }
           },
           "kind": "object"
-        }
+        },
+        "transfer_ranges_au": [
+          {
+            "MaxRangeAu": 1.6583036266502333,
+            "MinRangeAu": 0.5810318537519513
+          },
+          {
+            "MaxRangeAu": 1.6590932311459603,
+            "MinRangeAu": 0.5799496237129426
+          },
+          {
+            "MaxRangeAu": 1.6599357782012405,
+            "MinRangeAu": 0.5788355442344318
+          },
+          {
+            "MaxRangeAu": 1.654301440655211,
+            "MinRangeAu": 0.5908207427768893
+          },
+          {
+            "MaxRangeAu": 1.6549025168843594,
+            "MinRangeAu": 0.5898559754259631
+          },
+          {
+            "MaxRangeAu": 1.6555556342710411,
+            "MinRangeAu": 0.5888611049770791
+          }
+        ]
       }
     },
     {
@@ -261,6 +293,12 @@
                   "DepartureTime": {
                     "kind": "string"
                   },
+                  "MaxRangeAu": {
+                    "kind": "number"
+                  },
+                  "MinRangeAu": {
+                    "kind": "number"
+                  },
                   "RV1": {
                     "item": {
                       "kind": "number"
@@ -286,12 +324,38 @@
             }
           },
           "kind": "object"
-        }
+        },
+        "transfer_ranges_au": [
+          {
+            "MaxRangeAu": 1.1046815597850406,
+            "MinRangeAu": 0.9433212640311289
+          },
+          {
+            "MaxRangeAu": 1.1000967105904083,
+            "MinRangeAu": 0.9469611101758767
+          },
+          {
+            "MaxRangeAu": 1.0954139108010212,
+            "MinRangeAu": 0.950705771186044
+          },
+          {
+            "MaxRangeAu": 1.1033355644754934,
+            "MinRangeAu": 0.9453675951733505
+          },
+          {
+            "MaxRangeAu": 1.0987601689577309,
+            "MinRangeAu": 0.9489508608039481
+          },
+          {
+            "MaxRangeAu": 1.0940920723610155,
+            "MinRangeAu": 0.9526341172739136
+          }
+        ]
       }
     }
   ],
   "metadata": {
     "astrox_base_url": "http://astrox.cn:8765",
-    "refreshed_at": "2026-08-24T06:28:12Z"
+    "refreshed_at": "2026-09-21T05:23:56Z"
   }
 }

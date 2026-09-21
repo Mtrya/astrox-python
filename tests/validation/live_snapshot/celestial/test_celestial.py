@@ -23,6 +23,8 @@ from tests.validation._support import (  # noqa: E402
 
 
 SNAPSHOT_PATH = Path(__file__).with_name("celestial.snap.json")
+# Range values use the independently validated transfer-arc precision bound.
+RANGE_ABS_TOL_AU = 1e-9
 START = "2026-01-01T00:00:00.000Z"
 STOP = "2026-01-02T00:00:00.000Z"
 
@@ -149,6 +151,8 @@ def _transfer_result_shape(value: Any, *, field: str) -> dict[str, Any]:
         "RV2",
         "TimeOfFlightDays",
         "ArrivalLightAngle",
+        "MinRangeAu",
+        "MaxRangeAu",
     )
     for key in required:
         if key not in value:
@@ -156,10 +160,22 @@ def _transfer_result_shape(value: Any, *, field: str) -> dict[str, Any]:
     for key in ("DepartureTime", "ArrivalTime"):
         if not isinstance(value[key], str):
             raise SnapshotError(f"{field}.{key} must be a string")
-    for key in ("DV1_Mag", "DV2_Mag", "TimeOfFlightDays", "ArrivalLightAngle"):
+    for key in (
+        "DV1_Mag",
+        "DV2_Mag",
+        "TimeOfFlightDays",
+        "ArrivalLightAngle",
+        "MinRangeAu",
+        "MaxRangeAu",
+    ):
         if not isinstance(value[key], int | float) or isinstance(value[key], bool):
             raise SnapshotError(f"{field}.{key} must be numeric")
-    for key, expected_length in (("DeltaV1", 3), ("DeltaV2", 3), ("RV1", 6), ("RV2", 6)):
+    for key, expected_length in (
+        ("DeltaV1", 3),
+        ("DeltaV2", 3),
+        ("RV1", 6),
+        ("RV2", 6),
+    ):
         series = value[key]
         if (
             not isinstance(series, list)
@@ -234,7 +250,12 @@ def transfer_shape(*, frame: str | None, explicit_elements: bool) -> dict[str, A
         item_fields[key]["length"] = expected_length
     for index, result in enumerate(results):
         _transfer_result_shape(result, field=f"TransferResults[{index}]")
-    return _response_snapshot(shape)
+    snapshot = _response_snapshot(shape)
+    snapshot["transfer_ranges_au"] = [
+        {key: result[key] for key in ("MinRangeAu", "MaxRangeAu")}
+        for result in results
+    ]
+    return snapshot
 
 
 CASES = [
@@ -273,12 +294,12 @@ CASES = [
 
 def test_celestial_live_snapshot() -> None:
     configure_astrox_from_env()
-    check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH)
+    check_snapshot(cases=CASES, snapshot_path=SNAPSHOT_PATH, abs_tol=RANGE_ABS_TOL_AU)
 
 
 def _main() -> int:
     try:
-        return snapshot_main(cases=CASES, snapshot_path=SNAPSHOT_PATH)
+        return snapshot_main(cases=CASES, snapshot_path=SNAPSHOT_PATH, abs_tol=RANGE_ABS_TOL_AU)
     except Exception as exc:
         print(f"LIVE_SNAPSHOT_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
