@@ -280,6 +280,7 @@ print(
 | `RV1` / `RV2` | number[6] | 出发/到达时的位置速度（日心系）`[x, y, z, vx, vy, vz]`，位置 m、速度 m/s |
 | `TimeOfFlightDays` | number | 飞行时间，单位 d；已验证为 `ArrivalTime` 与 `DepartureTime` 的精确天数差 |
 | `ArrivalLightAngle` | number | 到达时刻太阳光照角，单位 deg；已验证为 `DeltaV2` 与 `RV2` 位置矢量的夹角 |
+| `MinRangeAu` / `MaxRangeAu` | number | 从出发到到达的转移弧上，距太阳的最小/最大距离，单位 AU；包含端点，不是整条轨道的近日点/远日点距离 |
 
 已验证（独立交叉验证支持）：省略 `sun_frame` 与显式传入 `EclpJ2000ICRF` 的 `TransferResults` 完全一致；`EclpJ2000ICRF` 输出是 `ICRF` 输出按 23.43929111111111° J2000 平黄赤交角进行的固定旋转；`sun_frame="ICRF"` 时，`RV1`/`RV2` 中的转移速度遵循零圈顺行 Lambert 关系，端点位置方向使用 ICRF 轴；`max_departure_delta_v_m_s`/`max_arrival_delta_v_m_s`/`max_time_of_flight_days` 分别按 `DV1_Mag`/`DV2_Mag`/飞行时间上限过滤采样网格。注意 2026-08-20 起服务端缺省值（出发/到达各 10000 m/s、500 d）会过滤掉超出缺省的算例，扫描大 ΔV 窗口时需显式放宽。未解决：显式 `MeanEclpJ2000` 与 ICRF 之间的精确坐标关系、`DeltaV` 相对端点天体速度的物理含义、显式 MPC 根数的独立开普勒递推（`reference_frame` 选项不改变该路由的到达状态，元素约定仍未确认）。这些分支的数值语义尚未验证，使用前请自行核对。
 

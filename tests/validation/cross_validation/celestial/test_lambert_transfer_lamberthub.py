@@ -29,6 +29,10 @@ server's element convention is identified.
 #       and DepartureTime
 #     - ArrivalLightAngle: verified as the angle in degrees between DeltaV2 and
 #       the RV2 position vector
+#     - MinRangeAu/MaxRangeAu: verified against independent Lambert velocities
+#       and DOP853 radial-stationary events plus endpoints for ICRF/EclpJ2000ICRF
+#       Earth -> Mars, explicit-element asteroid ICRF, and short ICRF transfers;
+#       conditional on returned endpoint positions, not their ephemeris model
 #     - DeltaV1/DeltaV2 physical body-velocity interpretation: unresolved
 #   Parameters:
 #     - departure and arrival sampling: verified for two departure dates and
@@ -71,6 +75,7 @@ import numpy as np
 import pytest
 from astropy.time import Time
 from lamberthub import izzo2015
+from scipy.integrate import solve_ivp
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
@@ -88,6 +93,7 @@ SUN_MU_M3_S2 = 1.3271244004193938e20
 AU_M = 149597870700.0
 MEAN_OBLIQUITY_DEG = 23.43929111111111
 SOLVER_ABS_TOL_M_S = 1.0e-6
+RANGE_ABS_TOL_AU = 1e-9
 NORM_REL_TOL = 1.0e-12
 NORM_ABS_TOL_M_S = 1.0e-9
 ECLIPTIC_RELATION_POSITION_ABS_TOL_M = 1.0e-3
@@ -304,6 +310,101 @@ def test_transfer_states_match_lamberthub_zero_revolution_prograde() -> None:
             f"zero-revolution prograde Lambert solver: max residual={max_residual:.12g} m/s, "
             f"threshold={SOLVER_ABS_TOL_M_S:g} m/s"
         )
+
+
+def test_transfer_ranges_match_independent_arc_extrema() -> None:
+    """Check finite transfer arcs, conditioning on the returned endpoint positions."""
+    configure_astrox_from_env()
+    # Independent Lambert velocities seed DOP853 two-body integration in AU/day.
+    # A 1e-6 m/s solver precision budget over ~300 days gives ~2e-10 AU;
+    # 1e-9 AU allows propagation amplification and integration error (rtol 2e-12).
+    # Endpoint ephemerides and explicit MPC element conventions are not tested here.
+    mu = SUN_MU_M3_S2 * 86400.0**2 / AU_M**3
+    max_residual = 0.0
+    interior_extrema = 0
+    endpoint_extrema = 0
+    grids = [
+        (
+            f"{frame}, explicit_elements={explicit_elements}",
+            _astrox_transfer_results(frame=frame, explicit_elements=explicit_elements),
+        )
+        for frame, explicit_elements in (
+            ("ICRF", False),
+            ("EclpJ2000ICRF", False),
+            ("ICRF", True),
+        )
+    ]
+    grids.append(
+        (
+            "ICRF short window",
+            _require_results(_short_window_results(min_tof_days=1), expected_count=4),
+        )
+    )
+    for label, results in grids:
+        for result in results:
+            r1, _ = _state(result, "RV1")
+            r2, _ = _state(result, "RV2")
+            tof_s = (
+                _time(result["ArrivalTime"]) - _time(result["DepartureTime"])
+            ).total_seconds()
+            v1, _ = izzo2015(
+                SUN_MU_M3_S2, r1, r2, tof_s, M=0, prograde=True, low_path=True
+            )
+            initial = np.concatenate((r1 / AU_M, v1 * 86400.0 / AU_M))
+            duration = tof_s / 86400.0
+
+            def derivative(t: float, state: np.ndarray) -> np.ndarray:
+                r = state[:3]
+                return np.concatenate((state[3:], -mu * r / np.linalg.norm(r) ** 3))
+
+            def radial_stationary(t: float, state: np.ndarray) -> float:
+                return float(np.dot(state[:3], state[3:]))
+
+            solution = solve_ivp(
+                derivative,
+                (0.0, duration),
+                initial,
+                method="DOP853",
+                rtol=2e-12,
+                atol=2e-14,
+                max_step=duration / 64,
+                events=radial_stationary,
+            )
+            if not solution.success:
+                raise CrossValidationError(solution.message)
+            endpoint_error = float(np.linalg.norm(solution.y[:3, -1] - r2 / AU_M))
+            if endpoint_error > RANGE_ABS_TOL_AU:
+                raise CrossValidationError(
+                    f"Independent transfer endpoint residual={endpoint_error} AU"
+                )
+            radii = [
+                float(np.linalg.norm(initial[:3])),
+                float(np.linalg.norm(solution.y[:3, -1])),
+            ]
+            radii.extend(
+                float(np.linalg.norm(state[:3])) for state in solution.y_events[0]
+            )
+            for key, index in (
+                ("MinRangeAu", int(np.argmin(radii))),
+                ("MaxRangeAu", int(np.argmax(radii))),
+            ):
+                actual = _require_number(result[key], field=key)
+                residual = abs(actual - radii[index])
+                max_residual = max(max_residual, residual)
+                if index < 2:
+                    endpoint_extrema += 1
+                else:
+                    interior_extrema += 1
+                if not math.isfinite(actual) or residual > RANGE_ABS_TOL_AU:
+                    raise CrossValidationError(
+                        f"{label}: {key}={actual}, independent={radii[index]}, residual={residual} AU"
+                    )
+    # These fixtures must distinguish finite-arc bounds from full-orbit apsides.
+    assert interior_extrema > 0
+    assert endpoint_extrema > 0
+    print(f"LAMBERT_RANGE_MAX_RESIDUAL_AU={max_residual:.12g}")
+    print(f"LAMBERT_RANGE_INTERIOR_EXTREMA={interior_extrema}")
+    print(f"LAMBERT_RANGE_ENDPOINT_EXTREMA={endpoint_extrema}")
 
 
 def test_transfer_delta_v_magnitudes_match_vector_norms() -> None:
@@ -940,6 +1041,7 @@ def test_explicit_mpc_elements_match_independent_kepler_propagation() -> None:
 def main() -> int:
     try:
         test_transfer_states_match_lamberthub_zero_revolution_prograde()
+        test_transfer_ranges_match_independent_arc_extrema()
         test_transfer_delta_v_magnitudes_match_vector_norms()
         test_min_time_of_flight_filters_short_sampling_pairs()
         test_time_of_flight_days_matches_timestamp_delta()
@@ -951,7 +1053,7 @@ def main() -> int:
     except Exception as exc:
         print(f"CROSS_VALIDATION_FAILED={type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
-    print("CROSS_VALIDATION_CHECKED=9")
+    print("CROSS_VALIDATION_CHECKED=10")
     print("CROSS_VALIDATION_FAILED=0")
     return 0
 

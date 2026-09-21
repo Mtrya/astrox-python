@@ -451,7 +451,13 @@ def test_lambert_transfer_window_lowers_complete_payload_and_strips_status(
     transfer_response = {
         "IsSuccess": True,
         "Message": "Success",
-        "TransferResults": [{"RV1": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]}],
+        "TransferResults": [
+            {
+                "RV1": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+                "MinRangeAu": 0.8,
+                "MaxRangeAu": 1.6,
+            }
+        ],
         "FutureField": {"preserve": True},
     }
     calls = record_raw_post(monkeypatch, transfer_response)
@@ -472,7 +478,13 @@ def test_lambert_transfer_window_lowers_complete_payload_and_strips_status(
     )
 
     assert response == {
-        "TransferResults": [{"RV1": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]}],
+        "TransferResults": [
+            {
+                "RV1": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+                "MinRangeAu": 0.8,
+                "MaxRangeAu": 1.6,
+            }
+        ],
         "FutureField": {"preserve": True},
     }
     assert response is not transfer_response

@@ -62,6 +62,7 @@ python compute_lambert_transfer.py
 - `RV1`/`RV2`：出发/到达时的日心位置速度 `[x, y, z, vx, vy, vz]`（位置 m、速度 m/s）；ICRF 分支下转移速度与独立 Lambert 解一致，端点位置方向与 ICRF 轴方向一致。
 - `TimeOfFlightDays`：飞行时间（d），已验证为到达与出发时刻的精确天数差。
 - `ArrivalLightAngle`：到达时刻太阳光照角（deg），已验证为 `DeltaV2` 与 `RV2` 位置矢量的夹角。
+- `MinRangeAu`/`MaxRangeAu`：从出发到到达的转移弧上，距太阳的最小/最大距离（AU，包含端点）。
 
 ## 小行星与显式 MPC 根数
 
