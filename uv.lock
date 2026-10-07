@@ -142,7 +142,7 @@ requires-dist = [{ name = "requests", specifier = ">=2.34.2" }]
 dev = [
     { name = "astropy", specifier = ">=6.1.7" },
     { name = "brahe", specifier = ">=1.6.0" },
-    { name = "e2m2e", specifier = "==5.9.6" },
+    { name = "e2m2e", specifier = "==5.9.8" },
     { name = "geographiclib", specifier = ">=2.1" },
     { name = "hatchling", specifier = ">=1.30.1" },
     { name = "lamberthub", specifier = ">=1.0.0" },
@@ -527,7 +527,7 @@ wheels = [
 
 [[package]]
 name = "e2m2e"
-version = "5.9.6"
+version = "5.9.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "calcephpy" },
@@ -540,11 +540,11 @@ dependencies = [
     { name = "spiceypy" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/28/d4/b15caa3424817ff8ad5d004b5ed20e7ac00e4071d4724871f41a88c7cf1e/e2m2e-5.9.6.tar.gz", hash = "sha256:9dbdf6e46f52d2927b5d98aac6b4b5cbc12fd6e8d4d0cf51d6bf87e3a1c436a5", size = 5912081, upload-time = "2026-09-25T16:25:18.697Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f0/ad/7852b80952123ad3a385c169521dec0d15f1f56445115e89c1b2632f9713/e2m2e-5.9.8.tar.gz", hash = "sha256:156196bf7cbb77e57a3ad7a15f35009a2a3aa1cb9fc0036299690ca60f66b884", size = 3942958, upload-time = "2026-10-02T09:17:16.309Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/de/17/e8dfeae8e506d8f0ea2a28d3cf1ea559d472d1767a4d70f165ea92d45bd6/e2m2e-5.9.6-cp310-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:e2752ba6e6e71f4228a72962e03782bf3401d8e33bf264d64c05d7cde53abcab", size = 8070456, upload-time = "2026-09-25T16:25:12.251Z" },
-    { url = "https://files.pythonhosted.org/packages/87/ea/a585fa236a625891a049e009d7b4dcd6764e0b5c1efc6722c8b239a6484f/e2m2e-5.9.6-cp310-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:654d576db682de50248a8706bcd7fc2a468121b783682d57752b4d53cc8f924a", size = 8213362, upload-time = "2026-09-25T16:25:14.474Z" },
-    { url = "https://files.pythonhosted.org/packages/24/eb/faeb5e98e4f72ee425da49178f7d7edbcb392746511433da42ae7d0016a5/e2m2e-5.9.6-cp310-abi3-win_amd64.whl", hash = "sha256:3cbc9788a72dc7c028845518a69e15bbedfeb7f78540d93ff3971c276144e83d", size = 7904790, upload-time = "2026-09-25T16:25:16.804Z" },
+    { url = "https://files.pythonhosted.org/packages/99/c9/b126140a79743fe6e08c9c2494ab025e6ae702c0f36d215d23e83564c500/e2m2e-5.9.8-cp310-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:cdda07bf65871544a86117aaabeedc1b122d6f9a64dbe34f017a763bdb99633f", size = 5847063, upload-time = "2026-10-02T09:17:09.95Z" },
+    { url = "https://files.pythonhosted.org/packages/fa/51/38ed99a3984b8e17597fd8a8febd15a15b80e00263dbd6299e0fb995afce/e2m2e-5.9.8-cp310-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:3e4ee4785cefda0513135fe3d19fc8838319dc578cbbf418ceb9c2c4c8c55ccd", size = 6003440, upload-time = "2026-10-02T09:17:12.115Z" },
+    { url = "https://files.pythonhosted.org/packages/44/9b/f431863904733e3148160724a21fcfbd6b8eb5b2c8fe4611f3b7ba4769cf/e2m2e-5.9.8-cp310-abi3-win_amd64.whl", hash = "sha256:aa48d14e9dea699345a39c150677a26a08ece081b53efa9f438c6cec39f99c2e", size = 5722824, upload-time = "2026-10-02T09:17:14.21Z" },
 ]
 
 [[package]]
