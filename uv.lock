@@ -142,7 +142,7 @@ requires-dist = [{ name = "requests", specifier = ">=2.34.2" }]
 dev = [
     { name = "astropy", specifier = ">=6.1.7" },
     { name = "brahe", specifier = ">=1.6.0" },
-    { name = "e2m2e", specifier = "==5.9.10" },
+    { name = "e2m2e", specifier = "==5.9.11" },
     { name = "geographiclib", specifier = ">=2.1" },
     { name = "hatchling", specifier = ">=1.30.1" },
     { name = "lamberthub", specifier = ">=1.0.0" },
@@ -194,14 +194,14 @@ wheels = [
 
 [[package]]
 name = "calcephpy"
-version = "5.0.0"
+version = "5.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cython" },
     { name = "numpy" },
     { name = "setuptools" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c0/83/a3e830fd0ea6e1427fd172b5a4d4f0704cfae5e86471920581ca8e22c0c9/calcephpy-5.0.0.tar.gz", hash = "sha256:abf52b8d2898299ff837f90ed9824cc40d70745700b440374d6f375a86a5e831", size = 8633564, upload-time = "2026-07-06T11:48:01.49Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ae/20/3b7866a13265630e8881485f03d145716def63a47b7305e4c322dad11126/calcephpy-5.0.1.tar.gz", hash = "sha256:30e880c2559c4e555dec42a707555c613e5dab455c339041960785529cdb1448", size = 8675687, upload-time = "2026-09-21T11:43:42.666Z" }
 
 [[package]]
 name = "certifi"
@@ -527,7 +527,7 @@ wheels = [
 
 [[package]]
 name = "e2m2e"
-version = "5.9.10"
+version = "5.9.11"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "calcephpy" },
@@ -540,11 +540,11 @@ dependencies = [
     { name = "spiceypy" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5d/8b/47b27552cb0e3c75f0a4459aa01a960bc6423edf5a16cb062aa73359d370/e2m2e-5.9.10.tar.gz", hash = "sha256:dd55833f0e5a3b887eb36b9c9b67bc8011404b7915ca2bbe6db364bf946f8e57", size = 3964195, upload-time = "2026-10-06T05:20:54.362Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f6/f5/cd7219d157af3a74e4474983978d38392b5f5a2773855194619aa8e140f2/e2m2e-5.9.11.tar.gz", hash = "sha256:6491de39e3bd1955ab54645fbdc46e9723eb291d7d5518bf969ad3ec2d0d34f7", size = 3964440, upload-time = "2026-10-16T00:23:16.885Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/08/5f/1c0cfd7a29c9a75f7a8bc66b9cab549c440a1c4b5ec3c965621e55068524/e2m2e-5.9.10-cp310-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:7a131e7dafe10f0c0358093d519f0279858690d07b2119fa879d8ec286bfdcbd", size = 5980312, upload-time = "2026-10-06T05:20:49.113Z" },
-    { url = "https://files.pythonhosted.org/packages/55/7b/1ef6c743924b2410fc2b4e74cde9382c6125b0976c8ba31231f5c17e8f65/e2m2e-5.9.10-cp310-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:84ad6e6d040d531f78e14c692ceb606faa687e32d37d0753c8a84e728a5acfac", size = 6139342, upload-time = "2026-10-06T05:20:51.145Z" },
-    { url = "https://files.pythonhosted.org/packages/66/7b/f2a8f0b4a4eca704c9b684e1201533a6cc3d572731073ade5033e9a5ba8a/e2m2e-5.9.10-cp310-abi3-win_amd64.whl", hash = "sha256:36a7bcca08a08a4870e17400abbc3c16399a2a23f18e4acbe4453e2930ed6d1c", size = 5849605, upload-time = "2026-10-06T05:20:52.817Z" },
+    { url = "https://files.pythonhosted.org/packages/f6/85/109c0fcacba0cdbf148787632adb318ee7e897d6b6c936e21606e39562a1/e2m2e-5.9.11-cp310-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:00ca1c2f4b2feac0114e673f245e4fe55aa8563425e0b6a337898cdd913dff95", size = 5980203, upload-time = "2026-10-16T00:23:11.597Z" },
+    { url = "https://files.pythonhosted.org/packages/13/bb/fb5401028d7614619d1daeca6312e408444ac755e42cf911c8525b70bc52/e2m2e-5.9.11-cp310-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:6817e1a2e8e9df0bf569a949c03086abce743ae88b272af4c76f3261fa31f884", size = 6139338, upload-time = "2026-10-16T00:23:13.248Z" },
+    { url = "https://files.pythonhosted.org/packages/e4/19/fe67c94f5535004c3a403e2a8b6b53aecdf6e21695e19bb86aa14658c58b/e2m2e-5.9.11-cp310-abi3-win_amd64.whl", hash = "sha256:1c43cc32d3ed9d88ed4869ae41805fe8f0a0765ef54164b46010b43c9f200158", size = 5849625, upload-time = "2026-10-16T00:23:15.136Z" },
 ]
 
 [[package]]
